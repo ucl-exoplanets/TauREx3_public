@@ -17,7 +17,7 @@ class Atmosphere(Logger):
         self._planet = planet
         self._tp_profile = tp_profile
         self._gas_profile = gas_profile
-
+        self.setup_pressure_profile(nlayers)
     
 
     def setup_pressure_profile(self,nlayers):
@@ -59,4 +59,9 @@ class Atmosphere(Logger):
         return self._tp_profile
 
 
+    def setStar(self,star):
+        pass
+    
+    def setPlanet(self,planet):
+        pass
 
