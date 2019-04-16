@@ -2,14 +2,13 @@ from .tpprofile import TemperatureProfile
 import numpy as np
 
 
-class Isothermal(TemperatureProfile):
-    """An isothermal temperature-pressure profile
+class Guillot2010(TemperatureProfile):
+    """
 
-    Parameters
-    ----------
-    
-    iso_temp : :obj:`float`
-        Isothermal Temperature to set
+    TP profile from Guillot 2010, A&A, 520, A27 (equation 49)
+    Using modified 2stream approx. from Line et al. 2012, ApJ, 749,93 (equation 19)
+
+    TODO: ACTUALLY IMPLEMENT IT MATE
 
     """
 
