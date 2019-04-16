@@ -23,6 +23,9 @@ class Atmosphere(Logger):
     def setup_pressure_profile(self,nlayers):
         """Sets up the pressure profile for the atmosphere model
         
+        Parameters
+        ----------
+        
         
         """
         self._nlayers = nlayers
