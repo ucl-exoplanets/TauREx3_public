@@ -16,10 +16,11 @@ class Isothermal(TPProfile):
     """
 
 
-    def __init__(self,n_layers,temp):
+    def __init__(self,nlayers,pressure_profile,temp):
+        super().__init__('Isothermal',nlayers,pressure_profile)
 
         
-        self._tp = np.zeros(shape=(n_layers,))
+        self._tp = np.zeros(shape=(self.nlayers,))
 
         self._tp[...] = temp
 
@@ -30,6 +31,6 @@ class Isothermal(TPProfile):
         Returns: :obj:np.array(float)
             temperature profile
         """
-        
+
         return self._tp
 

@@ -11,8 +11,11 @@ class TPProfile(Logger):
     """
     
 
-    def __init__(self):
-        pass
+    def __init__(self,name,nlayers,pressure_profile):
+        super().__init__(name)
+        self.nlayers=nlayers
+        self.nlevels = nlayers+1
+        self.pressure_profile = pressure_profile
 
     
 
