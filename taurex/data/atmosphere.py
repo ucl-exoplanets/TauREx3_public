@@ -9,13 +9,17 @@ class Atmosphere(Logger):
 
 
 
-    def __init__(self,star, planet,nlayers,tp_profile,
+    def __init__(self,star, planet,nlayers,
+                        t_profile,
+                        p_profile,
+                        dens_profile,
+                        
                         gas_profile):
         super().__init__('Atmosphere')
 
         self._star = star
         self._planet = planet
-        self._tp_profile = tp_profile
+        self._t_profile = t_profile
         self._gas_profile = gas_profile
         self.setup_pressure_profile(nlayers)
     
