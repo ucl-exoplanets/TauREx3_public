@@ -7,5 +7,7 @@ class Opacity(Logger):
 
     """
 
-    pass
+    
+    def path_integral(self):
+        pass
 
