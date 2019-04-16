@@ -20,7 +20,7 @@ class TemperatureProfile(Logger):
         self.nlayers=nlayers
         self.nlevels = nlayers+1
         self.pressure_profile = pressure_profile
-        self._planet = planet
+        self.planet = planet
 
 
 

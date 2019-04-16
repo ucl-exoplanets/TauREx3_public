@@ -1,4 +1,4 @@
-from .tpprofile import TemperatureProfile
+from .tprofile import TemperatureProfile
 import numpy as np
 
 
