@@ -41,7 +41,7 @@ class Guillot2010(TemperatureProfile):
             temperature profile
         """
 
-        planet_grav = self.planet.gravity()
+        planet_grav = self.planet.gravity
         gamma_1 = self.kappa_v1/(self.kappa_ir + 1e-10); gamma_2 = self.kappa_v2/(self.kappa_ir + 1e-10)
         tau = self.kappa_ir * self.pressure_profile / planet_grav
 
