@@ -59,8 +59,8 @@ class Atmosphere(Logger):
 
     
     @property
-    def tpProfile(self):
-        return self._tp_profile
+    def temperatureProfile(self):
+        return self._t_profile
 
 
     def setStar(self,star):
