@@ -1,6 +1,6 @@
 from .tprofile import TemperatureProfile
 import numpy as np
-
+from taurex.data.fittable import fitparam
 
 class Guillot2010(TemperatureProfile):
     """
@@ -25,7 +25,7 @@ class Guillot2010(TemperatureProfile):
     """
 
 
-    def __init__(self,T_irr,kappa_irr,kappa_v1,kappa_v2,alpha):
+    def __init__(self,T_irr=1500,kappa_irr=0.05,kappa_v1=0.05,kappa_v2=0.05,alpha=0.005):
         super().__init__('Guillot')
 
         self.T_irr = T_irr
@@ -34,8 +34,48 @@ class Guillot2010(TemperatureProfile):
         self.kappa_v2 = np.power(10, kappa_v2)
         self.alpha = alpha
     
+    @fitparam(param_name='T_irr',param_latex='$T_\\mathrm{irr}$',default_fit=True,default_bounds=[1300, 2500])
+    def equilTemperature(self):
+        return self.T_irr
+    
+    @equilTemperature.setter
+    def equilTemperature(self,value):
+        self.T_irr=value
+
+    @fitparam(param_name='kappa_ir',param_latex='$k_\\mathrm{ir}$',default_fit=False,default_bounds=[-10,1])
+    def meanInfraOpacity(self):
+        return self.kappa_ir
+
+    @meanInfraOpacity.setter
+    def meanInfraOpacity(self,value):
+        self.kappa_ir = np.power(10,value)
+
+    @fitparam(param_name='kappa_v1',param_latex='$k_\\mathrm{1}$',default_fit=False,default_bounds=[-10,1])
+    def meanOpticalOpacity1(self):
+        return self.kappa_v1
+
+    @meanOpticalOpacity1.setter
+    def meanOpticalOpacity1(self,value):
+        self.kappa_v1 = np.power(10,value)
+
+    @fitparam(param_name='kappa_v2',param_latex='$k_\\mathrm{2}$',default_fit=False,default_bounds=[-10,1])
+    def meanOpticalOpacity2(self):
+        return self.kappa_v2
+
+    @meanOpticalOpacity2.setter
+    def meanOpticalOpacity2(self,value):
+        self.kappa_v2 = np.power(10,value)
+
+    @fitparam(param_name='alpha',param_latex='$\\alpha$',default_fit=False,default_bounds=[0.0,1.0])
+    def opticalRatio(self):
+        return self.alpha
+
+    @opticalRatio.setter
+    def opticalRatio(self,value):
+        self.alpha = value
+
     def profile(self):
-        """Returns an isothermal temperature profile
+        """Returns a guillot temperature temperature profile
 
         Returns
         --------
