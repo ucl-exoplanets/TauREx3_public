@@ -1,8 +1,9 @@
 from taurex.log import Logger
 import numpy as np
+from .fittable import fitparam,Fittable
 from taurex.constants import KBOLTZ
 
-class Atmosphere(Logger):
+class Atmosphere(Fittable,Logger):
     """This class defines the atmosphere
 
     """
@@ -11,12 +12,12 @@ class Atmosphere(Logger):
 
     def __init__(self,star, 
                     planet,
-                    nlayers,
-                    atm_min_pressure,
-                    atm_max_pressure,
-                    dens_profile,
-                    t_profile,
-                    gas_profile):
+                    nlayers=100,
+                    atm_min_pressure=1e-4,
+                    atm_max_pressure=1e6,
+                    dens_profile=None,
+                    t_profile=None,
+                    gas_profile=None):
         super().__init__('Atmosphere')
 
         self._star = star
@@ -77,12 +78,6 @@ class Atmosphere(Logger):
     def densityProfile(self):
         return (self.pressureProfile)/(KBOLTZ*self.temperatureProfile)
 
-
-    def setStar(self,star):
-        pass
-    
-    def setPlanet(self,planet):
-        pass
 
 
 
