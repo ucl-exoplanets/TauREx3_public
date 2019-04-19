@@ -31,7 +31,13 @@ class FittableTest(unittest.TestCase):
             def pressure(self,value):
                 self._pressure = value
 
+        class TestClassChild(TestClass):
+            def __init__(self):
+                super().__init__()
+
+
         self._test_class = TestClass()
+        self._test_class_child = TestClassChild()
 
 
     def test_compileparams(self):
@@ -40,6 +46,9 @@ class FittableTest(unittest.TestCase):
         self.assertIn('temperature',params)
         self.assertIn('pressure',params)
 
+        params = self._test_class_child.fitting_parameters()
+        self.assertIn('temperature',params)
+        self.assertIn('pressure',params)
 
     def test_read_write_params(self):
         print('Testing readwrite')
@@ -54,3 +63,16 @@ class FittableTest(unittest.TestCase):
 
         self.assertEqual(self._test_class.temperature,40)
         self.assertEqual(self._test_class.pressure,80)
+
+        print('Testing readwrite')
+        params = self._test_class_child.fitting_parameters()
+        temperature = params['temperature']
+        pressure = params['pressure']
+        self.assertEqual(temperature[2](),10)
+        self.assertEqual(pressure[2](),50)
+
+        temperature[3](40)
+        pressure[3](80)
+
+        self.assertEqual(self._test_class_child.temperature,40)
+        self.assertEqual(self._test_class_child.pressure,80)
