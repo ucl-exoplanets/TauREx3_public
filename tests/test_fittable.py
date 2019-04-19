@@ -3,10 +3,7 @@ import numpy as np
 from taurex.data.fittable import fitparam,Fittable
 
 class FittableTest(unittest.TestCase):
-    """
-    I am fucking surprised this both worked and tested correctly
-    on the first run
-    """
+
     def setUp(self):
 
         class TestClass(Fittable):
