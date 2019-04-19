@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from taurex.data.planet import Planet
+from taurex.data.planet import Planet,Earth
 from taurex.constants import G,RJUP,MJUP
  
  
@@ -9,7 +9,7 @@ class PlanetTest(unittest.TestCase):
     def setUp(self):
         
         self.jup = Planet(MJUP,RJUP)
-        self.earth = Planet(5.972e24,6371000)
+        self.earth = Earth()
     
     def test_properties(self):
         
@@ -18,3 +18,10 @@ class PlanetTest(unittest.TestCase):
         self.assertAlmostEqual(self.jup.gravity,25.916,places=2)
 
         self.assertAlmostEqual(self.earth.gravity,9.819,places=2)
+
+    
+    def test_fitparams(self):
+        earth_params = self.earth.fitting_parameters()
+
+        self.assertIn('planet_radius',earth_params)
+        self.assertIn('planet_mass',earth_params)

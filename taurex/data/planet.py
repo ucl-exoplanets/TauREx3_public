@@ -1,8 +1,9 @@
 from taurex.log import Logger
 from taurex.constants import G
+from .fittable import fitparam,Fittable
 import numpy as np
 
-class Planet(Logger):
+class Planet(Fittable,Logger):
     """Holds information on a planet and its properties and 
     derived properties
 
@@ -17,18 +18,28 @@ class Planet(Logger):
     """
     
     def __init__(self,mass,radius):
-        super().__init__('Planet')
+        Logger.__init__(self,'Planet')
+        Fittable.__init__(self)
         self._mass = mass
         self._radius = radius
 
     
-    @property
+    @fitparam(param_name='planet_mass',param_latex=None)
     def mass(self):
         return self._mass
     
-    @property
+    @mass.setter
+    def mass(self,value):
+        self._mass = value
+
+
+    @fitparam(param_name='planet_radius',param_latex=None)
     def radius(self):
         return self._radius
+    
+    @radius.setter
+    def radius(self,value):
+        self._radius = value
         
 
     @property
@@ -40,4 +51,4 @@ class Planet(Logger):
 class Earth(Planet):
     """An implementation for earth"""
     def __init__(self):
-        super().__init__(5.972e24,6371000)
+        Planet.__init__(self,5.972e24,6371000)
