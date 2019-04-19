@@ -1,6 +1,6 @@
 from taurex.log import Logger
 import numpy as np
-
+from taurex.constants import KBOLTZ
 
 class Atmosphere(Logger):
     """This class defines the atmosphere
@@ -9,20 +9,27 @@ class Atmosphere(Logger):
 
 
 
-    def __init__(self,star, planet,nlayers,
-                        t_profile,
-                        p_profile,
-                        dens_profile,
-                        
-                        gas_profile):
+    def __init__(self,star, 
+                    planet,
+                    nlayers,
+                    atm_min_pressure,
+                    atm_max_pressure,
+                    dens_profile,
+                    t_profile,
+                    gas_profile):
         super().__init__('Atmosphere')
 
         self._star = star
         self._planet = planet
         self._t_profile = t_profile
         self._gas_profile = gas_profile
+        
+        self._atm_min_pressure = atm_min_pressure
+        
+        self._atm_max_pressure = atm_max_pressure
+
         self.setup_pressure_profile(nlayers)
-    
+
 
     def setup_pressure_profile(self,nlayers):
         """Sets up the pressure profile for the atmosphere model
@@ -35,7 +42,7 @@ class Atmosphere(Logger):
         self._nlayers = nlayers
 
         # set pressure profile of layer boundaries
-        press_exp = np.linspace(np.log(self.params.atm_min_pres), np.log(self.params.atm_max_pres), self.nlevels)
+        press_exp = np.linspace(np.log(self._atm_min_pressure), np.log(self._atm_max_pressure), self.nLevels)
         self.pressure_profile_levels =  np.exp(press_exp)[::-1]
 
         # get mid point pressure between levels (i.e. get layer pressure) computing geometric
@@ -60,7 +67,15 @@ class Atmosphere(Logger):
     
     @property
     def temperatureProfile(self):
-        return self._t_profile
+        return self._t_profile.profile()
+
+    @property
+    def pressureProfile(self):
+        return self.pressure_profile
+
+    @property
+    def densityProfile(self):
+        return (self.pressureProfile)/(KBOLTZ*self.temperatureProfile)
 
 
     def setStar(self,star):
@@ -68,4 +83,6 @@ class Atmosphere(Logger):
     
     def setPlanet(self,planet):
         pass
+
+
 

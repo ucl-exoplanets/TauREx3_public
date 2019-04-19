@@ -37,7 +37,10 @@ class Guillot2010(TemperatureProfile):
     def profile(self):
         """Returns an isothermal temperature profile
 
-        Returns: :obj:np.array(float)
+        Returns
+        --------
+        
+        :obj:np.array(float)
             temperature profile
         """
 
