@@ -1,6 +1,7 @@
 from taurex.log import Logger
 from taurex.data.fittable import fitparam,Fittable
 import numpy as np
+import math
 class GasProfile(Fittable,Logger):
     """
     Defines gas profiles
@@ -10,13 +11,39 @@ class GasProfile(Fittable,Logger):
     inactive_gases = ['H2', 'HE', 'N2']
 
 
-    def __init__(self,name):
+    def __init__(self,name,mode='linear'):
         Logger.__init__(self,name)
         Fittable.__init__(self)
         self.active_mixratio_profile = None
         self.inactive_mixratio_profile = None
-
+        self.setLinearLogMode(mode)
     
+    def setLinearLogMode(self,value):
+        value = value.lower()
+        if value in ('linear','log',):
+            self._log_mode =  (value == 'log')
+        else:
+            raise AttributeError('Linear/Log Mode muse be either \'linear\' or \'log\'')
+
+    @property
+    def isInLogMode(self):
+        return self._log_mode
+
+
+    def readableValue(self,value):
+        """Helper function to convert the read value to either linear or log space"""
+
+        if self.isInLogMode:
+            return math.log10(value)
+        else:
+            return value
+    
+    def writeableValue(self,value):
+        """Write value back to linear space when in either log or linear mode"""
+        if self.isInLogMode:
+            return math.pow(10,value)
+        else:
+            return value
 
     def initialize_profile(self,nlayers,temperature_profile,pressure_profile,altitude_profile):
         self.nlayers=nlayers
