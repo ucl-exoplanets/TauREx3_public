@@ -100,6 +100,12 @@ class TaurexProfileTest(unittest.TestCase):
         zero_mu =np.zeros_like(self.tp.muProfile)
         self.assertFalse((zero_mu == self.tp.muProfile).all())
 
+    def test_fitparams(self):
+        params = self.tp.fitting_parameters()
+        self.assertIn('N2',params)
+        self.assertIn('H2_He',params)
+
+        self.assertEqual(params['N2'][1],'N$_2$')
 
 
 class ConstantProfileTest(unittest.TestCase):

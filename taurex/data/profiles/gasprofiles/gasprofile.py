@@ -1,5 +1,5 @@
 from taurex.log import Logger
-from taurex.util import get_molecular_weight
+from taurex.util import get_molecular_weight,molecule_texlabel
 from taurex.data.fittable import fitparam,Fittable
 import numpy as np
 import math
@@ -107,6 +107,24 @@ class TaurexGasProfile(GasProfile):
         for idx,ratio in enumerate(self._active_gas_mix_ratio):
             self.active_mixratio_profile[idx, :] = ratio
     
+
+    @fitparam(param_name='N2',param_latex=molecule_texlabel('N2'),default_fit=False,default_bounds=[1e-12,1.0])
+    def N2MixRatio(self):
+        return self.readableValue(self._n2_mix_ratio)
+    
+    @N2MixRatio.setter
+    def N2MixRatio(self,value):
+        self._n2_mix_ratio = self.writeableValue(value)
+
+    @fitparam(param_name='H2_He',param_latex=molecule_texlabel('H$_2$/He'),default_fit=False,default_bounds=[1e-12,1.0])
+    def H2HeMixRatio(self):
+        return self.readableValue(self._he_h2_mix_ratio)
+    
+    @H2HeMixRatio.setter
+    def H2HeMixRatio(self,value):
+        self._he_h2_mix_ratio = self.writeableValue(value)
+
+
     def compute_inactive_gas_profile(self):
 
         self.inactive_mixratio_profile = np.zeros((len(self.inactive_gases), self.nlayers))
@@ -123,7 +141,4 @@ class TaurexGasProfile(GasProfile):
         self.inactive_mixratio_profile[0, :] = mixratio_remainder/(1. + self._he_h2_mix_ratio) # H2
         self.inactive_mixratio_profile[1, :] =  self._he_h2_mix_ratio * self.inactive_mixratio_profile[0, :] 
 
-
-
-        
         
