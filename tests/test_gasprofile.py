@@ -30,6 +30,9 @@ class GasProfileTest(unittest.TestCase):
         self.assertEqual(self.tp.activeGasMixProfile,None)
         self.assertEqual(self.tp.inActiveGasMixProfile,None)
 
+
+        #numpy.testing.ass
+
     def test_log_mode(self):
         with self.assertRaises(AttributeError):
             self.tp.setLinearLogMode('APPLES')
@@ -80,7 +83,24 @@ class TaurexProfileTest(unittest.TestCase):
     def test_compute_inactive(self):
         self.tp.compute_inactive_gas_profile()
     
+
+
     def test_get_profiles(self):
         
         self.assertIsNotNone(self.tp.activeGasMixProfile)
+        self.assertEqual(self.tp.activeGasMixProfile.shape[0],1)
+        self.assertEqual(self.tp.activeGasMixProfile.shape[1],10)
+
         self.assertIsNotNone(self.tp.inActiveGasMixProfile)
+        self.assertEqual(self.tp.inActiveGasMixProfile.shape[0],3)
+        self.assertEqual(self.tp.inActiveGasMixProfile.shape[1],10)
+
+
+        self.assertEqual(self.tp.muProfile.shape[0],10)
+        zero_mu =np.zeros_like(self.tp.muProfile)
+        self.assertFalse((zero_mu == self.tp.muProfile).all())
+
+
+
+class ConstantProfileTest(unittest.TestCase):
+    pass

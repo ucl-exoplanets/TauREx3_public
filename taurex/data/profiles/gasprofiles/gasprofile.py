@@ -1,4 +1,5 @@
 from taurex.log import Logger
+from taurex.util import get_molecular_weight
 from taurex.data.fittable import fitparam,Fittable
 import numpy as np
 import math
@@ -8,7 +9,7 @@ class GasProfile(Fittable,Logger):
 
     """
 
-    inactive_gases = ['H2', 'HE', 'N2']
+    
 
 
     def __init__(self,name,mode='linear'):
@@ -16,6 +17,10 @@ class GasProfile(Fittable,Logger):
         Fittable.__init__(self)
         self.active_mixratio_profile = None
         self.inactive_mixratio_profile = None
+
+        self.active_gases = []
+        self.inactive_gases = []
+        self.mu_profile = None
         self.setLinearLogMode(mode)
     
     def setLinearLogMode(self,value):
@@ -56,13 +61,21 @@ class GasProfile(Fittable,Logger):
 
         self.compute_active_gas_profile()
         self.compute_inactive_gas_profile()
-
+        self.compute_mu_profile()
     def compute_active_gas_profile(self):
         raise NotImplementedError
     
     def compute_inactive_gas_profile(self):
         raise NotImplementedError
 
+    def compute_mu_profile(self):
+        self.mu_profile= np.zeros(shape=(self.nlayers,))
+        if self.activeGasMixProfile is not None:
+            for idx, gasname in enumerate(self.active_gases):
+                self.mu_profile += self.activeGasMixProfile[idx,:]*get_molecular_weight(gasname)
+        if self.inActiveGasMixProfile is not None:
+            for idx, gasname in enumerate(self.inactive_gases):
+                self.mu_profile += self.inActiveGasMixProfile[idx,:]*get_molecular_weight(gasname)
     @property
     def activeGasMixProfile(self):
         return self.active_mixratio_profile
@@ -71,7 +84,9 @@ class GasProfile(Fittable,Logger):
     def inActiveGasMixProfile(self):
         return self.inactive_mixratio_profile
 
-
+    @property
+    def muProfile(self):
+        return self.mu_profile
 
 class TaurexGasProfile(GasProfile):
 
@@ -80,14 +95,15 @@ class TaurexGasProfile(GasProfile):
 
     def __init__(self,name,active_gases,active_gas_mix_ratio,n2_mix_ratio=0,he_h2_ratio=0.17647):
         super().__init__(name)
-        self._active_gases = active_gases
+        self.active_gases = active_gases
+        self.inactive_gases = ['H2', 'HE', 'N2']
         self._active_gas_mix_ratio = active_gas_mix_ratio
         self._n2_mix_ratio = n2_mix_ratio
         self._he_h2_mix_ratio = he_h2_ratio
     
 
     def compute_active_gas_profile(self):
-        self.active_mixratio_profile=np.zeros((len(self._active_gases), self.nlayers))
+        self.active_mixratio_profile=np.zeros((len(self.active_gases), self.nlayers))
         for idx,ratio in enumerate(self._active_gas_mix_ratio):
             self.active_mixratio_profile[idx, :] = ratio
     
@@ -96,7 +112,7 @@ class TaurexGasProfile(GasProfile):
         self.inactive_mixratio_profile = np.zeros((len(self.inactive_gases), self.nlayers))
         self.inactive_mixratio_profile[2, :] = self._n2_mix_ratio
         # first get the sum of the mixing ratio of all active gases
-        if len(self._active_gases) > 1:
+        if len(self.active_gases) > 1:
             active_mixratio_sum = np.sum(self.active_mixratio_profile, axis = 0)
         else:
             active_mixratio_sum = np.copy(self.active_mixratio_profile)
@@ -106,3 +122,8 @@ class TaurexGasProfile(GasProfile):
         mixratio_remainder = 1. - active_mixratio_sum
         self.inactive_mixratio_profile[0, :] = mixratio_remainder/(1. + self._he_h2_mix_ratio) # H2
         self.inactive_mixratio_profile[1, :] =  self._he_h2_mix_ratio * self.inactive_mixratio_profile[0, :] 
+
+
+
+        
+        
