@@ -93,8 +93,8 @@ class TaurexGasProfile(GasProfile):
 
 
 
-    def __init__(self,name,active_gases,active_gas_mix_ratio,n2_mix_ratio=0,he_h2_ratio=0.17647):
-        super().__init__(name)
+    def __init__(self,name,active_gases,active_gas_mix_ratio,n2_mix_ratio=0,he_h2_ratio=0.17647,mode='linear'):
+        super().__init__(name,mode=mode)
         self.active_gases = active_gases
         self.inactive_gases = ['H2', 'HE', 'N2']
         self.active_gas_mix_ratio = active_gas_mix_ratio
