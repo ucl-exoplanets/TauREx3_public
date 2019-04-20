@@ -64,6 +64,10 @@ class Planet(Fittable,Logger):
     def gravity(self):
         return (G * self.mass) / (self.radius**2) 
 
+    
+    def gravity_at_height(self,height):
+        return (G * self.mass) / ((self.radius+height)**2) 
+
 
 
 class Earth(Planet):
