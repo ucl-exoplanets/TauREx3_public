@@ -44,3 +44,20 @@ class GasProfile(Fittable,Logger):
             active_mixratio_sum = np.copy(self.active_mixratio_profile)
         
         active_mixratio_sum += self.inactive_mixratio_profile[2, :]
+        
+        mixratio_remainder = 1. - active_mixratio_sum
+        self.inactive_mixratio_profile[0, :] = mixratio_remainder/(1. + self._he_h2_mix_ratio) # H2
+        self.inactive_mixratio_profile[1, :] =  self._he_h2_mix_ratio * self.inactive_mixratio_profile[0, :] 
+
+    @property
+    def activeGasMixProfile(self):
+        return self.active_mixratio_profile
+
+    @property
+    def inActiveGasMixProfile(self):
+        return self.inactive_mixratio_profile
+
+class ConstantGasProfile(GasProfile):
+
+    def __init__(self,active_gases,active_gas_mix_ratio,n2_mix_ratio=0,he_h2_ratio=0.17647):
+        super().__init__('constant_gas',active_gases,active_gas_mix_ratio,n2_mix_ratio,he_h2_ratio)
