@@ -68,7 +68,7 @@ class TaurexProfileTest(unittest.TestCase):
 
     def setUp(self):
  
-        self.tp = TaurexGasProfile('test',['H2O'],[1e-4])
+        self.tp = TaurexGasProfile('test',['H2O','CH4'],[1e-4,1e-12])
     
         test_layers = 10
 
@@ -88,7 +88,7 @@ class TaurexProfileTest(unittest.TestCase):
     def test_get_profiles(self):
         
         self.assertIsNotNone(self.tp.activeGasMixProfile)
-        self.assertEqual(self.tp.activeGasMixProfile.shape[0],1)
+        self.assertEqual(self.tp.activeGasMixProfile.shape[0],2)
         self.assertEqual(self.tp.activeGasMixProfile.shape[1],10)
 
         self.assertIsNotNone(self.tp.inActiveGasMixProfile)
@@ -107,6 +107,21 @@ class TaurexProfileTest(unittest.TestCase):
 
         self.assertEqual(params['N2'][1],'N$_2$')
 
+
+
+        self.tp.add_active_gas_param(0)
+        self.tp.add_active_gas_param(1)
+        params = self.tp.fitting_parameters()
+        self.assertIn('H2O',params)
+        self.assertIn('CH4',params)
+        h2o = params['H2O']
+        ch4 = params['CH4']
+        self.assertEqual(h2o[2](),1e-4)
+        self.assertEqual(ch4[2](),1e-12)
+        h2o[3](1e-6)
+        ch4[3](1e-18)
+        self.assertEqual(self.tp.active_gas_mix_ratio[0],1e-6)
+        self.assertEqual(self.tp.active_gas_mix_ratio[1],1e-18)
 
 class ConstantProfileTest(unittest.TestCase):
     pass
