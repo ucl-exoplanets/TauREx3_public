@@ -181,3 +181,8 @@ class TwoPointGasProfileTest(unittest.TestCase):
     def test_compute_profile(self):
         cgp = TwoPointGasProfile(['H2O','CH4'],[1e-4,1e-12],['CH4'],[1e-4],[1e-8])  
         params = cgp.fitting_parameters()
+        test_layers = 10
+
+        pres_prof = np.ones(test_layers)
+
+        cgp.initialize_profile(10,pres_prof,pres_prof,pres_prof)   
