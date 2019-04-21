@@ -144,7 +144,6 @@ class TaurexGasProfile(GasProfile):
 
     def add_active_gas_param(self,idx):
         mol_name = self.active_gases[idx]
-
         param_name = mol_name
         param_tex = molecule_texlabel(mol_name)
         if self.isInLogMode:
@@ -165,3 +164,100 @@ class TaurexGasProfile(GasProfile):
         
         default_fit = False
         self.add_fittable_param(param_name,param_tex,fget,fset,default_fit,bounds)  
+
+    
+
+class ComplexGasProfile(TaurexGasProfile):
+
+    def __init__(self,
+                name,
+                active_gases,
+                active_gas_mix_ratio,
+                active_complex_gases,
+                active_gases_mixratios_surface,
+                active_gases_mixratios_top,
+                n2_mix_ratio=0,he_h2_ratio=0.17647,mode='linear'):
+        super().__init__(name,active_gases,active_gas_mix_ratio,n2_mix_ratio,he_h2_ratio,mode)
+        self.active_complex_gases = active_complex_gases
+        self.active_gases_mixratios_surface = active_gases_mixratios_surface
+        self.active_gases_mixratios_top = active_gases_mixratios_top
+
+        self.add_noncomplex_params()
+        self.add_surface_param()
+        self.add_top_param()
+
+    def add_surface_param(self):
+        for idx,mol_name in enumerate(self.active_complex_gases):
+            mol_tex = molecule_texlabel(mol_name)
+
+            param_surface = 'S {}'.format(mol_name)
+            param_surf_tex = '{}'.format(mol_tex)
+
+            if self.isInLogMode:
+                param_surface = 'S_log_{}'.format(mol_name)
+                param_surf_tex = 'S_log({})'.format(mol_tex)
+
+            def read_surf(self):
+                return self.readableValue(self.active_gases_mixratios_surface[idx])
+            def write_surf(self,value):
+                self.active_gases_mixratios_surface[idx] = self.writeableValue(value)
+
+            fget_surf = read_surf
+            fset_surf = write_surf
+
+            bounds = [1.0e-12, 0.1]
+            if self.isInLogMode:
+                bounds=[-12,-1]
+
+            default_fit = False
+            self.add_fittable_param(param_surface,param_surf_tex ,fget_surf,fset_surf,default_fit,bounds)   
+
+    def add_top_param(self):
+        for idx,mol_name in enumerate(self.active_complex_gases): 
+            mol_tex = molecule_texlabel(mol_name)
+
+            param_top = 'T {}'.format(mol_name)
+            param_top_tex = '{}'.format(mol_tex)
+
+            if self.isInLogMode:
+                param_top = 'T_log_{}'.format(mol_name)
+                param_top_tex = 'T_log({})'.format(mol_tex)
+
+            def read_top(self):
+                return self.readableValue(self.active_gases_mixratios_top[idx])
+            def write_top(self,value):
+                self.active_gases_mixratios_top[idx] = self.writeableValue(value)
+
+            fget_top = read_top
+            fset_top = write_top
+
+            bounds = [1.0e-12, 0.1]
+            if self.isInLogMode:
+                bounds=[-12,-1]
+
+            default_fit = False
+            self.add_fittable_param(param_top,param_top_tex ,fget_top,fset_top,default_fit,bounds)      
+
+    def add_noncomplex_params(self):
+
+        for idx,gas in enumerate(self.active_gases):
+            if not gas in self.active_complex_gases:
+                self.add_active_gas_param(idx) 
+
+
+    def compute_active_gas_profile(self):
+        super().compute_active_gas_profile()
+        self.compute_complex_gas_profile()
+
+    
+    def compute_complex_gas_profile(self):
+        """Overload to compute complex gas profiles"""
+        raise NotImplementedError
+
+    
+    def complex_gas_iter(self):
+        """Helper function to get indices for the complex gases"""
+        for j,complex_gas in enumerate(self.active_complex_gases):
+            for i,active_gas in enumerate(self.active_gases):
+                if complex_gas==active_gas:
+                    yield i,j

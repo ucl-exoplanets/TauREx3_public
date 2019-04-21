@@ -15,7 +15,7 @@ class ConstantGasProfile(TaurexGasProfile):
     """
 
 
-    def __init__(self,active_gases,active_gas_mix_ratio,n2_mix_ratio=0,he_h2_ratio=0.17647,mode='linear'):
+    def __init__(self,active_gases=['H2O','CH4'],active_gas_mix_ratio=[1e-5,1e-6],n2_mix_ratio=0,he_h2_ratio=0.17647,mode='linear'):
         super().__init__('ConstantGasProfile',active_gases,active_gas_mix_ratio,n2_mix_ratio,he_h2_ratio,mode=mode)
 
         self.setup_fitting_params()

@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 from taurex.data.profiles.gasprofiles.gasprofile import GasProfile,TaurexGasProfile
-
+from taurex.data.profiles.gasprofiles import ComplexGasProfile,TwoPointGasProfile
 
 class GasProfileTest(unittest.TestCase):
  
@@ -124,4 +124,60 @@ class TaurexProfileTest(unittest.TestCase):
         self.assertEqual(self.tp.active_gas_mix_ratio[1],1e-18)
 
 class ConstantProfileTest(unittest.TestCase):
-    pass
+    
+
+
+    
+    def test_init(self):
+        from taurex.data.profiles.gasprofiles import ConstantGasProfile
+        cgp = ConstantGasProfile(['H2O','CH4'],[1e-4,1e-12])
+    
+        test_layers = 10
+
+        pres_prof = np.ones(test_layers)
+
+        cgp.initialize_profile(10,pres_prof,pres_prof,pres_prof)
+    
+
+    def test_default_constant(self):
+        from taurex.data.profiles.gasprofiles import ConstantGasProfile
+        cgp = ConstantGasProfile()     
+
+        test_layers = 10
+
+        pres_prof = np.ones(test_layers)
+
+        cgp.initialize_profile(10,pres_prof,pres_prof,pres_prof)
+
+
+
+class ComplexProfileTest(unittest.TestCase):
+
+        
+           
+
+
+    def test_parameters(self):
+        cgp = ComplexGasProfile('test',['H2O','CH4'],[1e-4,1e-12],['CH4'],[1e-4],[1e-8])  
+        params = cgp.fitting_parameters()
+        self.assertIn('H2O',params)
+        self.assertNotIn('CH4',params)
+
+        self.assertIn('T CH4',params)
+        self.assertIn('S CH4',params)
+    def test_log_parameters(self):
+        cgp = ComplexGasProfile('test',['H2O','CH4'],[1e-4,1e-12],['CH4'],[1e-4],[1e-8],mode='log')  
+        params = cgp.fitting_parameters()      
+
+        self.assertIn('log_H2O',params)
+        self.assertNotIn('log_CH4',params)
+
+        self.assertNotIn('T CH4',params)
+        self.assertNotIn('S CH4',params)
+        self.assertIn('T_log_CH4',params)
+        self.assertIn('S_log_CH4',params)
+class TwoPointGasProfileTest(unittest.TestCase):
+
+    def test_compute_profile(self):
+        cgp = TwoPointGasProfile(['H2O','CH4'],[1e-4,1e-12],['CH4'],[1e-4],[1e-8])  
+        params = cgp.fitting_parameters()
