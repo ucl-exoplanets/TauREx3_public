@@ -76,15 +76,15 @@ Real(4),parameter :: Cte_Avogadro       = 6.02214199e23_sp         ! Constante d
 Real(4),parameter :: Convert_bar_atm    = 0.9869232863_sp          ! Convertit les bars en atm (par multiplication)
 Real(4),parameter :: Convert_atm_bar    = 1.013249980_sp           ! Convertit les atm en bars (par multiplication)
 Real(4),parameter :: Convert_mmHg_mbar  = 1.3332_sp                ! Convertit les mmHg en mbars (par multiplication)
-Real(8),parameter :: Convert_deg_rad    = Pi_dp/180.0d0            ! Convertit les degrés en radians
-Real(8),parameter :: Convert_rad_deg    = 180.0d0/Pi_dp            ! Convertit les radians en degrés
+Real(8),parameter :: Convert_deg_rad    = Pi_dp/180.0d0            ! Convertit les degrs en radians
+Real(8),parameter :: Convert_rad_deg    = 180.0d0/Pi_dp            ! Convertit les radians en degrs
 Real(8),parameter :: Convert_rad_arcsec = 648.0d3/Pi_dp            ! Convertit les radians en arcsec
 Real(8),parameter :: Convert_arcsec_rad = Pi_dp/648.0d3            ! Convertit les radians en arcsec
 Real(8),parameter :: T_std              = 273.15d0  	            ! Temperature standard [K]
 Real(8),parameter :: p_std              = 101324.9980_dp 	    ! Pression standard [Pa]
 
 ! ---------------------------------------------------------------------------------------------
-! Masses moléculaires [kg] (Hanbook of Chemistry and Physics, 65eme edition, 1988)
+! Masses molculaires [kg] (Hanbook of Chemistry and Physics, 65eme edition, 1988)
 ! ---------------------------------------------------------------------------------------------
 Real(4),parameter :: M_HD	  =  3.021933e-3_sp
 Real(4),parameter :: M_H2O	  = 18.010565e-3_sp

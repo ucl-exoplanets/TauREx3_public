@@ -6,15 +6,15 @@ import imp
 from setuptools import Distribution
 from setuptools import setup, find_packages
 from setuptools.command.install import install
-
-from distutils.core import setup
+from numpy.distutils.core import setup
+#from distutils.core import setup
 from distutils.command.install_scripts import install_scripts
 from distutils import log
+from numpy.distutils.core import Extension
 
 
 
 packages = find_packages(exclude=('tests', 'doc'))
-
 provides = ['taurex',]
 
 
@@ -25,6 +25,44 @@ install_requires = []
 
 
 console_scripts = []
+
+
+def return_major_minor_python():
+
+    import sys
+
+    return str(sys.version_info[0])+"."+str(sys.version_info[1])
+
+
+def return_include_dir():
+    from distutils.util import get_platform
+    return get_platform()+'-'+return_major_minor_python()
+
+
+def ext_configuration(parent_package='',top_path=None):
+    from numpy.distutils.misc_util import Configuration
+
+    config = Configuration()
+
+    #config.add_data_dir('tests')
+
+    ace_src = ['src/ACE/Md_Types_Numeriques.f90',
+                'src/ACE/Md_Constantes.f90',
+                'src/ACE/Md_numerical_recipes.f90',
+                'src/ACE/Md_Utilitaires.f90',
+                ]
+    config.add_library('ACE', sources=ace_src)
+
+
+    sources = ['src/ACE/Md_ACE.f90']
+
+
+    config.add_extension('taurex.external.ace',
+        sources=sources,
+        libraries=['ace'],
+        include_dirs=['build/temp.{}'.format(return_include_dir())],
+        depends=(ace_src))
+    return config
 
 
 entry_points = {'console_scripts': console_scripts,}
@@ -48,11 +86,13 @@ classifiers = [
     'Topic :: Software Development :: Libraries',
 ]
 
+print(ext_configuration(parent_package='taurex').todict())
+
 setup(name='taurex',
       author='Foo',
       author_email='bar',
       maintainer='Foo',
-      version='3',
+      version='3.0',
       description='Bar',
       classifiers=classifiers,
       packages=packages,
@@ -61,4 +101,4 @@ setup(name='taurex',
       provides=provides,
       requires=requires,
       install_requires=install_requires,
-)
+      **ext_configuration(parent_package='taurex').todict())

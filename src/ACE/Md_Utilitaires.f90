@@ -82,11 +82,11 @@ Subroutine taille_fichier(nom,n)
   Do while (test == '#')                     
     Read(i,'(a1)',iostat=end_of_file), test
     If (end_of_file < 0) then
-      Print*, 'Le fichier ', Trim(nom), ' ne contient pas de données exploitables'
+      Print*, 'Le fichier ', Trim(nom), ' ne contient pas de donnes exploitables'
       Stop
     End if
   End do
-  ! Comptage des lignes qui contiennent des données
+  ! Comptage des lignes qui contiennent des donnes
   If (end_of_file >= 0) then
     n = 0
     Do while (end_of_file >= 0)
@@ -147,7 +147,7 @@ End Subroutine Message_exec_c
 Subroutine Message_exec_i(Message,Entier,Arret)
 
 ! Ecrit un message a l'ecran ou dans un fichier
-! suivi d'un entier donné en argument
+! suivi d'un entier donn en argument
 ! et arrete ou poursuit l'execution du programme.
 ! Generique : Message_exec 
 
@@ -1544,7 +1544,7 @@ Real(8)              :: discriminant
 
 discriminant = b**2 - 4*a*c
 
-If (abs(discriminant/R2) < eps) then     ! discriminant nul, aux propagations d'erreurs d'arrondi près
+If (abs(discriminant/R2) < eps) then     ! discriminant nul, aux propagations d'erreurs d'arrondi prs
   s1 = -b/(2*a)
   s2 = s1
   info = 1
