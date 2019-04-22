@@ -13,7 +13,7 @@ Implicit None
 Integer, parameter :: nmaxcharspec = 10       ! Maximum number of species
 Integer, parameter :: nmaxelemxs = 10         ! Maximum number of different elements in one species
 Integer, parameter :: nb_NASA_coef = 7        ! Number of coefficients in NASA therm polynomials
-Character(len=*), parameter :: specfile = "library/ACE/composes.dat"
+
 
 !Real(8)         :: fm(105,1)
 Integer         :: code
@@ -23,8 +23,8 @@ Contains
 
 !######################################################################
 
-Subroutine ACE(nlayers,a_apt,p_apt,t_apt,He_abund_dex,C_abund_dex,O_abund_dex, &
-              N_abund_dex,fm) bind(c, name='ACE')
+Subroutine ACE(specfile,thermfile,nlayers,a_apt,p_apt,t_apt,He_abund_dex,C_abund_dex,O_abund_dex, &
+              N_abund_dex,fm)
 
 !Subroutine ACE(a_apt,p_apt,t_apt,He_abund_dex,C_abund_dex,O_abund_dex,N_abund_dex, &
 !               nspec,fm,code)  bind(c, name='ACE')
@@ -41,8 +41,8 @@ Real(8),         intent(out)   :: fm(105,nlayers)
 !Integer,          intent(in)    :: nspec
 !Real(8),         intent(out)   :: fm(nspec,size(a_apt))
 !Integer,          intent(inout) :: code
-
-Character(len=100), parameter :: thermfile = 'library/ACE/NASA.therm'        ! therm file
+Character(len=*), intent(in):: specfile
+Character(len=*), intent(in) :: thermfile
 Character(len=20) :: spec(105)
 
 

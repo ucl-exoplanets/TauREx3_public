@@ -53,6 +53,7 @@ def ext_configuration(parent_package='',top_path=None):
                 'src/ACE/Md_numerical_recipes.f90',
                 'src/ACE/Md_Utilitaires.f90','src/ACE/Md_ACE.f90']
 
+    config.add_data_dir(('taurex/external/ACE','src/ACE/Data'))
 
     config.add_extension('taurex.external.ace',
         sources=sources)

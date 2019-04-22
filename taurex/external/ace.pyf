@@ -4,7 +4,9 @@
 python module ace ! in 
     interface  ! in :ace
         module md_ace ! in :ace:src/ACE/Md_ACE.f90
-            subroutine ace(nlayers,a_apt,p_apt,t_apt,he_abund_dex,c_abund_dex,o_abund_dex,n_abund_dex,fm) ! in :ace:src/ACE/Md_ACE.f90:md_ace
+            subroutine ace(specfile,thermfile,nlayers,a_apt,p_apt,t_apt,he_abund_dex,c_abund_dex,o_abund_dex,n_abund_dex,fm) ! in :ace:src/ACE/Md_ACE.f90:md_ace
+                character*(*) intent(in) :: specfile
+                character*(*) intent(in) :: thermfile
                 integer, optional,intent(in),check(len(a_apt)>=nlayers),depend(a_apt) :: nlayers=len(a_apt)
                 real(kind=8) dimension(nlayers),intent(in) :: a_apt
                 real(kind=8) dimension(nlayers),intent(in),depend(nlayers) :: p_apt
