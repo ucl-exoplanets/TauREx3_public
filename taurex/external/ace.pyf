@@ -1,0 +1,112 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module ace ! in 
+    interface  ! in :ace
+        module md_ace ! in :ace:src/ACE/Md_ACE.f90
+            use md_types_numeriques
+            use md_constantes
+            use md_utilitaires
+            use md_numerical_recipes
+            use iso_c_binding, only: c_double,c_int
+            integer, parameter,optional :: nmaxcharspec=10
+            integer, parameter,optional :: nmaxelemxs=10
+            integer, parameter,optional :: nb_nasa_coef=7
+            character(len=*), parameter,optional :: specfile="library/ace/composes.dat"
+            integer :: code
+            integer, parameter,optional :: nspec=105
+            subroutine ace(nlayers,a_apt,p_apt,t_apt,he_abund_dex,c_abund_dex,o_abund_dex,n_abund_dex,fm) ! in :ace:src/ACE/Md_ACE.f90:md_ace
+                integer, optional,intent(in),check(len(a_apt)>=nlayers),depend(a_apt) :: nlayers=len(a_apt)
+                real(kind=8) dimension(nlayers),intent(in) :: a_apt
+                real(kind=8) dimension(nlayers),intent(in),depend(nlayers) :: p_apt
+                real(kind=8) dimension(nlayers),intent(in),depend(nlayers) :: t_apt
+                real(kind=8) intent(in) :: he_abund_dex
+                real(kind=8) intent(in) :: c_abund_dex
+                real(kind=8) intent(in) :: o_abund_dex
+                real(kind=8) intent(in) :: n_abund_dex
+                real(kind=8) dimension(105,nlayers),intent(out),depend(nlayers) :: fm
+            end subroutine ace
+            subroutine read_spec(specfile,spec,ilenspec) ! in :ace:src/ACE/Md_ACE.f90:md_ace
+                character*(*) intent(in) :: specfile
+                character(len=*) dimension(:),intent(out) :: spec
+                integer dimension(:),intent(out) :: ilenspec
+            end subroutine read_spec
+            subroutine read_therm(thermfile,spec,ilenspec,elem,ilenelem,zat,charge,nattot,nat,idzat,idtherm,atherm,btherm,tkmin_therm,tkmax_therm,tkmid_therm,ion,id_electr) ! in :ace:src/ACE/Md_ACE.f90:md_ace
+                character*(*) intent(in) :: thermfile
+                character(len=*) dimension(:),intent(in) :: spec
+                integer dimension(:),intent(in) :: ilenspec
+                character(len=*) dimension(:),intent(in) :: elem
+                integer dimension(:),intent(in) :: ilenelem
+                integer dimension(:),intent(in) :: zat
+                integer dimension(:),intent(out) :: charge
+                integer dimension(:),intent(out) :: nattot
+                integer dimension(:,:),intent(out) :: nat
+                integer dimension(:,:),intent(out) :: idzat
+                integer dimension(:),intent(out) :: idtherm
+                real(kind=8) dimension(:,:),intent(out) :: atherm
+                real(kind=8) dimension(:,:),intent(out) :: btherm
+                real(kind=8) dimension(:),intent(out) :: tkmin_therm
+                real(kind=8) dimension(:),intent(out) :: tkmax_therm
+                real(kind=8) dimension(:),intent(out) :: tkmid_therm
+                logical intent(out) :: ion
+                integer intent(out) :: id_electr
+            end subroutine read_therm
+            subroutine compute_chemical_equilibrium(nspec,spec,elfab,mat,charge,nat,ion,id_electr,a_apt,p_apt,t_apt,tkmid_therm,atherm,btherm,idtherm,abun,fm,code) ! in :ace:src/ACE/Md_ACE.f90:md_ace
+                integer, optional,intent(in),check(len(spec)>=nspec),depend(spec) :: nspec=len(spec)
+                character(len=*) dimension(nspec),intent(in) :: spec
+                real(kind=8) dimension(:),intent(in) :: elfab
+                real(kind=8) dimension(:),intent(in) :: mat
+                integer dimension(:),intent(in) :: charge
+                integer dimension(:,:),intent(inout) :: nat
+                logical intent(in) :: ion
+                integer intent(in) :: id_electr
+                real(kind=8) dimension(:),intent(in) :: a_apt
+                real(kind=8) dimension(:),intent(in) :: p_apt
+                real(kind=8) dimension(:),intent(in) :: t_apt
+                real(kind=8) dimension(:),intent(in) :: tkmid_therm
+                real(kind=8) dimension(:,:),intent(in) :: atherm
+                real(kind=8) dimension(:,:),intent(in) :: btherm
+                integer dimension(:),intent(in) :: idtherm
+                real(kind=8) dimension(:),intent(out) :: abun
+                real(kind=8) dimension(:,:),intent(out) :: fm
+                integer intent(inout) :: code
+            end subroutine compute_chemical_equilibrium
+            subroutine minimize_gibbs_energy(nspec,spec,neqt,nmaxeqt,nb_nasa_coef,nat,b0,pressure,tk,tkmid_therm,atherm,btherm,idtherm,abun,abunmax,abuntot,code) ! in :ace:src/ACE/Md_ACE.f90:md_ace
+                integer, optional,intent(in),check(len(spec)>=nspec),depend(spec) :: nspec=len(spec)
+                character(len=*) dimension(nspec),intent(in) :: spec
+                integer intent(in) :: neqt
+                integer intent(in) :: nmaxeqt
+                integer, optional,intent(in),check(shape(atherm,1)==nb_nasa_coef),depend(atherm) :: nb_nasa_coef=shape(atherm,1)
+                integer dimension(:,:),intent(in) :: nat
+                real(kind=8) dimension(:),intent(in) :: b0
+                real(kind=8) intent(in) :: pressure
+                real(kind=8) intent(in) :: tk
+                real(kind=8) dimension(nspec),intent(in),depend(nspec) :: tkmid_therm
+                real(kind=8) dimension(nspec,nb_nasa_coef),intent(in),depend(nspec) :: atherm
+                real(kind=8) dimension(nspec,nb_nasa_coef),intent(in),depend(nspec,nb_nasa_coef) :: btherm
+                integer dimension(nspec),intent(in),depend(nspec) :: idtherm
+                real(kind=8) dimension(nspec),intent(out),depend(nspec) :: abun
+                real(kind=8) dimension(nspec),intent(in),depend(nspec) :: abunmax
+                real(kind=8) intent(inout) :: abuntot
+                integer intent(inout) :: code
+            end subroutine minimize_gibbs_energy
+            subroutine compute_chemical_potential(nspec,nb_nasa_coef,spec,abun,abuntot,pressure,tk,tkmid_therm,atherm,btherm,idtherm,mu) ! in :ace:src/ACE/Md_ACE.f90:md_ace
+                integer, optional,intent(in),check(len(spec)>=nspec),depend(spec) :: nspec=len(spec)
+                integer, optional,intent(in),check(shape(atherm,1)==nb_nasa_coef),depend(atherm) :: nb_nasa_coef=shape(atherm,1)
+                character(len=*) dimension(nspec),intent(in) :: spec
+                real(kind=8) dimension(nspec),intent(in),depend(nspec) :: abun
+                real(kind=8) intent(in) :: abuntot
+                real(kind=8) intent(in) :: pressure
+                real(kind=8) intent(in) :: tk
+                real(kind=8) dimension(nspec),intent(in),depend(nspec) :: tkmid_therm
+                real(kind=8) dimension(nspec,nb_nasa_coef),intent(in),depend(nspec) :: atherm
+                real(kind=8) dimension(nspec,nb_nasa_coef),intent(in),depend(nspec,nb_nasa_coef) :: btherm
+                integer dimension(nspec),intent(in),depend(nspec) :: idtherm
+                real(kind=8) dimension(nspec),intent(out),depend(nspec) :: mu
+            end subroutine compute_chemical_potential
+        end module md_ace
+    end interface 
+end python module ace
+
+! This file was auto-generated with f2py (version:2).
+! See http://cens.ioc.ee/projects/f2py2e/

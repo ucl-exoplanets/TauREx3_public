@@ -50,16 +50,18 @@ def ext_configuration(parent_package='',top_path=None):
                 'src/ACE/Md_Constantes.f90',
                 'src/ACE/Md_numerical_recipes.f90',
                 'src/ACE/Md_Utilitaires.f90',
+                
+                
                 ]
     config.add_library('ACE', sources=ace_src)
 
 
-    sources = ['src/ACE/Md_ACE.f90']
+    sources = ['taurex/external/ace.pyf','src/ACE/Md_ACE.f90']
 
 
     config.add_extension('taurex.external.ace',
         sources=sources,
-        libraries=['ace'],
+        libraries=['ACE'],
         include_dirs=['build/temp.{}'.format(return_include_dir())],
         depends=(ace_src))
     return config
