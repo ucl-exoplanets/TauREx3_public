@@ -1,5 +1,7 @@
 
 # -*- mode: python -*-
+#!python
+#cython: language_level=3
 #cython: boundscheck=False
 #cython: wraparound=False
 # Comments above are special. Please do not remove.

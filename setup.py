@@ -3,6 +3,7 @@
 
 import os
 import imp
+import setuptools
 from setuptools import Distribution
 from setuptools import setup, find_packages
 from setuptools.command.install import install
@@ -11,6 +12,7 @@ from numpy.distutils.core import setup
 from distutils.command.install_scripts import install_scripts
 from distutils import log
 from numpy.distutils.core import Extension
+from Cython.Build import cythonize
 
 
 
@@ -39,9 +41,11 @@ def return_include_dir():
     return get_platform()+'-'+return_major_minor_python()
 
 
-def ace_configuration(parent_package='',top_path=None):
-    from numpy.distutils.misc_util import Configuration
+extensions = []
+data_files = []
 
+def build_ace(parent_package='',top_path=None):
+    from numpy.distutils.misc_util import Configuration
     config = Configuration()
 
     #config.add_data_dir('tests')
@@ -53,17 +57,26 @@ def ace_configuration(parent_package='',top_path=None):
                 'src/ACE/Md_numerical_recipes.f90',
                 'src/ACE/Md_Utilitaires.f90','src/ACE/Md_ACE.f90']
 
-    config.add_data_dir(('taurex/external/ACE','src/ACE/Data'))
+    data_files = ('taurex/external/ACE/', ['src/ACE/Data/NASA.therm', 'src/ACE/Data/composes.dat'])
+    ext = Extension(name='taurex.external.ace', sources=ace_sources)
 
-    config.add_extension('taurex.external.ace',
-        sources=ace_sources)
+    return ext,data_files
 
+ext,dat = build_ace()
 
+extensions.append(ext)
+data_files.append(dat)
+extensions.append(Extension("taurex.external.mie",  # indicate where it should be available !
+                        sources=["taurex/external/bh_mie.pyx",
+                                "src/MIE/bhmie_lib.c",
+                                "src/MIE/complex.c",
+                                "src/MIE/nrutil.c"
+                                ],
+                        #extra_compile_args = [],
+                        extra_compile_args=["-I./src/MIE/"],
+                        language="c"))
 
-    return config
-
-
-
+extensions = cythonize(extensions, language_level = "3")
 
 entry_points = {'console_scripts': console_scripts,}
 
@@ -86,7 +99,6 @@ classifiers = [
     'Topic :: Software Development :: Libraries',
 ]
 
-print(ext_configuration(parent_package='taurex').todict())
 
 setup(name='taurex',
       author='Foo',
@@ -101,4 +113,27 @@ setup(name='taurex',
       provides=provides,
       requires=requires,
       install_requires=install_requires,
-      **ace_configuration(parent_package='taurex').todict())
+      data_files=data_files,
+      ext_modules=extensions
+      )
+
+
+
+
+# Build the extensions
+# --------------------
+# The setup steps have been splitted here, because f2py uses a modified version of the setup.
+# If only cython or only f2py is used, the setup file can of course be one.
+
+def build_mie():
+
+    clib = Extension("taurex.external.mie",  # indicate where it should be available !
+                        sources=["taurex/external/bh_mie.pyx",
+                                "src/MIE/bhmie_lib.c",
+                                "src/MIE/complex.c",
+                                "src/MIE/nrutil.c"
+                                ],
+                        #extra_compile_args = [],
+                        extra_compile_args=["-O3","-I./src/MIE/"],
+                        language="c")
+
