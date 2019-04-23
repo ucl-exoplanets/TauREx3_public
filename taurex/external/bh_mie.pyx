@@ -11,7 +11,7 @@ ctypedef np.float32_t float_t
 ctypedef np.float64_t double_t
 ctypedef np.int32_t int_t
 
-cdef extern from "src/MIE/bhmie_lib.h":
+cdef extern from "bhmie_lib.h":
     void compute_sigma_mie(
             const double a, 
             const int nwgrid,   
@@ -26,18 +26,7 @@ def bh_mie(double particle_radius,
           np.ndarray[dtype=double_t, ndim=1, mode="c"] ref_real,
           np.ndarray[dtype=double_t, ndim=1, mode="c"] ref_imag,
           ):
-    """divide two arrays
-    Parameters
-    ----------
-    a : 1-D numpy array 
-        first operand
-    b : 1-D numpy array
-        second operand
-    Returns
-    -------
-    c : 1-D numpy array
-        result of division of a by b
-    """
+
     cdef np.ndarray[dtype=double_t, ndim=1, mode="c"] output
     output = np.empty_like(wavegrid, dtype='d')
 
@@ -47,6 +36,6 @@ def bh_mie(double particle_radius,
     if not (ref_real.shape[0] == ref_imag.shape[0]):
         raise ValueError("ref_real and ref_imag shapes are not consistent")
 
-    compute_sigma_mie(a, wavegrid.shape[0],<double*>wavegrid.data, <double*>ref_real.data,<double*>ref_imag.data, <double*>output.data)
+    compute_sigma_mie(particle_radius, wavegrid.shape[0],<double*>wavegrid.data, <double*>ref_real.data,<double*>ref_imag.data, <double*>output.data)
 
     return output
