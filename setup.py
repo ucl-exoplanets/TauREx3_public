@@ -39,7 +39,7 @@ def return_include_dir():
     return get_platform()+'-'+return_major_minor_python()
 
 
-def ext_configuration(parent_package='',top_path=None):
+def ace_configuration(parent_package='',top_path=None):
     from numpy.distutils.misc_util import Configuration
 
     config = Configuration()
@@ -47,7 +47,7 @@ def ext_configuration(parent_package='',top_path=None):
     #config.add_data_dir('tests')
 
 
-    sources = ['taurex/external/ace.pyf',
+    ace_sources = ['taurex/external/ace.pyf',
     'src/ACE/Md_Types_Numeriques.f90',
                 'src/ACE/Md_Constantes.f90',
                 'src/ACE/Md_numerical_recipes.f90',
@@ -56,8 +56,13 @@ def ext_configuration(parent_package='',top_path=None):
     config.add_data_dir(('taurex/external/ACE','src/ACE/Data'))
 
     config.add_extension('taurex.external.ace',
-        sources=sources)
+        sources=ace_sources)
+
+
+
     return config
+
+
 
 
 entry_points = {'console_scripts': console_scripts,}
@@ -96,4 +101,4 @@ setup(name='taurex',
       provides=provides,
       requires=requires,
       install_requires=install_requires,
-      **ext_configuration(parent_package='taurex').todict())
+      **ace_configuration(parent_package='taurex').todict())
