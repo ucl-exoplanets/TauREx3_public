@@ -12,14 +12,17 @@ class BaseSpectrum(Logger):
 
     
 
+    @property
+    def spectrum(self):
+        raise NotImplementedError
 
     @property
-    def spectrumWL(self):
+    def wavelengthGrid(self):
         raise NotImplementedError
     
     @property
-    def spectrumWN(self):
-        return 10000/self.spectrumWL
+    def wavenumberGrid(self):
+        return 10000/self.wavelengthGrid
 
     @property
     def binEdges(self):
