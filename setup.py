@@ -57,7 +57,7 @@ def build_ace(parent_package='',top_path=None):
                 'src/ACE/Md_numerical_recipes.f90',
                 'src/ACE/Md_Utilitaires.f90','src/ACE/Md_ACE.f90']
 
-    data_files = ('taurex/external/ACE/', ['src/ACE/Data/NASA.therm', 'src/ACE/Data/composes.dat'])
+    data_files = ('taurex/external/ACE', ['src/ACE/Data/NASA.therm', 'src/ACE/Data/composes.dat'])
     ext = Extension(name='taurex.external.ace', sources=ace_sources)
 
     return ext,data_files
