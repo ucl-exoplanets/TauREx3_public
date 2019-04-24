@@ -1,0 +1,25 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module ace ! in 
+    interface  ! in :ace
+        module md_ace ! in :ace:src/ACE/Md_ACE.f90
+            subroutine ace(specfile,thermfile,nlayers,a_apt,p_apt,t_apt,he_abund_dex,c_abund_dex,o_abund_dex,n_abund_dex,fm) ! in :ace:src/ACE/Md_ACE.f90:md_ace
+                character*(*) intent(in) :: specfile
+                character*(*) intent(in) :: thermfile
+                integer, optional,intent(in),check(len(a_apt)>=nlayers),depend(a_apt) :: nlayers=len(a_apt)
+                real(kind=8) dimension(nlayers),intent(in) :: a_apt
+                real(kind=8) dimension(nlayers),intent(in),depend(nlayers) :: p_apt
+                real(kind=8) dimension(nlayers),intent(in),depend(nlayers) :: t_apt
+                real(kind=8) intent(in) :: he_abund_dex
+                real(kind=8) intent(in) :: c_abund_dex
+                real(kind=8) intent(in) :: o_abund_dex
+                real(kind=8) intent(in) :: n_abund_dex
+                real(kind=8) dimension(105,nlayers),intent(out),depend(nlayers) :: fm
+            end subroutine ace
+        end module md_ace
+    end interface 
+end python module ace
+
+! This file was auto-generated with f2py (version:2).
+! See http://cens.ioc.ee/projects/f2py2e/
