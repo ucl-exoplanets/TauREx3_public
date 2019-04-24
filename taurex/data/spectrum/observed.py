@@ -59,6 +59,7 @@ class ObservedSpectrum(BaseSpectrum):
 
 
     def manual_binning(self):
+        pass
 
 
         
