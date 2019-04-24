@@ -104,3 +104,4 @@ venv.bak/
 .mypy_cache/
 .vscode/settings.json
 .DS_Store
+taurex/external/bh_mie.c
