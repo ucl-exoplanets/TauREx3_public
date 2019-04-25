@@ -58,20 +58,24 @@ class ObservedSpectrum(BaseSpectrum):
 
     @property
     def rawData(self):
+        """Data read from file"""
         return self._obs_spectrum
 
     @property
     def spectrum(self):
+        """The spectrum itself"""
         return self._obs_spectrum[:,1]
 
 
     @property
     def wavelengthGrid(self):
+        """Wavelength grid in microns"""
         return self.rawData[:,0]
 
     
     @property
     def wavenumberGrid(self):
+        """Wavenumber grid in cm-1"""
         return 10000/self.wavelengthGrid
 
     @property
