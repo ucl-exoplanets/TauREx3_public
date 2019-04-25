@@ -1,5 +1,6 @@
 from .gasprofile import GasProfile
 from taurex.external.ace import md_ace
+from taurex.data.fittable import fitparam
 import numpy as np
 import math
 class ACEGasProfile(GasProfile):
@@ -76,3 +77,21 @@ class ACEGasProfile(GasProfile):
     
     def compute_inactive_gas_profile(self):
         pass
+    
+
+    @fitparam(param_name='ace_log_metallicity',param_latex='log(Metallicity)',default_fit=False,default_bounds=[ -1, 4])
+    def aceMetallicity(self):
+        return math.log10(self.ace_metallicity)
+    
+    @aceMetallicity.setter
+    def aceMetallicity(self,value):
+        self.ace_metallicity = math.pow(10.0,value)
+    
+
+    @fitparam(param_name='ace_co',param_latex='C/O',default_fit=False,default_bounds=[0, 2])
+    def aceCORatio(self):
+        return self.ace_co
+    
+    @aceCORatio.setter
+    def aceCORatio(self,value):
+        self.ace_co = value
