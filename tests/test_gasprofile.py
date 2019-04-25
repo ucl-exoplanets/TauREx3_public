@@ -186,3 +186,17 @@ class TwoPointGasProfileTest(unittest.TestCase):
         pres_prof = np.ones(test_layers)
 
         cgp.initialize_profile(10,pres_prof,pres_prof,pres_prof)   
+
+
+
+class AceGasProfileTest(unittest.TestCase):
+
+    def test_compute_profile(self):
+        from taurex.data.profiles.gasprofiles.acegasprofile import ACEGasProfile
+        cgp = ACEGasProfile(['H2O','CH4'])  
+        params = cgp.fitting_parameters()
+        test_layers = 10
+
+        pres_prof = np.ones(test_layers)
+
+        cgp.initialize_profile(10,pres_prof,pres_prof,pres_prof)   
