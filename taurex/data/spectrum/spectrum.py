@@ -17,6 +17,10 @@ class BaseSpectrum(Logger):
         raise NotImplementedError
 
     @property
+    def rawData(self):
+        raise NotImplementedError
+
+    @property
     def wavelengthGrid(self):
         raise NotImplementedError
     
@@ -33,4 +37,7 @@ class BaseSpectrum(Logger):
         raise NotImplementedError
 
 
+    @property
+    def errorBar(self):
+        raise NotImplementedError
 
