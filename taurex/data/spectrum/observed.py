@@ -2,6 +2,23 @@ from .spectrum import BaseSpectrum
 import numpy as np
 
 class ObservedSpectrum(BaseSpectrum):
+    """Loads an observed spectrum from a file and computes bin
+    edges and bin widths
+
+    Parameters
+    -----------
+    filename: string
+        File name of observed spectrum. Spectrum must be 3-4 columns
+        1st column: 
+            wavelength
+        2nd column:
+            spectral data
+        3rd column:
+            error
+        4th(optional):
+            bin width
+
+    """
 
     def __init__(self,filename):
         super().__init__('observed_spectrum')
