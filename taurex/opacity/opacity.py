@@ -6,8 +6,4 @@ class Opacity(Logger):
     This is the base class for computing opactities
 
     """
-
-    
-    def path_integral(self):
-        pass
-
+    pass
