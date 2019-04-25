@@ -193,7 +193,7 @@ class AceGasProfileTest(unittest.TestCase):
 
     def test_compute_profile(self):
         from taurex.data.profiles.gasprofiles.acegasprofile import ACEGasProfile
-        cgp = ACEGasProfile(['H2O','CH4'])  
+        cgp = ACEGasProfile(['H2O','CH4'],spec_file='src/ACE/Data/composes.dat',therm_file='src/ACE/Data/NASA.therm')  
         params = cgp.fitting_parameters()
         test_layers = 10
 
