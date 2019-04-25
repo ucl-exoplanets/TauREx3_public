@@ -101,6 +101,21 @@ class ObservedSpectrumTest(unittest.TestCase):
 
         return np.array(obs_binedges)
 
+
+    def _taurex_extrap_bin(self):
+
+        obs_wlgrid = test_data_without_bin[:,0]
+        bin_edges =[]
+        bin_edges.append(obs_wlgrid[0]- (obs_wlgrid[1]-obs_wlgrid[0])/2.0) #first bin edge
+        for i in range(len(obs_wlgrid)-1):
+            bin_edges.append(obs_wlgrid[i]+(obs_wlgrid[i+1]-obs_wlgrid[i])/2.0)
+        bin_edges.append((obs_wlgrid[-1]-obs_wlgrid[-2])/2.0 + obs_wlgrid[-1]) #last bin edge
+        bin_widths = np.abs(np.diff(bin_edges))
+
+        return bin_widths,bin_edges
+
+
+
     @patch("numpy.loadtxt", return_value=np.ones(shape=(1000,4),dtype=np.float))
     def test_with_bin(self,mock_load):
         test_spec = ObservedSpectrum('TestFile')
@@ -146,3 +161,14 @@ class ObservedSpectrumTest(unittest.TestCase):
         np.testing.assert_array_equal(test_data_with_bin[:,3],test_spec.binWidths)
         np.testing.assert_array_equal(self._taurex_binwidths(),test_spec.binEdges)
 
+
+    @patch("numpy.loadtxt", return_value=test_data_without_bin)
+    def test_bin_edge_calc_without_bin(self,mock_load):
+        test_spec = ObservedSpectrum('TestFile')
+        mock_load.assert_called_with('TestFile')
+        
+        bin_widths,bin_edges = self._taurex_extrap_bin()
+
+        np.testing.assert_array_equal(test_data_without_bin,test_spec.rawData)
+        np.testing.assert_array_equal(bin_widths,test_spec.binWidths)
+        np.testing.assert_array_equal(bin_edges,test_spec.binEdges)
