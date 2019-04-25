@@ -48,8 +48,9 @@ class ObservedSpectrum(BaseSpectrum):
 
             bin_edges = np.zeros(shape=(len(self.binWidths)*2,))
 
-            bin_edges[0::2] = (obs_wl - obs_bw)/2
-            bin_edges[1::2] = (obs_wl + obs_bw)/2
+            bin_edges[0::2] = obs_wl - obs_bw/2
+            bin_edges[1::2] = obs_wl + obs_bw/2
+            #bin_edges[-1] = obs_wl[-1]-obs_bw[-1]/2.
 
             self._bin_edges = bin_edges[::-1]
         else:
