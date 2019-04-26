@@ -19,7 +19,7 @@ class PressureProfile(Fittable,Logger):
         raise NotImplementedError
 
 
-class TaurexPressureProfile(PressureProfile):
+class SimplePressureProfile(PressureProfile):
 
     def __init__(self,nlayers,atm_min_pressure,atm_max_pressure):
         super().__init__('pressure_profile',nlayers)
@@ -42,6 +42,8 @@ class TaurexPressureProfile(PressureProfile):
         self.pressure_profile = np.power(10, np.log10(self.pressure_profile_levels)[:-1]+
                                          np.diff(np.log10(self.pressure_profile_levels))/2.)
 
+
+    @fitparam(param_name='')
 
     @property
     def profile(self):
