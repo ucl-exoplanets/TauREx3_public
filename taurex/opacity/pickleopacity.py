@@ -1,5 +1,6 @@
 from .opacity import Opacity
 import pickle
+import numpy as np
 class PickleOpacity(Opacity):
     """
     This is the base class for computing opactities
@@ -31,7 +32,7 @@ class PickleOpacity(Opacity):
         self._wavenumber_grid = self._spec_dict['wno']
 
         self._temperature_grid = self._spec_dict['t']
-        self._pressure_grid = self._spec_dict['t']
+        self._pressure_grid = self._spec_dict['p']
         self._xsec_grid = self._spec_dict['xsecarr']
         self._molecule_name = self._spec_dict['name']
 
@@ -39,14 +40,37 @@ class PickleOpacity(Opacity):
     def wavenumberGrid(self):
         return self._wavenumber_grid
 
-    def find_closest_TP_index(self,temp,pressure):
-        t_idxmax = self._temperature_grid[self._temperature_grid > temp].argmin()
-        t_idxmin = self._temperature_grid[self._temperature_grid <= temp].argmax()
-        
-        p_idxmax = self._pressure_grid[self._pressure_grid > pressure].argmin()
-        p_idxmin = self._pressure_grid[self._pressure_grid <= pressure].argmax()
+    @property
+    def temperatureGrid(self):
+        return self._temperature_grid
+    
+    @property
+    def pressureGrid(self):
+        return self._pressure_grid
 
-        return t_idxmin,t_idxmax,p_idxmin,p_idxmax
+
+    def find_closest_TP_index(self,temp,pressure):
+        nearest_idx = np.abs(temp-self._temperature_grid).argmin() 
+        t_idx_min = -1
+        t_idx_max = -1
+        if self._temperature_grid[nearest_idx] > temp:
+            t_idx_max = nearest_idx
+            t_idx_min = nearest_idx-1
+        else:
+            t_idx_min = nearest_idx
+            t_idx_max = nearest_idx+1
+            
+        nearest_idx = np.abs(pressure-self._pressure_grid).argmin() 
+        p_idx_min = -1
+        p_idx_max = -1
+        if self._pressure_grid[nearest_idx] > pressure:
+            p_idx_max = nearest_idx
+            p_idx_min = nearest_idx-1
+        else:
+            p_idx_min = nearest_idx
+            p_idx_max = nearest_idx+1
+
+        return t_idx_min,t_idx_max,p_idx_min,p_idx_max
     
     def interp_bilinear_grid(self,T,P,t_idx_min,t_idx_max,p_idx_min,p_idx_max):
 
