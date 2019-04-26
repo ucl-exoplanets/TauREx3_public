@@ -22,7 +22,7 @@ class TemperatureProfileTest(unittest.TestCase):
 
     def test_unimplemeted(self):
         with self.assertRaises(NotImplementedError):
-            self.tp.profile()
+            self.tp.profile
 
 
 class IsoThermalTest(unittest.TestCase):
@@ -38,7 +38,7 @@ class IsoThermalTest(unittest.TestCase):
          
  
     def test_compute_profile(self):
-        self.tp.profile()
+        self.tp.profile
 
 
 class GuillotTest(unittest.TestCase):
@@ -67,7 +67,7 @@ class GuillotTest(unittest.TestCase):
          
  
     def test_compute_profile(self):
-        self.tp.profile()
+        self.tp.profile
 
 
 if __name__ == '__main__':

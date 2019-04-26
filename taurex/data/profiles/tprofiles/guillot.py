@@ -74,6 +74,7 @@ class Guillot2010(TemperatureProfile):
     def opticalRatio(self,value):
         self.alpha = value
 
+    @property
     def profile(self):
         """Returns a guillot temperature temperature profile
 

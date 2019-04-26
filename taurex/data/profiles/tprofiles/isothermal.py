@@ -28,7 +28,7 @@ class Isothermal(TemperatureProfile):
     def isoTemperature(self,value):
         self._iso_temp = value
 
-
+    @property
     def profile(self):
         """Returns an isothermal temperature profile
 

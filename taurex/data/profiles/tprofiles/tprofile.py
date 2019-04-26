@@ -23,6 +23,6 @@ class TemperatureProfile(Fittable,Logger):
         self.planet = planet
 
 
-
+    @property
     def profile(self):
         raise NotImplementedError
