@@ -26,7 +26,7 @@ class Planet(Fittable,Logger):
         self._distance = distance
 
     
-    @fitparam(param_name='planet_mass',param_latex='$M_p$',default_fit=False)
+    @fitparam(param_name='planet_mass',param_latex='$M_p$',default_fit=False,default_bounds=[0.5*MJUP,1.5*MJUP])
     def mass(self):
         return self._mass
     
@@ -43,13 +43,13 @@ class Planet(Fittable,Logger):
     def radius(self,value):
         self._radius = value
 
-    @fitparam(param_name='planet_ld_coeff',param_latex=None,default_fit=False)
-    def limbDarkeningCoeff(self):
-        return self._ld_coeff
+    # @fitparam(param_name='planet_ld_coeff',param_latex=None,default_fit=False)
+    # def limbDarkeningCoeff(self):
+    #     return self._ld_coeff
     
-    @limbDarkeningCoeff.setter
-    def limbDarkeningCoeff(self,value):
-        self._ld_coeff = value
+    # @limbDarkeningCoeff.setter
+    # def limbDarkeningCoeff(self,value):
+    #     self._ld_coeff = value
 
     @fitparam(param_name='planet_distance',param_latex='$D_{planet}$',default_fit=False,default_bounds=[1,2])
     def distance(self):
