@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
-from taurex.data.profiles.gasprofiles.gasprofile import GasProfile,TaurexGasProfile
-from taurex.data.profiles.gasprofiles import ComplexGasProfile,TwoPointGasProfile
+from taurex.data.profiles.gas.gasprofile import GasProfile,TaurexGasProfile
+from taurex.data.profiles.gas import ComplexGasProfile,TwoPointGasProfile
 
 class GasProfileTest(unittest.TestCase):
  
@@ -129,7 +129,7 @@ class ConstantProfileTest(unittest.TestCase):
 
     
     def test_init(self):
-        from taurex.data.profiles.gasprofiles import ConstantGasProfile
+        from taurex.data.profiles.gas import ConstantGasProfile
         cgp = ConstantGasProfile(['H2O','CH4'],[1e-4,1e-12])
     
         test_layers = 10
@@ -140,7 +140,7 @@ class ConstantProfileTest(unittest.TestCase):
     
 
     def test_default_constant(self):
-        from taurex.data.profiles.gasprofiles import ConstantGasProfile
+        from taurex.data.profiles.gas import ConstantGasProfile
         cgp = ConstantGasProfile()     
 
         test_layers = 10
@@ -192,7 +192,7 @@ class TwoPointGasProfileTest(unittest.TestCase):
 class AceGasProfileTest(unittest.TestCase):
 
     def test_compute_profile(self):
-        from taurex.data.profiles.gasprofiles.acegasprofile import ACEGasProfile
+        from taurex.data.profiles.gas.acegasprofile import ACEGasProfile
         cgp = ACEGasProfile(['H2O','CH4'],spec_file='src/ACE/Data/composes.dat',therm_file='src/ACE/Data/NASA.therm')  
         params = cgp.fitting_parameters()
         test_layers = 10

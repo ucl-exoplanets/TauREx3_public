@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from taurex.data.profiles.pressureprofiles.pressureprofile import PressureProfile,SimplePressureProfile
+from taurex.data.profiles.pressure.pressureprofile import PressureProfile,SimplePressureProfile
 
 
 class PressureProfileTest(unittest.TestCase):

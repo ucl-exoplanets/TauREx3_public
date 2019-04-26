@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from taurex.data.profiles.tprofiles.tprofile import TemperatureProfile
+from taurex.data.profiles.temperature.tprofile import TemperatureProfile
  
  
  
@@ -28,7 +28,7 @@ class TemperatureProfileTest(unittest.TestCase):
 class IsoThermalTest(unittest.TestCase):
  
     def setUp(self):
-        from taurex.data.profiles.tprofiles.isothermal import Isothermal
+        from taurex.data.profiles.temperature.isothermal import Isothermal
         self.tp = Isothermal(100.0)
         test_layers = 10
 
@@ -51,7 +51,7 @@ class GuillotTest(unittest.TestCase):
     tp_guillot_alpha = 0.005
 
     def setUp(self):
-        from taurex.data.profiles.tprofiles.guillot import Guillot2010
+        from taurex.data.profiles.temperature.guillot import Guillot2010
         from taurex.data.planet import Earth
         self.tp = Guillot2010(self.tp_guillot_T_irr,
                 self.tp_guillot_kappa_ir,
