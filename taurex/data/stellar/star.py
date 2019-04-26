@@ -16,5 +16,8 @@ class Star(Fittable,Logger):
     
 
     def __init__(self,name,temperature):
-        pass
-        
+        Logger.__init__(self,name)
+        Fittable.__init__(self)
+        self._temperature = temperature
+
+
