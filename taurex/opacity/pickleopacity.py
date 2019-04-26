@@ -1,7 +1,6 @@
-from taurex.log import Logger
+from .opacity import Opacity
 
-
-class Opacity(Logger):
+class PickleOpacity(Opacity):
     """
     This is the base class for computing opactities
 
