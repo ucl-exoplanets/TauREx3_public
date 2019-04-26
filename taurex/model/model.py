@@ -20,13 +20,28 @@ class ForwardModel(Logger):
 
 
 class SimpleForwardModel(ForwardModel):
+    """ A 'simple' base model in the sense that its just
+    a fairly standard single profiles model. Most like you'll
+    inherit from this to do your own fuckery
+    
+    Parameters
+    ----------
+    name: string
+        Name to use in logging
+    
+    planet: :obj:`Planet` or :obj:`None`
+        Planet object created or None to use a default
 
+    
+    """
     def __init__(self,name,
                             planet=None,
                             star=None,
                             pressure_profile=None,
                             temperature_profile=None,
-                            gas_profile=None
+                            gas_profile=None,
+                            opacities=None,
+                            atm_min_pressure=
                             ):
         super().__init__(name)
 
