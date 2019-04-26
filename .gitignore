@@ -107,3 +107,4 @@ venv.bak/
 taurex/external/bh_mie.c
 taurex/external/ace-f2pywrappers2.f90
 taurex/external/acemodule.c
+.vscode/ipch/22f44eeddc4f9f6d/mmap_address.bin
