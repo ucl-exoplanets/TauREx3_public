@@ -12,13 +12,8 @@ class ForwardModel(Logger):
     
 
 
-    def update_model(self,wn_grid):
-        """Recomputes the model for a specifc wngrid"""
-        raise NotImplementedError
-
-    
-    def model(self):
-        """Returns the currently computed model"""
+    def model(self,wn_grid):
+        """Computes the forward model for a wngrid"""
         raise NotImplementedError
 
     
@@ -41,3 +36,5 @@ class SimpleForwardModel(ForwardModel):
         self._temperature_profile = temperature_profile
         self._gas_profile = gas_profile
 
+
+    
