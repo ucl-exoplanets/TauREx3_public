@@ -6,4 +6,12 @@ class Opacity(Logger):
     This is the base class for computing opactities
 
     """
-    pass
+    
+    def __init__(self,name):
+        super().__init__(name)
+
+    
+
+
+    def opacity(self,temperature,pressure):
+        raise NotImplementedError
