@@ -182,6 +182,10 @@ class SimpleForwardModel(ForwardModel):
         return (self.pressureProfile)/(KBOLTZ*self.temperatureProfile)
 
 
+    @property
+    def nLayers(self):
+        return self._pressure_profile.nLayers
+
     def model_opacities(self,wngrid):
         ngases = len(self._gas_profile.activeGases)
 
@@ -204,7 +208,7 @@ class SimpleForwardModel(ForwardModel):
         self.initialize_profiles()
         self.model_opacities(wngrid)
 
-        return self.path_integral(wngrid)
+        return self.path_integral()
 
-    def path_integral(self,wngrid):
+    def path_integral(self):
         raise NotImplementedError

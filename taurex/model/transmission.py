@@ -44,10 +44,33 @@ class TransmissionModel(SimpleForwardModel):
                             atm_min_pressure,
                             atm_max_pressure)
     
-    def path_integral(self,wngrid):
+    def path_integral(self):
 
-
-        absorption = np.zeros_like(wngrid)
-
+        dz=np.gradient(self.altitude_profile)
+        tau = np.zeros(shape=(self.nLayers,len(wngrid),))
+        active_gas = self._gas_profile.activeGasMixProfile.transpose()
+        density_profile = self.densityProfile
+        total_layers = self.nLayers
+        for layer in range(total_layers):
+            
+            tau[layer] = np.sum(
+                          np.sum(self.sigma_xsec[layer:total_layers,:]* \
+                                 active_gas[layer:total_layers,:,None]* \
+                                 density_profile[layer:total_layers,None],axis=0),axis=2)
         
+        tau = np.exp(-tau)
+        integral = (self._planet.radius+self.altitude_profile[:,None])*(1.0-tau)*dz[:,None]
+        integral*=2.0
+        integral = np.sum(integral,axis=0)
+
+        absorption = ((self._planet.radius**2.0) + integral)/(self._star.radius**2)
+        return absorption,tau
+        
+
+
+
+
+
+
+
         
