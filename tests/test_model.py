@@ -3,7 +3,8 @@ import unittest
 import shutil, tempfile
 from os import path
 from unittest.mock import patch, mock_open
-from taurex.model.model import ForwardModel,SimpleForwardModel
+from taurex.model.model import ForwardModel
+from taurex.model.simplemodel import SimpleForwardModel
 import numpy as np
 import pickle
 
@@ -77,6 +78,11 @@ class ForwardModelTest(unittest.TestCase):
         with self.assertRaises(Exception):
             model.add_opacity(self.opacity_list[0])
 
+        model = ForwardModel('test')
+        model.load_opacities(None,self.test_dir,molecule_filter=['op_test0','op_test2'])
+        self.assertIn('op_test0',model.opacity_dict)    
+        self.assertIn('op_test2',model.opacity_dict)    
+        self.assertNotIn('op_test1',model.opacity_dict)    
     def test_load_cia(self):
 
 
