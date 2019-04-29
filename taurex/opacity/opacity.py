@@ -15,5 +15,18 @@ class Opacity(Logger):
     def moleculeName(self):
         raise NotImplementedError
 
+    @property
+    def wavenumberGrid(self):
+        raise NotImplementedError
+
+    @property
+    def temperatureGrid(self):
+        raise NotImplementedError
+    
+    @property
+    def pressureGrid(self):
+        raise NotImplementedError
+
+
     def opacity(self,temperature,pressure):
         raise NotImplementedError
