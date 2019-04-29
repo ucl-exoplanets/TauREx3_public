@@ -41,4 +41,12 @@ class PickleOpacityTest(unittest.TestCase):
         np.testing.assert_equal(pickle_test_data['xsecarr'],self.pop._xsec_grid)
 
 
-        
+    def test_opacity_calc(self):
+
+        t_list = [0,4,7]
+        p_list = [3,6,9]
+
+        for t_idx,p_idx in zip(t_list,p_list):
+            xsec = pickle_test_data['xsecarr'][p_idx,t_idx]
+            np.testing.assert_equal(xsec,self.pop.opacity(t_idx,p_idx))
+
