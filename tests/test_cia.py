@@ -33,10 +33,10 @@ class PickleOpacityTest(unittest.TestCase):
 
     def setUp(self):
         import pickle
-        data = pickle.dumps(pickle_test_data)
+        self.data = pickle.dumps(pickle_test_data)
         self.pop = None
-        with patch("builtins.open", mock_open(read_data=data)) as mock_file:
-            self.pop=PickleCIA('unittestfile','HeH2HF')
+        with patch("builtins.open", mock_open(read_data=self.data)) as mock_file:
+            self.pop=PickleCIA('/unittestfile/test.db','HeH2HF')
     
     def test_properties(self):
 
@@ -45,7 +45,13 @@ class PickleOpacityTest(unittest.TestCase):
         np.testing.assert_equal(pickle_test_data['t'],self.pop.temperatureGrid)
         np.testing.assert_equal(pickle_test_data['wno'],self.pop.wavenumberGrid)
         np.testing.assert_equal(pickle_test_data['xsecarr'],self.pop._xsec_grid)
-    
+
+
+    def test_pathname_naming(self):
+        with patch("builtins.open", mock_open(read_data=self.data)) as mock_file:
+            pop=PickleCIA('/unittestfile/HeH2HF.db')
+            mock_file.assert_called_once_with('/unittestfile/HeH2HF.db','rb')
+            self.assertEqual(pop.pairName,'HeH2HF')
 
     def test_cia_calc(self):
 

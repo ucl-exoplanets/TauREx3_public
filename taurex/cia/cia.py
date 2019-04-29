@@ -17,5 +17,13 @@ class CIA(Logger):
     def pairName(self):
         return self._pair_name
 
+    @property
+    def wavenumberGrid(self):
+        raise NotImplementedError
+
+    @property
+    def temperatureGrid(self):
+        raise NotImplementedError
+
     def cia(self,temperature):
         raise NotImplementedError
