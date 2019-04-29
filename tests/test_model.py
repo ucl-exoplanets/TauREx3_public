@@ -14,7 +14,7 @@ class ForwardModelTest(unittest.TestCase):
         # Create a temporary directory
         self.test_dir = tempfile.mkdtemp()
         self.gen_opacities(10)
-
+        self.gen_cia(10)
     
 
     def gen_opacities(self,num_opacties):
@@ -31,7 +31,19 @@ class ForwardModelTest(unittest.TestCase):
                 pickle.dump(pickle_test_data,f)
             self.opacity_list.append(PickleOpacity(path.join(self.test_dir, '{}.pickle'.format(op_name))))
 
-    
+
+    def gen_cia(self,num_cia):
+        from taurex.cia import PickleCIA
+        self.cia_names = ['cia_test{}'.format(x) for x in range(num_cia)]
+        self.cia_list = []
+        for op_name in self.cia_names:
+            pickle_test_data ={'t': np.arange(0,20),
+                'wno': np.linspace(0,10000,1000),
+                'xsecarr': np.random.rand(20,1000)}
+            with open(path.join(self.test_dir, '{}.db'.format(op_name)), 'wb') as f:
+                pickle.dump(pickle_test_data,f)
+            self.cia_list.append(PickleCIA(path.join(self.test_dir, '{}.db'.format(op_name)),op_name))
+
 
 
 
@@ -59,6 +71,37 @@ class ForwardModelTest(unittest.TestCase):
         model.load_opacities(None,self.test_dir)
         for op_name in self.opacity_names:
             self.assertIn(op_name,model.opacity_dict)    
+        
+        self.assertNotIn('cia_test0',model.opacity_dict)
+
+        with self.assertRaises(Exception):
+            model.add_opacity(self.opacity_list[0])
+
+    def test_load_cia(self):
+
+
+        #Test single load
+        model = ForwardModel('test')
+        model.load_cia(self.cia_list[0],None)
+        self.assertIn('cia_test0',model.cia_dict)
+
+        #Test list_load
+        model = ForwardModel('test')
+        model.load_cia(self.cia_list,None)
+        for op_name in self.cia_names:
+            self.assertIn(op_name,model.cia_dict)    
+
+        #Test path_load
+        model = ForwardModel('test')
+        model.load_cia(None,self.test_dir)
+        for op_name in self.cia_names:
+            self.assertIn(op_name,model.cia_dict)    
+        
+        self.assertNotIn('op_test0',model.cia_dict)
+
+        with self.assertRaises(Exception):
+            model.add_cia(self.cia_list[0])
+
 
     def tearDown(self):
         shutil.rmtree(self.test_dir)

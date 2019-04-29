@@ -80,18 +80,18 @@ class ForwardModel(Logger):
             op = PickleCIA(files,pairname)
             self.add_cia(op)
 
-    def load_cia(self,cias,cia_path):
+    def load_cia(self,cia_xsec,cia_path):
         from taurex.cia import CIA
-        if cias is not None:
-            if isinstance(cias,(list,)):
+        if cia_xsec is not None:
+            if isinstance(cia_xsec,(list,)):
                 self.debug('cia passed is list')
-                for cia in cias:
-                    self.add_cia(cia)
-            elif isinstance(cias,CIA):
-                self.add_cia(cia)
+                for xsec in cia_xsec:
+                    self.add_cia(xsec)
+            elif isinstance(cia_xsec,CIA):
+                self.add_cia(cia_xsec)
             else:
                 self.error('Unknown type {} passed into cia, should be a list, single \
-                     cia or None if reading a path'.format(type(cia)))
+                     cia or None if reading a path'.format(type(xsec)))
                 raise Exception('Unknown type passed into cia')
         elif cia_path is not None:
 
