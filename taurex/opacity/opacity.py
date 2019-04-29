@@ -1,5 +1,5 @@
 from taurex.log import Logger
-
+import numpy as np
 
 class Opacity(Logger):
     """
@@ -10,6 +10,10 @@ class Opacity(Logger):
     def __init__(self,name):
         super().__init__(name)
 
+
+    @property
+    def resolution(self):
+        raise NotImplementedError
     
     @property
     def moleculeName(self):
@@ -28,5 +32,9 @@ class Opacity(Logger):
         raise NotImplementedError
 
 
-    def opacity(self,temperature,pressure):
+    def compute_opacity(self,temperature,pressure):
         raise NotImplementedError
+
+    def opacity(self,wngrid,temperature,pressure):
+        orig=self.compute_opacity(temperature,pressure)
+        return np.interp(wngrid,self.wavenumberGrid,orig)

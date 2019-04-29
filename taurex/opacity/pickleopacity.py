@@ -13,8 +13,10 @@ class PickleOpacity(Opacity):
         self._filename = filename
         self._molecule_name = None
         self._spec_dict = None
+        self._resolution = None
         self._load_pickle_file(filename)
 
+        
         
     @property
     def moleculeName(self):
@@ -34,6 +36,7 @@ class PickleOpacity(Opacity):
         self._temperature_grid = self._spec_dict['t']
         self._pressure_grid = self._spec_dict['p']
         self._xsec_grid = self._spec_dict['xsecarr']
+        self._resolution = np.average(np.diff(self._wavenumber_grid))
         self._molecule_name = self._spec_dict['name']
 
     @property
@@ -48,6 +51,9 @@ class PickleOpacity(Opacity):
     def pressureGrid(self):
         return self._pressure_grid
 
+    @property
+    def resolution(self):
+        return self._resolution
 
     def find_closest_TP_index(self,temp,pressure):
         nearest_idx = np.abs(temp-self._temperature_grid).argmin() 
@@ -102,6 +108,6 @@ class PickleOpacity(Opacity):
 
 
 
-    def opacity(self,temperature,pressure):
+    def compute_opacity(self,temperature,pressure):
         return self.interp_bilinear_grid(temperature,pressure
                     ,*self.find_closest_TP_index(temperature,pressure))
