@@ -5,68 +5,15 @@ import math
 class ForwardModel(Logger):
     """A base class for producing forward models"""
 
-    def __init__(self,name):
-        super().__init__(name)
-
-    
-    
-
-
-    def model(self,wngrid):
-        """Computes the forward model for a wngrid"""
-        raise NotImplementedError
-
-    
-
-
-class SimpleForwardModel(ForwardModel):
-    """ A 'simple' base model in the sense that its just
-    a fairly standard single profiles model. Most like you'll
-    inherit from this to do your own fuckery
-    
-    Parameters
-    ----------
-    name: string
-        Name to use in logging
-    
-    planet: :obj:`Planet` or :obj:`None`
-        Planet object created or None to use a default
-
-    
-    """
-    def __init__(self,name,
-                            planet=None,
-                            star=None,
-                            pressure_profile=None,
-                            temperature_profile=None,
-                            gas_profile=None,
-                            opacities=None,
+    def __init__(self,name,opacities=None,
                             cia=None,
                             opacity_path=None,
-                            cia_path=None,
-                            nlayers=100,
-                            atm_min_pressure=1e-4,
-                            atm_max_pressure=1e6,
-
-                            ):
+                            cia_path=None,):
         super().__init__(name)
-
-        self._planet = planet
-        self._star=star
-        self._pressure_profile = pressure_profile
-        self._temperature_profile = temperature_profile
-        self._gas_profile = gas_profile
         self.opacity_dict = {}
         self.cia_dict = {}
-        self.setup_defaults(nlayers,atm_min_pressure,atm_max_pressure)
-    
-    def setup_defaults(self,nlayers,atm_min_pressure,atm_max_pressure):
-        if self._pressure_profile is None:
-            from taurex.data.profiles.pressure import SimplePressureProfile
-            self.info('No pressure profile defined, using simple pressure profile with')
-            self.info('parameters nlayers: {}, atm_pressure_range=({},{})'.format(nlayers,atm_min_pressure,atm_max_pressure))
-            self._pressure_profile = SimplePressureProfile()
-
+        self.load_opacities(opacities,opacity_path)
+        self.load_cia(cia,cia_path)    
 
     def add_opacity(self,opacity):
         self.info('Loading opacity {} into model'.format(opacity.moleculeName))
@@ -86,9 +33,6 @@ class SimpleForwardModel(ForwardModel):
         for files in file_list:
             op = PickleOpacity(files)
             self.add_opacity(op)
-        
-            
-        
 
 
 
@@ -135,11 +79,6 @@ class SimpleForwardModel(ForwardModel):
             pairname=Path(files).stem
             op = PickleCIA(files,pairname)
             self.add_cia(op)
-        
-            
-        
-
-
 
     def load_cia(self,cias,cia_path):
         from taurex.cia import CIA
@@ -160,7 +99,66 @@ class SimpleForwardModel(ForwardModel):
                 self.load_cia_from_path(cia_path)
             elif isinstance(cia_path,(list,)):
                 for path in cia_path:
-                    self.load_cia_from_path(path)     
-                    
+                    self.load_cia_from_path(path)        
+    
+
+
+    def model(self,wngrid):
+        """Computes the forward model for a wngrid"""
+        raise NotImplementedError
+
+    
+
+
+class SimpleForwardModel(ForwardModel):
+    """ A 'simple' base model in the sense that its just
+    a fairly standard single profiles model. Most like you'll
+    inherit from this to do your own fuckery
+    
+    Parameters
+    ----------
+    name: string
+        Name to use in logging
+    
+    planet: :obj:`Planet` or :obj:`None`
+        Planet object created or None to use a default
+
+    
+    """
+    def __init__(self,name,
+                            planet=None,
+                            star=None,
+                            pressure_profile=None,
+                            temperature_profile=None,
+                            gas_profile=None,
+                            opacities=None,
+                            cia=None,
+                            opacity_path=None,
+                            cia_path=None,
+                            nlayers=100,
+                            atm_min_pressure=1e-4,
+                            atm_max_pressure=1e6,
+
+                            ):
+        super().__init__(name,opacities,cia,opacity_path,cia_path)
+
+        self._planet = planet
+        self._star=star
+        self._pressure_profile = pressure_profile
+        self._temperature_profile = temperature_profile
+        self._gas_profile = gas_profile
+
+        self.setup_defaults(nlayers,atm_min_pressure,atm_max_pressure)
+
+    def setup_defaults(self,nlayers,atm_min_pressure,atm_max_pressure):
+        if self._pressure_profile is None:
+            from taurex.data.profiles.pressure import SimplePressureProfile
+            self.info('No pressure profile defined, using simple pressure profile with')
+            self.info('parameters nlayers: {}, atm_pressure_range=({},{})'.format(nlayers,atm_min_pressure,atm_max_pressure))
+            self._pressure_profile = SimplePressureProfile()
+
+ 
+    
+
 
 
