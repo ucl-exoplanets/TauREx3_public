@@ -11,7 +11,9 @@ class Opacity(Logger):
         super().__init__(name)
 
     
-
+    @property
+    def moleculeName(self):
+        raise NotImplementedError
 
     def opacity(self,temperature,pressure):
         raise NotImplementedError
