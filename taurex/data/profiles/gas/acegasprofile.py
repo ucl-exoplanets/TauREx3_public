@@ -68,7 +68,7 @@ class ACEGasProfile(GasProfile):
 
 
     def compute_active_gas_profile(self):
-        self._ace_profile = md_ace(self._specfile,self._thermfile,self.altitude_profile,self.pressure_profile,self.temperature_profile,
+        self._ace_profile = md_ace(self._specfile,self._thermfile,self.altitude_profile/1000.0,self.pressure_profile/1.e5,self.temperature_profile,
             self.He_abund_dex,self.C_abund_dex,self.O_abund_dex,self.N_abund_dex)
         
         self.active_mixratio_profile= self._ace_profile[self._active_mask,:]
