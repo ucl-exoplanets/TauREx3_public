@@ -85,6 +85,14 @@ class GasProfile(Fittable,Logger):
         return self.inactive_mixratio_profile
 
     @property
+    def activeGases(self):
+        return self.active_gases
+    
+    @property
+    def inActiveGases(self):
+        return self.inactive_gases
+
+    @property
     def muProfile(self):
         return self.mu_profile
 
