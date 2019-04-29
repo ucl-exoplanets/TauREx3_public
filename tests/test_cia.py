@@ -28,7 +28,7 @@ class CIATest(unittest.TestCase):
             op.cia(100)
         self.assertEqual(op.pairName,'HEH2HF')
 
-class PickleOpacityTest(unittest.TestCase):
+class PickleCIATest(unittest.TestCase):
     
 
     def setUp(self):
