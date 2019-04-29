@@ -12,7 +12,7 @@ class ForwardModel(Logger):
     
 
 
-    def model(self,wn_grid):
+    def model(self):
         """Computes the forward model for a wngrid"""
         raise NotImplementedError
 
@@ -41,7 +41,8 @@ class SimpleForwardModel(ForwardModel):
                             temperature_profile=None,
                             gas_profile=None,
                             opacities=None,
-                            atm_min_pressure=
+                            atm_min_pressure=1e-4,
+                            atm_max_pressure=1e6
                             ):
         super().__init__(name)
 
@@ -51,5 +52,8 @@ class SimpleForwardModel(ForwardModel):
         self._temperature_profile = temperature_profile
         self._gas_profile = gas_profile
 
-
+    
+    def setup_defaults(self):
+        if self._planet is None:
+            pass
     
