@@ -12,6 +12,9 @@ class ForwardModel(Logger):
         super().__init__(name)
         self.opacity_dict = {}
         self.cia_dict = {}
+        
+        self.fitting_parameters = {}
+
         self.load_opacities(opacities,opacity_path)
         self.load_cia(cia,cia_path)    
 
@@ -108,7 +111,9 @@ class ForwardModel(Logger):
         raise NotImplementedError
 
     
-
+    @property
+    def fittingParameters(self):
+        return self.fitting_parameters
 
 class SimpleForwardModel(ForwardModel):
     """ A 'simple' base model in the sense that its just
@@ -148,6 +153,9 @@ class SimpleForwardModel(ForwardModel):
         self._temperature_profile = temperature_profile
         self._gas_profile = gas_profile
 
+        self.altitude_profile=None
+        self.scaleheight_profile=None
+        self.gravity_profile=None
         self.setup_defaults(nlayers,atm_min_pressure,atm_max_pressure)
 
     def setup_defaults(self,nlayers,atm_min_pressure,atm_max_pressure):
@@ -156,9 +164,33 @@ class SimpleForwardModel(ForwardModel):
             self.info('No pressure profile defined, using simple pressure profile with')
             self.info('parameters nlayers: {}, atm_pressure_range=({},{})'.format(nlayers,atm_min_pressure,atm_max_pressure))
             self._pressure_profile = SimplePressureProfile()
+        if self._planet is None:
+            from taurex.data import Planet
+            self._planet = Planet()
 
  
+    def initialize_profiles(self):
+        self.info('Computing pressure profile')
+        
+        self._pressure_profile.compute_pressure_profile()
+        
+        self._temperature_profile.initialize_profile(self._planet,
+                    self._pressure_profile.nLayers,
+                    self._pressure_profile.profile)
     
+    @property
+    def pressureProfile(self):
+        return self._pressure_profile.profile
+
+    @property
+    def temperatureProfile(self):
+        return self._temperature_profile.profile
+
+    @property
+    def densityProfile(self):
+        from taurex.constants import KBOLTZ
+        return (self.pressureProfile)/(KBOLTZ*self.temperatureProfile)
+
 
 
 
