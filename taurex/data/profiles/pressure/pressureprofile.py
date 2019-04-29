@@ -11,6 +11,14 @@ class PressureProfile(Fittable,Logger):
         self._nlayers = nlayers
         self._nlevels = self._nlayers + 1
 
+    @property
+    def nLayers(self):
+        return self._nlayers
+    
+    @property
+    def nLevels(self):
+        return self._nlayers+1
+
     def compute_pressure_profile(self):
         raise NotImplementedError
 
