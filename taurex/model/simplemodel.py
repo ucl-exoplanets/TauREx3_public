@@ -191,7 +191,7 @@ class SimpleForwardModel(ForwardModel):
 
     def model_opacities(self,wngrid):
         ngases = len(self._gas_profile.activeGases)
-
+        
         self.sigma_xsec = np.zeros(self._pressure_profile.nLayers,ngases,
                 len(wngrid))
         
