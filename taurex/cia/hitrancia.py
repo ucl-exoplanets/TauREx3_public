@@ -17,10 +17,17 @@ class HitranCiaGrid(object):
 
     def add_temperature(self,T,sigma):
         self.Tsigma.append((T,sigma))
+    
+    @property
+    def temperature(self):
+        return [t for t,s in self.Tsigma]
 
+    @property
+    def sigma(self):
+        return  [s for t,s in self.Tsigma]
 
     def find_closest_temperature_index(self,temperature):
-        temp_grid = np.array(self.T)
+        temp_grid = np.array(self.temperature)
         nearest_idx = np.abs(temperature-temp_grid ).argmin()
         t_idx_min = -1
         t_idx_max = -1
@@ -34,7 +41,7 @@ class HitranCiaGrid(object):
     
 
     def interp_linear_grid(self,T,t_idx_min,t_idx_max):
-        temp_grid = np.array(self.T)
+        temp_grid = np.array(self.temperature)
         Tmax = temp_grid[t_idx_max]
         Tmin = temp_grid[t_idx_min]
         fx0=self.sigma[t_idx_min]
@@ -42,7 +49,21 @@ class HitranCiaGrid(object):
 
         return fx0 + (fx1-fx0)*(T-Tmin)/(Tmax-Tmin)  
 
+    def sortTempSigma(self):
+        import operator
+        self.Tsigma.sort(key = operator.itemgetter(0))
 
+    def fill_temperature(self,temperatures):
+        
+        for t in temperatures:
+            if t in self.temperature:
+                continue
+            #print(t,self.temperature)
+            if t < min(self.temperature) or t > max(self.temperature):
+                self.add_temperature(t,np.zeros_like(self.wn))
+            else:
+                self.add_temperature(t,self.interp_linear_grid(t,*self.find_closest_temperature_index(t)))
+            self.sortTempSigma()
 
 
 class HitranCIA(CIA):
@@ -103,10 +124,39 @@ class HitranCIA(CIA):
                 wn_obj.wn = np.array(wn_temp)
             #self._temperature_grid = np.array(temp_list)
             #self._xsec_grid = np.array(sigma_list)
+        temp_list.sort()
+        self._temperature_grid = np.array(temp_list)
+        self.fill_gaps(temp_list)
+        self.compute_final_grid()
+    def fill_gaps(self,temperature):
         
-        self.fill_gaps()
-    def fill_gaps(self):
-        pass
+        for wn_obj in self._wn_dict.values():
+            wn_obj.sortTempSigma()
+            wn_obj.fill_temperature(temperature)
+
+
+    def compute_final_grid(self):
+        _wngrid = []
+        for w in self._wn_dict.values():
+            _wngrid.append(w.wn)
+        self._wavenumber_grid = np.concatenate(_wngrid)
+        sorted_idx = np.argsort(self._wavenumber_grid )
+        self._wavenumber_grid = self._wavenumber_grid[sorted_idx]
+        _sigma_array = []
+
+
+
+        for idx,t in enumerate(self._temperature_grid):
+            _temp_sigma=[]
+            for w in self._wn_dict.values():
+                _temp_sigma.append(w.Tsigma[idx][1])
+            
+
+
+            _sigma_array.append(np.concatenate(_temp_sigma)[sorted_idx])
+
+        self._xsec_grid = np.array(_sigma_array)
+
 
 
     def find_closest_temperature_index(self,temperature):
