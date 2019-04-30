@@ -37,8 +37,13 @@ class HitranCIA(CIA):
                 #Clear the temporary list
                 sigma_temp = []
                 wn_temp = []
-                for line in range(total_points):
-                    _wn,_sigma = f.readline().split()
+                for x in range(total_points):
+                    line = f.readline()
+                    #print(line)
+                    splits = line.split()
+
+                    _wn = splits[0]
+                    _sigma=splits[1]
                     wn_temp.append(float(_wn))
                     sigma_temp.append(float(_sigma))
                 
