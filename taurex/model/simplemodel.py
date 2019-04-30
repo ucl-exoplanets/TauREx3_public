@@ -91,7 +91,10 @@ class SimpleForwardModel(ForwardModel):
             self.warning('No gas profile set, using constant profile with H2O and CH4')
             self._gas_profile = ConstantGasProfile()
 
- 
+        if self._star is None:
+            from taurex.data.stellar import Star
+            self.warning('No star, using the Sun')
+            self._star = Star()
     def initialize_profiles(self):
         self.info('Computing pressure profile')
         
@@ -200,14 +203,24 @@ class SimpleForwardModel(ForwardModel):
 
         return self.sigma_xsec
 
-        
+    
+    def model_cia(self,wngrid):
+        total_cia = len(self.cia_dict)
+        if total_cia == 0:
+            return
+        self.sigma_cia = np.zeros(self._pressure_profile.nLayers,total_cia,
+                len(wngrid))
+
+        for cia_idx,cia in enumerate(self.cia_dict.values()):
+            for idx_layer,temperature in enumerate(self.temperatureProfile):
+                self.sigma_cia[idx_layer,cia_idx] = cia.cia(temperature,wngrid)
 
 
 
     def model(self,wngrid):
         self.initialize_profiles()
         self.model_opacities(wngrid)
-
+        self.model_cia(wngrid)
         return self.path_integral()
 
     def path_integral(self):
