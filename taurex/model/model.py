@@ -93,6 +93,8 @@ class ForwardModel(Logger):
         from pathlib import Path
         import os
         from taurex.cia import PickleCIA
+
+        #Find .db files
         glob_path = os.path.join(path,'*.db')
 
         file_list = glob(glob_path)
@@ -102,13 +104,24 @@ class ForwardModel(Logger):
             op = PickleCIA(files,pairname)
             self.add_cia(op)
 
+        #Find .cia files
+        glob_path = os.path.join(path,'*.cia')
+
+        file_list = glob(glob_path)
+        self.debug('File list {}'.format(file_list))
+        for files in file_list:
+            #from taurex.cia import HitranCIA
+            #op = HitranCIA(files)
+            #self.add_cia(op)       
+            pass
+
     def load_cia(self,cia_xsec=None,cia_path=None):
         from taurex.cia import CIA
         if cia_xsec is None:
             cia_xsec = self._cia
         if cia_path is None:
             cia_path = self._cia_path
-
+        
 
         if cia_xsec is not None:
             if isinstance(cia_xsec,(list,)):
