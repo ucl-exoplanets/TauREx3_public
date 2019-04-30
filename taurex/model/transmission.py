@@ -47,10 +47,14 @@ class TransmissionModel(SimpleForwardModel):
     def path_integral(self):
 
         dz=np.gradient(self.altitude_profile)
-        tau = np.zeros(shape=(self.nLayers,len(wngrid),))
+        wngrid_size=self.sigma_xsec.shape[-1]
+        tau = np.zeros(shape=(self.nLayers,len(wngrid_size),))
+
         active_gas = self._gas_profile.activeGasMixProfile.transpose()
         density_profile = self.densityProfile
+
         total_layers = self.nLayers
+        
         for layer in range(total_layers):
             
             tau[layer] = np.sum(

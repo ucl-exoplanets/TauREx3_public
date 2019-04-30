@@ -195,7 +195,7 @@ class SimpleForwardModel(ForwardModel):
         for idx_gas,gas in enumerate(self._gas_profile.activeGases):
             self.info('Recomputing active gas {} opacity'.format(gas))
             for idx_layer,temperature,pressure in enumerate(zip(self.temperatureProfile,self.pressureProfile)):
-                self.sigma_xsec[idx_layer,idx_gas] = self.opacity_dict[gas].opacity(wngrid,temperature,pressure)
+                self.sigma_xsec[idx_layer,idx_gas] = self.opacity_dict[gas].opacity(temperature,pressure,wngrid)
 
 
         return self.sigma_xsec

@@ -35,6 +35,9 @@ class Opacity(Logger):
     def compute_opacity(self,temperature,pressure):
         raise NotImplementedError
 
-    def opacity(self,wngrid,temperature,pressure):
+    def opacity(self,temperature,pressure,wngrid=None):
         orig=self.compute_opacity(temperature,pressure)
-        return np.interp(wngrid,self.wavenumberGrid,orig)
+        if wngrid is None:
+            return orig
+        else:
+            return np.interp(wngrid,self.wavenumberGrid,orig)
