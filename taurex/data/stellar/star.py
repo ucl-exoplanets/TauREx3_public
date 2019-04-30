@@ -1,6 +1,6 @@
 from taurex.log import Logger
-from taurex.constants import G,RJUP,MJUP
-from .fittable import fitparam,Fittable
+from taurex.constants import G,RJUP,MJUP,RSOL
+from taurex.data.fittable import fitparam,Fittable
 import numpy as np
 
 class Star(Fittable,Logger):
@@ -15,9 +15,19 @@ class Star(Fittable,Logger):
     """
     
 
-    def __init__(self,name,temperature):
-        Logger.__init__(self,name)
+    def __init__(self,temperature=5000,radius=RSOL):
+        Logger.__init__(self,'Star')
         Fittable.__init__(self)
         self._temperature = temperature
+        self._radius = radius
+    
+
+    @property
+    def radius(self):
+        return self._radius
+    
+    @property
+    def temperature(self):
+        return self._temperature
 
 
