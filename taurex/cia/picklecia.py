@@ -63,7 +63,7 @@ class PickleCIA(CIA):
         return fx0 + (fx1-fx0)*(T-Tmin)/(Tmax-Tmin)
 
 
-    def cia(self,temperature):
+    def compute_cia(self,temperature):
         return self.interp_linear_grid(temperature,*self.find_closest_temperature_index(temperature))
 
     
