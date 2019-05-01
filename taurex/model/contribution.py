@@ -16,9 +16,12 @@ class Contribution(Fittable,Logger):
     def contribute(self,model,layer):
         raise NotImplementedError
 
-    def build(self):
+    def build(self,model):
         raise NotImplementedError
     
     def prepare(self,model):
         raise NotImplementedError
-        
+
+    @property
+    def totalContribution(self):
+        raise NotImplementedError
