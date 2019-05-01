@@ -1,5 +1,5 @@
 from taurex.log import Logger
-
+import numpy as np
 
 class CIA(Logger):
     """
@@ -17,5 +17,22 @@ class CIA(Logger):
     def pairName(self):
         return self._pair_name
 
-    def cia(self,temperature):
+    def compute_cia(self,temperature):
         raise NotImplementedError
+
+
+    @property
+    def wavenumberGrid(self):
+        raise NotImplementedError
+
+    @property
+    def temperatureGrid(self):
+        raise NotImplementedError
+
+
+    def cia(self,temperature,wngrid=None):
+        orig = self.compute_cia(temperature)
+        if wngrid is None:
+            return orig
+        else:
+            return np.interp(wngrid,self.wavenumberGrid,orig)
