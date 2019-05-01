@@ -1,6 +1,7 @@
 from .opacity import Opacity
 import pickle
 import numpy as np
+import pathlib
 class PickleOpacity(Opacity):
     """
     This is the base class for computing opactities
@@ -8,7 +9,7 @@ class PickleOpacity(Opacity):
     """
     
     def __init__(self,filename):
-        super().__init__('PickleOpacity')
+        super().__init__('PickleOpacity:{}'.format(pathlib.Path(filename).stem[0:10]))
 
         self._filename = filename
         self._molecule_name = None
@@ -38,6 +39,10 @@ class PickleOpacity(Opacity):
         self._xsec_grid = self._spec_dict['xsecarr']
         self._resolution = np.average(np.diff(self._wavenumber_grid))
         self._molecule_name = self._spec_dict['name']
+        self.clean_molecule_name()
+    def clean_molecule_name(self):
+        splits = self.moleculeName.split('_')
+        self._molecule_name = splits[0]
 
     @property
     def wavenumberGrid(self):
@@ -76,6 +81,12 @@ class PickleOpacity(Opacity):
             p_idx_min = nearest_idx
             p_idx_max = nearest_idx+1
 
+        p_idx_min = max(0,p_idx_min)
+        p_idx_max = min(len(self._pressure_grid)-1,p_idx_max)
+        t_idx_min = max(0,t_idx_min)
+        t_idx_max = min(len(self._temperature_grid)-1,t_idx_max)
+
+
         return t_idx_min,t_idx_max,p_idx_min,p_idx_max
     
     def interp_bilinear_grid(self,T,P,t_idx_min,t_idx_max,p_idx_min,p_idx_max):
@@ -93,8 +104,16 @@ class PickleOpacity(Opacity):
         Tmin = self._temperature_grid[t_idx_min]
         Pmax = self._pressure_grid[p_idx_max]
         Pmin = self._pressure_grid[p_idx_min]
+
+        diff = ((Tmax-Tmin)*(Pmax-Pmin))
+        if diff  == 0:
+            return np.zeros_like(self._xsec_grid[0,0])
         factor = 1.0/((Tmax-Tmin)*(Pmax-Pmin))
-    
+
+        self.debug('FACTOR {}'.format(factor))
+
+
+
         return factor*(q_11*(Pmax-P)*(Tmax-T) + q_21*(P-Pmin)*(Tmax-T) + q_12*(Pmax-P)*(T-Tmin) + q_22*(P-Pmin)*(T-Tmin))
 
 

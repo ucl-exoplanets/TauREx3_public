@@ -1,7 +1,7 @@
 from taurex.log import Logger
 import numpy as np
 import math
-
+import pathlib
 class ForwardModel(Logger):
     """A base class for producing forward models"""
 
@@ -23,7 +23,11 @@ class ForwardModel(Logger):
 
         self.fitting_parameters = {}
 
-  
+    def __getitem__(self,key):
+        return self.fitting_parameters[key][2]()
+
+    def __setitem__(self,key,value):
+        return self.fitting_parameters[key][3](value) 
 
     def add_opacity(self,opacity,molecule_filter=None):
         self.info('Reading opacity {}'.format(opacity.moleculeName))
@@ -47,6 +51,10 @@ class ForwardModel(Logger):
         file_list = glob(glob_path)
         self.debug('File list {}'.format(file_list))
         for files in file_list:
+            splits = pathlib.Path(files).stem.split('.')
+            if molecule_filter is not None:
+                if not splits[0] in molecule_filter:
+                    continue
             op = PickleOpacity(files)
             self.add_opacity(op,molecule_filter=molecule_filter)
 

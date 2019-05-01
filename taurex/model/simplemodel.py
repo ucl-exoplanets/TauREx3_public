@@ -134,8 +134,11 @@ class SimpleForwardModel(ForwardModel):
     def build(self):
         self.info('Building model........')
         self._compute_inital_mu()
+        self.info('Collecting paramters')
         self.collect_fitting_parameters()
+        self.info('Loading xsections')
         self.setup_opacities_and_sigmas()
+        self.info('Setting up profiles')
         self.initialize_profiles()
         self.info('.....done!!!')
 
@@ -186,18 +189,25 @@ class SimpleForwardModel(ForwardModel):
 
 
     @property
+    def altitudeProfile(self):
+        return self.altitude_profile
+
+    @property
     def nLayers(self):
         return self._pressure_profile.nLayers
 
     def model_opacities(self,wngrid):
         ngases = len(self._gas_profile.activeGases)
-        
-        self.sigma_xsec = np.zeros(self._pressure_profile.nLayers,ngases,
-                len(wngrid))
+        self.debug('Creating crossection for wngrid {} with ngases {} and nlayers {}'.format(wngrid,ngases,self.nLayers))
+
+        self.sigma_xsec = np.zeros(shape=(self._pressure_profile.nLayers,ngases,wngrid.shape[0]))
         
         for idx_gas,gas in enumerate(self._gas_profile.activeGases):
             self.info('Recomputing active gas {} opacity'.format(gas))
-            for idx_layer,temperature,pressure in enumerate(zip(self.temperatureProfile,self.pressureProfile)):
+            for idx_layer,tp in enumerate(zip(self.temperatureProfile,self.pressureProfile)):
+                self.debug('Got index,tp {} {}'.format(idx_layer,tp))
+                temperature,pressure = tp
+                pressure/=1e5
                 self.sigma_xsec[idx_layer,idx_gas] = self.opacity_dict[gas].opacity(temperature,pressure,wngrid)
 
 
@@ -220,7 +230,7 @@ class SimpleForwardModel(ForwardModel):
     def model(self,wngrid):
         self.initialize_profiles()
         self.model_opacities(wngrid)
-        self.model_cia(wngrid)
+        #self.model_cia(wngrid)
         return self.path_integral()
 
     def path_integral(self):

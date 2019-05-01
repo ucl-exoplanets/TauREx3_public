@@ -17,7 +17,7 @@ class Planet(Fittable,Logger):
 
     """
     
-    def __init__(self,mass=RJUP,radius=MJUP,ld_coeff=1.0,distance=1):
+    def __init__(self,mass=MJUP,radius=RJUP,ld_coeff=1.0,distance=1):
         Logger.__init__(self,'Planet')
         Fittable.__init__(self)
         self._mass = mass
