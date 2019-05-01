@@ -80,9 +80,28 @@ class GasProfile(Fittable,Logger):
     def activeGasMixProfile(self):
         return self.active_mixratio_profile
 
+
+    def get_gas_mix_profile(self,gas_name):
+        if gas_name in self.activeGases:
+            idx = self.active_gases.index(gas_name)
+            return self.activeGasMixProfile[idx,:]
+        elif gas_name in self.inActiveGases:
+            idx = self.inactive_gases.index(gas_name)
+            return self.inActiveGasMixProfile[idx,:]  
+        else:
+            raise KeyError     
+
     @property
     def inActiveGasMixProfile(self):
         return self.inactive_mixratio_profile
+
+    @property
+    def activeGases(self):
+        return self.active_gases
+    
+    @property
+    def inActiveGases(self):
+        return self.inactive_gases
 
     @property
     def muProfile(self):

@@ -37,13 +37,14 @@ class ACEGasProfile(GasProfile):
             self._thermfile = os.path.join(path_to_files,'NASA.therm')
     
     def _get_gas_mask(self):
-
+        import operator
         self._active_mask = np.ndarray(shape=(105,),dtype=np.bool)
         self._inactive_mask = np.ndarray(shape=(105,),dtype=np.bool)
 
         self._active_mask[...] = False
         self._inactive_mask[...] = False
-
+        new_active_gases=[]
+        new_inactive_gases=[]
         with open(self._specfile, 'r') as textfile:
             for line in textfile:
                 sl = line.split()
@@ -51,10 +52,18 @@ class ACEGasProfile(GasProfile):
                 molecule = sl[1].upper()
                 if molecule in self.active_gases:
                     self._active_mask[idx] = True
+                    new_active_gases.append((molecule,idx))
                 if molecule in self.inactive_gases:
                     self._inactive_mask[idx] = True
-        
-    
+                    new_inactive_gases.append((molecule,idx))
+        #Create a new list where the gases are in the correct order 
+        new_active_gases.sort(key = operator.itemgetter(1))
+        new_inactive_gases.sort(key = operator.itemgetter(1))
+
+        self.active_gases=[molecule for molecule,idx in new_active_gases]
+        self.inactive_gases=[molecule for molecule,idx in new_inactive_gases]
+
+
     def set_ace_params(self):
 
         # set O, C and N abundances given metallicity (in solar units) and CO ratio
@@ -68,7 +77,7 @@ class ACEGasProfile(GasProfile):
 
 
     def compute_active_gas_profile(self):
-        self._ace_profile = md_ace(self._specfile,self._thermfile,self.altitude_profile,self.pressure_profile,self.temperature_profile,
+        self._ace_profile = md_ace(self._specfile,self._thermfile,self.altitude_profile/1000.0,self.pressure_profile/1.e5,self.temperature_profile,
             self.He_abund_dex,self.C_abund_dex,self.O_abund_dex,self.N_abund_dex)
         
         self.active_mixratio_profile= self._ace_profile[self._active_mask,:]

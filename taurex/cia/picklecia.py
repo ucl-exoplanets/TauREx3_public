@@ -1,13 +1,18 @@
 from .cia import CIA
 import pickle
 import numpy as np
+from pathlib import Path
 class PickleCIA(CIA):
     """
     This is the base class for computing opactities
 
     """
     
-    def __init__(self,filename,pair_name):
+    def __init__(self,filename,pair_name=None):
+
+        if pair_name is None:
+            pair_name=Path(filename).stem
+            
         super().__init__('PickleCIA',pair_name)
 
         self._filename = filename

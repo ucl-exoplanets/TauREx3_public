@@ -27,29 +27,37 @@ class CIATest(unittest.TestCase):
 
 
     def test_notimplemented(self):
-        op = CIA('My name','HEH2HF')
+        op = CIA('My name','HEH-2HF')
         with self.assertRaises(NotImplementedError):
             op.cia(100)
-        self.assertEqual(op.pairName,'HEH2HF')
+        self.assertEqual(op.pairName,'HEH-2HF')
+        self.assertEqual(op.pairOne,'HEH')
+        self.assertEqual(op.pairTwo,'2HF')
 
-class PickleOpacityTest(unittest.TestCase):
+class PickleCIATest(unittest.TestCase):
     
 
     def setUp(self):
         import pickle
-        data = pickle.dumps(pickle_test_data)
+        self.data = pickle.dumps(pickle_test_data)
         self.pop = None
-        with patch("builtins.open", mock_open(read_data=data)) as mock_file:
-            self.pop=PickleCIA('unittestfile','HeH2HF')
+        with patch("builtins.open", mock_open(read_data=self.data)) as mock_file:
+            self.pop=PickleCIA('/unittestfile/test.db','HeH-2HF')
     
     def test_properties(self):
 
         
-        self.assertEqual(self.pop.pairName,'HeH2HF')
+        self.assertEqual(self.pop.pairName,'HeH-2HF')
         np.testing.assert_equal(pickle_test_data['t'],self.pop.temperatureGrid)
         np.testing.assert_equal(pickle_test_data['wno'],self.pop.wavenumberGrid)
         np.testing.assert_equal(pickle_test_data['xsecarr'],self.pop._xsec_grid)
-    
+
+
+    def test_pathname_naming(self):
+        with patch("builtins.open", mock_open(read_data=self.data)) as mock_file:
+            pop=PickleCIA('/unittestfile/HeH-2HF.db')
+            mock_file.assert_called_once_with('/unittestfile/HeH-2HF.db','rb')
+            self.assertEqual(pop.pairName,'HeH-2HF')
 
     def test_cia_calc(self):
 
