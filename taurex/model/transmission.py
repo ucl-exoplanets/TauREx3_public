@@ -23,9 +23,7 @@ class TransmissionModel(SimpleForwardModel):
                             temperature_profile=None,
                             gas_profile=None,
                             opacities=None,
-                            cia=None,
                             opacity_path=None,
-                            cia_path=None,
                             nlayers=100,
                             atm_min_pressure=1e-4,
                             atm_max_pressure=1e6,
@@ -37,9 +35,7 @@ class TransmissionModel(SimpleForwardModel):
                             temperature_profile,
                             gas_profile,
                             opacities,
-                            cia,
                             opacity_path,
-                            cia_path,
                             nlayers,
                             atm_min_pressure,
                             atm_max_pressure)
@@ -107,7 +103,9 @@ class TransmissionModel(SimpleForwardModel):
 
             tau[layer,...] = ne.evaluate('sum(comp,axis=0)')
 
-            tau[layer,...]+=np.sum(np.sum(self.sigma_cia[layer:total_layers,:]*(density**2)*dl[:],axis=0),axis=0)
+            for contrib in self.contribution_list:
+                tau[layer] += contrib.contribute(self,layer,density,dl)
+            #tau[layer,...]+=np.sum(np.sum(self.sigma_cia[layer:total_layers,:]*(density**2)*dl[:],axis=0),axis=0)
 
 
         
@@ -117,6 +115,13 @@ class TransmissionModel(SimpleForwardModel):
         integral = np.sum(integral,axis=0)
 
         absorption = ((self._planet.radius**2.0) + integral)/(self._star.radius**2)
+
+        contrib_absorption = []
+        for contrib in self.contribution_list:
+            c_tau = np.exp(-contrib.totalContribution)
+            c_integral = np.sum((self._planet.radius+self.altitudeProfile[:,None])*(1.0-c_tau)*dz[:,None]*2.0,axis=0)
+            contrib_absorption.append((contrib.name,c_integral))
+
         return absorption,tau
         
 

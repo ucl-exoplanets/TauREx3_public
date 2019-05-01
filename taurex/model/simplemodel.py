@@ -26,15 +26,13 @@ class SimpleForwardModel(ForwardModel):
                             temperature_profile=None,
                             gas_profile=None,
                             opacities=None,
-                            cia=None,
                             opacity_path=None,
-                            cia_path=None,
                             nlayers=100,
                             atm_min_pressure=1e-4,
                             atm_max_pressure=1e6,
 
                             ):
-        super().__init__(name,opacities,cia,opacity_path,cia_path)
+        super().__init__(name,opacities,opacity_path)
         
 
 
@@ -54,13 +52,17 @@ class SimpleForwardModel(ForwardModel):
         self._sigma_opacities = None
         self._sigma_cia = None
 
+
+
     def _compute_inital_mu(self):
         from taurex.data.profiles.gas import ConstantGasProfile
         self._inital_mu=ConstantGasProfile()
 
-    def setup_opacities_and_sigmas(self):
+    def setup_opacities(self):
         self.load_opacities(molecule_filter=self._gas_profile.activeGases)
-        self.load_cia()
+    
+
+
 
 
         
@@ -129,6 +131,8 @@ class SimpleForwardModel(ForwardModel):
         self.fitting_parameters.update(self._temperature_profile.fitting_parameters())
         self.fitting_parameters.update(self._gas_profile.fitting_parameters())
 
+        for contrib in self.contribution_list:
+            self.fitting_parameters.update(contrib.fitting_parameters())
 
 
     def build(self):
@@ -137,11 +141,15 @@ class SimpleForwardModel(ForwardModel):
         self.info('Collecting paramters')
         self.collect_fitting_parameters()
         self.info('Loading xsections')
-        self.setup_opacities_and_sigmas()
+        self.setup_opacities()
         self.info('Setting up profiles')
         self.initialize_profiles()
-        self.info('.....done!!!')
+        
 
+        self.info('Setting up contributions')
+        for contrib in self.contribution_list:
+            contrib.build()
+        self.info('DONE')
 
 
 
@@ -215,19 +223,7 @@ class SimpleForwardModel(ForwardModel):
         return self.sigma_xsec
 
     
-    def model_cia(self,wngrid):
-        total_cia = len(self.cia_dict)
-        if total_cia == 0:
-            return
-        self.sigma_cia = np.zeros(shape=(self._pressure_profile.nLayers,total_cia,wngrid.shape[0]))
-        self.info('Computing CIA ')
-        for cia_idx,cia in enumerate(self.cia_dict.values()):
-            for idx_layer,temperature in enumerate(self.temperatureProfile):
-                _cia_xsec = cia.cia(temperature,wngrid)
-                cia_factor = self._gas_profile.get_gas_mix_profile(cia.pairOne)
-                cia_factor *= self._gas_profile.get_gas_mix_profile(cia.pairTwo)
 
-                self.sigma_cia[idx_layer,cia_idx] = _cia_xsec*cia_factor[idx_layer]
                 
 
 

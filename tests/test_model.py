@@ -83,30 +83,30 @@ class ForwardModelTest(unittest.TestCase):
         self.assertIn('optest0',model.opacity_dict)    
         self.assertIn('optest2',model.opacity_dict)    
         self.assertNotIn('optest1',model.opacity_dict)    
-    def test_load_cia(self):
+    # def test_load_cia(self):
 
 
-        #Test single load
-        model = ForwardModel('test')
-        model.load_cia(self.cia_list[0],None)
-        self.assertIn('cia_test0',model.cia_dict)
+    #     #Test single load
+    #     model = ForwardModel('test')
+    #     model.load_cia(self.cia_list[0],None)
+    #     self.assertIn('cia_test0',model.cia_dict)
 
-        #Test list_load
-        model = ForwardModel('test')
-        model.load_cia(self.cia_list,None)
-        for op_name in self.cia_names:
-            self.assertIn(op_name,model.cia_dict)    
+    #     #Test list_load
+    #     model = ForwardModel('test')
+    #     model.load_cia(self.cia_list,None)
+    #     for op_name in self.cia_names:
+    #         self.assertIn(op_name,model.cia_dict)    
 
-        #Test path_load
-        model = ForwardModel('test')
-        model.load_cia(None,self.test_dir)
-        for op_name in self.cia_names:
-            self.assertIn(op_name,model.cia_dict)    
+    #     #Test path_load
+    #     model = ForwardModel('test')
+    #     model.load_cia(None,self.test_dir)
+    #     for op_name in self.cia_names:
+    #         self.assertIn(op_name,model.cia_dict)    
         
-        self.assertNotIn('optest0',model.cia_dict)
+    #     self.assertNotIn('optest0',model.cia_dict)
 
-        with self.assertRaises(Exception):
-            model.add_cia(self.cia_list[0])
+    #     with self.assertRaises(Exception):
+    #         model.add_cia(self.cia_list[0])
 
 
     def tearDown(self):

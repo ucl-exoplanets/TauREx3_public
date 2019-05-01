@@ -10,16 +10,25 @@ class Contribution(Fittable,Logger):
     def __init__(self,name):
         Logger.__init__(self,name)
         Fittable.__init__(self)
+        self._name = name
 
-    
+    @property
+    def name(self):
+        return self._name
 
-    def contribute(self,model,layer):
+
+  
+
+    def contribute(self,model,layer,density,path_length):
         raise NotImplementedError
 
     def build(self,model):
         raise NotImplementedError
     
-    def prepare(self,model):
+    def prepare(self,model,wngrid):
+        raise NotImplementedError
+
+    def finalize(self,model):
         raise NotImplementedError
 
     @property
