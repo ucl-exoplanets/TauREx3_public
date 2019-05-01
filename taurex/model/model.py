@@ -56,7 +56,7 @@ class ForwardModel(Logger):
 
 
     def add_contribution(self,contrib):
-        from .contribution import Contribution
+        from taurex.contributions import Contribution
         if not isinstance(contrib,Contribution):
             raise TypeError('Is not a a contribution type')
         else:

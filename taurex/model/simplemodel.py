@@ -203,23 +203,7 @@ class SimpleForwardModel(ForwardModel):
     def nLayers(self):
         return self.pressure_profile.nLayers
 
-    def model_opacities(self,wngrid):
-        ngases = len(self._gas_profile.activeGases)
-        self.debug('Creating crossection for wngrid {} with ngases {} and nlayers {}'.format(wngrid,ngases,self.nLayers))
 
-        self.sigma_xsec = np.zeros(shape=(self.pressure_profile.nLayers,ngases,wngrid.shape[0]))
-        
-        for idx_gas,gas in enumerate(self._gas_profile.activeGases):
-            self.info('Recomputing active gas {} opacity'.format(gas))
-            for idx_layer,tp in enumerate(zip(self.temperatureProfile,self.pressureProfile)):
-                self.debug('Got index,tp {} {}'.format(idx_layer,tp))
-                temperature,pressure = tp
-                pressure/=1e5
-                self.sigma_xsec[idx_layer,idx_gas] = self.opacity_dict[gas].opacity(temperature,pressure,wngrid)
-        active_gas = self._gas_profile.activeGasMixProfile.transpose()
-        self.sigma_xsec*=active_gas[:,:,None]
-        self.info('Done')
-        return self.sigma_xsec
 
     
 
@@ -228,12 +212,9 @@ class SimpleForwardModel(ForwardModel):
 
     def model(self,wngrid):
         self.initialize_profiles()
-        self.info('MODEL OPACITIES HERE')
-        self.model_opacities(wngrid)
-
         for contrib in self.contribution_list:
             contrib.prepare(self,wngrid)
-        return self.path_integral()
+        return self.path_integral(wngrid)
 
-    def path_integral(self):
+    def path_integral(self,wngrid):
         raise NotImplementedError

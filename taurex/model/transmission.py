@@ -2,7 +2,7 @@ from taurex.log import Logger
 import numpy as np
 import math
 from .simplemodel import SimpleForwardModel
-
+from taurex.contributions import AbsorptionContribution
 
 class TransmissionModel(SimpleForwardModel):
     """
@@ -39,7 +39,9 @@ class TransmissionModel(SimpleForwardModel):
                             nlayers,
                             atm_min_pressure,
                             atm_max_pressure)
-    
+
+
+        self.add_contribution(AbsorptionContribution())
 
     def compute_path_length(self,dz):
 
@@ -63,21 +65,21 @@ class TransmissionModel(SimpleForwardModel):
 
             dl.append(k)
         return dl
-    def path_integral(self):
+    def path_integral(self,wngrid):
         import numexpr as ne
 
         dz=np.gradient(self.altitudeProfile)
         
-        wngrid_size=self.sigma_xsec.shape[-1]
+        wngrid_size=wngrid.shape[0]
         
         path_length = self.compute_path_length(dz)
 
         tau = np.zeros(shape=(self.nLayers,wngrid_size,))
 
-        active_gas = self._gas_profile.activeGasMixProfile.transpose()
         density_profile = self.densityProfile
 
         total_layers = self.nLayers
+
         path_length = self.compute_path_length(dz)
 
         for layer in range(total_layers):
@@ -85,7 +87,6 @@ class TransmissionModel(SimpleForwardModel):
             self.debug('Computing layer {}'.format(layer))
             dl = path_length[layer][:,None,None]
             density = density_profile[layer:total_layers,None,None]
-            sigma = self.sigma_xsec[layer:total_layers,:]
 
             #   comp = self.sigma_xsec[layer:total_layers,:]* \
             #                                density_profile[layer:total_layers,None,None]*dl[:,None,None]
@@ -93,39 +94,37 @@ class TransmissionModel(SimpleForwardModel):
             # self.debug('Shape = {}'.format(comp.shape))
 
 
-            comp = ne.evaluate('sum(sigma*density*dl,axis=0)')
             # self.debug('Sum Shape = {}'.format(comp.shape))
 
             # comp = np.sum(comp,axis=0)
             # self.debug('Post Sum Shape = {}'.format(comp.shape))
 
-            
-
-            tau[layer,...] = ne.evaluate('sum(comp,axis=0)')
 
             for contrib in self.contribution_list:
+                self.debug('Adding contribution from {}'.format(contrib.name))
                 tau[layer] += contrib.contribute(self,layer,density,dl)
             #tau[layer,...]+=np.sum(np.sum(self.sigma_cia[layer:total_layers,:]*(density**2)*dl[:],axis=0),axis=0)
 
 
+        absorption = self.compute_absorption(tau,dz)
+
+
+
+        contrib_absorption = []
+        for contrib in self.contribution_list:
+            c_tau = contrib.totalContribution
+            contrib_absorption.append((contrib.name,self.compute_absorption(c_tau,dz)))
+
+        return absorption,tau,contrib_absorption
         
+
+    def compute_absorption(self,tau,dz):
         tau = np.exp(-tau)
         integral = (self._planet.radius+self.altitudeProfile[:,None])*(1.0-tau)*dz[:,None]
         integral*=2.0
         integral = np.sum(integral,axis=0)
 
-        absorption = ((self._planet.radius**2.0) + integral)/(self._star.radius**2)
-
-        contrib_absorption = []
-        for contrib in self.contribution_list:
-            c_tau = np.exp(-contrib.totalContribution)
-            c_integral = np.sum((self._planet.radius+self.altitudeProfile[:,None])*(1.0-c_tau)*dz[:,None]*2.0,axis=0)
-            contrib_absorption.append((contrib.name,c_integral))
-
-        return absorption,tau,contrib_absorption
-        
-
-
+        return ((self._planet.radius**2.0) + integral)/(self._star.radius**2)
 
 
 
