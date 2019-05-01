@@ -5,7 +5,7 @@ class CIAContribution(Contribution):
 
 
     def __init__(self,cia=None,cia_path=None):
-        super().__init__('CIAContribution')
+        super().__init__('CIA')
 
         self.cia_dict = {}
         self._cia = cia

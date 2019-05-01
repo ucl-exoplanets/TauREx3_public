@@ -6,7 +6,7 @@ class AbsorptionContribution(Contribution):
 
 
     def __init__(self):
-        super().__init__('AbsorptionContribution')
+        super().__init__('Absorption')
 
     
 
@@ -41,7 +41,7 @@ class AbsorptionContribution(Contribution):
                 sigma_xsec[idx_layer,idx_gas] = model.opacity_dict[gas].opacity(temperature,pressure,wngrid)
         
 
-        active_gas = model._gas_profile.activeGasMixProfile.transpose()[:,None]
+        active_gas = model._gas_profile.activeGasMixProfile.transpose()[...,None]
         
         self.sigma_xsec= ne.evaluate('sigma_xsec*active_gas')
         self.info('Done')
