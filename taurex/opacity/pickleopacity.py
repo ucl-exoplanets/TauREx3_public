@@ -90,7 +90,7 @@ class PickleOpacity(Opacity):
         return t_idx_min,t_idx_max,p_idx_min,p_idx_max
     
     def interp_bilinear_grid(self,T,P,t_idx_min,t_idx_max,p_idx_min,p_idx_max):
-
+        import numexpr as ne
         #FORMAT OF XSEC IS P,T,XSEC
         #P is x
         #T is y
@@ -112,9 +112,10 @@ class PickleOpacity(Opacity):
 
         self.debug('FACTOR {}'.format(factor))
 
+        return ne.evaluate('factor*(q_11*(Pmax-P)*(Tmax-T) + q_21*(P-Pmin)*(Tmax-T) + q_12*(Pmax-P)*(T-Tmin) + q_22*(P-Pmin)*(T-Tmin))')
 
 
-        return factor*(q_11*(Pmax-P)*(Tmax-T) + q_21*(P-Pmin)*(Tmax-T) + q_12*(Pmax-P)*(T-Tmin) + q_22*(P-Pmin)*(T-Tmin))
+        #return factor*(q_11*(Pmax-P)*(Tmax-T) + q_21*(P-Pmin)*(Tmax-T) + q_12*(Pmax-P)*(T-Tmin) + q_22*(P-Pmin)*(T-Tmin))
 
 
 
@@ -129,4 +130,4 @@ class PickleOpacity(Opacity):
 
     def compute_opacity(self,temperature,pressure):
         return self.interp_bilinear_grid(temperature,pressure
-                    ,*self.find_closest_TP_index(temperature,pressure))
+                    ,*self.find_closest_TP_index(temperature,pressure)) / 10000

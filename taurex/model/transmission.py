@@ -68,6 +68,7 @@ class TransmissionModel(SimpleForwardModel):
             dl.append(k)
         return dl
     def path_integral(self):
+        import numexpr as ne
 
         dz=np.gradient(self.altitudeProfile)
         
@@ -86,20 +87,29 @@ class TransmissionModel(SimpleForwardModel):
         for layer in range(total_layers):
 
             self.debug('Computing layer {}'.format(layer))
-            dl = path_length[layer]
-            comp = self.sigma_xsec[layer:total_layers,:]* \
-                                            active_gas[layer:total_layers,:,None]* \
-                                            density_profile[layer:total_layers,None,None]*dl[:,None,None]
-            self.debug('Compoutation result {}'.format(comp))
-            self.debug('Shape = {}'.format(comp.shape))
+            dl = path_length[layer][:,None,None]
+            density = density_profile[layer:total_layers,None,None]
+            sigma = self.sigma_xsec[layer:total_layers,:]
 
-            comp = np.sum(comp,axis=0)
-            self.debug('Sum Shape = {}'.format(comp.shape))
+            #   comp = self.sigma_xsec[layer:total_layers,:]* \
+            #                                density_profile[layer:total_layers,None,None]*dl[:,None,None]
+            # self.debug('Compoutation result {}'.format(comp))
+            # self.debug('Shape = {}'.format(comp.shape))
 
-            comp = np.sum(comp,axis=0)
-            self.debug('Post Sum Shape = {}'.format(comp.shape))
 
-            tau[layer,...] = comp[...]
+            comp = ne.evaluate('sum(sigma*density*dl,axis=0)')
+            # self.debug('Sum Shape = {}'.format(comp.shape))
+
+            # comp = np.sum(comp,axis=0)
+            # self.debug('Post Sum Shape = {}'.format(comp.shape))
+
+            
+
+            tau[layer,...] = ne.evaluate('sum(comp,axis=0)')
+
+            tau[layer,...]+=np.sum(np.sum(self.sigma_cia[layer:total_layers,:]*(density**2)*dl[:],axis=0),axis=0)
+
+
         
         tau = np.exp(-tau)
         integral = (self._planet.radius+self.altitudeProfile[:,None])*(1.0-tau)*dz[:,None]

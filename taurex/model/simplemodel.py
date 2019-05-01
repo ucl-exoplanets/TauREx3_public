@@ -209,8 +209,9 @@ class SimpleForwardModel(ForwardModel):
                 temperature,pressure = tp
                 pressure/=1e5
                 self.sigma_xsec[idx_layer,idx_gas] = self.opacity_dict[gas].opacity(temperature,pressure,wngrid)
-
-
+        active_gas = self._gas_profile.activeGasMixProfile.transpose()
+        self.sigma_xsec*=active_gas[:,:,None]
+        self.info('Done')
         return self.sigma_xsec
 
     
@@ -218,19 +219,24 @@ class SimpleForwardModel(ForwardModel):
         total_cia = len(self.cia_dict)
         if total_cia == 0:
             return
-        self.sigma_cia = np.zeros(self._pressure_profile.nLayers,total_cia,
-                len(wngrid))
-
+        self.sigma_cia = np.zeros(shape=(self._pressure_profile.nLayers,total_cia,wngrid.shape[0]))
+        self.info('Computing CIA ')
         for cia_idx,cia in enumerate(self.cia_dict.values()):
             for idx_layer,temperature in enumerate(self.temperatureProfile):
-                self.sigma_cia[idx_layer,cia_idx] = cia.cia(temperature,wngrid)
+                _cia_xsec = cia.cia(temperature,wngrid)
+                cia_factor = self._gas_profile.get_gas_mix_profile(cia.pairOne)
+                cia_factor *= self._gas_profile.get_gas_mix_profile(cia.pairTwo)
 
+                self.sigma_cia[idx_layer,cia_idx] = _cia_xsec*cia_factor[idx_layer]
+                
 
 
     def model(self,wngrid):
         self.initialize_profiles()
+        self.info('MODEL OPACITIES HERE')
         self.model_opacities(wngrid)
-        #self.model_cia(wngrid)
+        self.info('DO THE CIA HERE NOT THE FBI')
+        self.model_cia(wngrid)
         return self.path_integral()
 
     def path_integral(self):

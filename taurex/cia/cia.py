@@ -17,6 +17,15 @@ class CIA(Logger):
     def pairName(self):
         return self._pair_name
 
+
+    @property
+    def pairOne(self):
+        return self._pair_name.split('-')[0]
+
+    @property
+    def pairTwo(self):
+        return self._pair_name.split('-')[-1]
+
     @property
     def wavenumberGrid(self):
         raise NotImplementedError

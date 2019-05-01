@@ -18,8 +18,7 @@ class ForwardModel(Logger):
         self._opacity_path = opacity_path
 
         self._cia = cia
-        self._cia_path=None
-
+        self._cia_path=cia_path
 
         self.fitting_parameters = {}
 
@@ -106,7 +105,7 @@ class ForwardModel(Logger):
         glob_path = os.path.join(path,'*.db')
 
         file_list = glob(glob_path)
-        self.debug('File list {}'.format(file_list))
+        self.debug('File list FOR CIA {}'.format(file_list))
         for files in file_list:
             pairname=Path(files).stem
             op = PickleCIA(files,pairname)
@@ -130,7 +129,7 @@ class ForwardModel(Logger):
         if cia_path is None:
             cia_path = self._cia_path
         
-
+        self.debug('CIA XSEC, CIA_PATH {} {}'.format(cia_xsec,cia_path))
         if cia_xsec is not None:
             if isinstance(cia_xsec,(list,)):
                 self.debug('cia passed is list')
