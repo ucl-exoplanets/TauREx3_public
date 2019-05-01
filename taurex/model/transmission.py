@@ -122,7 +122,7 @@ class TransmissionModel(SimpleForwardModel):
             c_integral = np.sum((self._planet.radius+self.altitudeProfile[:,None])*(1.0-c_tau)*dz[:,None]*2.0,axis=0)
             contrib_absorption.append((contrib.name,c_integral))
 
-        return absorption,tau
+        return absorption,tau,contrib_absorption
         
 
 

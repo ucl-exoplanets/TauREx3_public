@@ -15,9 +15,6 @@ class ForwardModel(Logger):
         self._opacities=opacities
         self._opacity_path = opacity_path
 
-        self._cia = cia
-        self._cia_path=cia_path
-
         self.fitting_parameters = {}
 
         self.contribution_list = []

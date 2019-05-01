@@ -8,8 +8,8 @@ class CIAContribution(Contribution):
         super().__init__('CIAContribution')
 
         self.cia_dict = {}
-        self._cia = None
-        self._cia_path = None
+        self._cia = cia
+        self._cia_path = cia_path
 
     def add_cia(self,cia):
         self.info('Loading cia {} into model'.format(cia.pairName))
@@ -75,12 +75,15 @@ class CIAContribution(Contribution):
 
 
     def contribute(self,model,layer,density,path_length):
-        total_layers = model.pressureProfile.nLayers
-        contrib = np.sum(np.sum(self.sigma_cia[layer:total_layers,:]*(density**2)*path_length,axis=0),axis=0)
-        if self._total_contrib is None:
-            self._total_contrib = contrib
-        else:
-            self._total_contrib += contrib
+        import numexpr as ne
+        total_layers = model.pressure_profile.nLayers
+        sigma = self.sigma_cia[layer:total_layers,:]
+
+        contrib = ne.evaluate('sum(sigma*density*density*path_length,axis=0)')
+
+        contrib = ne.evaluate('sum(contrib,axis=0)')
+
+        self._total_contrib[layer,:]+=contrib
         return contrib
 
 
@@ -92,17 +95,17 @@ class CIAContribution(Contribution):
         total_cia = len(self.cia_dict)
         if total_cia == 0:
             return
-        self.sigma_cia = np.zeros(shape=(model.pressureProfile.nLayers,total_cia,wngrid.shape[0]))
+        self.sigma_cia = np.zeros(shape=(model.pressure_profile.nLayers,total_cia,wngrid.shape[0]))
         self.info('Computing CIA ')
         for cia_idx,cia in enumerate(self.cia_dict.values()):
             for idx_layer,temperature in enumerate(model.temperatureProfile):
                 _cia_xsec = cia.cia(temperature,wngrid)
-                cia_factor = model.gas_profile.get_gas_mix_profile(cia.pairOne)
-                cia_factor *= model.gas_profile.get_gas_mix_profile(cia.pairTwo)
+                cia_factor = model._gas_profile.get_gas_mix_profile(cia.pairOne)
+                cia_factor *= model._gas_profile.get_gas_mix_profile(cia.pairTwo)
 
                 self.sigma_cia[idx_layer,cia_idx] = _cia_xsec*cia_factor[idx_layer]
 
-        self._total_contrib = None
+        self._total_contrib = np.zeros(shape=(model.pressure_profile.nLayers,wngrid.shape[0],))
 
     @property
     def totalContribution(self):
