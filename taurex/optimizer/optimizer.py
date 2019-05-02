@@ -1,0 +1,125 @@
+from taurex.log import Logger
+import numpy as np
+
+
+class Optimizer(Logger):
+
+    def __init__(self,name,observed=None,model=None):
+        super().__init__(name)
+
+        self._model = model
+        self._observed = observed
+        
+
+
+    def set_model(self,model):
+        self._model = model
+
+    def set_observed(self,observed):
+        self._observed = observed
+
+
+
+
+
+    def collect_params_to_fit(self):
+        self.info('Initializing parameters')
+        self._fitting_parameters=[]
+        # param_name,param_latex,
+        #                 fget.__get__(self),fset.__get__(self),
+        #                         default_fit,default_bounds
+        for params in self._model.fittingParameters.values():
+            name,latex,fget,fset,to_fit,bounds = params
+
+            self.debug('Checking fitting parameter {}'.format(params))
+            if to_fit:
+                # #To make sure of any conversions going on lets get the current value
+                # c_v = fget()
+
+                # #Get the boundaries
+                # bound_min= bounds[0]
+                # bound_max = bounds[1]
+
+                # #set them to the internal model
+                # fset(bound_min)
+                # bound_min = fget()
+
+                # fset(bound_max)
+                # bound_max = fget()
+
+                # fset(c_v)
+
+                self._fitting_parameters.append(params)
+        
+        self.info('-------FITTING---------------')
+        self.info('Parameters to be fit:')
+        for params in self._fitting_parameters:
+            name,latex,fget,fset,to_fit,bounds = params
+            self.info('{}: Value: {} Boundaries:{}'.format(name,fget(),bounds))
+
+
+    def update_model(self,fit_params):
+
+        for value,param in zip(fit_params,self._fitting_parameters):
+            name,latex,fget,fset,to_fit,bounds = param
+            fset(value)
+
+
+    @property
+    def fit_values(self):
+        return [c[2]() for c in self._fitting_parameters]
+
+    @property
+    def fit_boundaries(self):
+        return [c[-1] for c in self._fitting_parameters]
+
+
+    @property
+    def fit_names(self):
+        return [c[0] for c in self._fitting_parameters]
+
+
+    def enable_fit(self,parameter):
+        self._model.fittingParameters[parameter][3] = True
+
+    def disable_fit(self,parameter):
+        self._model.fittingParameters[parameter][3] = False 
+    
+    def set_boundary(self,parameter,new_boundaries):
+        self._model.fittingParameters[parameter][-1] = new_boundaries
+
+    def chisq_trans(self, fit_params):
+
+        self.update_model(fit_params)
+
+        wngrid = self._observed.wavenumberGrid
+
+        model_out,_,_ = self._model.model(wngrid)
+
+
+
+        res = (self._observed.spectrum - model_out) / self._observed.errorBar
+
+        res = np.nansum(res*res)
+        if res == 0:
+            res = np.nan
+        return res
+
+
+    def compute_fit(self):
+        raise NotImplementedError
+
+
+    def fit(self):
+
+        self.collect_params_to_fit()
+
+        self.compute_fit()
+
+
+
+
+
+
+
+
