@@ -109,7 +109,7 @@ class RayleighContribution(Contribution):
                     sigma = ((8.14E-13)*(wave**(-4.))*(1+(1.572E6)*(wave**(-2.))+(1.981E12)*(wave**(-4.))))*1E-4
                 if gasname == 'HE':
                     sigma =  ((5.484E-14)*(wave**(-4.))*(1+(2.44E5)*(wave**(-2.))))*1E-4
-                    sigma[:] = 0
+                    #sigma[:] = 0
 
                 self.info('Rayleigh scattering cross section of %s correctly computed' % (gasname))
                 sigma_rayleigh_dict[gasname] = sigma
