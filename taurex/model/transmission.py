@@ -65,6 +65,9 @@ class TransmissionModel(SimpleForwardModel):
 
             dl.append(k)
         return dl
+
+
+
     def path_integral(self,wngrid):
         import numexpr as ne
 
@@ -82,28 +85,20 @@ class TransmissionModel(SimpleForwardModel):
 
         path_length = self.compute_path_length(dz)
 
+        
+
+
         for layer in range(total_layers):
 
             self.debug('Computing layer {}'.format(layer))
             dl = path_length[layer][:]
             density = density_profile[layer:total_layers]
 
-            #   comp = self.sigma_xsec[layer:total_layers,:]* \
-            #                                density_profile[layer:total_layers,None,None]*dl[:,None,None]
-            # self.debug('Compoutation result {}'.format(comp))
-            # self.debug('Shape = {}'.format(comp.shape))
-
-
-            # self.debug('Sum Shape = {}'.format(comp.shape))
-
-            # comp = np.sum(comp,axis=0)
-            # self.debug('Post Sum Shape = {}'.format(comp.shape))
-
 
             for contrib in self.contribution_list:
                 self.debug('Adding contribution from {}'.format(contrib.name))
                 tau[layer] += contrib.contribute(self,layer,density,dl)
-            #tau[layer,...]+=np.sum(np.sum(self.sigma_cia[layer:total_layers,:]*(density**2)*dl[:],axis=0),axis=0)
+
 
 
         absorption = self.compute_absorption(tau,dz)
