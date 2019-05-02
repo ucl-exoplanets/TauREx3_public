@@ -78,8 +78,8 @@ class CIAContribution(Contribution):
         import numexpr as ne
         total_layers = model.pressure_profile.nLayers
         sigma = self.sigma_cia[layer:total_layers,:]
-
-        contrib = ne.evaluate('sum(sigma*density*density*path_length,axis=0)')
+        combined_pt_dt = (density*density*path_length)[...,None,None]
+        contrib = ne.evaluate('sum(sigma*combined_pt_dt,axis=0)')
 
         contrib = ne.evaluate('sum(contrib,axis=0)')
 

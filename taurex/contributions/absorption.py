@@ -14,8 +14,9 @@ class AbsorptionContribution(Contribution):
         import numexpr as ne
         total_layers = model.pressure_profile.nLayers
         sigma=self.sigma_xsec[layer:total_layers]
+        combined_pt_dt = (density*path_length)[...,None,None]
 
-        comp = ne.evaluate('sum(sigma*density*path_length,axis=0)')
+        comp = ne.evaluate('sum(sigma*combined_pt_dt,axis=0)')
         comp = ne.evaluate('sum(comp,axis=0)')
         self._total_contrib[layer] += comp
         return comp

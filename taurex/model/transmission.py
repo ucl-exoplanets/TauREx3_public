@@ -85,8 +85,8 @@ class TransmissionModel(SimpleForwardModel):
         for layer in range(total_layers):
 
             self.debug('Computing layer {}'.format(layer))
-            dl = path_length[layer][:,None,None]
-            density = density_profile[layer:total_layers,None,None]
+            dl = path_length[layer][:]
+            density = density_profile[layer:total_layers]
 
             #   comp = self.sigma_xsec[layer:total_layers,:]* \
             #                                density_profile[layer:total_layers,None,None]*dl[:,None,None]

@@ -12,12 +12,14 @@ class RayleighContribution(Contribution):
     def contribute(self,model,layer,density,path_length):
         import numexpr as ne
         total_layers = model.pressure_profile.nLayers
-        sigma = self.sigma_rayleigh[layer:total_layers]
-        
-        contrib = ne.evaluate('sum(sigma*density*path_length,axis=0)')
+        sigma = self.sigma_rayleigh[layer:total_layers,:]
+        #print(sigma.shape,density.shape,path_length.shape)
+        combined_pt_dt = (density*path_length)[:,None,None]
+        contrib = ne.evaluate('sum(sigma*combined_pt_dt,axis=0)')
 
         contrib = ne.evaluate('sum(contrib,axis=0)')
-
+        #contrib = np.sum(sigma*density*path_length,axis=0)
+        #contrib = np.sum(contrib,axis=0)
         self._total_contrib[layer,:]+=contrib
         return contrib
 
