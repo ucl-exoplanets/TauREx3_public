@@ -80,13 +80,19 @@ class Optimizer(Logger):
 
 
     def enable_fit(self,parameter):
-        self._model.fittingParameters[parameter][3] = True
+        name,latex,fget,fset,to_fit,bounds = self._model.fittingParameters[parameter]
+        to_fit = True
+        self._model.fittingParameters[parameter]= (name,latex,fget,fset,to_fit,bounds)
 
     def disable_fit(self,parameter):
-        self._model.fittingParameters[parameter][3] = False 
+        name,latex,fget,fset,to_fit,bounds = self._model.fittingParameters[parameter]
+        to_fit = False
+        self._model.fittingParameters[parameter]= (name,latex,fget,fset,to_fit,bounds)
     
     def set_boundary(self,parameter,new_boundaries):
-        self._model.fittingParameters[parameter][-1] = new_boundaries
+        name,latex,fget,fset,to_fit,bounds = self._model.fittingParameters[parameter]
+        bounds = new_boundaries
+        self._model.fittingParameters[parameter]= (name,latex,fget,fset,to_fit,bounds)
 
     def chisq_trans(self, fit_params,data,datastd):
 

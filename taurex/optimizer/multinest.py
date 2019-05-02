@@ -50,13 +50,13 @@ class MultiNest(Optimizer):
         def multinest_uniform_prior(cube, ndim, nparams):
             # prior distributions called by multinest. Implements a uniform prior
             # converting parameters from normalised grid to uniform prior
-            for idx,bounds in self.fit_boundaries:
+            for idx,bounds in enumerate(self.fit_boundaries):
                 bound_min,bound_max = bounds
                 cube[idx] = (cube[idx] * (bound_max-bound_min)) + bound_min
    
         datastd_mean = np.mean(datastd)
         ndim = len(self.fitting_parameters)
-
+        self.info('Beginning fit......')
         pymultinest.run(LogLikelihood=multinest_loglike,
                         Prior=multinest_uniform_prior,
                         n_dims=ndim,
@@ -74,3 +74,5 @@ class MultiNest(Optimizer):
                         n_live_points = self.n_live_points,
                         max_iter= self.max_iter,
                         init_MPI=False)
+        
+        self.info('Fit complete.....')
