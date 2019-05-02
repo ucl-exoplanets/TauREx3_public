@@ -24,7 +24,7 @@ class Optimizer(Logger):
 
     def collect_params_to_fit(self):
         self.info('Initializing parameters')
-        self._fitting_parameters=[]
+        self.fitting_parameters=[]
         # param_name,param_latex,
         #                 fget.__get__(self),fset.__get__(self),
         #                         default_fit,default_bounds
@@ -49,34 +49,34 @@ class Optimizer(Logger):
 
                 # fset(c_v)
 
-                self._fitting_parameters.append(params)
+                self.fitting_parameters.append(params)
         
         self.info('-------FITTING---------------')
         self.info('Parameters to be fit:')
-        for params in self._fitting_parameters:
+        for params in self.fitting_parameters:
             name,latex,fget,fset,to_fit,bounds = params
             self.info('{}: Value: {} Boundaries:{}'.format(name,fget(),bounds))
 
 
     def update_model(self,fit_params):
 
-        for value,param in zip(fit_params,self._fitting_parameters):
+        for value,param in zip(fit_params,self.fitting_parameters):
             name,latex,fget,fset,to_fit,bounds = param
             fset(value)
 
 
     @property
     def fit_values(self):
-        return [c[2]() for c in self._fitting_parameters]
+        return [c[2]() for c in self.fitting_parameters]
 
     @property
     def fit_boundaries(self):
-        return [c[-1] for c in self._fitting_parameters]
+        return [c[-1] for c in self.fitting_parameters]
 
 
     @property
     def fit_names(self):
-        return [c[0] for c in self._fitting_parameters]
+        return [c[0] for c in self.fitting_parameters]
 
 
     def enable_fit(self,parameter):
@@ -88,7 +88,7 @@ class Optimizer(Logger):
     def set_boundary(self,parameter,new_boundaries):
         self._model.fittingParameters[parameter][-1] = new_boundaries
 
-    def chisq_trans(self, fit_params):
+    def chisq_trans(self, fit_params,data,datastd):
 
         self.update_model(fit_params)
 
@@ -98,7 +98,7 @@ class Optimizer(Logger):
 
 
 
-        res = (self._observed.spectrum - model_out) / self._observed.errorBar
+        res = (data - model_out) / datastd
 
         res = np.nansum(res*res)
         if res == 0:
