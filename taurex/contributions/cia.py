@@ -40,10 +40,10 @@ class CIAContribution(Contribution):
         file_list = glob(glob_path)
         self.debug('File list {}'.format(file_list))
         for files in file_list:
-            #from taurex.cia import HitranCIA
-            #op = HitranCIA(files)
-            #self.add_cia(op)       
-            pass
+            from taurex.cia import HitranCIA
+            op = HitranCIA(files)
+            self.add_cia(op)       
+            
 
     def load_cia(self,cia_xsec=None,cia_path=None):
         from taurex.cia import CIA
@@ -100,8 +100,7 @@ class CIAContribution(Contribution):
         for cia_idx,cia in enumerate(self.cia_dict.values()):
             for idx_layer,temperature in enumerate(model.temperatureProfile):
                 _cia_xsec = cia.cia(temperature,wngrid)
-                cia_factor = model._gas_profile.get_gas_mix_profile(cia.pairOne)
-                cia_factor *= model._gas_profile.get_gas_mix_profile(cia.pairTwo)
+                cia_factor = model._gas_profile.get_gas_mix_profile(cia.pairOne)*model._gas_profile.get_gas_mix_profile(cia.pairTwo)
 
                 self.sigma_cia[idx_layer,cia_idx] = _cia_xsec*cia_factor[idx_layer]
 
