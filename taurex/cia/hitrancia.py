@@ -116,7 +116,10 @@ class HitranCIA(CIA):
                     _wn = splits[0]
                     _sigma=splits[1]
                     wn_temp.append(float(_wn))
-                    sigma_temp.append(float(_sigma))
+                    _sig = float(_sigma)*1e-10
+                    if _sig < 0:
+                        _sig = 0
+                    sigma_temp.append(_sig)
                 
                 #Ok we're done lets add the sigma
                 wn_obj.add_temperature(T,np.array(sigma_temp))
