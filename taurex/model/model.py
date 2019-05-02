@@ -6,9 +6,7 @@ class ForwardModel(Logger):
     """A base class for producing forward models"""
 
     def __init__(self,name,opacities=None,
-                            cia=None,
-                            opacity_path=None,
-                            cia_path=None,):
+                            opacity_path=None):
         super().__init__(name)
         self.opacity_dict = {}
         self.cia_dict = {}
@@ -17,10 +15,9 @@ class ForwardModel(Logger):
         self._opacities=opacities
         self._opacity_path = opacity_path
 
-        self._cia = cia
-        self._cia_path=cia_path
-
         self.fitting_parameters = {}
+
+        self.contribution_list = []
 
     def __getitem__(self,key):
         return self.fitting_parameters[key][2]()
@@ -58,6 +55,16 @@ class ForwardModel(Logger):
             self.add_opacity(op,molecule_filter=molecule_filter)
 
 
+    def add_contribution(self,contrib):
+        from taurex.contributions import Contribution
+        if not isinstance(contrib,Contribution):
+            raise TypeError('Is not a a contribution type')
+        else:
+            if not contrib in self.contribution_list:
+                self.contribution_list.append(contrib)
+            else:
+                raise Exception('Contribution already exists')
+
 
     def load_opacities(self,opacities=None,opacity_path=None,molecule_filter=None):
         from taurex.opacity import Opacity
@@ -87,78 +94,31 @@ class ForwardModel(Logger):
                     self.load_opacity_from_path(path,molecule_filter=molecule_filter)
         self._opacities = None
 
-
-    def add_cia(self,cia):
-        self.info('Loading cia {} into model'.format(cia.pairName))
-        if cia.pairName in self.cia_dict:
-            self.error('cia with name {} already in opactiy dictionary {}'.format(cia.pairName,self.cia_dict.keys()))
-            raise Exception('cia for molecule {} already exists')
-        self.cia_dict[cia.pairName] = cia            
-    
-    def load_cia_from_path(self,path):
-        from glob import glob
-        from pathlib import Path
-        import os
-        from taurex.cia import PickleCIA
-
-        #Find .db files
-        glob_path = os.path.join(path,'*.db')
-
-        file_list = glob(glob_path)
-        self.debug('File list FOR CIA {}'.format(file_list))
-        for files in file_list:
-            pairname=Path(files).stem
-            op = PickleCIA(files,pairname)
-            self.add_cia(op)
-
-        #Find .cia files
-        glob_path = os.path.join(path,'*.cia')
-
-        file_list = glob(glob_path)
-        self.debug('File list {}'.format(file_list))
-        for files in file_list:
-            #from taurex.cia import HitranCIA
-            #op = HitranCIA(files)
-            #self.add_cia(op)       
-            pass
-
-    def load_cia(self,cia_xsec=None,cia_path=None):
-        from taurex.cia import CIA
-        if cia_xsec is None:
-            cia_xsec = self._cia
-        if cia_path is None:
-            cia_path = self._cia_path
-        
-        self.debug('CIA XSEC, CIA_PATH {} {}'.format(cia_xsec,cia_path))
-        if cia_xsec is not None:
-            if isinstance(cia_xsec,(list,)):
-                self.debug('cia passed is list')
-                for xsec in cia_xsec:
-                    self.add_cia(xsec)
-            elif isinstance(cia_xsec,CIA):
-                self.add_cia(cia_xsec)
-            else:
-                self.error('Unknown type {} passed into cia, should be a list, single \
-                     cia or None if reading a path'.format(type(xsec)))
-                raise Exception('Unknown type passed into cia')
-        elif cia_path is not None:
-
-            if isinstance(cia_path,str):
-                self.load_cia_from_path(cia_path)
-            elif isinstance(cia_path,(list,)):
-                for path in cia_path:
-                    self.load_cia_from_path(path)        
+             
     
     def build(self):
-        self.load_opacities()
-        self.load_cia()
-
+        raise NotImplementedError
 
     def model(self,wngrid):
         """Computes the forward model for a wngrid"""
         raise NotImplementedError
 
+
+    @property
+    def pressureProfile(self):
+        raise NotImplementedError
+
+    @property
+    def temperatureProfile(self):
+        raise NotImplementedError
+    
+    @property
+    def altitudeProfile(self):
+        raise NotImplementedError
     
     @property
     def fittingParameters(self):
         return self.fitting_parameters
+    
+
+

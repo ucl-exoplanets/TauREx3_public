@@ -2,7 +2,7 @@ from taurex.log import Logger
 import numpy as np
 import math
 from .simplemodel import SimpleForwardModel
-
+from taurex.contributions import AbsorptionContribution
 
 class TransmissionModel(SimpleForwardModel):
     """
@@ -23,9 +23,7 @@ class TransmissionModel(SimpleForwardModel):
                             temperature_profile=None,
                             gas_profile=None,
                             opacities=None,
-                            cia=None,
                             opacity_path=None,
-                            cia_path=None,
                             nlayers=100,
                             atm_min_pressure=1e-4,
                             atm_max_pressure=1e6,
@@ -37,13 +35,13 @@ class TransmissionModel(SimpleForwardModel):
                             temperature_profile,
                             gas_profile,
                             opacities,
-                            cia,
                             opacity_path,
-                            cia_path,
                             nlayers,
                             atm_min_pressure,
                             atm_max_pressure)
-    
+
+
+        self.add_contribution(AbsorptionContribution())
 
     def compute_path_length(self,dz):
 
@@ -67,60 +65,61 @@ class TransmissionModel(SimpleForwardModel):
 
             dl.append(k)
         return dl
-    def path_integral(self):
+
+
+
+    def path_integral(self,wngrid):
         import numexpr as ne
 
         dz=np.gradient(self.altitudeProfile)
         
-        wngrid_size=self.sigma_xsec.shape[-1]
+        wngrid_size=wngrid.shape[0]
         
         path_length = self.compute_path_length(dz)
 
         tau = np.zeros(shape=(self.nLayers,wngrid_size,))
 
-        active_gas = self._gas_profile.activeGasMixProfile.transpose()
         density_profile = self.densityProfile
 
         total_layers = self.nLayers
+
         path_length = self.compute_path_length(dz)
+
+        
+
 
         for layer in range(total_layers):
 
             self.debug('Computing layer {}'.format(layer))
-            dl = path_length[layer][:,None,None]
-            density = density_profile[layer:total_layers,None,None]
-            sigma = self.sigma_xsec[layer:total_layers,:]
-
-            #   comp = self.sigma_xsec[layer:total_layers,:]* \
-            #                                density_profile[layer:total_layers,None,None]*dl[:,None,None]
-            # self.debug('Compoutation result {}'.format(comp))
-            # self.debug('Shape = {}'.format(comp.shape))
+            dl = path_length[layer][:]
+            density = density_profile[layer:total_layers]
 
 
-            comp = ne.evaluate('sum(sigma*density*dl,axis=0)')
-            # self.debug('Sum Shape = {}'.format(comp.shape))
-
-            # comp = np.sum(comp,axis=0)
-            # self.debug('Post Sum Shape = {}'.format(comp.shape))
-
-            
-
-            tau[layer,...] = ne.evaluate('sum(comp,axis=0)')
-
-            tau[layer,...]+=np.sum(np.sum(self.sigma_cia[layer:total_layers,:]*(density**2)*dl[:],axis=0),axis=0)
+            for contrib in self.contribution_list:
+                self.debug('Adding contribution from {}'.format(contrib.name))
+                tau[layer] += contrib.contribute(self,layer,density,dl)
 
 
+
+        absorption = self.compute_absorption(tau,dz)
+
+
+
+        contrib_absorption = []
+        for contrib in self.contribution_list:
+            c_tau = contrib.totalContribution
+            contrib_absorption.append((contrib.name,self.compute_absorption(c_tau,dz)))
+
+        return absorption,tau,contrib_absorption
         
+
+    def compute_absorption(self,tau,dz):
         tau = np.exp(-tau)
         integral = (self._planet.radius+self.altitudeProfile[:,None])*(1.0-tau)*dz[:,None]
         integral*=2.0
         integral = np.sum(integral,axis=0)
 
-        absorption = ((self._planet.radius**2.0) + integral)/(self._star.radius**2)
-        return absorption,tau
-        
-
-
+        return ((self._planet.radius**2.0) + integral)/(self._star.radius**2)
 
 
 

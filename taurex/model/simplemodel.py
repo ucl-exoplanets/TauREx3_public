@@ -26,21 +26,19 @@ class SimpleForwardModel(ForwardModel):
                             temperature_profile=None,
                             gas_profile=None,
                             opacities=None,
-                            cia=None,
                             opacity_path=None,
-                            cia_path=None,
                             nlayers=100,
                             atm_min_pressure=1e-4,
                             atm_max_pressure=1e6,
 
                             ):
-        super().__init__(name,opacities,cia,opacity_path,cia_path)
+        super().__init__(name,opacities,opacity_path)
         
 
 
         self._planet = planet
         self._star=star
-        self._pressure_profile = pressure_profile
+        self.pressure_profile = pressure_profile
         self._temperature_profile = temperature_profile
         self._gas_profile = gas_profile
 
@@ -52,15 +50,18 @@ class SimpleForwardModel(ForwardModel):
         self._initialized = False
 
         self._sigma_opacities = None
-        self._sigma_cia = None
+
+
 
     def _compute_inital_mu(self):
         from taurex.data.profiles.gas import ConstantGasProfile
         self._inital_mu=ConstantGasProfile()
 
-    def setup_opacities_and_sigmas(self):
+    def setup_opacities(self):
         self.load_opacities(molecule_filter=self._gas_profile.activeGases)
-        self.load_cia()
+    
+
+
 
 
         
@@ -69,11 +70,11 @@ class SimpleForwardModel(ForwardModel):
 
     def setup_defaults(self,nlayers,atm_min_pressure,atm_max_pressure):
 
-        if self._pressure_profile is None:
+        if self.pressure_profile is None:
             from taurex.data.profiles.pressure import SimplePressureProfile
             self.info('No pressure profile defined, using simple pressure profile with')
             self.info('parameters nlayers: {}, atm_pressure_range=({},{})'.format(nlayers,atm_min_pressure,atm_max_pressure))
-            self._pressure_profile = SimplePressureProfile(nlayers,atm_min_pressure,atm_max_pressure)
+            self.pressure_profile = SimplePressureProfile(nlayers,atm_min_pressure,atm_max_pressure)
 
         if self._planet is None:
             from taurex.data import Planet
@@ -98,22 +99,22 @@ class SimpleForwardModel(ForwardModel):
     def initialize_profiles(self):
         self.info('Computing pressure profile')
         
-        self._pressure_profile.compute_pressure_profile()
+        self.pressure_profile.compute_pressure_profile()
         
         self._temperature_profile.initialize_profile(self._planet,
-                    self._pressure_profile.nLayers,
-                    self._pressure_profile.profile)
+                    self.pressure_profile.nLayers,
+                    self.pressure_profile.profile)
         
         #Initialize the atmosphere with a constant gas profile
         if self._initialized is False:
-            self._inital_mu.initialize_profile(self._pressure_profile.nLayers,
+            self._inital_mu.initialize_profile(self.pressure_profile.nLayers,
                                                 self.temperatureProfile,self.pressureProfile,
                                                 None)
             self.compute_altitude_gravity_scaleheight_profile(self._inital_mu.muProfile)
             self._initialized=True
         
         #Now initialize the gas profile
-        self._gas_profile.initialize_profile(self._pressure_profile.nLayers,
+        self._gas_profile.initialize_profile(self.pressure_profile.nLayers,
                                                 self.temperatureProfile,self.pressureProfile,
                                                 self.altitude_profile)
         
@@ -125,10 +126,12 @@ class SimpleForwardModel(ForwardModel):
         self.fitting_parameters.update(self._planet.fitting_parameters())
         if self._star is not None:
             self.fitting_parameters.update(self._star.fitting_parameters())
-        self.fitting_parameters.update(self._pressure_profile.fitting_parameters())
+        self.fitting_parameters.update(self.pressure_profile.fitting_parameters())
         self.fitting_parameters.update(self._temperature_profile.fitting_parameters())
         self.fitting_parameters.update(self._gas_profile.fitting_parameters())
 
+        for contrib in self.contribution_list:
+            self.fitting_parameters.update(contrib.fitting_parameters())
 
 
     def build(self):
@@ -137,11 +140,15 @@ class SimpleForwardModel(ForwardModel):
         self.info('Collecting paramters')
         self.collect_fitting_parameters()
         self.info('Loading xsections')
-        self.setup_opacities_and_sigmas()
+        self.setup_opacities()
         self.info('Setting up profiles')
         self.initialize_profiles()
-        self.info('.....done!!!')
+        
 
+        self.info('Setting up contributions')
+        for contrib in self.contribution_list:
+            contrib.build(self)
+        self.info('DONE')
 
 
 
@@ -152,7 +159,7 @@ class SimpleForwardModel(ForwardModel):
             mu_profile=self._gas_profile.muProfile
 
         # build the altitude profile from the bottom up
-        nlayers = self._pressure_profile.nLayers
+        nlayers = self.pressure_profile.nLayers
         H = np.zeros(nlayers)
         g = np.zeros(nlayers)
         z = np.zeros(nlayers)
@@ -176,7 +183,7 @@ class SimpleForwardModel(ForwardModel):
 
     @property
     def pressureProfile(self):
-        return self._pressure_profile.profile
+        return self.pressure_profile.profile
 
     @property
     def temperatureProfile(self):
@@ -194,50 +201,20 @@ class SimpleForwardModel(ForwardModel):
 
     @property
     def nLayers(self):
-        return self._pressure_profile.nLayers
+        return self.pressure_profile.nLayers
 
-    def model_opacities(self,wngrid):
-        ngases = len(self._gas_profile.activeGases)
-        self.debug('Creating crossection for wngrid {} with ngases {} and nlayers {}'.format(wngrid,ngases,self.nLayers))
 
-        self.sigma_xsec = np.zeros(shape=(self._pressure_profile.nLayers,ngases,wngrid.shape[0]))
-        
-        for idx_gas,gas in enumerate(self._gas_profile.activeGases):
-            self.info('Recomputing active gas {} opacity'.format(gas))
-            for idx_layer,tp in enumerate(zip(self.temperatureProfile,self.pressureProfile)):
-                self.debug('Got index,tp {} {}'.format(idx_layer,tp))
-                temperature,pressure = tp
-                pressure/=1e5
-                self.sigma_xsec[idx_layer,idx_gas] = self.opacity_dict[gas].opacity(temperature,pressure,wngrid)
-        active_gas = self._gas_profile.activeGasMixProfile.transpose()
-        self.sigma_xsec*=active_gas[:,:,None]
-        self.info('Done')
-        return self.sigma_xsec
 
     
-    def model_cia(self,wngrid):
-        total_cia = len(self.cia_dict)
-        if total_cia == 0:
-            return
-        self.sigma_cia = np.zeros(shape=(self._pressure_profile.nLayers,total_cia,wngrid.shape[0]))
-        self.info('Computing CIA ')
-        for cia_idx,cia in enumerate(self.cia_dict.values()):
-            for idx_layer,temperature in enumerate(self.temperatureProfile):
-                _cia_xsec = cia.cia(temperature,wngrid)
-                cia_factor = self._gas_profile.get_gas_mix_profile(cia.pairOne)
-                cia_factor *= self._gas_profile.get_gas_mix_profile(cia.pairTwo)
 
-                self.sigma_cia[idx_layer,cia_idx] = _cia_xsec*cia_factor[idx_layer]
                 
 
 
     def model(self,wngrid):
         self.initialize_profiles()
-        self.info('MODEL OPACITIES HERE')
-        self.model_opacities(wngrid)
-        self.info('DO THE CIA HERE NOT THE FBI')
-        self.model_cia(wngrid)
-        return self.path_integral()
+        for contrib in self.contribution_list:
+            contrib.prepare(self,wngrid)
+        return self.path_integral(wngrid)
 
-    def path_integral(self):
+    def path_integral(self,wngrid):
         raise NotImplementedError

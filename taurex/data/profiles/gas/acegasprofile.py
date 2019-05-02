@@ -12,7 +12,7 @@ class ACEGasProfile(GasProfile):
     ace_N_solar = 7.83 
 
 
-    def __init__(self,active_gases,metallicity=1,co_ratio=0.54951,therm_file = None,spec_file=None,mode='linear'):
+    def __init__(self,active_gases=['H2O','CH4'],metallicity=1,co_ratio=0.54951,therm_file = None,spec_file=None,mode='linear'):
         super().__init__('ACE',mode=mode)
 
         self.inactive_gases = ['H2', 'HE', 'N2']
