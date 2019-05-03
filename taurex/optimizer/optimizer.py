@@ -99,16 +99,14 @@ class Optimizer(Logger):
         self.update_model(fit_params)
 
         obs_bins= self._observed.wavenumberGrid
-        factor = 10
+        wngrid = self._model.nativeWavenumberGrid
 
-        wngrid = np.linspace(obs_bins.min(),obs_bins.max(),len(obs_bins)*10)
-        print('CHI-----')
+
 
         model_out,_,_ = self._model.model(wngrid)
 
-        final_model =(np.histogram(model_out, obs_bins, weights=model_out)[0] /
-             np.histogram(model_out, obs_bins)[0])
-
+        final_model =(np.histogram(wngrid, obs_bins, weights=model_out)[0] /
+              np.histogram(wngrid, obs_bins)[0])
         res = (data[:-1] - final_model) / datastd[:-1]
 
         res = np.nansum(res*res)
