@@ -49,7 +49,7 @@ class TransmissionModel(SimpleForwardModel):
         dl = []
 
 
-        planet_radius =self._planet.radius
+        planet_radius =self._planet.fullRadius
         total_layers = self.nLayers
 
         z = self.altitudeProfile
@@ -115,11 +115,11 @@ class TransmissionModel(SimpleForwardModel):
 
     def compute_absorption(self,tau,dz):
         tau = np.exp(-tau)
-        integral = (self._planet.radius+self.altitudeProfile[:,None])*(1.0-tau)*dz[:,None]
+        integral = (self._planet.fullRadius+self.altitudeProfile[:,None])*(1.0-tau)*dz[:,None]
         integral*=2.0
         integral = np.sum(integral,axis=0)
 
-        return ((self._planet.radius**2.0) + integral)/(self._star.radius**2)
+        return ((self._planet.fullRadius**2.0) + integral)/(self._star.radius**2)
 
 
 

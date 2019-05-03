@@ -15,9 +15,9 @@ class MultiNest(Optimizer):
         # sampling efficiency (parameter, ...)
         self.sampling_eff = 'parameter'
         # number of live points
-        self.n_live_points = 1000
+        self.n_live_points = 100
         # maximum no. of iterations (0=inf)
-        self.max_iter = 0
+        self.max_iter = 1000
         # search for multiple modes
         self.multimodes = True
         #parameters on which to cluster, e.g. if nclust_par = 3, it will cluster on the first 3 parameters only.
@@ -31,7 +31,7 @@ class MultiNest(Optimizer):
         self.evidence_tolerance = 0.5
         self.mode_tolerance = -1e90
         # importance nested sampling
-        self.imp_sampling = False  
+        self.imp_sampling = True
 
         self.dir_multinest = multi_nest_path  
 
@@ -42,18 +42,30 @@ class MultiNest(Optimizer):
 
         def multinest_loglike(cube, ndim, nparams):
             # log-likelihood function called by multinest
-            fit_params_container = np.asarray([cube[i] for i in range(len(self.fitting_parameters))])
+            fit_params_container = np.array([cube[i] for i in range(len(self.fitting_parameters))])
             chi_t = self.chisq_trans(fit_params_container, data, datastd)
-            loglike = (-1.)*np.sum(np.log(datastd*np.sqrt(2*np.pi))) - 0.5 * chi_t
+            
+            #print('---------START---------')
+            #print('chi_t',chi_t)
+            #print('LOG',loglike)
+            loglike = -np.sum(np.log(datastd*np.sqrt(2*np.pi))) - 0.5 * chi_t
             return loglike
 
         def multinest_uniform_prior(cube, ndim, nparams):
             # prior distributions called by multinest. Implements a uniform prior
             # converting parameters from normalised grid to uniform prior
+            #print(type(cube))
             for idx,bounds in enumerate(self.fit_boundaries):
+                # print(idx,self.fitting_parameters[idx])
                 bound_min,bound_max = bounds
                 cube[idx] = (cube[idx] * (bound_max-bound_min)) + bound_min
-   
+                #print('CUBE idx',cube[idx])
+            #print('-----------')
+
+        def dump_call(a, b, c,d,e,f,g,h,i,j):
+            print(a,b,c,d,e,f,g,h,i,j)
+
+
         datastd_mean = np.mean(datastd)
         ndim = len(self.fitting_parameters)
         self.info('Beginning fit......')
@@ -63,7 +75,7 @@ class MultiNest(Optimizer):
                         multimodal=self.multimodes,
                         n_clustering_params=self.nclust_par,
                         max_modes=self.max_modes,
-                        outputfiles_basename=os.path.join(self.dir_multinest, '1-'),
+                        outputfiles_basename=os.path.join(self.dir_multinest, '3-'),
                         const_efficiency_mode = self.const_eff,
                         importance_nested_sampling = self.imp_sampling,
                         resume = False,
@@ -72,7 +84,6 @@ class MultiNest(Optimizer):
                         evidence_tolerance = self.evidence_tolerance,
                         mode_tolerance = self.mode_tolerance,
                         n_live_points = self.n_live_points,
-                        max_iter= self.max_iter,
-                        init_MPI=False)
+                        max_iter= self.max_iter)
         
         self.info('Fit complete.....')

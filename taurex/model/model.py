@@ -64,7 +64,11 @@ class ForwardModel(Logger):
                 self.contribution_list.append(contrib)
             else:
                 raise Exception('Contribution already exists')
+    
 
+    @property
+    def nativeOpacityGrid(self):
+        pass
 
     def load_opacities(self,opacities=None,opacity_path=None,molecule_filter=None):
         from taurex.opacity import Opacity

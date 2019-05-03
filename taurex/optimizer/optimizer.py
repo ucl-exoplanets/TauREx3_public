@@ -22,7 +22,7 @@ class Optimizer(Logger):
 
 
 
-    def collect_params_to_fit(self):
+    def compile_params(self):
         self.info('Initializing parameters')
         self.fitting_parameters=[]
         # param_name,param_latex,
@@ -98,13 +98,18 @@ class Optimizer(Logger):
 
         self.update_model(fit_params)
 
-        wngrid = self._observed.wavenumberGrid
+        obs_bins= self._observed.wavenumberGrid
+        factor = 10
+
+        wngrid = np.linspace(obs_bins.min(),obs_bins.max(),len(obs_bins)*10)
+        print('CHI-----')
 
         model_out,_,_ = self._model.model(wngrid)
 
+        final_model =(np.histogram(model_out, obs_bins, weights=model_out)[0] /
+             np.histogram(model_out, obs_bins)[0])
 
-
-        res = (data - model_out) / datastd
+        res = (data[:-1] - final_model) / datastd[:-1]
 
         res = np.nansum(res*res)
         if res == 0:
@@ -118,7 +123,7 @@ class Optimizer(Logger):
 
     def fit(self):
 
-        self.collect_params_to_fit()
+        self.compile_params()
 
         self.compute_fit()
 
