@@ -97,9 +97,9 @@ class Optimizer(Logger):
         self.update_model(fit_params)
 
         obs_bins= self._observed.wavenumberGrid
-        wngrid = self._model.nativeWavenumberGrid[::10]
+        wngrid = self._model.nativeWavenumberGrid
 
-        wngrid = obs_bins
+        #wngrid = obs_bins
 
         model_out,_,_ = self._model.model(wngrid)
 
