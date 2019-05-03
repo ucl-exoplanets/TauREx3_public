@@ -95,6 +95,7 @@ class Optimizer(Logger):
         self._model.fittingParameters[parameter]= (name,latex,fget,fset,to_fit,bounds)
 
     def chisq_trans(self, fit_params,data,datastd):
+        from taurex.util import bindown
 
         self.update_model(fit_params)
 
@@ -105,8 +106,7 @@ class Optimizer(Logger):
 
         model_out,_,_ = self._model.model(wngrid)
 
-        final_model =(np.histogram(wngrid, obs_bins, weights=model_out)[0] /
-              np.histogram(wngrid, obs_bins)[0])
+        final_model =bindown(wngrid,model_out,obs_bins)
         res = (data[:-1] - final_model) / datastd[:-1]
 
         res = np.nansum(res*res)

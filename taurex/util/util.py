@@ -97,3 +97,26 @@ def molecule_texlabel(gasname):
         return _mol_latex[gasname]
     except KeyError:
         return gasname
+
+
+def bindown(original_bin,original_data,new_bin):
+    """
+    This method quickly bins down by taking the mean.
+    The numpy histogram function is exploited to do this quickly
+    
+    Parameters
+    ----------
+    original_bin: :obj:`numpy.array`
+        The original bins for the that we want to bin down
+    
+    original_data: :obj:`numpy.array`
+        The associated data that will be averaged along the new bins
+
+    new_bin: :obj:`numpy.array`
+        The new binnings we want to use (must have less points than the original)
+    
+    
+    """
+    import numpy as np
+    return(np.histogram(original_bin, new_bin, weights=original_data)[0] /
+              np.histogram(original_bin, new_bin)[0])
