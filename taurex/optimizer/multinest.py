@@ -15,9 +15,9 @@ class MultiNest(Optimizer):
         # sampling efficiency (parameter, ...)
         self.sampling_eff = 'parameter'
         # number of live points
-        self.n_live_points = 100
+        self.n_live_points = 1500
         # maximum no. of iterations (0=inf)
-        self.max_iter = 1000
+        self.max_iter = 0
         # search for multiple modes
         self.multimodes = True
         #parameters on which to cluster, e.g. if nclust_par = 3, it will cluster on the first 3 parameters only.
@@ -34,6 +34,7 @@ class MultiNest(Optimizer):
         self.imp_sampling = True
 
         self.dir_multinest = multi_nest_path  
+
 
     def compute_fit(self):
 
@@ -61,9 +62,9 @@ class MultiNest(Optimizer):
                 cube[idx] = (cube[idx] * (bound_max-bound_min)) + bound_min
                 #print('CUBE idx',cube[idx])
             #print('-----------')
-
-        def dump_call(a, b, c,d,e,f,g,h,i,j):
-            print(a,b,c,d,e,f,g,h,i,j)
+        status = None
+        def dump_call(nSamples,nlive,nPar,physLive,posterior,paramConstr,maxloglike,logZ,INSlogZ,logZerr,context):
+            status = (nSamples,nlive,nPar,physLive,posterior,paramConstr,maxloglike,logZ,INSlogZ,logZerr,context)
 
 
         datastd_mean = np.mean(datastd)
@@ -84,6 +85,9 @@ class MultiNest(Optimizer):
                         evidence_tolerance = self.evidence_tolerance,
                         mode_tolerance = self.mode_tolerance,
                         n_live_points = self.n_live_points,
-                        max_iter= self.max_iter)
+                        max_iter= self.max_iter
+                        )
         
         self.info('Fit complete.....')
+
+        return status
