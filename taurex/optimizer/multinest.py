@@ -3,7 +3,7 @@ import pymultinest
 import numpy as np
 import os
 
-class MultiNest(Optimizer):
+class MultiNestOptimizer(Optimizer):
 
 
     def __init__(self,multi_nest_path,observed=None,model=None):
@@ -40,7 +40,7 @@ class MultiNest(Optimizer):
 
         data = self._observed.spectrum
         datastd = self._observed.errorBar
-
+        sqrtpi = np.sqrt(2*np.pi)
         def multinest_loglike(cube, ndim, nparams):
             # log-likelihood function called by multinest
             fit_params_container = np.array([cube[i] for i in range(len(self.fitting_parameters))])
@@ -49,7 +49,7 @@ class MultiNest(Optimizer):
             #print('---------START---------')
             #print('chi_t',chi_t)
             #print('LOG',loglike)
-            loglike = -np.sum(np.log(datastd*np.sqrt(2*np.pi))) - 0.5 * chi_t
+            loglike = -np.sum(np.log(datastd*sqrtpi)) - 0.5 * chi_t
             return loglike
 
         def multinest_uniform_prior(cube, ndim, nparams):

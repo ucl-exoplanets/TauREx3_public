@@ -1,0 +1,55 @@
+from .optimizer import Optimizer
+import nestle
+import numpy as np
+import os
+import time
+class NestleOptimizer(Optimizer):
+
+    def __init__(self,observed=None,model=None):
+        super().__init__('Nestle',observed,model)
+
+    
+
+    def compute_fit(self):
+
+        data = self._observed.spectrum
+        datastd = self._observed.errorBar
+        sqrtpi = np.sqrt(2*np.pi)
+        def nestle_loglike(params):
+            # log-likelihood function called by multinest
+            fit_params_container = np.array(params)
+            chi_t = self.chisq_trans(fit_params_container, data, datastd)
+            loglike = -np.sum(np.log(datastd*sqrtpi)) - 0.5 * chi_t
+            return loglike
+
+        def nestle_uniform_prior(theta):
+            # prior distributions called by multinest. Implements a uniform prior
+            # converting parameters from normalised grid to uniform prior
+            cube = []
+
+            for idx,bounds in enumerate(self.fit_boundaries):
+                bound_min,bound_max = bounds
+                cube.append((theta[idx] * (bound_max-bound_min)) + bound_min)
+            
+            return tuple(cube)
+            
+
+        ndim = len(self.fitting_parameters)
+        self.info('Beginning fit......')
+        nlive = 1500     # number of live points
+        method = 'multi' # use MutliNest algorithm
+        ndims = ndim        # two parameters
+        tol = 0.5        # the stopping criterion
+
+        t0 = time.time()
+        
+        res = nestle.sample(nestle_loglike, nestle_uniform_prior, ndims, method=method, npoints=nlive, dlogz=tol,callback=nestle.print_progress)
+        t1 = time.time()
+
+        timenestle = (t1-t0)
+
+        print("Time taken to run 'Nestle' is {} seconds".format(timenestle))
+        
+        self.info('Fit complete.....')
+
+        print(res)

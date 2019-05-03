@@ -23,11 +23,13 @@ tm.add_contribution(CIAContribution(cia_path='/Users/ahmed/Documents/taurex_file
 tm.add_contribution(RayleighContribution())
 tm.build()
 
-from taurex.optimizer.multinest import MultiNest
+from taurex.optimizer.multinest import MultiNestOptimizer
+
+from taurex.optimizer.nestle import NestleOptimizer
 from taurex.data.spectrum.observed import ObservedSpectrum
 
-opt = MultiNest('/Users/ahmed/Documents/taurex_files/multinest',model=tm)
-
+# opt = MultiNestOptimizer('/Users/ahmed/Documents/taurex_files/multinest',model=tm)
+opt = NestleOptimizer(model=tm)
 obs = ObservedSpectrum('/Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_transmission/SPECTRUM_fit.dat')
 
 

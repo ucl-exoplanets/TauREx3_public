@@ -10,16 +10,13 @@ class Optimizer(Logger):
         self._model = model
         self._observed = observed
         
-
+        self._model_callback = None
 
     def set_model(self,model):
         self._model = model
 
     def set_observed(self,observed):
         self._observed = observed
-
-
-
 
 
     def compile_params(self):
@@ -100,9 +97,9 @@ class Optimizer(Logger):
         self.update_model(fit_params)
 
         obs_bins= self._observed.wavenumberGrid
-        wngrid = self._model.nativeWavenumberGrid
+        wngrid = self._model.nativeWavenumberGrid[::10]
 
-
+        wngrid = obs_bins
 
         model_out,_,_ = self._model.model(wngrid)
 
