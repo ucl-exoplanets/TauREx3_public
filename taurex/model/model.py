@@ -11,6 +11,7 @@ class ForwardModel(Logger):
         self.opacity_dict = {}
         self.cia_dict = {}
         
+        self._native_grid = None
 
         self._opacities=opacities
         self._opacity_path = opacity_path
@@ -34,10 +35,18 @@ class ForwardModel(Logger):
         if molecule_filter is not None:
             if opacity.moleculeName in molecule_filter:
                 self.info('Loading opacity {} into model'.format(opacity.moleculeName))
-                self.opacity_dict[opacity.moleculeName] = opacity       
+                self.opacity_dict[opacity.moleculeName] = opacity  
+            else:
+                return     
         else:     
             self.info('Loading opacity {} into model'.format(opacity.moleculeName))
             self.opacity_dict[opacity.moleculeName] = opacity    
+        
+        if self._native_grid is None:
+            self._native_grid = opacity.wavenumberGrid
+        else:
+            if opacity.wavenumberGrid.shape[0] > self._native_grid.shape[0]:
+                self._native_grid = opacity.wavenumberGrid 
     def load_opacity_from_path(self,path,molecule_filter=None):
         from glob import glob
         import os
@@ -67,8 +76,8 @@ class ForwardModel(Logger):
     
 
     @property
-    def nativeOpacityGrid(self):
-        pass
+    def nativeWavenumberGrid(self):
+        return self._native_grid
 
     def load_opacities(self,opacities=None,opacity_path=None,molecule_filter=None):
         from taurex.opacity import Opacity
