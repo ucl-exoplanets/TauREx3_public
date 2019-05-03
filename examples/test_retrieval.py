@@ -9,6 +9,7 @@ from taurex.data.profiles.gas import ConstantGasProfile
 from taurex.data.profiles.temperature import Isothermal
 from taurex.contributions import *
 import numpy as np
+import time
 
 gas = ConstantGasProfile(active_gases=['H2O'],
                         active_gas_mix_ratio=[1e-4],n2_mix_ratio=1e-12,mode='log')
@@ -54,11 +55,26 @@ print(opt.fit_names)
 print(opt.fit_values)
 print(opt.fit_boundaries)
 #quit()
+
+
+start = time.time()
 opt.fit()
 
+end = time.time()-start
+
+print('Fitting took {} seconds '.format(end))
+
+#opt.fit()
 #[('planet_radius', 0.9977460143147965), ('T', 1773.753290656476), ('N2', -2.9852926824091544), ('H2_He', 11.611379020348924), ('log_H2O', -3.6689485064871157)]
 #[('planet_radius', 0.9954708431819737), ('T', 1680.2792218153766), ('N2', -1.2510885714329305), ('H2_He', -7.606159994370432), ('log_H2O', -3.327989739664458)]
 print(list(zip(opt.fit_names,opt.fit_values)))
 
-absptn,tau,contrib = tm.model(obs.wavenumberGrid)
-np.save('output_spec.npy',absptn)
+
+obs_bins = obs.wavenumberGrid
+xsec_wnbins = tm.opacity_dict['H2O'].wavenumberGrid
+absptn,tau,contrib = tm.model(tm.opacity_dict['H2O'].wavenumberGrid)
+
+bin_means = (np.histogram(xsec_wnbins,obs_bins, weights=absptn)[0] /
+             np.histogram(xsec_wnbins,obs_bins)[0])
+
+np.save('output_spec_big.npy',bin_means)
