@@ -91,3 +91,7 @@ class MultiNest(Optimizer):
         self.info('Fit complete.....')
 
         return status
+
+    
+    def process_multinest_status(self,status):
+        pass
