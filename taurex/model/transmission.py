@@ -68,7 +68,7 @@ class TransmissionModel(SimpleForwardModel):
 
 
 
-    def path_integral(self,wngrid):
+    def path_integral(self,wngrid,return_contrib):
         import numexpr as ne
 
         dz=np.gradient(self.altitudeProfile)
@@ -91,35 +91,39 @@ class TransmissionModel(SimpleForwardModel):
         for layer in range(total_layers):
 
             self.debug('Computing layer {}'.format(layer))
-            dl = path_length[layer][:]
-            density = density_profile[layer:total_layers]
+            dl = path_length[layer]
 
 
             for contrib in self.contribution_list:
                 self.debug('Adding contribution from {}'.format(contrib.name))
-                tau[layer] += contrib.contribute(self,layer,density,dl)
+                tau[layer] += contrib.contribute(self,layer,density_profile,dl,return_contrib)
 
 
 
-        absorption = self.compute_absorption(tau,dz)
-
-
+        absorption,tau = self.compute_absorption(tau,dz)
 
         contrib_absorption = []
-        for contrib in self.contribution_list:
-            c_tau = contrib.totalContribution
-            contrib_absorption.append((contrib.name,self.compute_absorption(c_tau,dz)))
-
+        if return_contrib:
+            contrib_absorption = []
+            for contrib in self.contribution_list:
+                c_tau = contrib.totalContribution
+                contrib_absorption.append((contrib.name,self.compute_absorption(c_tau,dz)[0]))
+        
         return absorption,tau,contrib_absorption
         
 
     def compute_absorption(self,tau,dz):
-        tau = np.exp(-tau)
-        integral = (self._planet.radius+self.altitudeProfile[:,None])*(1.0-tau)*dz[:,None]
-        integral*=2.0
-        integral = np.sum(integral,axis=0)
-
-        return ((self._planet.radius**2.0) + integral)/(self._star.radius**2)
+        import numexpr as ne
+        tau = ne.evaluate('exp(-tau)')
+        ap = self.altitudeProfile[:,None]
+        pradius = self._planet.radius
+        sradius = self._star.radius
+        _dz = dz[:,None]
+        #integral = (self._planet.radius+self.altitudeProfile[:,None])*(1.0-tau)*dz[:,None]
+        #integral*=2.0
+        #integral = np.sum(integral,axis=0)
+        integral = ne.evaluate('sum((pradius+ap)*(1.0-tau)*_dz*2,axis=0)')
+        return ((self._planet.radius**2.0) + integral)/(self._star.radius**2),tau
 
 
 

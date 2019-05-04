@@ -210,11 +210,11 @@ class SimpleForwardModel(ForwardModel):
                 
 
 
-    def model(self,wngrid):
+    def model(self,wngrid,return_contrib=False):
         self.initialize_profiles()
         for contrib in self.contribution_list:
             contrib.prepare(self,wngrid)
-        return self.path_integral(wngrid)
+        return self.path_integral(wngrid,return_contrib)
 
-    def path_integral(self,wngrid):
+    def path_integral(self,wngrid,return_contrib):
         raise NotImplementedError
