@@ -123,7 +123,7 @@ class TransmissionModel(SimpleForwardModel):
         #integral*=2.0
         #integral = np.sum(integral,axis=0)
         integral = ne.evaluate('sum((pradius+ap)*(1.0-tau)*_dz*2,axis=0)')
-        return ((self._planet.radius**2.0) + integral)/(self._star.radius**2),tau
+        return ((pradius**2.0) + integral)/(sradius**2),tau
 
 
 
