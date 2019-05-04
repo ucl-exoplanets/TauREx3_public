@@ -11,7 +11,7 @@ class Contribution(Fittable,Logger):
         Logger.__init__(self,name)
         Fittable.__init__(self)
         self._name = name
-
+        self._total_contribution = None
     @property
     def name(self):
         return self._name
@@ -19,7 +19,7 @@ class Contribution(Fittable,Logger):
 
   
 
-    def contribute(self,model,layer,density,path_length):
+    def contribute(self,model,layer,density,path_length,return_contrib):
         raise NotImplementedError
 
     def build(self,model):
