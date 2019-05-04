@@ -21,7 +21,7 @@ import numexpr as ne
 
 logging.basicConfig(level=logging.INFO)
 
-tm = TransmissionModel(gas_profile=ConstantGasProfile(active_gases=['H2O','CH4'],active_gas_mix_ratio=[1e-6,1e-4]),
+tm = TransmissionModel(gas_profile=ConstantGasProfile(active_gases=['H2O'],active_gas_mix_ratio=[1e-6]),
                        opacity_path='C:/Users/Bahamut/Documents/TaurexFiles/Input/xsec/TauRex_sampled_xsecs_R10000_0.3-15',
                        planet=Planet(),
                        star=Star(),
@@ -32,14 +32,12 @@ tm.add_contribution(RayleighContribution())
 
 tm.build()
 
-wngrid = np.linspace(100,30000,30000)
 
-
-absorption,tau,contributions = tm.model(wngrid)
+absorption,tau,contributions = tm.model(tm.opacity_dict['H2O'],return_contrib=True)
 
 start = time.time()
 for x in range(10):
-    tm.model(wngrid)
+    tm.model(wngrid,return_contrib=True)
 
 end = time.time()
 
@@ -49,8 +47,10 @@ wlgrid = np.log10(10000/wngrid)
 
 fig = plt.figure()
 
-for name,value in contributions:
+#for name,value in contributions:
     plt.plot(wlgrid,value,label=name)
+
+
 
 plt.plot(wlgrid,absorption,label='total')
 plt.legend()
