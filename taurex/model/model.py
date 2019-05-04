@@ -112,7 +112,7 @@ class ForwardModel(Logger):
     def build(self):
         raise NotImplementedError
 
-    def model(self,wngrid):
+    def model(self,wngrid,return_contrib=True):
         """Computes the forward model for a wngrid"""
         raise NotImplementedError
 

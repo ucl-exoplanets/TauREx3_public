@@ -1,6 +1,19 @@
  
 from .contribution import Contribution
 import numpy as np
+import numba
+
+@numba.jit(nopython=True,parallel=True, nogil=True)
+def rayleigh_numba(sigma,density,path,nlayers,ngrid,nmols,layer):
+    tau = np.zeros(shape=(ngrid,))
+    for k in range(nlayers-layer):
+        _path = path[k]
+        _density = density[k+layer]
+        for mol in range(nmols):
+            for wn in range(ngrid):
+                tau[wn] += sigma[k+layer,mol,wn]*_path*_density
+    return tau
+
 
 class RayleighContribution(Contribution):
 
@@ -9,18 +22,20 @@ class RayleighContribution(Contribution):
         super().__init__('Rayleigh')
  
 
-    def contribute(self,model,layer,density,path_length):
+    def contribute(self,model,layer,density,path_length,return_contrib):
         import numexpr as ne
         total_layers = model.pressure_profile.nLayers
-        sigma = self.sigma_rayleigh[layer:total_layers,:]
-        #print(sigma.shape,density.shape,path_length.shape)
-        combined_pt_dt = (density*path_length)[:,None,None]
-        contrib = ne.evaluate('sum(sigma*combined_pt_dt,axis=0)')
+        # sigma = self.sigma_rayleigh[layer:total_layers,:]
+        # #print(sigma.shape,density.shape,path_length.shape)
+        # combined_pt_dt = (density*path_length)[:,None,None]
+        # contrib = ne.evaluate('sum(sigma*combined_pt_dt,axis=0)')
 
-        contrib = ne.evaluate('sum(contrib,axis=0)')
+        # contrib = ne.evaluate('sum(contrib,axis=0)')
         #contrib = np.sum(sigma*density*path_length,axis=0)
         #contrib = np.sum(contrib,axis=0)
-        self._total_contrib[layer,:]+=contrib
+        contrib = rayleigh_numba(self.sigma_rayleigh,density,path_length,self._nlayers,self._ngrid,self._nmols,layer)
+        if return_contrib:
+            self._total_contrib[layer,:]+=contrib
         return contrib
 
     def build(self,model):
@@ -113,12 +128,16 @@ class RayleighContribution(Contribution):
 
                 self.info('Rayleigh scattering cross section of %s correctly computed' % (gasname))
                 sigma_rayleigh_dict[gasname] = sigma
-            else:
-                sigma_rayleigh_dict[gasname] = np.zeros((len(wn)))
+            #else:
+            #    sigma_rayleigh_dict[gasname] = np.zeros((len(wn)))
 
         self.sigma_rayleigh_dict = sigma_rayleigh_dict
 
-        self.sigma_rayleigh = np.zeros(shape=(model.pressure_profile.nLayers,len(molecules),wngrid.shape[0]))
+        self._ngrid = wngrid.shape[0]
+        self._nmols = len(self.sigma_rayleigh_dict.keys())
+        self._nlayers = model.pressure_profile.nLayers
+
+        self.sigma_rayleigh = np.zeros(shape=(model.pressure_profile.nLayers,self._nmols,wngrid.shape[0]))
         self.info('Computing Ray interpolation ')
         for rayleigh_idx,rayleigh in enumerate(self.sigma_rayleigh_dict.items()):
             gas,xsec = rayleigh
