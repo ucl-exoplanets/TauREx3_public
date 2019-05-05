@@ -96,11 +96,11 @@ class CIAContribution(Contribution):
 
         # contrib = ne.evaluate('sum(contrib,axis=0)')
 
-        contrib =cia_numba(self.sigma_cia,density,path_length,self._nlayers,self._ngrid,self._total_cia,layer)
+        self._total_contrib[layer,:]+=cia_numba(self.sigma_cia,density,path_length,self._nlayers,self._ngrid,self._total_cia,layer)
 
-        if return_contrib:
-            self._total_contrib[layer,:]+=contrib
-        return contrib
+        #if return_contrib:
+        #self._total_contrib[layer,:]+=contrib
+        #return contrib
 
 
 
