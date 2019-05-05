@@ -27,7 +27,7 @@ class TransmissionModel(SimpleForwardModel):
                             nlayers=100,
                             atm_min_pressure=1e-4,
                             atm_max_pressure=1e6,
-
+                            abs_contrib= None
                             ):
         super().__init__('transmission_model',planet,
                             star,
@@ -40,8 +40,9 @@ class TransmissionModel(SimpleForwardModel):
                             atm_min_pressure,
                             atm_max_pressure)
 
-
-        self.add_contribution(AbsorptionContribution())
+        if abs_contrib is None:
+            abs_contrib = AbsorptionContribution()
+        self.add_contribution(abs_contrib)
 
     def compute_path_length(self,dz):
 
@@ -77,14 +78,13 @@ class TransmissionModel(SimpleForwardModel):
         
         path_length = self.compute_path_length(dz)
 
-        tau = np.zeros(shape=(self.nLayers,wngrid_size,))
 
         density_profile = self.densityProfile
 
         total_layers = self.nLayers
 
         path_length = self.compute_path_length(dz)
-
+        self.path_length = path_length
         
 
 
@@ -96,9 +96,13 @@ class TransmissionModel(SimpleForwardModel):
 
             for contrib in self.contribution_list:
                 self.debug('Adding contribution from {}'.format(contrib.name))
-                tau[layer] += contrib.contribute(self,layer,density_profile,dl,return_contrib)
+                contrib.contribute(self,layer,density_profile,dl,return_contrib)
 
+        all_contrib = [c.totalContribution for c in self.contribution_list]
 
+        self.debug('Contributionlist {}'.format(all_contrib))
+        tau = np.sum(all_contrib,axis=0)
+        self.debug('tau {} {}'.format(tau,tau.shape))
 
         absorption,tau = self.compute_absorption(tau,dz)
 

@@ -29,11 +29,11 @@ class AbsorptionContribution(Contribution):
 
         # comp = ne.evaluate('sum(sigma*combined_pt_dt,axis=0)')
         # comp = ne.evaluate('sum(comp,axis=0)')
-        comp =absorption_numba(self.sigma_xsec,density,path_length,self._nlayers,self._ngrid,self._nmols,layer)
-        if return_contrib:
-            self._total_contrib[layer] += comp
+        self._total_contrib[layer] +=absorption_numba(self.sigma_xsec,density,path_length,self._nlayers,self._ngrid,self._nmols,layer)
+        #if return_contrib:
+        #self._total_contrib[layer] += comp
         #elf.debug('Contribution {}'.format(comp))
-        return comp
+        #return comp
 
     def build(self,model):
         pass
