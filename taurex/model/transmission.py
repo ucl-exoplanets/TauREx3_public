@@ -117,7 +117,7 @@ class TransmissionModel(SimpleForwardModel):
         tau = ne.evaluate('exp(-tau)')
         ap = self.altitudeProfile[:,None]
         pradius = self._planet.fullRadius
-        sradius = self._star.fullRadius
+        sradius = self._star.radius
         _dz = dz[:,None]
         #integral = (self._planet.radius+self.altitudeProfile[:,None])*(1.0-tau)*dz[:,None]
         #integral*=2.0
