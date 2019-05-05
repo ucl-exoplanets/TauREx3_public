@@ -7,14 +7,15 @@ from numba import cuda
 def rayleigh_cuda(sigma,density,path,nlayers,ngrid,nmols,layer,tau):
     
     wn = cuda.grid(1)
+    result = 0.0
     if wn < ngrid:
         for k in range(nlayers-layer):
-            _path = path[k+layer]
+            _path = path[k]
             _density = density[k+layer]
             for mol in range(nmols):
                 #for wn in range(startY,ngrid,gridY):
-                tau[layer,wn] += sigma[k+layer,mol,wn]*_path*_density
-
+                result +=sigma[k+layer,mol,wn]*_path*_density
+        tau[layer,wn]+= result
 
 
 
