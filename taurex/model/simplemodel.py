@@ -25,14 +25,12 @@ class SimpleForwardModel(ForwardModel):
                             pressure_profile=None,
                             temperature_profile=None,
                             gas_profile=None,
-                            opacities=None,
-                            opacity_path=None,
                             nlayers=100,
                             atm_min_pressure=1e-4,
                             atm_max_pressure=1e6,
 
                             ):
-        super().__init__(name,opacities,opacity_path)
+        super().__init__(name)
         
 
 
@@ -57,8 +55,6 @@ class SimpleForwardModel(ForwardModel):
         from taurex.data.profiles.gas import ConstantGasProfile
         self._inital_mu=ConstantGasProfile()
 
-    def setup_opacities(self):
-        self.load_opacities(molecule_filter=self._gas_profile.activeGases)
     
 
 
@@ -139,8 +135,6 @@ class SimpleForwardModel(ForwardModel):
         self._compute_inital_mu()
         self.info('Collecting paramters')
         self.collect_fitting_parameters()
-        self.info('Loading xsections')
-        self.setup_opacities()
         self.info('Setting up profiles')
         self.initialize_profiles()
         
