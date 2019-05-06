@@ -1,7 +1,7 @@
 from .contribution import Contribution
 import numpy as np
 import numba
-
+from taurex.cache import CIACache
 @numba.jit(nopython=True,parallel=True)
 def cia_numba(sigma,density,path,nlayers,ngrid,nmols,layer):
     tau = np.zeros(shape=(ngrid,))
@@ -17,9 +17,13 @@ def cia_numba(sigma,density,path,nlayers,ngrid,nmols,layer):
 class CIAContribution(Contribution):
 
 
-    def __init__(self,cia_pairs):
+    def __init__(self,cia_pairs=None):
         super().__init__('CIA')
-        self._cia_pairs = []
+        self._cia_pairs = cia_pairs
+
+        self._cia_cache = CIACache()
+        if self._cia_pairs is None:
+            self._cia_pairs=[]
 
 
     @property
@@ -63,8 +67,10 @@ class CIAContribution(Contribution):
         self._nlayers = model.pressure_profile.nLayers
         self._ngrid = wngrid.shape[0]
         self.info('Computing CIA ')
-        for cia_idx,cia in enumerate(self.ciaPairs):
+        for cia_idx,pairName in enumerate(self.ciaPairs):
             for idx_layer,temperature in enumerate(model.temperatureProfile):
+                cia = self._cia_cache[pairName]
+
                 _cia_xsec = cia.cia(temperature,wngrid)
                 cia_factor = model._gas_profile.get_gas_mix_profile(cia.pairOne)*model._gas_profile.get_gas_mix_profile(cia.pairTwo)
 

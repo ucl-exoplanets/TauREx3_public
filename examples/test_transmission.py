@@ -11,7 +11,7 @@ from taurex.data.profiles.pressure import SimplePressureProfile
 from taurex.data.profiles.temperature import Guillot2010,Isothermal
 from taurex.data.planet import Earth,Planet
 
-from taurex.cache import OpacityCache
+from taurex.cache import OpacityCache,CIACache
 
 import time
 import matplotlib
@@ -30,7 +30,7 @@ import numexpr as ne
 logging.basicConfig(level=logging.INFO)
 
 OpacityCache().set_opacity_path('/Users/ahmed/Documents/taurex_files/xsec/TauRex_sampled_xsecs_R10000_0.3-15')
-
+CIACache().set_cia_path('/Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/cia/hitran/')
 absc = AbsorptionContribution()
 
 tm = TransmissionModel(gas_profile=ConstantGasProfile(active_gases=['H2O'],active_gas_mix_ratio=[1e-6]),
@@ -39,7 +39,7 @@ tm = TransmissionModel(gas_profile=ConstantGasProfile(active_gases=['H2O'],activ
                        temperature_profile=Isothermal(),nlayers=30,
                         abs_contrib=absc)
 
-tm.add_contribution(CIAContribution(cia_path='/Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/cia/hitran/'))
+tm.add_contribution(CIAContribution(cia_pairs=['H2-H2','H2-He']))
 tm.add_contribution(RayleighContribution())
 
 tm.build()
