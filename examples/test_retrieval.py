@@ -10,6 +10,10 @@ from taurex.data.profiles.temperature import Isothermal
 from taurex.contributions import *
 import numpy as np
 import time
+from taurex.cache import OpacityCache,CIACache
+OpacityCache().set_opacity_path('/Users/ahmed/Documents/taurex_files/xsec/TauRex_sampled_xsecs_R10000_0.3-15')
+CIACache().set_cia_path('/Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/cia/hitran/')
+
 
 gas = ConstantGasProfile(active_gases=['H2O'],
                         active_gas_mix_ratio=[1e-4],n2_mix_ratio=1e-12,mode='log')
@@ -17,9 +21,8 @@ gas = ConstantGasProfile(active_gases=['H2O'],
 temp = Isothermal(iso_temp=1550)
 
 tm = TransmissionModel(nlayers=30,gas_profile= gas,temperature_profile=temp
-                ,atm_min_pressure=1e-5,atm_max_pressure=1e6,
-        opacity_path='/Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/xsec/TauRex_sampled_xsecs_R10000_0.3-15')
-tm.add_contribution(CIAContribution(cia_path='/Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/cia/hitran'))
+                ,atm_min_pressure=1e-5,atm_max_pressure=1e6)
+tm.add_contribution(CIAContribution(cia_pairs=['H2-He','H2-H2']))
 tm.add_contribution(RayleighContribution())
 tm.build()
 
@@ -28,8 +31,8 @@ from taurex.optimizer.multinest import MultiNestOptimizer
 from taurex.optimizer.nestle import NestleOptimizer
 from taurex.data.spectrum.observed import ObservedSpectrum
 
-# opt = MultiNestOptimizer('/Users/ahmed/Documents/taurex_files/multinest',model=tm)
-opt = NestleOptimizer(model=tm)
+opt = MultiNestOptimizer('/Users/ahmed/Documents/taurex_files/multinest',model=tm)
+#opt = NestleOptimizer(model=tm)
 obs = ObservedSpectrum('/Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_transmission/SPECTRUM_fit.dat')
 
 
@@ -37,6 +40,8 @@ obs = ObservedSpectrum('/Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/
 print(tm.fittingParameters.keys())
 
 opt.set_observed(obs)
+
+opt.set_wavenumber_grid(obs.wavenumberGrid)
 
 opt.compile_params()
 opt.enable_fit('T')
@@ -73,10 +78,13 @@ print(list(zip(opt.fit_names,opt.fit_values)))
 
 
 obs_bins = obs.wavenumberGrid
-xsec_wnbins = tm.opacity_dict['H2O'].wavenumberGrid
-absptn,tau,contrib = tm.model(tm.opacity_dict['H2O'].wavenumberGrid)
+xsec_wnbins = OpacityCache()['H2O'].wavenumberGrid
+absptn,tau,contrib = tm.model(xsec_wnbins)
 
 bin_means = (np.histogram(xsec_wnbins,obs_bins, weights=absptn)[0] /
              np.histogram(xsec_wnbins,obs_bins)[0])
 
-np.save('output_spec_big.npy',bin_means)
+wlgrid = np.log10(obs.wavelengthGrid)
+
+plt.plot(wlgrid,obs.spectrum)
+plt.plot(wlgrid[:-1],bin_means)
