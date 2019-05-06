@@ -4,12 +4,12 @@ import numpy as np
 
 class Optimizer(Logger):
 
-    def __init__(self,name,observed=None,model=None):
+    def __init__(self,name,observed=None,model=None,wngrid=None):
         super().__init__(name)
 
         self._model = model
         self._observed = observed
-        
+        self._wngrid = None
         self._model_callback = None
 
     def set_model(self,model):
@@ -18,6 +18,8 @@ class Optimizer(Logger):
     def set_observed(self,observed):
         self._observed = observed
 
+    def set_wavenumber_grid(self,wngrid):
+        self._wngrid = wngrid
 
     def compile_params(self):
         self.info('Initializing parameters')
@@ -97,7 +99,7 @@ class Optimizer(Logger):
         self.update_model(fit_params)
 
         obs_bins= self._observed.wavenumberGrid
-        wngrid = self._model.nativeWavenumberGrid
+        wngrid = self._wngrid
 
         #wngrid = obs_bins
 
