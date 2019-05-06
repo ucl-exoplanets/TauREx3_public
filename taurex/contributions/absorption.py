@@ -2,7 +2,7 @@
 from .contribution import Contribution
 import numpy as np
 import numba
-
+from taurex.cache import OpacityCache
 @numba.jit(nopython=True, nogil=True,parallel=True)
 def absorption_numba(sigma,density,path,nlayers,ngrid,nmols,layer):
     tau = np.zeros(shape=(ngrid,))
@@ -20,7 +20,7 @@ class AbsorptionContribution(Contribution):
 
     def __init__(self):
         super().__init__('Absorption')
-
+        self._opacity_cache = OpacityCache()
     
 
     def contribute(self,model,layer,density,path_length,return_contrib):
@@ -55,7 +55,7 @@ class AbsorptionContribution(Contribution):
                 self.debug('Got index,tp {} {}'.format(idx_layer,tp))
                 temperature,pressure = tp
                 pressure/=1e5
-                sigma_xsec[idx_layer,idx_gas] = model.opacity_dict[gas].opacity(temperature,pressure,wngrid)
+                sigma_xsec[idx_layer,idx_gas] = self._opacity_cache[gas].opacity(temperature,pressure,wngrid)
         
 
         active_gas = model._gas_profile.activeGasMixProfile.transpose()[...,None]

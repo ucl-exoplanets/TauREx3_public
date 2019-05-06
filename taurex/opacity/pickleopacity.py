@@ -42,7 +42,7 @@ class PickleOpacity(Opacity):
         self.clean_molecule_name()
     def clean_molecule_name(self):
         splits = self.moleculeName.split('_')
-        self._molecule_name = splits[0]
+        self._molecule_name = splits[0].upper()
 
     @property
     def wavenumberGrid(self):

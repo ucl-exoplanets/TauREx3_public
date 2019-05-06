@@ -11,37 +11,40 @@ from taurex.data.profiles.pressure import SimplePressureProfile
 from taurex.data.profiles.temperature import Guillot2010,Isothermal
 from taurex.data.planet import Earth,Planet
 
-import time
+from taurex.cache import OpacityCache,CIACache
 
+import time
+import matplotlib
 from taurex.data.stellar import Star
 from taurex.constants import RSOL,MJUP,RJUP
 import matplotlib.pyplot as plt
 from taurex.model import TransmissionModel
-from taurex.contributions.cuda.absorption import GPUAbsorptionContribution
-from taurex.contributions.cuda.cia import GPUCIAContribution
-from taurex.contributions.cuda.rayleigh import GPURayleighContribution
+#from taurex.contributions.cuda.absorption import GPUAbsorptionContribution
+#from taurex.contributions.cuda.cia import GPUCIAContribution
+#from taurex.contributions.cuda.rayleigh import GPURayleighContribution
 from taurex.contributions import CIAContribution,RayleighContribution,AbsorptionContribution
 import logging
 import numexpr as ne
 
 
-logging.basicConfig(level=logging.WARNING)
+logging.basicConfig(level=logging.INFO)
 
-abs = GPUAbsorptionContribution()
+OpacityCache().set_opacity_path('/Users/ahmed/Documents/taurex_files/xsec/TauRex_sampled_xsecs_R10000_0.3-15')
+CIACache().set_cia_path('/Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/cia/hitran/')
+absc = AbsorptionContribution()
 
-tm = TransmissionModel(gas_profile=ConstantGasProfile(active_gases=['H2O','CH4','CO','VO'],active_gas_mix_ratio=[1e-6,1e-6,1e-6,1e-6]),
-                       opacity_path='C:/Users/Bahamut/Documents/TaurexFiles/Input/xsec/TauRex_sampled_xsecs_R10000_0.3-15',
+tm = TransmissionModel(gas_profile=ConstantGasProfile(active_gases=['H2O'],active_gas_mix_ratio=[1e-6]),
                        planet=Planet(),
                        star=Star(),
                        temperature_profile=Isothermal(),nlayers=30,
-                        abs_contrib=abs)
+                        abs_contrib=absc)
 
-tm.add_contribution(GPUCIAContribution(cia_path='C:/Users/Bahamut/Documents/TaurexFiles/Input/cia/hitran/'))
-tm.add_contribution(GPURayleighContribution())
+tm.add_contribution(CIAContribution(cia_pairs=['H2-H2','H2-He']))
+tm.add_contribution(RayleighContribution())
 
 tm.build()
 
-wngrid = tm.opacity_dict['H2O'].wavenumberGrid
+wngrid = OpacityCache()['H2O'].wavenumberGrid
 
 absorption,tau,contributions = tm.model(wngrid,return_contrib=True)
 
@@ -55,16 +58,16 @@ print('Total time taken for 10 iterations {} s time per iteration {}'.format(end
 
 wlgrid = np.log10(10000/wngrid)
 
-# fig = plt.figure()
+fig = plt.figure()
 
-# for name,value in contributions:
-#     plt.plot(wlgrid,value,label=name)
+for name,value in contributions:
+    plt.plot(wlgrid,value,label=name)
 
 
 
-# plt.plot(wlgrid,absorption,label='total')
-# plt.legend()
-# plt.show()
+plt.plot(wlgrid,absorption,label='total')
+plt.legend()
+plt.show()
 
 
 
