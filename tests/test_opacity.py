@@ -34,7 +34,7 @@ class PickleOpacityTest(unittest.TestCase):
     def test_properties(self):
 
         
-        self.assertEqual(self.pop.moleculeName,'testMol')
+        self.assertEqual(self.pop.moleculeName,'TESTMOL')
         np.testing.assert_equal(pickle_test_data['t'],self.pop.temperatureGrid)
         np.testing.assert_equal(pickle_test_data['p'],self.pop.pressureGrid)
         np.testing.assert_equal(pickle_test_data['wno'],self.pop.wavenumberGrid)
