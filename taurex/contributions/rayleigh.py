@@ -33,10 +33,8 @@ class RayleighContribution(Contribution):
         # contrib = ne.evaluate('sum(contrib,axis=0)')
         #contrib = np.sum(sigma*density*path_length,axis=0)
         #contrib = np.sum(contrib,axis=0)
-        contrib = rayleigh_numba(self.sigma_rayleigh,density,path_length,self._nlayers,self._ngrid,self._nmols,layer)
-        if return_contrib:
-            self._total_contrib[layer,:]+=contrib
-        return contrib
+        self._total_contrib[layer,:]+= rayleigh_numba(self.sigma_rayleigh,density,path_length,self._nlayers,self._ngrid,self._nmols,layer)
+
 
     def build(self,model):
         pass

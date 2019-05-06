@@ -26,8 +26,8 @@ def cia_cuda(sigma,density,path,nlayers,ngrid,nmols,layer,tau):
 class GPUCIAContribution(CIAContribution):
 
 
-    def __init__(self,cia=None,cia_path=None):
-        super().__init__(cia=cia,cia_path=cia_path)
+    def __init__(self,cia_pairs=None):
+        super().__init__(cia_pairs=cia_pairs)
         self._stream = cuda.stream()
 
     def contribute(self,model,layer,density,path_length,return_contrib):
