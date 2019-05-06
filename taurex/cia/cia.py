@@ -15,16 +15,16 @@ class CIA(Logger):
     
     @property
     def pairName(self):
-        return self._pair_name
+        return self._pair_name.upper()
 
 
     @property
     def pairOne(self):
-        return self._pair_name.split('-')[0]
+        return self._pair_name.split('-')[0].upper()
 
     @property
     def pairTwo(self):
-        return self._pair_name.split('-')[-1]
+        return self._pair_name.split('-')[-1].upper()
     def compute_cia(self,temperature):
         raise NotImplementedError
 
