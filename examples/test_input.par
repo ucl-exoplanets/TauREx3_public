@@ -1,0 +1,45 @@
+[Global]
+xsec_path = C:\Downloads\
+cia_path = C:\Downloads\
+
+
+[Gas]
+profile_type = Constant
+active_gases = H2O,CH4,CO2
+mode = linear
+
+
+[Temperature]
+profile_type = Guillot2010
+T_irr = 1500.0
+
+[Pressure]
+profile_type = Simple
+atm_min_pressure = 0.001
+atm_max_pressure = 10e6
+nlayers = 300
+
+[Planet]
+planet_type = Simple
+mass = 1.0 
+radius = 1.0
+
+[Star]
+star_type = Simple
+radius = 1.0
+
+[Model]
+model_type = transmission
+
+    [[Absorption]]
+    [[CIA]]
+    cia_pairs = H2-He,H2-H2,N2-N2
+    [[Rayleigh]]
+
+
+[Optimizer]
+optimizer = Nestle
+
+[Fitting]
+T_irr:fit = true
+T_irr:bounds = 1200.0,1600.0
