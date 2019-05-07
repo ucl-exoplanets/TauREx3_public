@@ -4,12 +4,15 @@ log = Logger('Factory')
 
 def get_keywordarg_dict(klass):
     import inspect
-
+    init_dicts = {}
     args, varargs, varkw, defaults = inspect.getargspec(klass.__init__)
+    log.debug('Inpection {} {} {} {}'.format(args, varargs, varkw, defaults))
+    if defaults is None:
+        return init_dicts
 
     keyword_args = args[-len(defaults):]
     
-    init_dicts = {}
+    
 
     for keyword,value in zip(keyword_args,defaults):
         init_dicts[keyword] = value
@@ -65,7 +68,7 @@ def temp_factory(profile_type):
     if profile_type == 'isothermal':
         from taurex.data.profiles.temperature import Isothermal
         return Isothermal
-    elif profile_type== 'guillot':
+    elif profile_type in ('guillot','guillot2010',):
         from taurex.data.profiles.temperature import Guillot2010
         return Guillot2010
     else:
@@ -88,5 +91,63 @@ def create_temperature_profile(config):
 def create_pressure_profile(config):
     return create_profile(config,pressure_factory)
 
+def model_factory(model_type):
+    if model_type =='transmission':
+        from taurex.model import TransmissionModel
+        return TransmissionModel
+    else:
+        raise NotImplementedError('Model {} not implemented'.format(model_type))
+
+
+def generate_contributions(config):
+    from taurex.contributions import AbsorptionContribution,CIAContribution,RayleighContribution
+
+    contributions = []
+    for key in config.keys():
+        if key == 'Absorption':
+            contributions.append(create_klass(config[key],AbsorptionContribution))
+        elif key == 'CIA':
+            contributions.append(create_klass(config[key],CIAContribution))
+        elif key == 'Rayleigh':
+            contributions.append(create_klass(config[key],RayleighContribution))
+        elif key == 'AbsorptionCUDA':
+            from taurex.contributions.cuda.absorption import GPUAbsorptionContribution
+            contributions.append(create_klass(config[key],GPUAbsorptionContribution))
+        elif key == 'CIACUDA':
+            from taurex.contributions.cuda.cia import GPUCIAContribution
+            contributions.append(create_klass(config[key],GPUCIAContribution))
+        elif key == 'RayleighCUDA':
+            from taurex.contributions.cuda.rayleigh import GPURayleighContribution
+            contributions.append(create_klass(config[key],GPURayleighContribution))     
+
+    return contributions
+
     
+def create_model(config,gas,temperature,pressure,planet,star):
+    try:
+        model_type = config.pop('model_type').lower()
+    except KeyError:
+        log.error('No model_type defined input')
+        raise KeyError    
+
+    klass = model_factory(model_type)
     
+    kwargs = get_keywordarg_dict(klass)
+    log.debug('Model kwargs {}'.format(kwargs))
+    log.debug('---------------{} {} {}--------------'.format(gas,gas.active_gases,gas.active_gas_mix_ratio))
+    kwargs['planet'] = planet
+    kwargs['star'] = star
+    kwargs['gas_profile'] = gas
+    kwargs['temperature_profile'] =temperature
+    kwargs['pressure_profile'] = pressure
+    log.debug('New Model kwargs {}'.format(kwargs))
+    log.debug('Creating model---------------')
+    obj = klass(**kwargs)
+    
+    contribs = generate_contributions(config)
+
+    for c in contribs:
+        obj.add_contribution(c)
+
+
+    return obj       
