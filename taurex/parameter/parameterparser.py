@@ -28,7 +28,19 @@ class ParameterParser(Logger):
 
 
     def setup_globals(self):
-        
+        from taurex.cache import CIACache,OpacityCache
+        config = self._raw_config.dict()
+        if 'Global' in config:
+            try:
+                OpacityCache().set_opacity_path(config['Global']['xsec_path'])
+            except KeyError:
+                self.warning('No xsec path set, opacities cannot be used in model')
+            
+            try:
+                CIACache().set_cia_path(config['Global']['cia_path'])
+            except KeyError:
+                self.warning('No cia path set, cia cannot be used in model')
+
 
 
     def read(self,filename):
