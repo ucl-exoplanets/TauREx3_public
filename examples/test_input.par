@@ -7,6 +7,10 @@ cia_path = C:\Downloads\
 profile_type = Constant
 active_gases = H2O,CH4,CO2
 mode = linear
+H2O = 1e-7
+CH4 = 1e-3
+CO2 = 1e-4
+
 
 
 [Temperature]
@@ -39,6 +43,7 @@ model_type = transmission
 
 [Optimizer]
 optimizer = Nestle
+
 
 [Fitting]
 T_irr:fit = true
