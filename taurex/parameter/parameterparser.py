@@ -19,10 +19,13 @@ class ParameterParser(Logger):
             except:
                 pass
         elif isinstance(val, (str)):
-            try:
-                newval = float(val)
-            except:
-                pass
+            if val in ('True','true','False','false',):
+                newval = bool(val)
+            else:
+                try:
+                    newval = float(val)
+                except:
+                    pass
         section[key]=newval
         return newval
 
@@ -74,6 +77,7 @@ class ParameterParser(Logger):
 
             if 'grid_type' in spectrum_config:
                 grid_type = spectrum_config['grid_type']
+
                 if grid_type == 'observed':
                     if observed is not None:
                         return observed,observed.wavenumberGrid
@@ -143,5 +147,22 @@ class ParameterParser(Logger):
         if 'Star' in config:
             from taurex.data.stellar.star import Star
             return create_klass(config['Star'],Star)
+
+
+    def generate_fitting_parameters(self):
+        config = self._raw_config.dict()
+        if 'Fitting' in config:
+            fitting_config = config['Fitting']
+
+            fitting_params = {}
+
+            for key,value in fitting_config.items():
+                fit_param,fit_type=key.split(':')
+                if not fit_param in fitting_params:
+                    fitting_params[fit_param] = {'fit':None,'bounds':None}
+                
+                fitting_params[fit_param][fit_type]=value
+        
+        return fitting_params
 
 
