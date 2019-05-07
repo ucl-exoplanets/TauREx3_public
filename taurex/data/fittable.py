@@ -59,7 +59,11 @@ class Fittable(object):
             self.add_fittable_param(param_name,param_latex,get_func,set_func,def_fit,def_bounds)
 
 
-            
+    def __getitem__(self,key):
+        return self._param_dict[key][2]()
+
+    def __setitem__(self,key,value):
+        return self._param_dict[key][3](value)        
 
     def find_fitparams(self):
         """ 
