@@ -8,7 +8,7 @@ class PressureProfile(Fittable,Logger):
         Logger.__init__(self,name)
 
 
-        self._nlayers = nlayers
+        self._nlayers = int(nlayers)
         self._nlevels = self._nlayers + 1
 
     @property
