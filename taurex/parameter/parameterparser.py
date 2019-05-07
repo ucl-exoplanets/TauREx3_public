@@ -1,9 +1,11 @@
 import configobj
-from .factory import create_gas_profile,create_pressure_profile,create_temperature_profile,create_klass
+from taurex.log import Logger
+from .factory import create_gas_profile,create_pressure_profile,create_temperature_profile,create_klass,create_model
 
-class ParameterParser(object):
+class ParameterParser(Logger):
 
     def __init__(self):
+        super().__init__('ParamParser')
         self._read = False
     
 
@@ -24,41 +26,67 @@ class ParameterParser(object):
         section[key]=newval
         return newval
 
+
+    def setup_globals(self):
+        
+
+
     def read(self,filename):
-        self._config = configobj.ConfigObj(filename)
-        self._config.walk(self.transform)
+        import os.path
+        if not os.path.isfile(filename):
+            raise Exception('Input file {} does not exist'.format(filename))
+        self._raw_config = configobj.ConfigObj(filename)
+        self.debug('Raw Config file is {}, filename is {}'.format(self._raw_config,filename))
+        self._raw_config.walk(self.transform)
+        config = self._raw_config.dict()
+        self.debug('Config file is {}, filename is {}'.format(config,filename))
 
     def generate_model(self):
-        pass
-    
+        config = self._raw_config.dict()
+        if 'Model' in config:
+            gas = self.generate_gas_profile()
+            pressure = self.generate_pressure_profile()
+            temperature = self.generate_temperature_profile()
+            planet = self.generate_planet()
+            star = self.generate_star()
+            model= create_model(config['Model'],gas,temperature,pressure,planet,star)
+        else:
+            raise Exception('No model header defined in input file')
+        
+        return model
     def generate_gas_profile(self):
-        if 'Gas' in self._config:
-            return create_gas_profile(self._config['Gas'])
+        config = self._raw_config.dict()
+        if 'Gas' in config:
+            return create_gas_profile(config['Gas'])
         else:
             return None
 
     def generate_pressure_profile(self):
-        if 'Pressure' in self._config:
-            return create_pressure_profile(self._config['Pressure'])
+        config = self._raw_config.dict()
+        if 'Pressure' in config:
+            return create_pressure_profile(config['Pressure'])
         else:
             return None
     
     def generate_temperature_profile(self):
-        if 'Temperature' in self._config:
-            return create_temperature_profile(self._config['Temeperature'])
+        config = self._raw_config.dict()
+        if 'Temperature' in config:
+            return create_temperature_profile(config['Temperature'])
         else:
             return None
     
     def generate_planet(self):
-        if 'Planet' in self._config:
+        config = self._raw_config.dict()
+
+        if 'Planet' in config:
             from taurex.data.planet import Planet
-            return create_klass(self._config['Planet'],Planet)
+            return create_klass(config['Planet'],Planet)
         else:
             return None
     def generate_star(self):
-        if 'Star' in self._config:
+        config = self._raw_config.dict()
+        if 'Star' in config:
             from taurex.data.stellar.star import Star
-            return create_klass(self._config['Star'],Star)
+            return create_klass(config['Star'],Star)
 
 
-    
