@@ -20,16 +20,17 @@ packages = find_packages(exclude=('tests', 'doc'))
 provides = ['taurex',]
 
 
-requires = [
+requires = []
+
+
+install_requires = ['numpy','cython',
         'configobj',
         'numba',
         'numexpr',
         'matplotlib',
         'numpy',
-        'scipy'
-]
-
-install_requires = ['numpy','cython']
+        'scipy',
+        'nestle']
 
 
 
