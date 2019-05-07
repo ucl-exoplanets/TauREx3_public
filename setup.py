@@ -20,13 +20,20 @@ packages = find_packages(exclude=('tests', 'doc'))
 provides = ['taurex',]
 
 
-requires = []
+requires = [
+        'configobj',
+        'numba',
+        'numexpr',
+        'matplotlib',
+        'numpy',
+        'scipy'
+]
 
-install_requires = []
+install_requires = ['numpy','cython']
 
 
 
-console_scripts = []
+console_scripts = ['taurex=taurex.taurex:main']
 
 
 def return_major_minor_python():
