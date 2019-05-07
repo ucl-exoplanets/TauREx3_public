@@ -15,11 +15,11 @@ class Star(Fittable,Logger):
     """
     
 
-    def __init__(self,temperature=5000,radius=RSOL):
+    def __init__(self,temperature=5000,radius=1.0):
         Logger.__init__(self,'Star')
         Fittable.__init__(self)
         self._temperature = temperature
-        self._radius = radius
+        self._radius = radius*RSOL
     
 
     @property
