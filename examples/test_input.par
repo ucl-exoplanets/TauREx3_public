@@ -1,0 +1,62 @@
+[Global]
+xsec_path = C:\Users\Ahmed\Documents\TaurexData\xsec\xsec_sampled_R15000_0.3-15
+cia_path = C:\Users\Ahmed\Documents\TaurexData\cia\hitran
+
+
+[Gas]
+profile_type = Constant
+active_gases = H2O, CH4
+mode = log
+log_H2O = -4
+log_CH4 = -10
+N2 = -3.2510885714329305
+H2_He = 0.17647
+
+[Temperature]
+profile_type = Isothermal
+T = 1380.2792218153766
+
+[Pressure]
+profile_type = Simple
+atm_min_pressure = 1e-5
+atm_max_pressure = 1e6
+nlayers = 100
+
+[Planet]
+planet_type = Simple
+planet_mass = 1.0 
+planet_radius = 1.0
+
+[Star]
+mass = 1.0
+
+[Model]
+model_type = transmission
+
+    [[Absorption]]
+    [[CIA]]
+    cia_pairs = H2-He,H2-H2
+    [[Rayleigh]]
+
+[Spectrum]
+observed_spectrum = "C:\Users\Ahmed\Documents\TaurexData\tests\test_0_transmission\SPECTRUM_out.dat"
+grid_type = observed
+wavenumber_grid = 0.0,10000.0,10000
+wavelength_grid = 0.01,10.0,10000
+
+
+
+
+[Optimizer]
+optimizer = Nestle
+num_live_points = 10
+method = multi
+tol = 0.5
+
+
+[Fitting]
+T:fit = True
+T:bounds = 1200.0,1600.0
+log_CH4:fit = True
+log_CH4:bounds = -2,-5
+

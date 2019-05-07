@@ -18,10 +18,9 @@ class ACEGasProfile(GasProfile):
         self.inactive_gases = ['H2', 'HE', 'N2']
         self.ace_metallicity = metallicity
         self.ace_co = co_ratio
-        self.set_ace_params()
         self.active_gases = active_gases
         self._get_files(therm_file,spec_file)
-        self._get_gas_mask()
+
 
 
     def _get_files(self,therm_file,spec_file):
@@ -77,6 +76,8 @@ class ACEGasProfile(GasProfile):
 
 
     def compute_active_gas_profile(self):
+        self._get_gas_mask()
+        self.set_ace_params()
         self._ace_profile = md_ace(self._specfile,self._thermfile,self.altitude_profile/1000.0,self.pressure_profile/1.e5,self.temperature_profile,
             self.He_abund_dex,self.C_abund_dex,self.O_abund_dex,self.N_abund_dex)
         

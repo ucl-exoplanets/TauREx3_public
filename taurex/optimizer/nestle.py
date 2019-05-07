@@ -5,12 +5,12 @@ import os
 import time
 class NestleOptimizer(Optimizer):
 
-    def __init__(self,observed=None,model=None):
+    def __init__(self,observed=None,model=None,num_live_points=1500,method='multi',tol=0.5):
         super().__init__('Nestle',observed,model)
-        self._nlive = 1500     # number of live points
-        self._method = 'multi' # use MutliNest algorithm
+        self._nlive = int(num_live_points)    # number of live points
+        self._method = method # use MutliNest algorithm
         
-        self._tol = 0.5        # the stopping criterion
+        self._tol = tol       # the stopping criterion
     
 
     @property

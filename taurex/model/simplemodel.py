@@ -39,7 +39,7 @@ class SimpleForwardModel(ForwardModel):
         self.pressure_profile = pressure_profile
         self._temperature_profile = temperature_profile
         self._gas_profile = gas_profile
-
+        self.debug('Passed: {} {} {} {} {}'.format(planet,star,pressure_profile,temperature_profile,gas_profile))
         self.altitude_profile=None
         self.scaleheight_profile=None
         self.gravity_profile=None
@@ -49,6 +49,7 @@ class SimpleForwardModel(ForwardModel):
 
         self._sigma_opacities = None
 
+        self._native_grid = None
 
 
     def _compute_inital_mu(self):
@@ -146,6 +147,7 @@ class SimpleForwardModel(ForwardModel):
 
 
 
+
     # altitude, gravity and scale height profile
     def compute_altitude_gravity_scaleheight_profile(self,mu_profile=None):
         from taurex.constants import KBOLTZ
@@ -199,7 +201,20 @@ class SimpleForwardModel(ForwardModel):
 
 
 
-    
+    @property
+    def nativeWavenumberGrid(self):
+        from taurex.cache.opacitycache import OpacityCache
+        wavenumbergrid = [OpacityCache()[gas].wavenumberGrid for gas in self._gas_profile.active_gases]
+
+        current_grid = None
+        for wn in wavenumbergrid:
+            if current_grid is None:
+                current_grid = wn
+            if wn.shape[0] > current_grid.shape[0]:
+                current_grid = wn
+        
+        return current_grid
+                
 
                 
 
