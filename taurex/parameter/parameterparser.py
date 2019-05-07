@@ -84,15 +84,15 @@ class ParameterParser(Logger):
                     return observed,None
                 elif grid_type == 'manual':
 
-                    if 'wngrid' in spectrum_config:
-                        start,end,size = spectrum_config['wngrid']
+                    if 'wavenumber_grid' in spectrum_config:
+                        start,end,size = spectrum_config['wavenumber_grid']
                         return observed,np.linspace(start,end,int(size))
-                    elif 'wlgrid' in spectrum_config:
-                        start,end,size = spectrum_config['wlgrid']
+                    elif 'wavelength_grid' in spectrum_config:
+                        start,end,size = spectrum_config['wavelength_grid']
                         return observed,10000/np.linspace(start,end,int(size))
                     else:
-                       self.critical('grid type is manual yet neither wlgrid or wngrid is defined')
-                       raise Exception('wngrid/wlgrid not defined in input for manual grid_type')
+                       self.critical('grid type is manual yet neither wavelength_grid or wavenumber_grid is defined')
+                       raise Exception('wavenumber_grid/wavelength_grid not defined in input for manual grid_type')
                 else:
                     return observed,None
 
