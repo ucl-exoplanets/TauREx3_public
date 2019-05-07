@@ -27,16 +27,16 @@ class MultiNestOptimizer(Optimizer):
         # sampling efficiency (parameter, ...)
         self.sampling_eff = sampling_efficiency
         # number of live points
-        self.n_live_points = num_live_points
+        self.n_live_points = int(num_live_points)
         # maximum no. of iterations (0=inf)
         self.max_iter = max_iterations
         # search for multiple modes
-        self.multimodes = search_multi_modes
+        self.multimodes = int(search_multi_modes)
         #parameters on which to cluster, e.g. if nclust_par = 3, it will cluster on the first 3 parameters only.
         #if ncluster_par = -1 it clusters on all parameters
-        self.nclust_par = num_params_cluster
+        self.nclust_par = int(num_params_cluster)
         # maximum number of modes
-        self.max_modes = maximum_modes
+        self.max_modes = int(maximum_modes)
         # run in constant efficiency mode
         self.const_eff = constant_efficiency_mode
         # set log likelihood tolerance. If change is smaller, multinest will have converged
