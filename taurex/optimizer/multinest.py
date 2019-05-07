@@ -6,7 +6,7 @@ import os
 class MultiNestOptimizer(Optimizer):
 
 
-    def __init__(self,multi_nest_path,observed=None,model=None):
+    def __init__(self,multi_nest_path=None,observed=None,model=None):
         super().__init__('Multinest',observed,model)
 
         # sampling chains directory
@@ -34,6 +34,9 @@ class MultiNestOptimizer(Optimizer):
         self.imp_sampling = True
 
         self.dir_multinest = multi_nest_path  
+
+        self.resume = False
+        self.verbose = True
 
 
     def compute_fit(self):
@@ -79,8 +82,8 @@ class MultiNestOptimizer(Optimizer):
                         outputfiles_basename=os.path.join(self.dir_multinest, '3-'),
                         const_efficiency_mode = self.const_eff,
                         importance_nested_sampling = self.imp_sampling,
-                        resume = False,
-                        verbose = True,
+                        resume = self.resume,
+                        verbose = self.verbose,
                         sampling_efficiency = self.sampling_eff,
                         evidence_tolerance = self.evidence_tolerance,
                         mode_tolerance = self.mode_tolerance,
@@ -90,7 +93,19 @@ class MultiNestOptimizer(Optimizer):
         
         self.info('Fit complete.....')
 
-        return status
+        rank = 0
+
+        try:
+            from mpi4py import MPI
+            rank = MPI.COMM_WORLD.Get_rank()
+        except:
+            pass
+
+        #Only allow rank 0 to do any further processing
+        if rank == 0:
+            return status
+        else:
+            return None
 
     
     def process_multinest_status(self,status):
