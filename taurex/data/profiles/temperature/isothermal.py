@@ -20,7 +20,7 @@ class Isothermal(TemperatureProfile):
         self._iso_temp = iso_temp
     
 
-    @fitparam(param_name='T',param_latex='$T$')
+    @fitparam(param_name='T',param_latex='$T$',default_fit=False,default_bounds=[300.0, 2000.0])
     def isoTemperature(self):
         return self._iso_temp
 

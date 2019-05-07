@@ -7,7 +7,7 @@ def fitparam(f=None,param_name=None,param_latex=None,default_fit=False,default_b
     to the function
     """
     if f is None:
-        return partial(fitparam, param_name=param_name,param_latex=param_latex)
+        return partial(fitparam, param_name=param_name,param_latex=param_latex,default_fit=default_fit,default_bounds=default_bounds)
     
     def wrapper(self, *args, **kwargs):
         

@@ -1,1 +1,1 @@
-from .util import get_molecular_weight,molecule_texlabel
+from .util import get_molecular_weight,molecule_texlabel,bindown

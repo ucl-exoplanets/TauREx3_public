@@ -10,6 +10,7 @@ class ForwardModel(Logger):
         self.opacity_dict = {}
         self.cia_dict = {}
         
+        self._native_grid = None
 
         self.fitting_parameters = {}
 
@@ -23,7 +24,6 @@ class ForwardModel(Logger):
 
 
 
-
     def add_contribution(self,contrib):
         from taurex.contributions import Contribution
         if not isinstance(contrib,Contribution):
@@ -33,6 +33,7 @@ class ForwardModel(Logger):
                 self.contribution_list.append(contrib)
             else:
                 raise Exception('Contribution already exists')
+    
 
              
     

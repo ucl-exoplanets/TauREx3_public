@@ -17,31 +17,39 @@ class Planet(Fittable,Logger):
 
     """
     
-    def __init__(self,mass=MJUP,radius=RJUP,ld_coeff=1.0,distance=1):
+    def __init__(self,mass=1.0,radius=1.0,ld_coeff=1.0,distance=1):
         Logger.__init__(self,'Planet')
         Fittable.__init__(self)
-        self._mass = mass
-        self._radius = radius
+        self._mass = mass*MJUP
+        self._radius = radius*RJUP
         self._ld_coeff = ld_coeff
         self._distance = distance
 
     
-    @fitparam(param_name='planet_mass',param_latex='$M_p$',default_fit=False,default_bounds=[0.5*MJUP,1.5*MJUP])
+    @fitparam(param_name='planet_mass',param_latex='$M_p$',default_fit=False,default_bounds=[0.5,1.5])
     def mass(self):
-        return self._mass
+        return self._mass/MJUP
     
     @mass.setter
     def mass(self,value):
-        self._mass = value
+        self._mass = value*MJUP
 
 
-    @fitparam(param_name='planet_radius',param_latex='$R_p$',default_fit=True,default_bounds=[0.9*RJUP,1.1*RJUP])
+    @fitparam(param_name='planet_radius',param_latex='$R_p$',default_fit=True,default_bounds=[0.9,1.1])
     def radius(self):
-        return self._radius
+        return self._radius/RJUP
     
     @radius.setter
     def radius(self,value):
-        self._radius = value
+        self._radius = value*RJUP
+    
+    @property
+    def fullRadius(self):
+        return self._radius
+
+    @property
+    def fullMass(self):
+        return self._mass
 
     # @fitparam(param_name='planet_ld_coeff',param_latex=None,default_fit=False)
     # def limbDarkeningCoeff(self):
@@ -62,11 +70,11 @@ class Planet(Fittable,Logger):
 
     @property
     def gravity(self):
-        return (G * self.mass) / (self.radius**2) 
+        return (G * self.fullMass) / (self.fullRadius**2) 
 
     
     def gravity_at_height(self,height):
-        return (G * self.mass) / ((self.radius+height)**2) 
+        return (G * self.fullMass) / ((self.fullRadius+height)**2) 
 
 
 
