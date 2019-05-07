@@ -21,12 +21,12 @@ def main():
 
     pp = ParameterParser()
     pp.read(args.input_file)
-
+    pp.setup_globals()
     model = pp.generate_model()
 
     print(model)
     model.build()
-    print(model.model(np.linspace(0,20000,10000)))
+    print(model.model(np.linspace(0,20000,10000),return_contrib=True))
 
 
 if __name__=="__main__":

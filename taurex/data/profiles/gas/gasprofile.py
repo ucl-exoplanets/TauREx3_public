@@ -114,8 +114,12 @@ class TaurexGasProfile(GasProfile):
 
     def __init__(self,name,active_gases,active_gas_mix_ratio,n2_mix_ratio=0,he_h2_ratio=0.17647,mode='linear'):
         super().__init__(name,mode=mode)
+        if isinstance(active_gases,str):
+            active_gases = [active_gases]
+        
         self.active_gases = active_gases
         self.inactive_gases = ['H2', 'HE', 'N2']
+        self.debug('Active Gases {}'.format(self.active_gases))
         total_size_gases = len(self.active_gases)
         self.debug('Active gas length: {}'.format(total_size_gases))
         self.active_gas_mix_ratio = [0.0]*total_size_gases
