@@ -7,8 +7,30 @@ class NestleOptimizer(Optimizer):
 
     def __init__(self,observed=None,model=None):
         super().__init__('Nestle',observed,model)
-
+        self._nlive = 1500     # number of live points
+        self._method = 'multi' # use MutliNest algorithm
+        
+        self._tol = 0.5        # the stopping criterion
     
+
+    @property
+    def tolerance(self):
+        return self._tol
+    
+    @tolerance.setter
+    def tolerance(self,value):
+        self._tol = value
+    
+
+    @property
+    def numLivePoints(self):
+        return self._nlive
+    
+    @numLivePoints.setter
+    def numLivePoints(self,value):
+        self._nlive = value
+
+
 
     def compute_fit(self):
 
@@ -36,14 +58,11 @@ class NestleOptimizer(Optimizer):
 
         ndim = len(self.fitting_parameters)
         self.info('Beginning fit......')
-        nlive = 1500     # number of live points
-        method = 'multi' # use MutliNest algorithm
         ndims = ndim        # two parameters
-        tol = 0.5        # the stopping criterion
 
         t0 = time.time()
         
-        res = nestle.sample(nestle_loglike, nestle_uniform_prior, ndims, method=method, npoints=nlive, dlogz=tol,callback=nestle.print_progress)
+        res = nestle.sample(nestle_loglike, nestle_uniform_prior, ndims, method='multi', npoints=self.numLivePoints, dlogz=self.tolerance,callback=nestle.print_progress)
         t1 = time.time()
 
         timenestle = (t1-t0)
