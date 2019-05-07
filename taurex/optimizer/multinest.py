@@ -6,37 +6,49 @@ import os
 class MultiNestOptimizer(Optimizer):
 
 
-    def __init__(self,multi_nest_path=None,observed=None,model=None):
+    def __init__(self,multi_nest_path=None,observed=None,model=None,
+                sampling_efficiency='parameter',
+                num_live_points=1500,
+                max_iterations=0,
+                search_multi_modes = True,
+                num_params_cluster=-1,
+                maximum_modes=100,
+                constant_efficiency_mode=False,
+                evidence_tolerance=0.5,
+                mode_tolerance=-1e90,
+                importance_sampling=True,
+                resume=False,
+                verbose_output=True):
         super().__init__('Multinest',observed,model)
 
         # sampling chains directory
         self.nest_path = 'chains/'
         self.nclust_par = -1
         # sampling efficiency (parameter, ...)
-        self.sampling_eff = 'parameter'
+        self.sampling_eff = sampling_efficiency
         # number of live points
-        self.n_live_points = 1500
+        self.n_live_points = num_live_points
         # maximum no. of iterations (0=inf)
-        self.max_iter = 0
+        self.max_iter = max_iteration
         # search for multiple modes
-        self.multimodes = True
+        self.multimodes = search_multi_modes
         #parameters on which to cluster, e.g. if nclust_par = 3, it will cluster on the first 3 parameters only.
         #if ncluster_par = -1 it clusters on all parameters
-        self.nclust_par = -1
+        self.nclust_par = num_params_cluster
         # maximum number of modes
-        self.max_modes = 100
+        self.max_modes = maximum_modes
         # run in constant efficiency mode
-        self.const_eff = False
+        self.const_eff = constant_efficiency_mode
         # set log likelihood tolerance. If change is smaller, multinest will have converged
-        self.evidence_tolerance = 0.5
-        self.mode_tolerance = -1e90
+        self.evidence_tolerance = evidence_tolerance
+        self.mode_tolerance = mode_tolerance
         # importance nested sampling
-        self.imp_sampling = True
+        self.imp_sampling = importance_sampling
 
         self.dir_multinest = multi_nest_path  
 
-        self.resume = False
-        self.verbose = True
+        self.resume = resume
+        self.verbose = verbose_output
 
 
     def compute_fit(self):
