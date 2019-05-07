@@ -11,11 +11,12 @@ def main():
     from taurex.parameter import ParameterParser
     import matplotlib.pyplot as plt
     from taurex.util import bindown
-    logging.basicConfig(level=logging.WARNING,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    logging.basicConfig(level=logging.INFO,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     parser = argparse.ArgumentParser(description='Taurex')
     parser.add_argument("-i", "--input",dest='input_file',type=str,required=True,help="Input par file to pass")
     parser.add_argument("-R", "--retrieval",dest='retrieval',default=False, help="When set, runs retrieval",action='store_true')
     parser.add_argument("-p", "--plot",dest='plot',default=True,type=bool,help="Whether to plot after the run")
+
 
     args=parser.parse_args()
 
@@ -44,12 +45,7 @@ def main():
         bindown_wngrid = native_grid
     
 
-    if args.retrieval is False:
-        #Run the model
-        absp,tau,contrib=model.model(native_grid,return_contrib=True)
-        #Get out new binned down model
-        new_absp = bindown(native_grid,absp,bindown_wngrid)
-    else:
+    if args.retrieval is True:
         if observed is None:
             logging.critical('No spectrum is defined!!')
             quit()
@@ -74,18 +70,28 @@ def main():
             if bounds:
                 optimizer.set_boundary(key,bounds)
 
+        logging.getLogger().setLevel(logging.WARNING)
+
         optimizer.fit()
+
+    #Run the model
+    absp,tau,contrib=model.model(native_grid,return_contrib=True)
+    #Get out new binned down model
+    new_absp = bindown(native_grid,absp,bindown_wngrid)
+    wlgrid = np.log10(10000/bindown_wngrid)
+
+    for name,value in contrib:
+        new_value = bindown(native_grid,value,bindown_wngrid)
+        plt.plot(wlgrid[:-1],new_value,label=name)
 
     #If we have an observation then plot it
     if observed is not None:
         plt.plot(np.log10(observed.wavelengthGrid),observed.spectrum,label='observed')
 
-    wlgrid = np.log10(10000/bindown_wngrid)
+    
     #Plot the absorption
     plt.plot(wlgrid[:-1],new_absp,label='forward model')
-    for name,value in contrib:
-        new_value = bindown(native_grid,value,bindown_wngrid)
-        plt.plot(wlgrid[:-1],new_value,label=name)
+
 
     plt.legend()
     plt.show()
