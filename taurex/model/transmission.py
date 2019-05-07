@@ -24,8 +24,7 @@ class TransmissionModel(SimpleForwardModel):
                             gas_profile=None,
                             nlayers=100,
                             atm_min_pressure=1e-4,
-                            atm_max_pressure=1e6,
-                            abs_contrib= None
+                            atm_max_pressure=1e6
                             ):
         super().__init__('transmission_model',planet,
                             star,
@@ -36,9 +35,9 @@ class TransmissionModel(SimpleForwardModel):
                             atm_min_pressure,
                             atm_max_pressure)
 
-        if abs_contrib is None:
-            abs_contrib = AbsorptionContribution()
-        self.add_contribution(abs_contrib)
+        #if abs_contrib is None:
+        #    abs_contrib = AbsorptionContribution()
+        #self.add_contribution(abs_contrib)
 
     def compute_path_length(self,dz):
 
