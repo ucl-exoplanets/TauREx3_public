@@ -61,6 +61,40 @@ class ParameterParser(Logger):
         else:
             None
 
+    def generate_spectrum(self):
+        import numpy as np
+
+        config = self._raw_config.dict()
+        observed = None,
+        if 'Spectrum' in config:
+            spectrum_config = config['Spectrum']
+            if 'observed_spectrum' in spectrum_config:
+                from taurex.data.spectrum.observed import ObservedSpectrum
+                observed = ObservedSpectrum(spectrum_config['observed_spectrum'])
+
+            if 'grid_type' in spectrum_config:
+                grid_type = spectrum_config['grid_type']
+                if grid_type == 'observed':
+                    if observed is not None:
+                        return observed,observed.wavenumberGrid
+                    else:
+                        self.critical('grid type is observed yet no observed_spectrum is defined!!!')
+                        raise Exception('No observed spectrum defined for observed grid_type')
+                elif grid_type == 'native':
+                    return observed,None
+                elif grid_type == 'manual':
+
+                    if 'wngrid' in spectrum_config:
+                        start,end,size = spectrum_config['wngrid']
+                        return observed,np.linspace(start,end,int(size))
+                    elif 'wlgrid' in spectrum_config:
+                        start,end,size = spectrum_config['wlgrid']
+                        return observed,10000/np.linspace(start,end,int(size))
+                    else:
+                       self.critical('grid type is manual yet neither wlgrid or wngrid is defined')
+                       raise Exception('wngrid/wlgrid not defined in input for manual grid_type')
+                else:
+                    return observed,None
 
     def generate_model(self):
         config = self._raw_config.dict()
