@@ -9,7 +9,9 @@ import numpy as np
 import pickle
 
 class ForwardModelTest(unittest.TestCase):
-    pass
+    
+    def test_init(self):
+        pass
 
 
 
