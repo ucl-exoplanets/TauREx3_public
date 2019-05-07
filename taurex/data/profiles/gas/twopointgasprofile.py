@@ -8,11 +8,11 @@ from taurex.util import molecule_texlabel
 class TwoPointGasProfile(ComplexGasProfile):
 
     def __init__(self,
-                active_gases,
-                active_gas_mix_ratio,
-                active_complex_gases,
-                active_gases_mixratios_surface,
-                active_gases_mixratios_top,
+                active_gases=['H2O','CH4'],
+                active_gas_mix_ratio=[1e-5,1e-6],
+                active_complex_gases=['CH4'],
+                active_gases_mixratios_surface=[1e-4],
+                active_gases_mixratios_top=[1e-8],
                 n2_mix_ratio=0,he_h2_ratio=0.17647,mode='linear'):
 
         super().__init__('2-point gas',active_gases,
