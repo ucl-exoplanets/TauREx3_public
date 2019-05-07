@@ -113,6 +113,8 @@ class TransmissionModel(SimpleForwardModel):
 
     def compute_absorption(self,tau,dz):
         import numexpr as ne
+        #Inpreperation
+        tau[tau<0.0] = 0.0
         tau = ne.evaluate('exp(-tau)')
         ap = self.altitudeProfile[:,None]
         pradius = self._planet.fullRadius
