@@ -39,7 +39,7 @@ class SimpleForwardModel(ForwardModel):
         self.pressure_profile = pressure_profile
         self._temperature_profile = temperature_profile
         self._gas_profile = gas_profile
-
+        self.debug('Passed: {} {} {} {} {}'.format(planet,star,pressure_profile,temperature_profile,gas_profile))
         self.altitude_profile=None
         self.scaleheight_profile=None
         self.gravity_profile=None
