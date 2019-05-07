@@ -1,6 +1,6 @@
 import configobj
 from taurex.log import Logger
-from .factory import create_gas_profile,create_pressure_profile,create_temperature_profile,create_klass,create_model
+from .factory import create_gas_profile,create_pressure_profile,create_temperature_profile,create_klass,create_model,create_optimizer
 
 class ParameterParser(Logger):
 
@@ -53,6 +53,15 @@ class ParameterParser(Logger):
         config = self._raw_config.dict()
         self.debug('Config file is {}, filename is {}'.format(config,filename))
 
+
+    def generate_optimizer(self):
+        config = self._raw_config.dict()
+        if 'Optimizer' in config:
+            return create_optimizer(config['Optimizer'])
+        else:
+            None
+
+
     def generate_model(self):
         config = self._raw_config.dict()
         if 'Model' in config:
@@ -63,7 +72,7 @@ class ParameterParser(Logger):
             star = self.generate_star()
             model= create_model(config['Model'],gas,temperature,pressure,planet,star)
         else:
-            raise Exception('No model header defined in input file')
+            return None
         
         return model
     def generate_gas_profile(self):

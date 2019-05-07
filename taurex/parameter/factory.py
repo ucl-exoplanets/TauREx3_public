@@ -38,6 +38,9 @@ def create_klass(config,klass):
     return obj
 
 
+
+
+
 def create_profile(config,factory):
     try:
         profile_type = config.pop('profile_type').lower()
@@ -97,6 +100,31 @@ def model_factory(model_type):
         return TransmissionModel
     else:
         raise NotImplementedError('Model {} not implemented'.format(model_type))
+
+def optimizer_factory(optimizer):
+    if optimizer == 'nestle':
+        from taurex.optimizer.nestle import NestleOptimizer
+        return NestleOptimizer
+    elif optimizer in ('multinest','pymultinest',):
+        from taurex.optimizer.multinest import MultiNestOptimizer
+        return MultiNestOptimizer
+    else:
+        raise NotImplementedError('Optimizer {} not implemented'.format(optimizer))    
+
+
+def create_optimizer(config):
+    try:
+        optimizer = config.pop('optimizer').lower()
+    except KeyError:
+        log.error('No optimizier defined input')
+        raise KeyError    
+
+    klass = optimizer_factory(optimizer)
+
+    obj = create_klass(config,klass)
+    
+    return obj
+
 
 
 def generate_contributions(config):
