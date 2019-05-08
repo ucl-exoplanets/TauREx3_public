@@ -34,12 +34,12 @@ mass = 1.0
 model_type = transmission
 
     [[Absorption]]
-    #[[CIA]]
-    #cia_pairs = H2-He,H2-H2
-    #[[Rayleigh]]
+    [[CIA]]
+    cia_pairs = H2-He,H2-H2
+    [[Rayleigh]]
 
 [Spectrum]
-observed_spectrum = /Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_transmission/SPECTRUM_fit.dat
+observed_spectrum = /Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_transmission/SPECTRUM_out.dat
 grid_type = observed
 wavenumber_grid = 0.0,10000.0,10000
 wavelength_grid = 0.01,10.0,10000
