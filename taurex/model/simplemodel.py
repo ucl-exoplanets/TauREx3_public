@@ -90,9 +90,9 @@ class SimpleForwardModel(ForwardModel):
             self._gas_profile = ConstantGasProfile()
 
         if self._star is None:
-            from taurex.data.stellar import Star
+            from taurex.data.stellar import BlackbodyStar
             self.warning('No star, using the Sun')
-            self._star = Star()
+            self._star = BlackbodyStar()
     def initialize_profiles(self):
         self.info('Computing pressure profile')
         
@@ -130,7 +130,7 @@ class SimpleForwardModel(ForwardModel):
         for contrib in self.contribution_list:
             self.fitting_parameters.update(contrib.fitting_parameters())
 
-
+        self.debug('Available Fitting params: {}'.format(list(self.fitting_parameters.keys())))
     def build(self):
         self.info('Building model........')
         self._compute_inital_mu()

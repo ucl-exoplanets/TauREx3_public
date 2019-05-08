@@ -17,7 +17,7 @@ def main():
     parser.add_argument("-R", "--retrieval",dest='retrieval',default=False, help="When set, runs retrieval",action='store_true')
     parser.add_argument("-p", "--plot",dest='plot',default=True,type=bool,help="Whether to plot after the run")
     parser.add_argument("-g", "--debug-log",dest='debug',default=False,help="Debug log output",action='store_true')
-
+    parser.add_argument("-c", "--show-contrib",dest='contrib',default=False,help="Show contributions",action='store_true')
 
 
 
@@ -82,7 +82,7 @@ def main():
         optimizer.fit()
 
     #Run the model
-    absp,tau,contrib=model.model(native_grid,return_contrib=True)
+    absp,tau,contrib=model.model(native_grid,return_contrib=args.contrib)
     #Get out new binned down model
     new_absp = bindown(native_grid,absp,bindown_wngrid)
     wlgrid = np.log10(10000/bindown_wngrid)

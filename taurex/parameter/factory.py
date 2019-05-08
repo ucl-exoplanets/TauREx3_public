@@ -152,7 +152,10 @@ def generate_contributions(config):
             contributions.append(create_klass(config[key],GPUCIAContribution))
         elif key == 'RayleighCUDA':
             from taurex.contributions.cuda.rayleigh import GPURayleighContribution
-            contributions.append(create_klass(config[key],GPURayleighContribution))     
+            contributions.append(create_klass(config[key],GPURayleighContribution))
+        elif key == 'SimpleClouds':
+             from taurex.contributions import SimpleCloudsContribution
+             contributions.append(create_klass(config[key],SimpleCloudsContribution))
 
     return contributions
 
