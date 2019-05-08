@@ -4,7 +4,7 @@ import math
 from .simplemodel import SimpleForwardModel
 from .emission import EmissionModel
 from taurex.constants import PI
-class DirectImageModel(SimpleForwardModel):
+class DirectImageModel(EmissionModel):
     """
     Parameters
     ----------

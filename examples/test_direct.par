@@ -1,0 +1,66 @@
+[Global]
+xsec_path = /Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/xsec/TauRex_sampled_xsecs_R10000_0.3-15
+cia_path = /Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/cia/hitran
+
+
+[Gas]
+profile_type = Constant
+mode = log
+active_gases = H2O
+he_h2_ratio = 0.17647
+log_H2O = -5
+
+
+[Temperature]
+profile_type = Isothermal
+T = 1500.0
+
+
+[Pressure]
+profile_type = Simple
+atm_min_pressure = 1e-4
+atm_max_pressure = 1e6
+nlayers = 100
+
+[Planet]
+planet_type = Simple
+planet_mass = 1.0 
+planet_radius = 1.0
+
+[Star]
+mass = 1.0
+temperature = 5800
+
+[Model]
+model_type = directimage
+
+    [[Absorption]]
+    [[CIA]]
+    cia_pairs = H2-He,H2-H2
+    [[Rayleigh]]
+
+[Spectrum]
+#observed_spectrum = /Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_emission/SPECTRUM_out.dat
+grid_type = native
+wavenumber_grid = 0.0,10000.0,10000
+wavelength_grid = 0.01,10.0,10000
+
+
+
+
+[Optimizer]
+optimizer = multinest
+num_live_points = 100
+max_iterations = 1000
+resume=False
+verbose_output=True
+multi_nest_path = ../multinest
+
+
+
+[Fitting]
+T:fit = True
+T:bounds = 1200.0,1600.0
+log_H2O:fit = True
+log_H2O:bounds = -2,-5
+

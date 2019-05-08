@@ -101,6 +101,9 @@ def model_factory(model_type):
     elif model_type == 'emission':
         from taurex.model import EmissionModel
         return EmissionModel
+    elif model_type in ('directimage', 'direct image'):
+        from taurex.model import DirectImageModel
+        return DirectImageModel
     else:
         raise NotImplementedError('Model {} not implemented'.format(model_type))
 
