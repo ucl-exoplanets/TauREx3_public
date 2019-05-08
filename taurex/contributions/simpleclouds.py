@@ -13,7 +13,8 @@ class SimpleCloudsContribution(Contribution):
     def contribute(self,model,start_horz_layer,end_horz_layer,density_offset,layer,density,path_length=None):
 
         if model.pressureProfile[layer] >= self._cloud_pressure:
-            self._total_contrib[layer,:]+=1e100     
+            #Set to infinity so zero opacity
+            self._total_contrib[layer,:]=np.inf
     
 
 
