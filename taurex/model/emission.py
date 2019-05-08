@@ -74,7 +74,7 @@ class EmissionModel(SimpleForwardModel):
         w4 = 0.1012885
 
         temperature = self.temperatureProfile
-
+        tau = np.zeros(shape=(self.nLayers,wngrid_size))
         surface_tau = np.zeros(wngrid_size)
 
         layer_tau = np.zeros(wngrid_size)
@@ -103,6 +103,9 @@ class EmissionModel(SimpleForwardModel):
                 layer_tau += contrib.contribute(self,layer+1,total_layers,0,0,density,dz)  
                 dtau += contrib.contribute(self,layer,layer+1,0,0,density,dz)           
 
+            _tau = ne.evaluate('exp(-layer_tau) - exp(-dtau)')
+
+            tau[layer] += _tau
             #for contrib in self.contribution_list:
 
             self.debug('Layer_tau[{}]={}'.format(layer,layer_tau))
@@ -121,4 +124,4 @@ class EmissionModel(SimpleForwardModel):
         flux_total = ne.evaluate('2.0*PI*(I1*mu1*w1 + I2*mu2*w2 + I3*mu3*w3 + I4*mu4*w4)')
         self.debug('flux_total {}'.format(flux_total))
         
-        return self.compute_final_flux(flux_total),None,[]
+        return self.compute_final_flux(flux_total),tau,[]
