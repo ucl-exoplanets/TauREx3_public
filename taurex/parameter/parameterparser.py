@@ -68,7 +68,7 @@ class ParameterParser(Logger):
         import numpy as np
 
         config = self._raw_config.dict()
-        observed = None,
+        observed = None
         if 'Spectrum' in config:
             spectrum_config = config['Spectrum']
             if 'observed_spectrum' in spectrum_config:
