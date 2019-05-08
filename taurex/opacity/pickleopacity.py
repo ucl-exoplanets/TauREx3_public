@@ -132,28 +132,28 @@ class PickleOpacity(Opacity):
         self.debug('Check temeprature min/max {}/{}'.format(check_temperature_min,check_temperature_max))
         #Are we both max?
         if check_pressure_max and check_temperature_max:
-            self.warning('Maximum Temperature pressure reached. Using last')
+            self.debug('Maximum Temperature pressure reached. Using last')
             return self._xsec_grid[-1,-1] 
 
         #Max pressure
         if check_pressure_max:
-            self.warning('Max pressure reached. Interpolating temperature only')
+            self.debug('Max pressure reached. Interpolating temperature only')
             return self.interp_temp_only(T,t_idx_min,t_idx_max,-1)
         
         #Max temperature
         if check_temperature_max:
-            self.warning('Max temperature reached. Interpolating pressure only')
+            self.debug('Max temperature reached. Interpolating pressure only')
             return self.interp_pressure_only(P,p_idx_min,p_idx_max,-1)
 
         if check_pressure_min and check_temperature_min:
             return self._xsec_grid[0,0]
         
         if check_pressure_min:
-            self.warning('Min pressure reached. Interpolating temperature only')
+            self.debug('Min pressure reached. Interpolating temperature only')
             return self.interp_temp_only(T,t_idx_min,t_idx_max,0)          
 
         if check_temperature_min:
-            self.warning('Min temeprature reached. Interpolating pressure only')
+            self.debug('Min temeprature reached. Interpolating pressure only')
             return self.interp_pressure_only(P,p_idx_min,p_idx_max,0)  
 
         
