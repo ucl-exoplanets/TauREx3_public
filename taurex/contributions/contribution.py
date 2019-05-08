@@ -19,7 +19,7 @@ class Contribution(Fittable,Logger):
 
   
 
-    def contribute(self,model,layer,density,path_length=None,dz=None):
+    def contribute(self,model,layer,density,start_horz_layer,end_horz_layer,density_offset,path_length=None):
         raise NotImplementedError
 
     def build(self,model):

@@ -4,11 +4,11 @@ import numpy as np
 import numba
 from taurex.cache import OpacityCache
 @numba.jit(nopython=True, nogil=True,parallel=True)
-def absorption_numba(sigma,density,path,nlayers,ngrid,nmols,layer):
+def absorption_numba(startK,endK,density_offset,sigma,density,path,nlayers,ngrid,nmols,layer):
     tau = np.zeros(shape=(ngrid,))
-    for k in range(nlayers-layer):
+    for k in range(startK,endK):
         _path = path[k]
-        _density = density[k+layer]
+        _density = density[k+density_offset]
         for mol in range(nmols):
             for wn in numba.prange(ngrid):
                 tau[wn] += sigma[k+layer,mol,wn]*_path*_density
@@ -23,9 +23,10 @@ class AbsorptionContribution(Contribution):
         self._opacity_cache = OpacityCache()
     
 
-    def contribute(self,model,layer,density,path_length=None,dz=None):
-        self._total_contrib[layer] +=absorption_numba(self.sigma_xsec,density,path_length,self._nlayers,self._ngrid,self._nmols,layer)
-
+    def contribute(self,model,start_horz_layer,end_horz_layer,density_offset,layer,density,path_length=None):
+        contrib =absorption_numba(start_horz_layer,end_horz_layer,density_offset,self.sigma_xsec,density,path_length,self._nlayers,self._ngrid,self._nmols,layer)
+        self._total_contrib[layer] += contrib
+        return contrib
 
     def build(self,model):
         pass

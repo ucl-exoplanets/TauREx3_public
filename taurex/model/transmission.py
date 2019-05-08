@@ -88,10 +88,11 @@ class TransmissionModel(SimpleForwardModel):
             self.debug('Computing layer {}'.format(layer))
             dl = path_length[layer]
 
+            endK = total_layers-layer
 
             for contrib in self.contribution_list:
                 self.debug('Adding contribution from {}'.format(contrib.name))
-                contrib.contribute(self,layer,density_profile,path_length=dl)
+                contrib.contribute(self,0,endK,layer,layer,density_profile,path_length=dl)
 
         all_contrib = [c.totalContribution for c in self.contribution_list]
 
