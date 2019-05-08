@@ -34,9 +34,14 @@ mass = 1.0
 model_type = transmission
 
     [[Absorption]]
+    
     [[CIA]]
     cia_pairs = H2-He,H2-H2
+    
     [[Rayleigh]]
+
+    [[SimpleClouds]]
+    cloud_pressure=1
 
 [Spectrum]
 observed_spectrum = /Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_transmission/SPECTRUM_out.dat
