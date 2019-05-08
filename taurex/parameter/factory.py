@@ -98,6 +98,9 @@ def model_factory(model_type):
     if model_type =='transmission':
         from taurex.model import TransmissionModel
         return TransmissionModel
+    elif model_type == 'emission':
+        from taurex.model import EmissionModel
+        return EmissionModel
     else:
         raise NotImplementedError('Model {} not implemented'.format(model_type))
 
@@ -159,7 +162,7 @@ def create_model(config,gas,temperature,pressure,planet,star):
         raise KeyError    
 
     klass = model_factory(model_type)
-    
+    log.debug('Chosen_model is {}'.format(klass))
     kwargs = get_keywordarg_dict(klass)
     log.debug('Model kwargs {}'.format(kwargs))
     log.debug('---------------{} {} {}--------------'.format(gas,gas.active_gases,gas.active_gas_mix_ratio))

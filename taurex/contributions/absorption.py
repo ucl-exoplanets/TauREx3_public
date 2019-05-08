@@ -13,6 +13,9 @@ def absorption_numba(startK,endK,density_offset,sigma,density,path,nlayers,ngrid
             for wn in numba.prange(ngrid):
                 tau[wn] += sigma[k+layer,mol,wn]*_path*_density
     return tau
+#
+#sigma_interp[wn + nwngrid*(k + l*nlayers)] * active_mixratio[k+nlayers*l] * density[k] * dz[k]
+#sigma_interp
 
 
 class AbsorptionContribution(Contribution):

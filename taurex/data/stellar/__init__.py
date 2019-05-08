@@ -1,1 +1,1 @@
-from .star import Star
+from .star import BlackbodyStar

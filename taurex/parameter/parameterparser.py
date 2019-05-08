@@ -145,8 +145,8 @@ class ParameterParser(Logger):
     def generate_star(self):
         config = self._raw_config.dict()
         if 'Star' in config:
-            from taurex.data.stellar.star import Star
-            return create_klass(config['Star'],Star)
+            from taurex.data.stellar import BlackbodyStar
+            return create_klass(config['Star'],BlackbodyStar)
 
 
     def generate_fitting_parameters(self):
