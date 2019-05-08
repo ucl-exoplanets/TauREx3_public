@@ -1,8 +1,8 @@
  
 from .contribution import Contribution
 import numpy as np
-
-
+from taurex.data.fittable import fitparam
+import math
 
 class SimpleCloudsContribution(Contribution):
 
@@ -23,7 +23,13 @@ class SimpleCloudsContribution(Contribution):
     def prepare(self,model,wngrid):
         self._total_contrib = np.zeros(shape=(model.pressure_profile.nLayers,wngrid.shape[0],))
 
-        
+    @fitparam(param_name='log_clouds_pressure',param_latex='$log(P_\mathrm{clouds})$',default_fit=False,default_bounds=[-3, 6])
+    def cloudsPressure(self):
+        return math.log10(self._cloud_pressure)
+    
+    @cloudsPressure.setter
+    def cloudsPressure(self,value):
+        self._cloud_pressure = 10**value
 
     @property
     def totalContribution(self):
