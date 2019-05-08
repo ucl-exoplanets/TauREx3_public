@@ -11,15 +11,22 @@ def main():
     from taurex.parameter import ParameterParser
     import matplotlib.pyplot as plt
     from taurex.util import bindown
-    logging.basicConfig(level=logging.INFO,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    
     parser = argparse.ArgumentParser(description='Taurex')
     parser.add_argument("-i", "--input",dest='input_file',type=str,required=True,help="Input par file to pass")
     parser.add_argument("-R", "--retrieval",dest='retrieval',default=False, help="When set, runs retrieval",action='store_true')
     parser.add_argument("-p", "--plot",dest='plot',default=True,type=bool,help="Whether to plot after the run")
+    parser.add_argument("-g", "--debug-log",dest='debug',default=False,help="Debug log output",action='store_true')
+
+
 
 
     args=parser.parse_args()
 
+    if args.debug:
+        logging.basicConfig(level=logging.DEBUG,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    else:
+        logging.basicConfig(level=logging.INFO,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     #Parse the input file
     pp = ParameterParser()
     pp.read(args.input_file)
@@ -84,14 +91,15 @@ def main():
         new_value = bindown(native_grid,value,bindown_wngrid)
         plt.plot(wlgrid[:-1],new_value,label=name)
 
-    #If we have an observation then plot it
-    if observed is not None:
-        plt.plot(np.log10(observed.wavelengthGrid),observed.spectrum,label='observed')
+
 
     
     #Plot the absorption
     plt.plot(wlgrid[:-1],new_absp,label='forward model')
 
+    #If we have an observation then plot it
+    if observed is not None:
+        plt.plot(np.log10(observed.wavelengthGrid),observed.spectrum,label='observed')
 
     plt.legend()
     plt.show()
