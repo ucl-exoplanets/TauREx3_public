@@ -5,15 +5,16 @@ cia_path = /Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/cia/hitran
 
 [Gas]
 profile_type = Constant
-active_gases = H2O,
-active_gases_mix_ratios = 1e-5,
 mode = log
-N2 = 0.0
-h2_he_ratio = 0.17647
+active_gases = H2O
+he_h2_ratio = 0.17647
+log_H2O = -5
+
 
 [Temperature]
 profile_type = Isothermal
-T = 1500
+T = 1500.0
+
 
 [Pressure]
 profile_type = Simple
@@ -33,12 +34,13 @@ mass = 1.0
 model_type = transmission
 
     [[Absorption]]
-    #[[CIA]]
-    #cia_pairs = H2-He,H2-H2
+    [[CIA]]
+    cia_pairs = H2-He,H2-H2
     #[[Rayleigh]]
 
 [Spectrum]
-grid_type = native
+observed_spectrum = /Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_transmission/SPECTRUM_out.dat
+grid_type = observed
 wavenumber_grid = 0.0,10000.0,10000
 wavelength_grid = 0.01,10.0,10000
 

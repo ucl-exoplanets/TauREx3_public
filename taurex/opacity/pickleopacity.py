@@ -39,6 +39,9 @@ class PickleOpacity(Opacity):
         self._xsec_grid = self._spec_dict['xsecarr']
         self._resolution = np.average(np.diff(self._wavenumber_grid))
         self._molecule_name = self._spec_dict['name']
+
+        self._max_pressure_id,self._max_temperature_id = len(self._pressure_grid)-1,len(self._temperature_grid)-1
+
         self.clean_molecule_name()
     def clean_molecule_name(self):
         splits = self.moleculeName.split('_')
@@ -89,11 +92,71 @@ class PickleOpacity(Opacity):
 
         return t_idx_min,t_idx_max,p_idx_min,p_idx_max
     
+    def interp_temp_only(self,T,t_idx_min,t_idx_max,P):
+        Tmax = self._temperature_grid[t_idx_max]
+        Tmin = self._temperature_grid[t_idx_min]
+        fx0=self._xsec_grid[P,t_idx_min]
+        fx1 = self._xsec_grid[P,t_idx_max]
+
+        return fx0 + (fx1-fx0)*(T-Tmin)/(Tmax-Tmin)
+
+    def interp_pressure_only(self,P,p_idx_min,p_idx_max,T):
+        Pmax = self._pressure_grid[p_idx_max]
+        Pmin = self._pressure_grid[p_idx_min]
+        fx0=self._xsec_grid[p_idx_min,T]
+        fx1 = self._xsec_grid[p_idx_max,T]
+
+        return fx0 + (fx1-fx0)*(P-Pmin)/(Pmax-Pmin)
+
+
     def interp_bilinear_grid(self,T,P,t_idx_min,t_idx_max,p_idx_min,p_idx_max):
         import numexpr as ne
         #FORMAT OF XSEC IS P,T,XSEC
         #P is x
         #T is y
+
+        self.debug('Interpolating {} {} {} {} {} {}'.format(T,P,t_idx_min,t_idx_max,p_idx_min,p_idx_max))
+        self.debug('Stats are {} {} {} {}'.format(self._temperature_grid[-1],self.pressureGrid[-1],self._max_temperature_id,self._max_pressure_id))
+        if p_idx_max == 0 and t_idx_max == 0:
+
+            return np.zeros_like(self._xsec_grid[0,0])
+
+        check_pressure_max = p_idx_min >= self._max_pressure_id
+        check_temperature_max = t_idx_min >= self._max_temperature_id
+
+        check_pressure_min = p_idx_max == 0
+        check_temperature_min = t_idx_max == 0
+
+
+        self.debug('Check pressure min/max {}/{}'.format(check_pressure_min,check_pressure_max))
+        self.debug('Check temeprature min/max {}/{}'.format(check_temperature_min,check_temperature_max))
+        #Are we both max?
+        if check_pressure_max and check_temperature_max:
+            self.debug('Maximum Temperature pressure reached. Using last')
+            return self._xsec_grid[-1,-1] 
+
+        #Max pressure
+        if check_pressure_max:
+            self.debug('Max pressure reached. Interpolating temperature only')
+            return self.interp_temp_only(T,t_idx_min,t_idx_max,-1)
+        
+        #Max temperature
+        if check_temperature_max:
+            self.debug('Max temperature reached. Interpolating pressure only')
+            return self.interp_pressure_only(P,p_idx_min,p_idx_max,-1)
+
+        if check_pressure_min and check_temperature_min:
+            return self._xsec_grid[0,0]
+        
+        if check_pressure_min:
+            self.debug('Min pressure reached. Interpolating temperature only')
+            return self.interp_temp_only(T,t_idx_min,t_idx_max,0)          
+
+        if check_temperature_min:
+            self.debug('Min temeprature reached. Interpolating pressure only')
+            return self.interp_pressure_only(P,p_idx_min,p_idx_max,0)  
+
+        
 
         q_11 = self._xsec_grid[p_idx_min,t_idx_min]
         q_12 = self._xsec_grid[p_idx_min,t_idx_max]
@@ -106,8 +169,6 @@ class PickleOpacity(Opacity):
         Pmin = self._pressure_grid[p_idx_min]
 
         diff = ((Tmax-Tmin)*(Pmax-Pmin))
-        if diff  == 0:
-            return np.zeros_like(self._xsec_grid[0,0])
         factor = 1.0/((Tmax-Tmin)*(Pmax-Pmin))
 
         self.debug('FACTOR {}'.format(factor))
