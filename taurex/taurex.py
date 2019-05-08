@@ -35,8 +35,8 @@ def main():
     #Get the spectrum
     observed,bindown_wngrid = pp.generate_spectrum()
     
-    logging.info('Using grid {}'.format(bindown_wngrid))
-    logging.info('Observed grid is {}'.format(observed.wavenumberGrid))
+    #logging.info('Using grid {}'.format(bindown_wngrid))
+    #logging.info('Observed grid is {}'.format(observed.wavenumberGrid))
     #Get the native grid
     native_grid = model.nativeWavenumberGrid
 
