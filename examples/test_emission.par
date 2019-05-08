@@ -29,9 +29,10 @@ planet_radius = 1.0
 
 [Star]
 mass = 1.0
+temperature = 5800
 
 [Model]
-model_type = transmission
+model_type = Emission
 
     [[Absorption]]
     [[CIA]]
@@ -39,8 +40,8 @@ model_type = transmission
     [[Rayleigh]]
 
 [Spectrum]
-observed_spectrum = /Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_transmission/SPECTRUM_out.dat
-grid_type = observed
+observed_spectrum = /Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_emission/SPECTRUM_fit.dat
+grid_type = native
 wavenumber_grid = 0.0,10000.0,10000
 wavelength_grid = 0.01,10.0,10000
 

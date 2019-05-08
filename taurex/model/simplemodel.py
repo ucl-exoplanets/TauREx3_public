@@ -117,7 +117,7 @@ class SimpleForwardModel(ForwardModel):
         
         #Compute gravity scale height
         self.compute_altitude_gravity_scaleheight_profile()
-
+        
     def collect_fitting_parameters(self):
         self.fitting_parameters = {}
         self.fitting_parameters.update(self._planet.fitting_parameters())
@@ -221,6 +221,7 @@ class SimpleForwardModel(ForwardModel):
 
     def model(self,wngrid,return_contrib=False):
         self.initialize_profiles()
+        self._star.initialize(wngrid)
         for contrib in self.contribution_list:
             contrib.prepare(self,wngrid)
         return self.path_integral(wngrid,return_contrib)

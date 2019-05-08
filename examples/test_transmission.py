@@ -15,10 +15,10 @@ from taurex.cache import OpacityCache,CIACache
 
 import time
 import matplotlib
-from taurex.data.stellar import Star
+from taurex.data.stellar import BlackbodyStar
 from taurex.constants import RSOL,MJUP,RJUP
 import matplotlib.pyplot as plt
-from taurex.model import TransmissionModel
+from taurex.model import EmissionModel
 #from taurex.contributions.cuda.absorption import GPUAbsorptionContribution
 #from taurex.contributions.cuda.cia import GPUCIAContribution
 #from taurex.contributions.cuda.rayleigh import GPURayleighContribution
@@ -33,14 +33,13 @@ OpacityCache().set_opacity_path('/Users/ahmed/Documents/taurex_files/xsec/TauRex
 CIACache().set_cia_path('/Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/cia/hitran/')
 absc = AbsorptionContribution()
 
-tm = TransmissionModel(gas_profile=ConstantGasProfile(active_gases=['H2O'],active_gas_mix_ratio=[1e-6]),
+tm = EmissionModel(gas_profile=ConstantGasProfile(active_gases=['H2O'],active_gas_mix_ratio=[1e-6]),
                        planet=Planet(),
-                       star=Star(),
-                       temperature_profile=Isothermal(),nlayers=30,
-                        abs_contrib=absc)
-
-tm.add_contribution(CIAContribution(cia_pairs=['H2-H2','H2-He']))
-tm.add_contribution(RayleighContribution())
+                       star=BlackbodyStar(temperature=5800),
+                       temperature_profile=Isothermal(),nlayers=30)
+tm.add_contribution(AbsorptionContribution())
+#tm.add_contribution(CIAContribution(cia_pairs=['H2-H2','H2-He']))
+#tm.add_contribution(RayleighContribution())
 
 tm.build()
 
