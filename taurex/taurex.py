@@ -91,15 +91,15 @@ def main():
         new_value = bindown(native_grid,value,bindown_wngrid)
         plt.plot(wlgrid[:-1],new_value,label=name)
 
-
+    #If we have an observation then plot it
+    if observed is not None:
+        plt.plot(np.log10(observed.wavelengthGrid),observed.spectrum,label='observed')
 
     
     #Plot the absorption
     plt.plot(wlgrid[:-1],new_absp,label='forward model')
 
-    #If we have an observation then plot it
-    if observed is not None:
-        plt.plot(np.log10(observed.wavelengthGrid),observed.spectrum,label='observed')
+
 
     plt.legend()
     plt.show()

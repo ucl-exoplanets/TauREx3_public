@@ -56,15 +56,24 @@ class AbsorptionContribution(Contribution):
                 temperature,pressure = tp
                 pressure/=1e5
                 sigma_xsec[idx_layer,idx_gas] = self._opacity_cache[gas].opacity(temperature,pressure,wngrid)
-        
+                self.debug('Sigma for T {}, P:{} is {}'.format(temperature,pressure,sigma_xsec[idx_layer,idx_gas]))
 
         active_gas = model._gas_profile.activeGasMixProfile.transpose()[...,None]
         
+
+        self.debug('Sigma is {}'.format(sigma_xsec))
+        self.debug('Active gas mix ratio is {}'.format(active_gas))
+
+
         self._ngrid = wngrid.shape[0]
         self._nlayers = model.pressure_profile.nLayers
         self._nmols = ngases
 
-        self.sigma_xsec= ne.evaluate('sigma_xsec*active_gas')
+        self.sigma_xsec= sigma_xsec*active_gas
+
+
+        self.debug('Final sigma is {}'.format(self.sigma_xsec))
+        #quit()
         self.info('Done')
         self._total_contrib = np.zeros(shape=(model.pressure_profile.nLayers,wngrid.shape[0],))
         return self.sigma_xsec
