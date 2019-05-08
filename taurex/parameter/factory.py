@@ -22,7 +22,7 @@ def get_keywordarg_dict(klass):
 
 def create_klass(config,klass):
     kwargs = get_keywordarg_dict(klass)
-
+    
     for key in kwargs.keys():
         if key in config:
             value = config.pop(key)
@@ -121,7 +121,7 @@ def create_optimizer(config):
 
     klass = optimizer_factory(optimizer)
 
-    obj = create_klass(config,klass)
+    obj = klass(**config)
     
     return obj
 

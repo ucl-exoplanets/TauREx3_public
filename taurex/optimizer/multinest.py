@@ -29,7 +29,7 @@ class MultiNestOptimizer(Optimizer):
         # number of live points
         self.n_live_points = int(num_live_points)
         # maximum no. of iterations (0=inf)
-        self.max_iter = max_iterations
+        self.max_iter = int(max_iterations)
         # search for multiple modes
         self.multimodes = int(search_multi_modes)
         #parameters on which to cluster, e.g. if nclust_par = 3, it will cluster on the first 3 parameters only.
