@@ -35,20 +35,10 @@ class CIAContribution(Contribution):
         self._cia_pairs = value
 
 
-    def contribute(self,model,layer,density,path_length,return_contrib):
-        import numexpr as ne
-        total_layers = model.pressure_profile.nLayers
-        # sigma = self.sigma_cia[layer:total_layers,:]
-        # combined_pt_dt = (density*density*path_length)[...,None,None]
-        # contrib = ne.evaluate('sum(sigma*combined_pt_dt,axis=0)')
+    def contribute(self,model,layer,density,path_length=None,dz=None):
 
-        # contrib = ne.evaluate('sum(contrib,axis=0)')
         if self._total_cia > 0:
             self._total_contrib[layer,:]+=cia_numba(self.sigma_cia,density,path_length,self._nlayers,self._ngrid,self._total_cia,layer)
-
-        #if return_contrib:
-        #self._total_contrib[layer,:]+=contrib
-        #return contrib
 
 
 
