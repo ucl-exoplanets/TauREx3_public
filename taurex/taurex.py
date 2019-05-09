@@ -93,7 +93,7 @@ def main():
 
     #If we have an observation then plot it
     if observed is not None:
-        plt.plot(np.log10(observed.wavelengthGrid),observed.spectrum,label='observed')
+        plt.errorbar(np.log10(observed.wavelengthGrid),observed.spectrum,observed.errorBar,label='observed')
 
     
     #Plot the absorption
