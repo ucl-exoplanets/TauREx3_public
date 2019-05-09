@@ -5,7 +5,7 @@ class PhoenixStar(BlackbodyStar):
 
     def __init__(self,temperature=5000,radius=1.0,phoenix_file_path=None):
         super().__init__(temperature=temperature,radius=radius)
-
+        
     
     def preload_phoenix_spectra(self):
         pass
