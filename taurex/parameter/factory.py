@@ -84,6 +84,16 @@ def pressure_factory(profile_type):
     else:
         raise NotImplementedError('Pressure profile {} not implemented'.format(profile_type))
 
+def star_factory(star_type):
+    if star_type == 'blackbody':
+        from taurex.data.stellar import BlackbodyStar
+        return BlackbodyStar
+    elif star_type == 'phoenix':
+        from taurex.data.stellar import PhoenixStar
+        return PhoenixStar
+    else:
+        raise NotImplementedError('Star of type {} not implemented'.format(star_type))
+
 
 def create_gas_profile(config):
     return create_profile(config,gas_factory)
@@ -118,6 +128,19 @@ def optimizer_factory(optimizer):
         raise NotImplementedError('Optimizer {} not implemented'.format(optimizer))    
 
 
+def create_star(config):
+    try:
+        star = config.pop('star_type').lower()
+    except KeyError:
+        log.error('No star defined input')
+        raise KeyError    
+
+    klass = star_factory(star)
+
+    obj = klass(**config)
+    
+    return obj
+
 def create_optimizer(config):
     try:
         optimizer = config.pop('optimizer').lower()
@@ -130,7 +153,6 @@ def create_optimizer(config):
     obj = klass(**config)
     
     return obj
-
 
 
 def generate_contributions(config):

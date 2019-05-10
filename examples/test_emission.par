@@ -23,12 +23,12 @@ atm_max_pressure = 1e6
 nlayers = 100
 
 [Planet]
-planet_type = Simple
 planet_mass = 1.0 
 planet_radius = 1.0
 
 [Star]
-mass = 1.0
+star_type = phoenix
+phoenix_path = /Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/star_spectra/
 temperature = 5800
 
 [Model]
@@ -40,7 +40,7 @@ model_type = Emission
     [[Rayleigh]]
 
 [Spectrum]
-observed_spectrum = /Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_emission/SPECTRUM_fit.dat
+observed_spectrum = /Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_emission/SPECTRUM_out.dat
 grid_type = native
 wavenumber_grid = 0.0,10000.0,10000
 wavelength_grid = 0.01,10.0,10000

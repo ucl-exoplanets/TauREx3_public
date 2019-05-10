@@ -38,8 +38,8 @@ tm = EmissionModel(gas_profile=ConstantGasProfile(active_gases=['H2O'],active_ga
                        star=BlackbodyStar(temperature=5800),
                        temperature_profile=Isothermal(),nlayers=30)
 tm.add_contribution(AbsorptionContribution())
-#tm.add_contribution(CIAContribution(cia_pairs=['H2-H2','H2-He']))
-#tm.add_contribution(RayleighContribution())
+tm.add_contribution(CIAContribution(cia_pairs=['H2-H2','H2-He']))
+tm.add_contribution(RayleighContribution())
 
 tm.build()
 
