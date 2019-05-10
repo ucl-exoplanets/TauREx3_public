@@ -1,6 +1,6 @@
 import configobj
 from taurex.log import Logger
-from .factory import create_gas_profile,create_pressure_profile,create_temperature_profile,create_klass,create_model,create_optimizer
+from .factory import *
 
 class ParameterParser(Logger):
 
@@ -144,9 +144,11 @@ class ParameterParser(Logger):
             return None
     def generate_star(self):
         config = self._raw_config.dict()
+        
         if 'Star' in config:
-            from taurex.data.stellar import BlackbodyStar
-            return create_klass(config['Star'],BlackbodyStar)
+            return create_star(config['Star'])
+        else:
+            return None
 
 
     def generate_fitting_parameters(self):

@@ -31,6 +31,8 @@ class BlackbodyStar(Fittable,Logger):
     def temperature(self):
         return self._temperature
 
+
+
     def initialize(self,wngrid):
         self.sed = black_body(wngrid,self.temperature)
     
