@@ -31,7 +31,7 @@ class TestPhoenixStar(unittest.TestCase):
 
     
     def test_sort_temps(self):
-        ps = PhoenixStar(phoenix_file_path=self.test_dir)
+        ps = PhoenixStar(phoenix_path=self.test_dir)
         
         list_out = ps.detect_all_T(self.test_dir)
         new_list = [x[0] for x in list_out]
