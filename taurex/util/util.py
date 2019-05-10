@@ -120,3 +120,10 @@ def bindown(original_bin,original_data,new_bin):
     import numpy as np
     return(np.histogram(original_bin, new_bin, weights=original_data)[0] /
               np.histogram(original_bin, new_bin)[0])
+
+
+def movingaverage(a, n=3) :
+    import numpy as np
+    ret = np.cumsum(a)
+    ret[n:] = ret[n:] - ret[:-n]
+    return ret[n - 1:] / n
