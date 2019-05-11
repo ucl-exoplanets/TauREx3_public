@@ -15,7 +15,7 @@ class SimpleCloudsContribution(Contribution):
         if model.pressureProfile[layer] >= self._cloud_pressure:
             #Set to infinity so zero opacity
             self._total_contrib[layer,:]=np.inf
-    
+        return np.inf
 
 
     def build(self,model):

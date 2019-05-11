@@ -1,1 +1,1 @@
-from .util import get_molecular_weight,molecule_texlabel,bindown
+from .util import get_molecular_weight,molecule_texlabel,bindown,movingaverage

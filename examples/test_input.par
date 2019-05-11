@@ -13,9 +13,11 @@ log_H2O = -5
 
 
 [Temperature]
-profile_type = Isothermal
-T = 1372.86
-
+profile_type = Npoint
+T_surface = 1500.0
+temperature_points = 1000.0,500.0,200.0,40.0
+pressure_points = 1e4,1e2,1e0,1e-3
+T_top = 20.0
 
 [Pressure]
 profile_type = Simple
@@ -30,10 +32,9 @@ planet_radius = 1.0
 
 [Star]
 star_type = blackbody
-mass = 1.0
 
 [Model]
-model_type = emission
+model_type = transmission
 
     [[Absorption]]
     
