@@ -125,7 +125,7 @@ class NPoint(TemperatureProfile):
 
 
 
-
+    @property
     def profile(self):
 
         Tnodes = [self._T_surface,*self._t_points,self._T_top]
