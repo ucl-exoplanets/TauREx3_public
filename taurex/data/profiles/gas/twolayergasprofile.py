@@ -69,7 +69,7 @@ class TwoLayerGasProfile(ComplexGasProfile):
             wsize = self.nlayers * (smooth_window / 100.0)
             if (wsize % 2 == 0):
                 wsize += 1
-            C_smooth = 10**movingaverage(np.log10(chemprofile), wsize)
+            C_smooth = 10**movingaverage(np.log10(chemprofile), int(wsize))
             border = np.int((len(chemprofile) - len(C_smooth)) / 2)
             foo = chemprofile[::-1]
             foo[border:-border] = C_smooth[::-1]

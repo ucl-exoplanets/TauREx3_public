@@ -122,6 +122,7 @@ def bindown(original_bin,original_data,new_bin):
               np.histogram(original_bin, new_bin)[0])
 
 
+
 def movingaverage(a, n=3) :
     import numpy as np
     ret = np.cumsum(a)

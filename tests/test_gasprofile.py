@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 from taurex.data.profiles.gas.gasprofile import GasProfile,TaurexGasProfile
-from taurex.data.profiles.gas import ComplexGasProfile,TwoPointGasProfile
+from taurex.data.profiles.gas import ComplexGasProfile,TwoPointGasProfile,TwoLayerGasProfile
 
 class GasProfileTest(unittest.TestCase):
  
@@ -187,6 +187,17 @@ class TwoPointGasProfileTest(unittest.TestCase):
 
         cgp.initialize_profile(10,pres_prof,pres_prof,pres_prof)   
 
+class TwoLayerGasProfileTest(unittest.TestCase):
+
+    def test_compute_profile(self):
+        cgp = TwoLayerGasProfile(['H2O','CH4'],[1e-4,1e-12],['CH4'],[1e-4],[1e-8],[1e-4])  
+        params = cgp.fitting_parameters()
+        test_layers = 100
+
+        pres_prof = np.ones(test_layers)
+        self.assertIn('P CH4',params)
+        self.assertNotIn('P H2O',params)
+        cgp.initialize_profile(100,pres_prof,pres_prof,pres_prof)   
 
 
 class AceGasProfileTest(unittest.TestCase):
