@@ -58,12 +58,15 @@ def gas_factory(profile_type):
     if profile_type == 'constant':
         from taurex.data.profiles.gas import ConstantGasProfile
         return ConstantGasProfile
-    elif profile_type== 'twopoint':
+    elif profile_type in ('twopoint', '2point',):
         from taurex.data.profiles.gas import TwoPointGasProfile
         return TwoPointGasProfile
     elif profile_type == 'ace':
         from taurex.data.profiles.gas import ACEGasProfile
         return ACEGasProfile
+    elif profile_type in ('twolayer','2layer',):
+        from taurex.data.profiles.gas import TwoLayerGasProfile
+        return TwoLayerGasProfile
     else:
         raise NotImplementedError('Gas profile {} not implemented'.format(profile_type))
 
@@ -74,6 +77,12 @@ def temp_factory(profile_type):
     elif profile_type in ('guillot','guillot2010',):
         from taurex.data.profiles.temperature import Guillot2010
         return Guillot2010
+    elif profile_type in ('npoint',):
+        from taurex.data.profiles.temperature import NPoint
+        return NPoint
+    elif profile_type in ('rodgers','rodgers2010',):
+        from taurex.data.profiles.temperature import Rodgers2000
+        return Rodgers2000
     else:
         raise NotImplementedError('Temperature profile {} not implemented'.format(profile_type))
 

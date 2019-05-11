@@ -37,7 +37,8 @@ class NPoint(TemperatureProfile):
             raise Exception('Incorrect_number of temp and pressure points')
         
         self.info('Npoint temeprature profile is initialized')
-
+        self.debug('Passed temeprature points {}'.format(temperature_points))
+        self.debug('Passed pressure points {}'.format(pressure_points))
         self._t_points = temperature_points
         self._p_points = pressure_points
         self._T_surface = T_surface
