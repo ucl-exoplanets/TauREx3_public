@@ -145,7 +145,7 @@ class NPoint(TemperatureProfile):
 
         TP = np.interp((np.log(self.pressure_profile[::-1])), np.log(Pnodes[::-1]), Tnodes[::-1])
         #smoothing T-P profile
-        wsize = self.nlayers*(smooth_window/100.0)
+        wsize = int(self.nlayers*(smooth_window/100.0))
         if (wsize %2 == 0):
             wsize += 1
         TP_smooth = movingaverage(TP,wsize)

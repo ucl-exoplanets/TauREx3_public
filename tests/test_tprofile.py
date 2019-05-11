@@ -3,7 +3,7 @@ import numpy as np
 from taurex.data.profiles.temperature.tprofile import TemperatureProfile
 from taurex.data.profiles.temperature import NPoint
 from taurex.data.planet import Earth
- 
+from taurex.data.profiles.temperature import Rodgers2000
 class TemperatureProfileTest(unittest.TestCase):
  
     def setUp(self):
@@ -130,6 +130,36 @@ class NpointTest(unittest.TestCase):
         self.gen_npoint_test(29)
 
 
+class RodgersTest(unittest.TestCase):
+
+    def test_params(self):
+        import random
+        t_profile = np.arange(1,101,dtype=np.float)
+        rp=Rodgers2000(temperature_layers=t_profile)
+        params = rp.fitting_parameters()
+        for idx,val in enumerate(t_profile):
+            t_name = 'T_{}'.format(idx+1)
+            self.assertIn(t_name,params)
+            self.assertEqual(rp[t_name],val)
+
+            rand_val = random.uniform(10,1000)
+
+            rp[t_name] = rand_val
+            self.assertEqual(rp[t_name],rand_val)
+            self.assertEqual(rp._T_layers[idx],rand_val)
+
+
+    def test_profile(self):
+        t_profile = np.arange(1,101,dtype=np.float)
+
+        rp=Rodgers2000(temperature_layers=t_profile)
+        
+        test_layers = 100
+        pres_prof = np.ones(test_layers)
+
+        rp.initialize_profile(Earth(),test_layers,pres_prof)
+
+        rp.profile
 
 if __name__ == '__main__':
     unittest.main()
