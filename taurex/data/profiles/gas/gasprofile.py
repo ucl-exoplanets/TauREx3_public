@@ -183,9 +183,9 @@ class TaurexGasProfile(GasProfile):
             param_name = 'log_{}'.format(mol_name)
             param_tex = 'log({})'.format(molecule_texlabel(mol_name))
         
-        def read_mol(self):
+        def read_mol(self,idx=idx):
             return self.readableValue(self.active_gas_mix_ratio[idx])
-        def write_mol(self,value):
+        def write_mol(self,value,idx=idx):
             self.active_gas_mix_ratio[idx] = self.writeableValue(value)
 
         fget = read_mol
@@ -230,9 +230,9 @@ class ComplexGasProfile(TaurexGasProfile):
                 param_surface = 'S_log_{}'.format(mol_name)
                 param_surf_tex = 'S_log({})'.format(mol_tex)
 
-            def read_surf(self):
+            def read_surf(self,idx=idx):
                 return self.readableValue(self.active_gases_mixratios_surface[idx])
-            def write_surf(self,value):
+            def write_surf(self,value,idx=idx):
                 self.active_gases_mixratios_surface[idx] = self.writeableValue(value)
 
             fget_surf = read_surf
@@ -256,9 +256,9 @@ class ComplexGasProfile(TaurexGasProfile):
                 param_top = 'T_log_{}'.format(mol_name)
                 param_top_tex = 'T_log({})'.format(mol_tex)
 
-            def read_top(self):
+            def read_top(self,idx=idx):
                 return self.readableValue(self.active_gases_mixratios_top[idx])
-            def write_top(self,value):
+            def write_top(self,value,idx=idx):
                 self.active_gases_mixratios_top[idx] = self.writeableValue(value)
 
             fget_top = read_top

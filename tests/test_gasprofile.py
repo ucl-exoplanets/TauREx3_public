@@ -131,7 +131,7 @@ class ConstantProfileTest(unittest.TestCase):
     def test_init(self):
         from taurex.data.profiles.gas import ConstantGasProfile
         cgp = ConstantGasProfile(['H2O','CH4'],[1e-4,1e-12])
-    
+        print('Constant---------',[x[2] for x in cgp.fitting_parameters().values()])
         test_layers = 10
 
         pres_prof = np.ones(test_layers)
@@ -192,6 +192,8 @@ class TwoLayerGasProfileTest(unittest.TestCase):
     def test_compute_profile(self):
         cgp = TwoLayerGasProfile(['H2O','CH4'],[1e-4,1e-12],['CH4'],[1e-4],[1e-8],[1e-4])  
         params = cgp.fitting_parameters()
+
+
         test_layers = 100
 
         pres_prof = np.ones(test_layers)

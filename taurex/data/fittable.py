@@ -45,7 +45,7 @@ class Fittable(object):
         self._param_dict[param_name] = (param_name,param_latex,
                         fget.__get__(self),fset.__get__(self),
                                 default_fit,default_bounds)
-
+        
     def compile_fitparams(self):
 
         for fitparams in self.find_fitparams():
@@ -60,7 +60,9 @@ class Fittable(object):
 
 
     def __getitem__(self,key):
-        return self._param_dict[key][2]()
+        param = self._param_dict[key]
+
+        return param[2]()
 
     def __setitem__(self,key,value):
         return self._param_dict[key][3](value)        

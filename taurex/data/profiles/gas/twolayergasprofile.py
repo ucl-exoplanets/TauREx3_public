@@ -38,9 +38,9 @@ class TwoLayerGasProfile(ComplexGasProfile):
                 param_P = 'P_log_{}'.format(mol_name)
                 param_P_tex = 'P_log({})'.format(mol_tex)
 
-            def read_P(self):
+            def read_P(self,idx=idx):
                 return self.readableValue(self.active_gases_mixratios_P[idx])
-            def write_P(self,value):
+            def write_P(self,value,idx=idx):
                 self.active_gases_mixratios_P[idx] = self.writeableValue(value)
 
             fget_P = read_P
