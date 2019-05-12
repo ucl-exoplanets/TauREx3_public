@@ -20,10 +20,10 @@ def mie_numba(startK,endK,density_offset,sigma,density,path,nlayers,ngrid,layer)
 class MieContribution(Contribution):
 
 
-    def __init__(self,mie_path=None,mie_type='cloud',particle_radius=1.0,cloud_mix=1.0,cloud_bottom_pressure=1e-4,
+    def __init__(self,mie_path=None,mie_type='cloud',particle_radius=1.0,cloud_mix=1.0,cloud_bottom_pressure=1e-2,
                     cloud_top_pressure=1e-3):
         super().__init__('Mie')
-        self._mie_path = None
+        self._mie_path = mie_path
         self.load_mie_indices()
         self._mie_type = mie_type.lower()
 
@@ -60,11 +60,11 @@ class MieContribution(Contribution):
 
     @property
     def realReference(self):
-        return self.mie_indices[:,1]
+        return np.ascontiguousarray(self.mie_indices[:,1])
     
     @property
     def imaginaryReference(self):
-        return self.mie_indices[:,2]
+        return np.ascontiguousarray(self.mie_indices[:,2])
 
     @property
     def mieType(self):
@@ -105,11 +105,13 @@ class MieContribution(Contribution):
 
 
     def contribute(self,model,start_horz_layer,end_horz_layer,density_offset,layer,density,path_length=None):
-
-        contrib = mie_numba(start_horz_layer,end_horz_layer,
-            density_offset,self.sigma_mie,density,path_length,self._nlayers,self._ngrid,layer)
-        self._total_contrib[layer,:]+=contrib
-        return contrib
+        if model.pressureProfile[layer] <= self._cloud_bottom_pressure and model.pressureProfile[layer] >= self._cloud_top_pressure :
+            contrib = mie_numba(start_horz_layer,end_horz_layer,
+                density_offset,self.sigma_mie,density,path_length,self._nlayers,self._ngrid,layer)
+            self._total_contrib[layer,:]+=contrib
+            return contrib
+        else:
+            return 0.0
 
     def build(self,model):
         wavegrid = self.wavelengthGrid*1e-4 #micron to cm
@@ -149,7 +151,7 @@ class MieContribution(Contribution):
         return self._total_contrib
  
     def prepare(self,model,wngrid):
-        self._nlayer = model.nLayers
+        self._nlayers = model.nLayers
         self._ngrid = wngrid.shape[0]
         self.sigma_mie = np.interp(wngrid,self.wavenumberGrid,self._sig_out_aver)*self._mix_cloud_mix
         self._total_contrib = np.zeros(shape=(model.pressure_profile.nLayers,wngrid.shape[0],))
