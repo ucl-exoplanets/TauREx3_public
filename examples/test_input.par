@@ -41,7 +41,8 @@ model_type = transmission
     [[CIA]]
     cia_pairs = H2-He,H2-H2
     
-    [[Rayleigh]]
+    [[Mie]]
+    mie_path= /Users/ahmed/Documents/repos/TauREx3/src/MIE/MgSiO3.dat
 
     [[SimpleClouds]]
     clouds_pressure =5e3
