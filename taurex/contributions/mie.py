@@ -20,11 +20,17 @@ def mie_numba(startK,endK,density_offset,sigma,density,path,nlayers,ngrid,layer)
 class MieContribution(Contribution):
 
 
-    def __init__(self,mie_path=None,mie_type='cloud'):
+    def __init__(self,mie_path=None,mie_type='cloud',particle_radius=1.0,cloud_mix=1.0,cloud_bottom_pressure=1e-4,
+                    cloud_top_pressure=1e-3):
         super().__init__('Mie')
         self._mie_path = None
         self.load_mie_indices()
         self._mie_type = mie_type.lower()
+
+        self._mie_radius = 1.0
+        self._mix_cloud_mix = 1.0
+        self._cloud_top_pressure = 1.0
+        self._cloud_bottom_pressure = -1.0
     def load_mie_indices(self):
         import pathlib
         if self._mie_path is None:
@@ -38,10 +44,6 @@ class MieContribution(Contribution):
         self.mie_indices = mie_raw
         self.mie_species = species_name       
 
-        self._mie_radius = 1.0
-        self._mix_cloud_mix = 1.0
-        self._cloud_top_pressure = 1.0
-        self._cloud_bottom_pressure = -1.0
 
 
     @property
