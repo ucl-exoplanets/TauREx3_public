@@ -3,7 +3,7 @@ import pymultinest
 import numpy as np
 import os
 
-from taurex.util.util import read_table,read_error_line,read_error_into_dict,quantile_corner
+from taurex.util.util import read_table,read_error_line,read_error_into_dict,quantile_corner,recursively_save_dict_contents_to_output
 
 class MultiNestOptimizer(Optimizer):
 
@@ -108,9 +108,9 @@ class MultiNestOptimizer(Optimizer):
         self.info('Fit complete.....')
 
         self._multinest_output = self.store_nest_solutions()
-    
-    def process_multinest_status(self,status):
-        pass
+
+        self.debug('Multinest output {}'.format(self._multinest_output))
+
 
 
     def write_optimizer(self,output):
@@ -142,6 +142,11 @@ class MultiNestOptimizer(Optimizer):
     
     def write_fit(self,output):
         fit = super().write_fit(output)
+
+        if self._multinest_output:
+            recursively_save_dict_contents_to_output(output,self._multinest_output)
+
+
 
         return fit
 
@@ -238,7 +243,7 @@ class MultiNestOptimizer(Optimizer):
         modes_weights = np.asarray(modes_weights)
 
         for nmode in range(len(modes)):
-            print(nmode)
+            self.debug('Nmode: {}'.format(nmode))
 
             mydict = {'type': 'nest',
                     'local_logE': (NEST_out['NEST_stats']['modes'][0]['local log-evidence'],  NEST_out['NEST_stats']['modes'][0]['local log-evidence error']),
