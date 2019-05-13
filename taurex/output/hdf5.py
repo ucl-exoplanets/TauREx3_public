@@ -26,7 +26,7 @@ class HDF5OutputGroup(OutputGroup):
     def write_string_array(self,string_name,string_array):
 
         asciiList = [n.encode("ascii", "ignore") for n in string_array]
-        self._entry.create_dataset(string_name, (len(asciiList),1),'S10', asciiList)
+        self._entry.create_dataset(string_name, (len(asciiList),1),'S64', asciiList)
 class HDF5Output(Output):
     def __init__(self,filename):
         super().__init__('HDF5Output')
