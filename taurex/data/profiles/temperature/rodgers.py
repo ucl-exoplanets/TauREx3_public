@@ -12,7 +12,7 @@ class Rodgers2000(TemperatureProfile):
         self._tp_corr_length = correlation_length
         self._covariance = covariance_matrix
         self._T_layers = np.array(temperature_layers)
-        self.generate_temeprature_fitting_params()
+        self.generate_temperature_fitting_params()
 
     def gen_covariance(self):
         h = self._tp_corr_length
@@ -45,7 +45,7 @@ class Rodgers2000(TemperatureProfile):
     def correlationLength(self,value):
         self._tp_corr_length = value
 
-    def generate_temeprature_fitting_params(self):
+    def generate_temperature_fitting_params(self):
 
 
         bounds = [1e5,1e3]
