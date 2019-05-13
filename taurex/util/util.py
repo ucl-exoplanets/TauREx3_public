@@ -188,3 +188,28 @@ def read_table(txt, d=None, title=None):
     if len(data.shape) == 1:
         data = np.reshape(data, (1, -1))
     return data
+
+
+def recursively_save_dict_contents_to_output(output, dic):
+    """
+    ....
+    """
+    import numpy as np
+
+    for key, item in dic.items():
+        if isinstance(item,(float,int,np.int64,np.float64,)):
+            output.write_scalar(key,item)
+        elif isinstance(item,(np.ndarray,)):
+            output.write_array(key,item)
+        elif isinstance(item,(str,)):
+            output.write_string(key,item)
+        elif isinstance(item,(list,)):
+            if True in [isinstance(x,str) for x in item]:
+                output.write_string_array(key,item)
+            else:
+                output.write_list(key,item)
+        elif isinstance(item, dict):
+            group = output.create_group(key)
+            recursively_save_dict_contents_to_output(group, item)
+        else:
+            raise ValueError('Cannot save %s type'%type(item))
