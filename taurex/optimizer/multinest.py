@@ -12,7 +12,7 @@ class MultiNestOptimizer(Optimizer):
                 sampling_efficiency='parameter',
                 num_live_points=1500,
                 max_iterations=0,
-                search_multi_modes = True,
+                search_multi_modes = False,
                 num_params_cluster=-1,
                 maximum_modes=100,
                 constant_efficiency_mode=False,
@@ -47,7 +47,7 @@ class MultiNestOptimizer(Optimizer):
         # importance nested sampling
         self.imp_sampling = importance_sampling
 
-        self.dir_multinest = os.path.join(multi_nest_path, '1-') 
+        self.dir_multinest = multi_nest_path
 
         self.resume = resume
         self.verbose = verbose_output
@@ -86,6 +86,9 @@ class MultiNestOptimizer(Optimizer):
 
         datastd_mean = np.mean(datastd)
         ndim = len(self.fitting_parameters)
+        self.warning('Number of dimensions {}'.format(ndim))
+        self.warning('Fitting parameters {}'.format(self.fitting_parameters))
+
         self.info('Beginning fit......')
         pymultinest.run(LogLikelihood=multinest_loglike,
                         Prior=multinest_uniform_prior,
@@ -158,8 +161,8 @@ class MultiNestOptimizer(Optimizer):
         
 
 
-        self.info('Store the multinest results')
-        NEST_out = {}
+        self.warning('Store the multinest results')
+        NEST_out = {'solutions': {}}
         data = np.loadtxt(os.path.join(self.dir_multinest, '1-.txt'))
 
         NEST_analyzer = pymultinest.Analyzer(n_params=len(self.fitting_parameters),
@@ -199,7 +202,7 @@ class MultiNestOptimizer(Optimizer):
             mode['Strictly Local Log-Evidence'.lower()] = mode['Local Log-Evidence'.lower()]
             mode['Strictly Local Log-Evidence error'.lower()] = mode['Local Log-Evidence error'.lower()]
 
-            NEST_out['NEST_stats']['modes'].append(mode)
+            NEST_out['NEST_stats']['modes']=mode
 
 
         modes = []
@@ -266,6 +269,6 @@ class MultiNestOptimizer(Optimizer):
                     'trace': trace,
                 }
 
-            NEST_out['solutions'].append(mydict)
+            NEST_out['solutions']['solution{}'.format(idx)] = mydict
         
         return NEST_out

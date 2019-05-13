@@ -39,5 +39,5 @@ class SimpleCloudsContribution(Contribution):
 
     def write(self,output):
         contrib = super().write(output)
-        contrib.write_string_array('cloud_pressure',self._cloud_pressure)
+        contrib.write_scalar('cloud_pressure',self._cloud_pressure)
         return contrib

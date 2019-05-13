@@ -203,11 +203,12 @@ def recursively_save_dict_contents_to_output(output, dic):
             output.write_array(key,item)
         elif isinstance(item,(str,)):
             output.write_string(key,item)
-        elif isinstance(item,(list,)):
+        elif isinstance(item,(list,tuple,)):
+            if isinstance(item,tuple):
+                item = list(item)
             if True in [isinstance(x,str) for x in item]:
                 output.write_string_array(key,item)
-            else:
-                output.write_list(key,item)
+        
         elif isinstance(item, dict):
             group = output.create_group(key)
             recursively_save_dict_contents_to_output(group, item)

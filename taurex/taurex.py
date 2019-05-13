@@ -1,6 +1,26 @@
 """The main taurex program"""
 
 
+def write_spectrum(output,native_wngrid,model,tau,contributions,wngrid=None,binned_model=None,observed=None):
+    spectrum = output.create_group('Spectrum')
+    spectrum.write_array('native_wngrid',native_wngrid)
+    spectrum.write_array('native_spectrum',model)
+    spectrum.write_array('native_tau',tau)
+
+    contrib = spectrum.create_group('native_contributions')
+    for name,value in contributions:
+        contrib.write_array(name,value)
+
+    if wngrid is not None:
+        spectrum.write_array('wngrid',wngrid)
+    if binned_model is not None:
+        spectrum.write_array('binned_spectrum',binned_model)
+    if observed is not None:
+        spectrum.write_array('observed_spectrum',observed.spectrum)
+        spectrum.write_array('observed_wngrid',observed.wavenumberGrid)
+
+
+
 
 def main():
     import argparse
@@ -9,16 +29,15 @@ def main():
     import logging
     import numpy as np
     from taurex.parameter import ParameterParser
-    import matplotlib.pyplot as plt
     from taurex.util import bindown
-    
+    from taurex.output.hdf5 import HDF5Output
     parser = argparse.ArgumentParser(description='Taurex')
     parser.add_argument("-i", "--input",dest='input_file',type=str,required=True,help="Input par file to pass")
     parser.add_argument("-R", "--retrieval",dest='retrieval',default=False, help="When set, runs retrieval",action='store_true')
-    parser.add_argument("-p", "--plot",dest='plot',default=True,type=bool,help="Whether to plot after the run")
+    parser.add_argument("-p", "--plot",dest='plot',default=False,help="Whether to plot after the run",action='store_true')
     parser.add_argument("-g", "--debug-log",dest='debug',default=False,help="Debug log output",action='store_true')
     parser.add_argument("-c", "--show-contrib",dest='contrib',default=False,help="Show contributions",action='store_true')
-
+    parser.add_argument("-o","--output_file",dest='output_file',type=str)
 
 
     args=parser.parse_args()
@@ -51,6 +70,7 @@ def main():
     if bindown_wngrid is None:
         bindown_wngrid = native_grid
     
+    optimizer = None
 
     if args.retrieval is True:
         if observed is None:
@@ -82,27 +102,40 @@ def main():
         optimizer.fit()
 
     #Run the model
-    absp,tau,contrib=model.model(native_grid,return_contrib=args.contrib)
+    absp,tau,contrib=model.model(native_grid,return_contrib=True)
     #Get out new binned down model
     new_absp = bindown(native_grid,absp,bindown_wngrid)
-    wlgrid = np.log10(10000/bindown_wngrid)
 
-    for name,value in contrib:
-        new_value = bindown(native_grid,value,bindown_wngrid)
-        plt.plot(wlgrid[:-1],new_value,label=name)
+    if args.output_file:
+        #Output taurex data
+        with HDF5Output(args.output_file) as o:
+            model.write(o)
+            write_spectrum(o,native_grid,absp,tau,contrib,bindown_wngrid,new_absp,observed)
+            if optimizer:
+                optimizer.write(o)
 
-    #If we have an observation then plot it
-    if observed is not None:
-        plt.errorbar(np.log10(observed.wavelengthGrid),observed.spectrum,observed.errorBar,label='observed')
 
     
-    #Plot the absorption
-    plt.plot(wlgrid[:-1],new_absp,label='forward model')
+    wlgrid = np.log10(10000/bindown_wngrid)
+    if args.plot:
+        import matplotlib.pyplot as plt
+        if args.contrib:
+            for name,value in contrib:
+                new_value = bindown(native_grid,value,bindown_wngrid)
+                plt.plot(wlgrid[:-1],new_value,label=name)
+
+        #If we have an observation then plot it
+        if observed is not None:
+            plt.errorbar(np.log10(observed.wavelengthGrid),observed.spectrum,observed.errorBar,label='observed')
+
+        
+        #Plot the absorption
+        plt.plot(wlgrid[:-1],new_absp,label='forward model')
 
 
 
-    plt.legend()
-    plt.show()
+        plt.legend()
+        plt.show()
     
 
 
