@@ -45,7 +45,7 @@ class MultiNestOptimizer(Optimizer):
         # importance nested sampling
         self.imp_sampling = importance_sampling
 
-        self.dir_multinest = multi_nest_path  
+        self.dir_multinest = os.path.join(multi_nest_path, '1-') 
 
         self.resume = resume
         self.verbose = verbose_output
@@ -91,7 +91,7 @@ class MultiNestOptimizer(Optimizer):
                         multimodal=self.multimodes,
                         n_clustering_params=self.nclust_par,
                         max_modes=self.max_modes,
-                        outputfiles_basename=os.path.join(self.dir_multinest, '3-'),
+                        outputfiles_basename=self.dir_multinest,
                         const_efficiency_mode = self.const_eff,
                         importance_nested_sampling = self.imp_sampling,
                         resume = self.resume,
@@ -105,20 +105,39 @@ class MultiNestOptimizer(Optimizer):
         
         self.info('Fit complete.....')
 
-        rank = 0
-
-        try:
-            from mpi4py import MPI
-            rank = MPI.COMM_WORLD.Get_rank()
-        except:
-            pass
-
-        #Only allow rank 0 to do any further processing
-        if rank == 0:
-            return status
-        else:
-            return None
-
     
     def process_multinest_status(self,status):
         pass
+
+
+    def write_optimizer(self,output):
+        opt = super().write_optimizer(output)
+
+        # sampling efficiency (parameter, ...)
+        opt.write_scalar('sampling_eff ',self.sampling_eff)
+        # number of live points
+        opt.write_scalar('num_live_points',self.n_live_points)
+        # maximum no. of iterations (0=inf)
+        opt.write_scalar('max_iterations',self.max_iter)
+        # search for multiple modes
+        opt.write_scalar('search_multimodes',self.multimodes)
+        #parameters on which to cluster, e.g. if nclust_par = 3, it will cluster on the first 3 parameters only.
+        #if ncluster_par = -1 it clusters on all parameters
+        opt.write_scalar('nclust_parameter',self.nclust_par)
+        # maximum number of modes
+        opt.write_scalar('max_modes',self.max_modes)
+        # run in constant efficiency mode
+        opt.write_scalar('constant_effeciency',self.const_eff)
+        # set log likelihood tolerance. If change is smaller, multinest will have converged
+        opt.write_scalar('evidence_tolerance',self.evidence_tolerance)
+        opt.write_scalar('mode_tolerance',self.mode_tolerance)
+        # importance nested sampling
+        opt.write_scalar('importance_sampling ',self.imp_sampling)
+
+
+        return opt
+    
+    def write_fit(self,output):
+        fit = super().write_fit(output)
+
+        return fit
