@@ -230,6 +230,10 @@ class SimpleForwardModel(ForwardModel):
         raise NotImplementedError
 
     def write(self,output):
+
+        #Run a model if needed
+        self.model(self.nativeWavenumberGrid)
+
         model = super().write(output)
 
         #Write Gas
