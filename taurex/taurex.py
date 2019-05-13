@@ -18,6 +18,7 @@ def write_spectrum(output,native_wngrid,model,tau,contributions,wngrid=None,binn
     if observed is not None:
         spectrum.write_array('observed_spectrum',observed.spectrum)
         spectrum.write_array('observed_wngrid',observed.wavenumberGrid)
+        spectrum.write_array('observed_error',observed.errorBar)
 
 
 
