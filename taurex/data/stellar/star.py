@@ -21,7 +21,7 @@ class BlackbodyStar(Fittable,Logger,Writeable):
         Fittable.__init__(self)
         self._temperature = temperature
         self._radius = radius*RSOL
-        self._sed = None
+        self.sed = None
 
     @property
     def radius(self):
@@ -48,6 +48,6 @@ class BlackbodyStar(Fittable,Logger,Writeable):
         star.write_scalar('temperature',self.temperature)
         star.write_scalar('radius',self._radius)
         star.write_scalar('radius_RSOL',self.radius/RSOL)
-        star.write_array('SED',self.sed)
+        star.write_array('SED',self.spectralEmissionDensity)
         return star
 
