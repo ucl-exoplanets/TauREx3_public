@@ -1,7 +1,7 @@
 from taurex.log import Logger
 from taurex.data.fittable import fitparam,Fittable
-
-class TemperatureProfile(Fittable,Logger):
+from taurex.output.writeable import Writeable
+class TemperatureProfile(Fittable,Logger,Writeable):
     """
     Defines temperature profile for an atmosphere
 
@@ -26,3 +26,12 @@ class TemperatureProfile(Fittable,Logger):
     @property
     def profile(self):
         raise NotImplementedError
+
+
+    def write(self,output):
+        temperature = output.create_group('Temperature')
+        temperature.write_string('temperature_type',self.__class__.__name__)
+        temperature.write_array('profile',self.profile)
+        return temperature
+
+    

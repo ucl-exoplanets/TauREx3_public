@@ -2,8 +2,8 @@ from taurex.log import Logger
 from taurex.constants import G,RJUP,MJUP
 from .fittable import fitparam,Fittable
 import numpy as np
-
-class Planet(Fittable,Logger):
+from taurex.output.writeable import Writeable
+class Planet(Fittable,Logger,Writeable):
     """Holds information on a planet and its properties and 
     derived properties
 
@@ -76,7 +76,16 @@ class Planet(Fittable,Logger):
     def gravity_at_height(self,height):
         return (G * self.fullMass) / ((self.fullRadius+height)**2) 
 
-
+    def write(self,output):
+        planet = output.create_group('Planet')
+        planet.write_string('planet_type',self.__class__.__name__)
+        planet.write_scalar('mass',self._mass)
+        planet.write_scalar('radius',self._radius)
+        planet.write_scalar('mass_MJUP',self.mass)
+        planet.write_scalar('radius_RJUP',self.radius)
+        planet.write_scalar('distance',self._distance)
+        planet.write_scalar('surface_gravity',self.gravity)
+        return planet
 
 class Earth(Planet):
     """An implementation for earth"""

@@ -1,6 +1,7 @@
 from taurex.log import Logger
 from taurex.data.fittable import fitparam,Fittable
 import numpy as np
+from taurex.output.writeable import Writeable
 class PressureProfile(Fittable,Logger):
 
     def __init__(self,name,nlayers):
@@ -26,6 +27,12 @@ class PressureProfile(Fittable,Logger):
     def profile(self):
         raise NotImplementedError
 
+    def write(self,output):
+        pressure = output.create_group('Pressure')
+        pressure.write_string('pressure_type',self.__class__.__name__)
+        pressure.write_scalar('nLayers',self._nlayers)
+        pressure.write_array('profile',self.profile)
+        return pressure
 
 class SimplePressureProfile(PressureProfile):
 
@@ -59,7 +66,7 @@ class SimplePressureProfile(PressureProfile):
     def minAtmospherePressure(self,value):
         self._atm_min_pressure = value
 
-    @fitparam(param_name='max_atm_pressure',param_latex='$P_\mathrm{max}$',default_fit=False,default_bounds=[0.1,1.0])
+    @fitparam(param_name='max_atm_pressure',param_latex='$P_\\mathrm{max}$',default_fit=False,default_bounds=[0.1,1.0])
     def maxAtmospherePressure(self):
         return self._atm_max_pressure
     
@@ -72,4 +79,11 @@ class SimplePressureProfile(PressureProfile):
     def profile(self):
         return self.pressure_profile
 
-    
+
+    def write(self,output):
+        pressure = super().write(output)
+
+        pressure.write_scalar('max_atm_pressure',self._atm_max_pressure)
+        pressure.write_scalar('min_atm_pressure',self._atm_min_pressure)
+
+        return pressure
