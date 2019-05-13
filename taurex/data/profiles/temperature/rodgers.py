@@ -62,3 +62,16 @@ class Rodgers2000(TemperatureProfile):
             fset_point = write_point
             default_fit = False
             self.add_fittable_param(param_name,param_latex ,fget_point,fset_point,default_fit,bounds) 
+
+
+    def write(self,output):
+        temperature = super().write(output)
+
+        cov_mat = self._covariance
+        if cov_mat is None:
+            cov_mat = self.gen_covariance()
+
+        temperature.write_array('covariance_matrix',cov_mat)
+        temperature.write_array('temperature_layers',self._T_layers)
+        temperature.write_scalar('correlation_length',self._tp_corr_length)
+        return temperature

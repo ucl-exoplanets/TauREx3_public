@@ -103,3 +103,11 @@ class Guillot2010(TemperatureProfile):
 
         return T
 
+    def write(self,output):
+        temperature = super().write(output)
+        temperature.write_scalar('T_irr',self.T_irr)
+        temperature.write_scalar('kappa_irr',self.kappa_ir)
+        temperature.write_scalar('kappa_v1',self.kappa_v1)
+        temperature.write_scalar('kappa_v2',self.kappa_v2)
+        temperature.write_scalar('alpha',self.alpha)
+        return temperature
