@@ -1,9 +1,9 @@
 from taurex.log import Logger
 from taurex.data.fittable import fitparam,Fittable
 import numpy as np
+from taurex.output.writeable import Writeable
 
-
-class Contribution(Fittable,Logger):
+class Contribution(Fittable,Logger,Writeable):
 
 
 
@@ -34,3 +34,10 @@ class Contribution(Fittable,Logger):
     @property
     def totalContribution(self):
         raise NotImplementedError
+
+    
+
+    def write(self,output):
+        contrib = output.create_group(self.name)
+        return contrib
+

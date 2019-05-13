@@ -77,3 +77,8 @@ class CIAContribution(Contribution):
     def totalContribution(self):
         return self._total_contrib
 
+
+    def write(self,output):
+        contrib = super().write(output)
+        contrib.write_string_array('cia-pairs',self.ciaPairs)
+        return contrib

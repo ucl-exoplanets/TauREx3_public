@@ -35,3 +35,9 @@ class SimpleCloudsContribution(Contribution):
     @property
     def totalContribution(self):
         return self._total_contrib
+
+
+    def write(self,output):
+        contrib = super().write(output)
+        contrib.write_string_array('cloud_pressure',self._cloud_pressure)
+        return contrib
