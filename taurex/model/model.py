@@ -71,6 +71,6 @@ class ForwardModel(Logger,Writeable):
             c.write(contrib)
 
 
-
+    
         return model
 
