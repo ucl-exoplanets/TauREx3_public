@@ -1,6 +1,6 @@
 from taurex.log import Logger
 import numpy as np
-
+from taurex.output.writeable import Writeable
 
 class Optimizer(Logger):
 
@@ -77,6 +77,9 @@ class Optimizer(Logger):
     def fit_names(self):
         return [c[0] for c in self.fitting_parameters]
 
+    @property
+    def fit_latex(self):
+        return [c[1] for c in self.fitting_parameters]
 
     def enable_fit(self,parameter):
         name,latex,fget,fset,to_fit,bounds = self._model.fittingParameters[parameter]
@@ -123,6 +126,29 @@ class Optimizer(Logger):
         self.compile_params()
 
         self.compute_fit()
+
+    def write_optimizer(self,output):
+        output.write_string('optimizer',self.__class__.__name__)
+        
+        return output
+    
+    def write_fit(self,output):
+        output.write_string('fit_format',self.__class__.__name__)
+        output.write_string_array('fit_parameter_names',self.fit_names)
+        output.write_string_array('fit_parameter_latex',self.fit_latex)
+        output.write_list('fit_parameter_values',self.fit_values)
+
+        return output
+
+
+    def write(self,output):
+        opt = output.create_group('Optimizer')
+        fit = output.create_group('Fit')
+
+        self.write_optimizer(opt)
+        self.write_fit(fit)
+        
+
 
 
 
