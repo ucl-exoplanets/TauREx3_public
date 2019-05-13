@@ -30,7 +30,8 @@ install_requires = ['numpy','cython',
         'matplotlib',
         'numpy',
         'scipy',
-        'nestle']
+        'nestle',
+        'h5py']
 
 
 
