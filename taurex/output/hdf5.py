@@ -30,8 +30,10 @@ class HDF5OutputGroup(OutputGroup):
 class HDF5Output(Output):
     def __init__(self,filename):
         super().__init__('HDF5Output')
+        self.filename = filename
     
-        self.fd = self._openFile(filename)
+    def open(self):
+        self.fd = self._openFile(self.filename)
 
     def _openFile(self, fname):
         fd = h5py.File(fname, mode='w')
@@ -48,6 +50,11 @@ class HDF5Output(Output):
     def create_group(self,group_name):
         entry = self.fd.create_group(group_name)
         return HDF5OutputGroup(entry)
+
+
+    def close(self):
+        self.fd.close()
+    
 
 
 

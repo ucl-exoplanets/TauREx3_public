@@ -7,10 +7,21 @@ class Output(Logger):
     def __init__(self,name):
         super().__init__(name)
 
+    def open(self):
+        raise NotImplementedError
+
     def create_group(self,group_name):
         raise NotImplementedError
 
+    def close(self):
+        raise NotImplementedError
 
+    def __enter__(self):
+        self.open()
+        return self
+
+    def __exit__(self, type, value, tb):
+        self.close()
 
     
 class OutputGroup(Output):
@@ -35,3 +46,5 @@ class OutputGroup(Output):
     
     def write_string_array(self,string_name,string_array):
         raise NotImplementedError
+
+
