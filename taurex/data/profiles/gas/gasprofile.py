@@ -111,12 +111,13 @@ class GasProfile(Fittable,Logger,Writeable):
     def write(self,output):
 
         gas_entry = output.create_group('Gas')
-        gas_entry.write_list('active_gases',self.activeGases)
-        gas_entry.write_list('inactive_gases',self.inActiveGases)
+        gas_entry.write_string('gas_profile_type',self.__class__.__name__)
+        gas_entry.write_string_array('active_gases',self.activeGases)
+        gas_entry.write_string_array('inactive_gases',self.inActiveGases)
         gas_entry.write_array('active_gas_mix_profile',self.activeGasMixProfile)
         gas_entry.write_array('inactive_gas_mix_profile',self.inActiveGasMixProfile)
         gas_entry.write_array('mu_profile',self.muProfile)
-        gas_entry.write_bool('inLogMode',self._log_mode)
+        gas_entry.write_scalar('inLogMode',self._log_mode)
         return gas_entry
 
 class TaurexGasProfile(GasProfile):
@@ -316,7 +317,8 @@ class ComplexGasProfile(TaurexGasProfile):
     def write(self,output):
 
         gas_entry = super().write(output)
-        gas_entry.write_list('active_complex_gases',self.active_complex_gases)
+
+        gas_entry.write_string_array('active_complex_gases',self.active_complex_gases)
         gas_entry.write_array('active_gases_mixratios_surface',self.active_gases_mixratios_surface)
         gas_entry.write_array('active_gases_mixratios_top',self.active_gases_mixratios_top)
 

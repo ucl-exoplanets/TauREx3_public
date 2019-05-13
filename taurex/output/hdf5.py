@@ -23,14 +23,18 @@ class HDF5OutputGroup(OutputGroup):
         entry = self._entry.create_group(group_name)
         return HDF5OutputGroup(entry)
 
+    def write_string_array(self,string_name,string_array):
+
+        asciiList = [n.encode("ascii", "ignore") for n in string_array]
+        self._entry.create_dataset(string_name, (len(asciiList),1),'S10', asciiList)
 class HDF5Output(Output):
     def __init__(self,filename):
-        super().__init__(self,'HDF5Output')
+        super().__init__('HDF5Output')
     
         self.fd = self._openFile(filename)
 
     def _openFile(self, fname):
-        fd = h5py.File(fname, mode='w-')
+        fd = h5py.File(fname, mode='w')
         fd.attrs['file_name'] = fname
         fd.attrs['file_time'] = datetime.datetime.now().isoformat()
         fd.attrs['creator'] = self.__class__.__name__

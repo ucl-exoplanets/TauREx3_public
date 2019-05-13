@@ -5,7 +5,7 @@ import numpy as np
 class Output(Logger):
 
     def __init__(self,name):
-        super().__init__(self,name)
+        super().__init__(name)
 
     def create_group(self,group_name):
         raise NotImplementedError
@@ -16,7 +16,7 @@ class Output(Logger):
 class OutputGroup(Output):
 
     def __init__(self,name):
-        super().__init__(self,name)
+        super().__init__(name)
         self._name = name
     
 
@@ -31,4 +31,7 @@ class OutputGroup(Output):
         raise NotImplementedError
     
     def write_string(self,string_name,string):
+        raise NotImplementedError
+    
+    def write_string_array(self,string_name,string_array):
         raise NotImplementedError
