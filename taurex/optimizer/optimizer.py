@@ -28,7 +28,7 @@ class Optimizer(Logger):
         #                 fget.__get__(self),fset.__get__(self),
         #                         default_fit,default_bounds
         for params in self._model.fittingParameters.values():
-            name,latex,fget,fset,to_fit,bounds = params
+            name,latex,fget,fset,mode,to_fit,bounds = params
 
             self.debug('Checking fitting parameter {}'.format(params))
             if to_fit:
@@ -53,8 +53,8 @@ class Optimizer(Logger):
         self.info('-------FITTING---------------')
         self.info('Parameters to be fit:')
         for params in self.fitting_parameters:
-            name,latex,fget,fset,to_fit,bounds = params
-            self.info('{}: Value: {} Boundaries:{}'.format(name,fget(),bounds))
+            name,latex,fget,fset,mode,to_fit,bounds = params
+            self.info('{}: Value: {} Mode:{} Boundaries:{}'.format(name,fget(),mode,bounds))
 
 
     def update_model(self,fit_params):
@@ -65,14 +65,16 @@ class Optimizer(Logger):
                 value = 10**value
             fset(value)
 
-
+    @property
+    def fit_values_nomode(self):
+        return [c[2]() for c in self.fitting_parameters]
     @property
     def fit_values(self):
-        return [c[2] if c[4]=='linear' else math.log10(c[2])for c in self.fitting_parameters]
+        return [c[2]() if c[4]=='linear' else math.log10(c[2]())for c in self.fitting_parameters]
 
     @property
     def fit_boundaries(self):
-        return [c[-1] if c[4]=='linear' else (math.log10(c[4][0]),math.log10(c[4][1])) for c in self.fitting_parameters]
+        return [c[-1] if c[4]=='linear' else (math.log10(c[-1][0]),math.log10(c[-1][1])) for c in self.fitting_parameters]
 
 
     @property
@@ -150,7 +152,7 @@ class Optimizer(Logger):
         output.write_string_array('fit_parameter_names',self.fit_names)
         output.write_string_array('fit_parameter_latex',self.fit_latex)
         output.write_list('fit_parameter_values',self.fit_values)
-
+        output.write_list('fit_parameter_values_nomode',self.fit_values_nomode)
         return output
 
 

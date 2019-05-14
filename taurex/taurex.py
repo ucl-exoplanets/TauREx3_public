@@ -88,6 +88,7 @@ def main():
         for key,value in fitting_parameters.items():
             fit = value['fit']
             bounds = value['bounds']
+            mode = value['mode']
 
             if fit:
                 logging.info('Fitting: {}'.format(key))
@@ -97,10 +98,15 @@ def main():
             
             if bounds:
                 optimizer.set_boundary(key,bounds)
+            
+            if mode:
+                optimizer.set_mode(key,mode.lower())
 
         logging.getLogger().setLevel(logging.WARNING)
 
         optimizer.fit()
+
+        logging.getLogger().setLevel(logging.INFO)
 
     #Run the model
     absp,tau,contrib=model.model(native_grid,return_contrib=True)
