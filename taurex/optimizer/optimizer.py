@@ -1,7 +1,7 @@
 from taurex.log import Logger
 import numpy as np
 from taurex.output.writeable import Writeable
-
+import math
 class Optimizer(Logger):
 
     def __init__(self,name,observed=None,model=None,wngrid=None):
@@ -28,7 +28,7 @@ class Optimizer(Logger):
         #                 fget.__get__(self),fset.__get__(self),
         #                         default_fit,default_bounds
         for params in self._model.fittingParameters.values():
-            name,latex,fget,fset,to_fit,bounds = params
+            name,latex,fget,fset,mode,to_fit,bounds = params
 
             self.debug('Checking fitting parameter {}'.format(params))
             if to_fit:
@@ -53,48 +53,63 @@ class Optimizer(Logger):
         self.info('-------FITTING---------------')
         self.info('Parameters to be fit:')
         for params in self.fitting_parameters:
-            name,latex,fget,fset,to_fit,bounds = params
-            self.info('{}: Value: {} Boundaries:{}'.format(name,fget(),bounds))
+            name,latex,fget,fset,mode,to_fit,bounds = params
+            self.info('{}: Value: {} Mode:{} Boundaries:{}'.format(name,fget(),mode,bounds))
 
 
     def update_model(self,fit_params):
 
         for value,param in zip(fit_params,self.fitting_parameters):
-            name,latex,fget,fset,to_fit,bounds = param
+            name,latex,fget,fset,mode,to_fit,bounds = param
+            if mode == 'log':
+                value = 10**value
             fset(value)
 
-
+    @property
+    def fit_values_nomode(self):
+        return [c[2]() for c in self.fitting_parameters]
     @property
     def fit_values(self):
-        return [c[2]() for c in self.fitting_parameters]
+        return [c[2]() if c[4]=='linear' else math.log10(c[2]())for c in self.fitting_parameters]
 
     @property
     def fit_boundaries(self):
-        return [c[-1] for c in self.fitting_parameters]
+        return [c[-1] if c[4]=='linear' else (math.log10(c[-1][0]),math.log10(c[-1][1])) for c in self.fitting_parameters]
 
 
     @property
     def fit_names(self):
-        return [c[0] for c in self.fitting_parameters]
+        return [c[0] if c[4]=='linear' else 'log_{}'.format(c[0]) for c in self.fitting_parameters]
 
     @property
     def fit_latex(self):
-        return [c[1] for c in self.fitting_parameters]
+        return [c[1] if c[4]=='linear' else 'log({})'.format(c[1]) for c in self.fitting_parameters]
 
     def enable_fit(self,parameter):
-        name,latex,fget,fset,to_fit,bounds = self._model.fittingParameters[parameter]
+        name,latex,fget,fset,mode,to_fit,bounds = self._model.fittingParameters[parameter]
         to_fit = True
-        self._model.fittingParameters[parameter]= (name,latex,fget,fset,to_fit,bounds)
+        self._model.fittingParameters[parameter]= (name,latex,fget,fset,mode,to_fit,bounds)
 
     def disable_fit(self,parameter):
-        name,latex,fget,fset,to_fit,bounds = self._model.fittingParameters[parameter]
+        name,latex,fget,fset,mode,to_fit,bounds = self._model.fittingParameters[parameter]
         to_fit = False
-        self._model.fittingParameters[parameter]= (name,latex,fget,fset,to_fit,bounds)
+        self._model.fittingParameters[parameter]= (name,latex,fget,fset,mode,to_fit,bounds)
     
     def set_boundary(self,parameter,new_boundaries):
-        name,latex,fget,fset,to_fit,bounds = self._model.fittingParameters[parameter]
+        name,latex,fget,fset,mode,to_fit,bounds = self._model.fittingParameters[parameter]
         bounds = new_boundaries
-        self._model.fittingParameters[parameter]= (name,latex,fget,fset,to_fit,bounds)
+        self._model.fittingParameters[parameter]= (name,latex,fget,fset,mode,to_fit,bounds)
+
+
+    def set_mode(self,parameter,new_mode):
+        new_mode = new_mode.lower()
+        name,latex,fget,fset,mode,to_fit,bounds = self._model.fittingParameters[parameter]
+        if not new_mode in ('log','linear',):
+            self.error('Incorrect mode set for fit parameter,')
+            raise ValueError
+
+        self._model.fittingParameters[parameter]= (name,latex,fget,fset,new_mode,to_fit,bounds)       
+
 
     def chisq_trans(self, fit_params,data,datastd):
         from taurex.util import bindown
@@ -137,7 +152,7 @@ class Optimizer(Logger):
         output.write_string_array('fit_parameter_names',self.fit_names)
         output.write_string_array('fit_parameter_latex',self.fit_latex)
         output.write_list('fit_parameter_values',self.fit_values)
-
+        output.write_list('fit_parameter_values_nomode',self.fit_values_nomode)
         return output
 
 

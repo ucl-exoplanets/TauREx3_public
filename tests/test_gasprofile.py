@@ -33,35 +33,35 @@ class GasProfileTest(unittest.TestCase):
 
         #numpy.testing.ass
 
-    def test_log_mode(self):
-        with self.assertRaises(AttributeError):
-            self.tp.setLinearLogMode('APPLES')
+    # def test_log_mode(self):
+    #     with self.assertRaises(AttributeError):
+    #         self.tp.setLinearLogMode('APPLES')
         
-        self.tp.setLinearLogMode('linear')
-        self.assertFalse(self.tp.isInLogMode)
-        self.tp.setLinearLogMode('log')
-        self.assertTrue(self.tp.isInLogMode)
+    #     self.tp.setLinearLogMode('linear')
+    #     self.assertFalse(self.tp.isInLogMode)
+    #     self.tp.setLinearLogMode('log')
+    #     self.assertTrue(self.tp.isInLogMode)
 
-        self.tp.setLinearLogMode('LINEAR')
-        self.assertFalse(self.tp.isInLogMode)
-        self.tp.setLinearLogMode('LOG')
-        self.assertTrue(self.tp.isInLogMode)
+    #     self.tp.setLinearLogMode('LINEAR')
+    #     self.assertFalse(self.tp.isInLogMode)
+    #     self.tp.setLinearLogMode('LOG')
+    #     self.assertTrue(self.tp.isInLogMode)
 
-        self.tp.setLinearLogMode('LiNeAR')
-        self.assertFalse(self.tp.isInLogMode)
-        self.tp.setLinearLogMode('LoG')
-        self.assertTrue(self.tp.isInLogMode)
+    #     self.tp.setLinearLogMode('LiNeAR')
+    #     self.assertFalse(self.tp.isInLogMode)
+    #     self.tp.setLinearLogMode('LoG')
+    #     self.assertTrue(self.tp.isInLogMode)
 
-        #Test values are correct
-        #Check linear mode first
-        self.tp.setLinearLogMode('Linear')
-        self.assertEqual(self.tp.readableValue(1e-4),1e-4)
-        self.assertEqual(self.tp.writeableValue(1e-8),1e-8)
+    #     #Test values are correct
+    #     #Check linear mode first
+    #     self.tp.setLinearLogMode('Linear')
+    #     self.assertEqual(self.tp.readableValue(1e-4),1e-4)
+    #     self.assertEqual(self.tp.writeableValue(1e-8),1e-8)
 
-        #Now check log mode
-        self.tp.setLinearLogMode('Log')
-        self.assertEqual(self.tp.readableValue(1e-4),-4)
-        self.assertEqual(self.tp.writeableValue(-8),1e-8)
+    #     #Now check log mode
+    #     self.tp.setLinearLogMode('Log')
+    #     self.assertEqual(self.tp.readableValue(1e-4),-4)
+    #     self.assertEqual(self.tp.writeableValue(-8),1e-8)
 
 
 class TaurexProfileTest(unittest.TestCase):
@@ -165,17 +165,17 @@ class ComplexProfileTest(unittest.TestCase):
 
         self.assertIn('T CH4',params)
         self.assertIn('S CH4',params)
-    def test_log_parameters(self):
-        cgp = ComplexGasProfile('test',['H2O','CH4'],[1e-4,1e-12],['CH4'],[1e-4],[1e-8],mode='log')  
-        params = cgp.fitting_parameters()      
+    # def test_log_parameters(self):
+    #     cgp = ComplexGasProfile('test',['H2O','CH4'],[1e-4,1e-12],['CH4'],[1e-4],[1e-8],mode='log')  
+    #     params = cgp.fitting_parameters()      
 
-        self.assertIn('log_H2O',params)
-        self.assertNotIn('log_CH4',params)
+    #     self.assertIn('log_H2O',params)
+    #     self.assertNotIn('log_CH4',params)
 
-        self.assertNotIn('T CH4',params)
-        self.assertNotIn('S CH4',params)
-        self.assertIn('T_log_CH4',params)
-        self.assertIn('S_log_CH4',params)
+    #     self.assertNotIn('T CH4',params)
+    #     self.assertNotIn('S CH4',params)
+    #     self.assertIn('T_log_CH4',params)
+    #     self.assertIn('S_log_CH4',params)
 class TwoPointGasProfileTest(unittest.TestCase):
 
     def test_compute_profile(self):
