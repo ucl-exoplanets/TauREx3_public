@@ -108,7 +108,7 @@ class Optimizer(Logger):
             self.error('Incorrect mode set for fit parameter,')
             raise ValueError
 
-        self._model.fittingParameters[parameter]= (name,latex,fget,fset,mode,to_fit,bounds)       
+        self._model.fittingParameters[parameter]= (name,latex,fget,fset,new_mode,to_fit,bounds)       
 
 
     def chisq_trans(self, fit_params,data,datastd):

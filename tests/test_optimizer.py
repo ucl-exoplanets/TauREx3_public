@@ -31,3 +31,10 @@ class OptimizerTest(unittest.TestCase):
         opt.fit_latex
         opt.fit_values_nomode
 
+        opt.set_mode('H2O','linear')
+        opt.set_mode('T','log')  
+        opt.compile_params()    
+        
+        names = opt.fit_names
+        self.assertIn('log_T',names)
+        self.assertIn('H2O',names)  
