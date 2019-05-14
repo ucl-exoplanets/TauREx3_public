@@ -74,3 +74,13 @@ class TwoLayerGasProfile(ComplexGasProfile):
             foo = chemprofile[::-1]
             foo[border:-border] = C_smooth[::-1]
             self.active_mixratio_profile[i, :] = foo[:]
+    
+
+    def write(self,output):
+
+        gas = super().write(output)
+
+        gas.write('active_gases_mixratios_P',self.active_gases_mixratios_P)
+        gas.write('active_gases_smooth',self.active_complex_gases_smooth)
+
+        return gas

@@ -19,8 +19,10 @@ class ParameterParser(Logger):
             except:
                 pass
         elif isinstance(val, (str)):
-            if val in ('True','true','False','false',):
-                newval = bool(val)
+            if val.lower() in ['true',  'yes', 'yeah', 'yup', 'certainly', 'uh-huh',]:
+                newval = True
+            elif val.lower() in ['false',  'no', 'nope', 'no-way', 'hell-no', 'fuck-off']:
+                newval = False
             else:
                 try:
                     newval = float(val)
@@ -162,7 +164,7 @@ class ParameterParser(Logger):
                 fit_param,fit_type=key.split(':')
                 if not fit_param in fitting_params:
                     fitting_params[fit_param] = {'fit':None,'bounds':None}
-                
+                print(key,value)
                 fitting_params[fit_param][fit_type]=value
         
         return fitting_params

@@ -3,8 +3,8 @@ from taurex.constants import G,RJUP,MJUP,RSOL
 from taurex.data.fittable import fitparam,Fittable
 import numpy as np
 from taurex.util.emission import black_body
-
-class BlackbodyStar(Fittable,Logger):
+from taurex.output.writeable import Writeable
+class BlackbodyStar(Fittable,Logger,Writeable):
     """Holds information on the star
     its default is a blackbody spectra
 
@@ -21,7 +21,7 @@ class BlackbodyStar(Fittable,Logger):
         Fittable.__init__(self)
         self._temperature = temperature
         self._radius = radius*RSOL
-        self._sed = None
+        self.sed = None
 
     @property
     def radius(self):
@@ -40,3 +40,14 @@ class BlackbodyStar(Fittable,Logger):
     @property
     def spectralEmissionDensity(self):
         return self.sed
+
+
+    def write(self,output):
+        star = output.create_group('Star')
+        star.write_string('star_type',self.__class__.__name__)
+        star.write_scalar('temperature',self.temperature)
+        star.write_scalar('radius',self._radius)
+        star.write_scalar('radius_RSOL',self.radius/RSOL)
+        star.write_array('SED',self.spectralEmissionDensity)
+        return star
+

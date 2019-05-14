@@ -2,8 +2,9 @@ from taurex.log import Logger
 from taurex.util import get_molecular_weight,molecule_texlabel
 from taurex.data.fittable import fitparam,Fittable
 import numpy as np
+from taurex.output.writeable import Writeable
 import math
-class GasProfile(Fittable,Logger):
+class GasProfile(Fittable,Logger,Writeable):
     """
     Defines gas profiles
 
@@ -107,6 +108,18 @@ class GasProfile(Fittable,Logger):
     def muProfile(self):
         return self.mu_profile
 
+    def write(self,output):
+
+        gas_entry = output.create_group('Gas')
+        gas_entry.write_string('gas_profile_type',self.__class__.__name__)
+        gas_entry.write_string_array('active_gases',self.activeGases)
+        gas_entry.write_string_array('inactive_gases',self.inActiveGases)
+        gas_entry.write_array('active_gas_mix_profile',self.activeGasMixProfile)
+        gas_entry.write_array('inactive_gas_mix_profile',self.inActiveGasMixProfile)
+        gas_entry.write_array('mu_profile',self.muProfile)
+        gas_entry.write_scalar('inLogMode',self._log_mode)
+        return gas_entry
+
 class TaurexGasProfile(GasProfile):
 
 
@@ -198,8 +211,14 @@ class TaurexGasProfile(GasProfile):
         default_fit = False
         self.add_fittable_param(param_name,param_tex,fget,fset,default_fit,bounds)  
 
-    
+    def write(self,output):
 
+        gas_entry = super().write(output)
+        gas_entry.write_array('active_gas_mix_ratios',self.active_gas_mix_ratio)
+        gas_entry.write_scalar('n2_mix_ratio',self._n2_mix_ratio)
+        gas_entry.write_scalar('he_h2_ratio',self._he_h2_mix_ratio)
+
+        return gas_entry
 class ComplexGasProfile(TaurexGasProfile):
 
     def __init__(self,
@@ -294,3 +313,13 @@ class ComplexGasProfile(TaurexGasProfile):
             for i,active_gas in enumerate(self.active_gases):
                 if complex_gas==active_gas:
                     yield i,j
+
+    def write(self,output):
+
+        gas_entry = super().write(output)
+
+        gas_entry.write_string_array('active_complex_gases',self.active_complex_gases)
+        gas_entry.write_array('active_gases_mixratios_surface',self.active_gases_mixratios_surface)
+        gas_entry.write_array('active_gases_mixratios_top',self.active_gases_mixratios_top)
+
+        return gas_entry

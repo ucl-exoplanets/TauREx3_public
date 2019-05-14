@@ -2,7 +2,8 @@ from taurex.log import Logger
 import numpy as np
 import math
 import pathlib
-class ForwardModel(Logger):
+from taurex.output.writeable import Writeable
+class ForwardModel(Logger,Writeable):
     """A base class for producing forward models"""
 
     def __init__(self,name):
@@ -62,4 +63,14 @@ class ForwardModel(Logger):
         return self.fitting_parameters
     
 
+    def write(self,output):
+        model = output.create_group('ForwardModel')
+        model.write_string('model_type',self.__class__.__name__)
+        contrib = model.create_group('Contributions')
+        for c in self.contribution_list:
+            c.write(contrib)
+
+
+    
+        return model
 

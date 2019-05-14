@@ -228,3 +228,25 @@ class SimpleForwardModel(ForwardModel):
 
     def path_integral(self,wngrid,return_contrib):
         raise NotImplementedError
+
+    def write(self,output):
+
+        #Run a model if needed
+        self.model(self.nativeWavenumberGrid)
+
+        model = super().write(output)
+
+        #Write Gas
+
+        self._gas_profile.write(model)
+        self._temperature_profile.write(model)
+        self._planet.write(model)
+        self.pressure_profile.write(model)
+        self._star.write(model)
+        
+        model.write_array('density_profile',self.densityProfile)
+        model.write_array('scaleheight_profile',self.scaleheight_profile)
+        model.write_array('altitude_profile',self.altitudeProfile)
+        model.write_array('gravity_profile',self.gravity_profile)
+    
+        return model

@@ -128,3 +128,89 @@ def movingaverage(a, n=3) :
     ret = np.cumsum(a)
     ret[n:] = ret[n:] - ret[:-n]
     return ret[n - 1:] / n
+
+def quantile_corner(x, q, weights=None):
+    """
+
+    * Taken from corner.py
+    __author__ = "Dan Foreman-Mackey (danfm@nyu.edu)"
+    __copyright__ = "Copyright 2013-2015 Daniel Foreman-Mackey"
+
+    Like numpy.percentile, but:
+
+    * Values of q are quantiles [0., 1.] rather than percentiles [0., 100.]
+    * scalar q not supported (q must be iterable)
+    * optional weights on x
+
+    """
+    import numpy as np
+    if weights is None:
+        return np.percentile(x, [100. * qi for qi in q])
+    else:
+        idx = np.argsort(x)
+        xsorted = x[idx]
+        cdf = np.add.accumulate(weights[idx])
+        cdf /= cdf[-1]
+        return np.interp(q, cdf, xsorted).tolist()
+
+def loadtxt2d(intext):
+	try:
+		return np.loadtxt(intext, ndmin=2)
+	except:
+		return np.loadtxt(intext)
+
+def read_error_line(l):
+    print('_read_error_line -> line>', l)
+    name, values = l.split('   ', 1)
+    print('_read_error_line -> name>', name)
+    print('_read_error_line -> values>', values)
+    name = name.strip(': ').strip()
+    values = values.strip(': ').strip()
+    v, error = values.split(" +/- ")
+    return name, float(v), float(error)
+
+def read_error_into_dict(l, d):
+    name, v, error = read_error_line(l)
+    d[name.lower()] = v
+    d['%s error' % name.lower()] = error
+
+def read_table(txt, d=None, title=None):
+    from io import StringIO
+    import numpy as np
+    if title is None:
+        title, table = txt.split("\n", 1)
+    else:
+        table = txt
+    header, table = table.split("\n", 1)
+    data = loadtxt2d(StringIO(table))
+    if d is not None:
+        d[title.strip().lower()] = data
+    if len(data.shape) == 1:
+        data = np.reshape(data, (1, -1))
+    return data
+
+
+def recursively_save_dict_contents_to_output(output, dic):
+    """
+    ....
+    """
+    import numpy as np
+
+    for key, item in dic.items():
+        if isinstance(item,(float,int,np.int64,np.float64,)):
+            output.write_scalar(key,item)
+        elif isinstance(item,(np.ndarray,)):
+            output.write_array(key,item)
+        elif isinstance(item,(str,)):
+            output.write_string(key,item)
+        elif isinstance(item,(list,tuple,)):
+            if isinstance(item,tuple):
+                item = list(item)
+            if True in [isinstance(x,str) for x in item]:
+                output.write_string_array(key,item)
+        
+        elif isinstance(item, dict):
+            group = output.create_group(key)
+            recursively_save_dict_contents_to_output(group, item)
+        else:
+            raise ValueError('Cannot save %s type'%type(item))

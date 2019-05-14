@@ -105,3 +105,12 @@ class ACEGasProfile(GasProfile):
     @aceCORatio.setter
     def aceCORatio(self,value):
         self.ace_co = value
+
+
+    def write(self,output):
+
+        gas_entry = super().write(output)
+        gas_entry.write_scalar('metallicity',self.ace_metallicity)
+        gas_entry.write_scalar('co_ratio',self.ace_co)
+
+        return gas_entry

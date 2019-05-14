@@ -155,3 +155,13 @@ class MieContribution(Contribution):
         self._ngrid = wngrid.shape[0]
         self.sigma_mie = np.interp(wngrid,self.wavenumberGrid,self._sig_out_aver)*self._mix_cloud_mix
         self._total_contrib = np.zeros(shape=(model.pressure_profile.nLayers,wngrid.shape[0],))
+
+    def write(self,output):
+        contrib = super().write(output)
+        contrib.write_scalar('cloud_particle_size',self._mie_radius)
+        contrib.write_scalar('cloud_top_pressure',self._cloud_top_pressure)
+        contrib.write_scalar('cloud_bottom_pressure',self._cloud_bottom_pressure)
+        contrib.write_scalar('cloud_mixing',self._mix_cloud_mix)
+        contrib.write_array('averaged_sigma',self._sig_out_aver)
+        contrib.write_array('wavenumber_grid',self.wavenumberGrid)
+        return contrib
