@@ -58,7 +58,7 @@ class SimplePressureProfile(PressureProfile):
                                          np.diff(np.log10(self.pressure_profile_levels))/2.)
 
 
-    @fitparam(param_name='min_atm_pressure',param_latex='$P_\mathrm{min}$',default_fit=False,default_bounds=[0.1,1.0])
+    @fitparam(param_name='min_atm_pressure',param_latex='$P_\mathrm{min}$',default_mode='log',default_fit=False,default_bounds=[0.1,1.0])
     def minAtmospherePressure(self):
         return self._atm_min_pressure
     
@@ -66,7 +66,7 @@ class SimplePressureProfile(PressureProfile):
     def minAtmospherePressure(self,value):
         self._atm_min_pressure = value
 
-    @fitparam(param_name='max_atm_pressure',param_latex='$P_\\mathrm{max}$',default_fit=False,default_bounds=[0.1,1.0])
+    @fitparam(param_name='max_atm_pressure',param_latex='$P_\\mathrm{max}$',default_mode='log',default_fit=False,default_bounds=[0.1,1.0])
     def maxAtmospherePressure(self):
         return self._atm_max_pressure
     

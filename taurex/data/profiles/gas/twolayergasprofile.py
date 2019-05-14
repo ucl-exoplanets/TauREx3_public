@@ -34,21 +34,15 @@ class TwoLayerGasProfile(ComplexGasProfile):
             param_P = 'P {}'.format(mol_name)
             param_P_tex = '{}'.format(mol_tex)
 
-            if self.isInLogMode:
-                param_P = 'P_log_{}'.format(mol_name)
-                param_P_tex = 'P_log({})'.format(mol_tex)
-
             def read_P(self,idx=idx):
-                return self.readableValue(self.active_gases_mixratios_P[idx])
+                return self.active_gases_mixratios_P[idx]
             def write_P(self,value,idx=idx):
-                self.active_gases_mixratios_P[idx] = self.writeableValue(value)
+                self.active_gases_mixratios_P[idx] = value
 
             fget_P = read_P
             fset_P = write_P
 
             bounds = [1.0e-12, 0.1]
-            if self.isInLogMode:
-                bounds=[-12,-1]
 
             default_fit = False
             self.add_fittable_param(param_P,param_P_tex ,fget_P,fset_P,default_fit,bounds)      

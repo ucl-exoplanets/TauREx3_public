@@ -1,5 +1,6 @@
 from .optimizer import Optimizer
 import pymultinest
+from pymultinest.solver import solve
 import numpy as np
 import os
 
