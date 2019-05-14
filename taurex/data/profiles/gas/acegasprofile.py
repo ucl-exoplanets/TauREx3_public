@@ -13,7 +13,7 @@ class ACEGasProfile(GasProfile):
 
 
     def __init__(self,active_gases=['H2O','CH4'],metallicity=1,co_ratio=0.54951,therm_file = None,spec_file=None,mode='linear'):
-        super().__init__('ACE',mode=mode)
+        super().__init__('ACE')
 
         self.inactive_gases = ['H2', 'HE', 'N2']
         self.ace_metallicity = metallicity
@@ -89,13 +89,13 @@ class ACEGasProfile(GasProfile):
         pass
     
 
-    @fitparam(param_name='ace_log_metallicity',param_latex='log(Metallicity)',default_fit=False,default_bounds=[ -1, 4])
+    @fitparam(param_name='ace_metallicity',param_latex='Metallicity',default_mode='log',default_fit=False,default_bounds=[ -1, 4])
     def aceMetallicity(self):
-        return math.log10(self.ace_metallicity)
+        return self.ace_metallicity
     
     @aceMetallicity.setter
     def aceMetallicity(self,value):
-        self.ace_metallicity = math.pow(10.0,value)
+        self.ace_metallicity = 10.0
     
 
     @fitparam(param_name='ace_co',param_latex='C/O',default_fit=False,default_bounds=[0, 2])

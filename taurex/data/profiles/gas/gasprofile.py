@@ -195,8 +195,8 @@ class ComplexGasProfile(TaurexGasProfile):
                 active_complex_gases,
                 active_gases_mixratios_surface,
                 active_gases_mixratios_top,
-                n2_mix_ratio=0,he_h2_ratio=0.17647,mode='linear'):
-        super().__init__(name,active_gases,active_gas_mix_ratio,n2_mix_ratio,he_h2_ratio,mode)
+                n2_mix_ratio=0,he_h2_ratio=0.17647):
+        super().__init__(name,active_gases,active_gas_mix_ratio,n2_mix_ratio,he_h2_ratio)
         self.active_complex_gases = active_complex_gases
         self.active_gases_mixratios_surface = active_gases_mixratios_surface
         self.active_gases_mixratios_top = active_gases_mixratios_top

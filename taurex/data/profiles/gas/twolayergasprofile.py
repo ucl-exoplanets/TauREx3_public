@@ -15,14 +15,14 @@ class TwoLayerGasProfile(ComplexGasProfile):
                 active_gases_mixratios_top=[1e-8],
                 active_gases_mixratios_P = [1e3],
                 active_gases_smooth=10,
-                n2_mix_ratio=0,he_h2_ratio=0.17647,mode='linear'):
+                n2_mix_ratio=0,he_h2_ratio=0.17647):
 
         super().__init__('2-point gas',active_gases,
                 active_gas_mix_ratio,
                 active_complex_gases,
                 active_gases_mixratios_surface,
                 active_gases_mixratios_top,
-                n2_mix_ratio,he_h2_ratio,mode)
+                n2_mix_ratio,he_h2_ratio)
         self.active_gases_mixratios_P = active_gases_mixratios_P 
         self.active_complex_gases_smooth = active_gases_smooth
 
@@ -45,7 +45,7 @@ class TwoLayerGasProfile(ComplexGasProfile):
             bounds = [1.0e-12, 0.1]
 
             default_fit = False
-            self.add_fittable_param(param_P,param_P_tex ,fget_P,fset_P,default_fit,bounds)      
+            self.add_fittable_param(param_P,param_P_tex ,fget_P,fset_P,'log',default_fit,bounds)      
 
     def compute_complex_gas_profile(self):
 
