@@ -63,34 +63,16 @@ class PickleOpacity(Opacity):
     def resolution(self):
         return self._resolution
 
-    def find_closest_TP_index(self,temp,pressure):
-        nearest_idx = np.abs(temp-self._temperature_grid).argmin() 
-        t_idx_min = -1
-        t_idx_max = -1
-        if self._temperature_grid[nearest_idx] > temp:
-            t_idx_max = nearest_idx
-            t_idx_min = nearest_idx-1
-        else:
-            t_idx_min = nearest_idx
-            t_idx_max = nearest_idx+1
-            
-        nearest_idx = np.abs(pressure-self._pressure_grid).argmin() 
-        p_idx_min = -1
-        p_idx_max = -1
-        if self._pressure_grid[nearest_idx] > pressure:
-            p_idx_max = nearest_idx
-            p_idx_min = nearest_idx-1
-        else:
-            p_idx_min = nearest_idx
-            p_idx_max = nearest_idx+1
 
-        p_idx_min = max(0,p_idx_min)
-        p_idx_max = min(len(self._pressure_grid)-1,p_idx_max)
-        t_idx_min = max(0,t_idx_min)
-        t_idx_max = min(len(self._temperature_grid)-1,t_idx_max)
+    def find_closest_index(self,T,P):
+        t_min=self._temperature_grid.searchsorted(T,side='right')-1
+        t_max = t_min+1
 
+        p_min=self._pressure_grid.searchsorted(P,side='right')-1
+        p_max = p_min+1
 
-        return t_idx_min,t_idx_max,p_idx_min,p_idx_max
+        return t_min,t_max,p_min,p_max
+
     
     def interp_temp_only(self,T,t_idx_min,t_idx_max,P):
         Tmax = self._temperature_grid[t_idx_max]
@@ -191,4 +173,4 @@ class PickleOpacity(Opacity):
 
     def compute_opacity(self,temperature,pressure):
         return self.interp_bilinear_grid(temperature,pressure
-                    ,*self.find_closest_TP_index(temperature,pressure)) / 10000
+                    ,*self.find_closest_index(temperature,pressure)) / 10000
