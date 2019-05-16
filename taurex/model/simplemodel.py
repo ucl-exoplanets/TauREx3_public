@@ -117,6 +117,8 @@ class SimpleForwardModel(ForwardModel):
         
         #Compute gravity scale height
         self.compute_altitude_gravity_scaleheight_profile()
+
+        #quit()
         
     def collect_fitting_parameters(self):
         self.fitting_parameters = {}
@@ -165,11 +167,12 @@ class SimpleForwardModel(ForwardModel):
         H[0] = (KBOLTZ*self.temperatureProfile[0])/(mu_profile[0]*g[0]) # scaleheight at the surface (0th layer)
 
         for i in range(1, nlayers):
-            deltaz = (-1.)*H[i-1]*np.log(self.pressureProfile[i]/self.pressureProfile[i-1])
+            deltaz = (-1.)*H[i-1]*np.log(self.pressure_profile.pressure_profile_levels[i]/self.pressure_profile.pressure_profile_levels[i-1])
             z[i] = z[i-1] + deltaz # altitude at the i-th layer
 
             with np.errstate(over='ignore'):
                 g[i] = self._planet.gravity_at_height(z[i]) # gravity at the i-th layer
+                #print('G[{}] = {}'.format(i,g[i]))
             with np.errstate(divide='ignore'):
                 H[i] = (KBOLTZ*self.temperatureProfile[i])/(mu_profile[i]*g[i])
 
