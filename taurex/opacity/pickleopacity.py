@@ -40,8 +40,10 @@ class PickleOpacity(Opacity):
         self._resolution = np.average(np.diff(self._wavenumber_grid))
         self._molecule_name = self._spec_dict['name']
 
-        self._max_pressure_id,self._max_temperature_id = len(self._pressure_grid)-1,len(self._temperature_grid)-1
-
+        self._min_pressure = self._pressure_grid.min()
+        self._max_pressure = self._pressure_grid.max()
+        self._min_temperature = self._temperature_grid.min()
+        self._max_temeprature = self._temperature_grid.max()
         self.clean_molecule_name()
     def clean_molecule_name(self):
         splits = self.moleculeName.split('_')
@@ -98,16 +100,16 @@ class PickleOpacity(Opacity):
         #T is y
 
         self.debug('Interpolating {} {} {} {} {} {}'.format(T,P,t_idx_min,t_idx_max,p_idx_min,p_idx_max))
-        self.debug('Stats are {} {} {} {}'.format(self._temperature_grid[-1],self.pressureGrid[-1],self._max_temperature_id,self._max_pressure_id))
+        #self.debug('Stats are {} {} {} {}'.format(self._temperature_grid[-1],self.pressureGrid[-1],self._max_temperature_id,self._max_pressure_id))
         if p_idx_max == 0 and t_idx_max == 0:
 
             return np.zeros_like(self._xsec_grid[0,0])
 
-        check_pressure_max = p_idx_min >= self._max_pressure_id
-        check_temperature_max = t_idx_min >= self._max_temperature_id
+        check_pressure_max = P > self._max_pressure
+        check_temperature_max = T > self._max_temeprature
 
-        check_pressure_min = p_idx_max == 0
-        check_temperature_min = t_idx_max == 0
+        check_pressure_min = P < self._min_pressure
+        check_temperature_min = T < self._min_temperature
 
 
         self.debug('Check pressure min/max {}/{}'.format(check_pressure_min,check_pressure_max))
@@ -172,5 +174,5 @@ class PickleOpacity(Opacity):
 
 
     def compute_opacity(self,temperature,pressure):
-        return self.interp_bilinear_grid(temperature,pressure
-                    ,*self.find_closest_index(temperature,pressure)) / 10000
+        return self.interp_bilinear_grid(temperature,pressure/1e5
+                    ,*self.find_closest_index(temperature,pressure/1e5)) / 10000
