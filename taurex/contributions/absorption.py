@@ -50,7 +50,6 @@ class AbsorptionContribution(Contribution):
             for idx_layer,tp in enumerate(zip(model.temperatureProfile,model.pressureProfile)):
                 self.debug('Got index,tp {} {}'.format(idx_layer,tp))
                 temperature,pressure = tp
-                pressure/=1e5
                 sigma_xsec[idx_layer,idx_gas] = self._opacity_cache[gas].opacity(temperature,pressure,wngrid)
                 self.debug('Sigma for T {}, P:{} is {}'.format(temperature,pressure,sigma_xsec[idx_layer,idx_gas]))
 

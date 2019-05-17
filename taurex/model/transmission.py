@@ -54,12 +54,11 @@ class TransmissionModel(SimpleForwardModel):
 
             p = (planet_radius+dz[0]/2 + z[layer])**2
             k = np.zeros(shape=(self.nLayers-layer))
-            k[0] = 2.0 * np.sqrt((planet_radius + dz[0]/2. + z[layer] + dz[layer]/2.)**2 - p)
+            k[0] =np.sqrt((planet_radius + dz[0]/2. + z[layer] + dz[layer]/2.)**2 - p)
 
             k[1:]= np.sqrt((planet_radius + dz[0]/2 + z[layer+1:] + dz[layer+1:]/2)**2 - p) 
             k[1:] -= np.sqrt((planet_radius + dz[0]/2 + z[layer:self.nLayers-1] + dz[layer:self.nLayers-1]/2)**2 -p)
-
-            dl.append(k)
+            dl.append(k*2.0)
         return dl
 
 
