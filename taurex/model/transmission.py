@@ -54,11 +54,11 @@ class TransmissionModel(SimpleForwardModel):
 
             p = (planet_radius+dz[0]/2 + z[layer])**2
             k = np.zeros(shape=(self.nLayers-layer))
-            k[0] = 2.0 * np.sqrt((planet_radius + dz[0]/2. + z[layer] + dz[layer]/2.)**2 - p)
+            k[0] =np.sqrt((planet_radius + dz[0]/2. + z[layer] + dz[layer]/2.)**2 - p)
 
-            k[1:]= 2.0*np.sqrt((planet_radius + dz[0]/2 + z[layer+1:] + dz[layer+1:]/2)**2 - p) 
-            k[1:] -= 2.0*np.sqrt((planet_radius + dz[0]/2 + z[layer:self.nLayers-1] + dz[layer:self.nLayers-1]/2)**2 -p)
-            dl.append(k)
+            k[1:]= np.sqrt((planet_radius + dz[0]/2 + z[layer+1:] + dz[layer+1:]/2)**2 - p) 
+            k[1:] -= np.sqrt((planet_radius + dz[0]/2 + z[layer:self.nLayers-1] + dz[layer:self.nLayers-1]/2)**2 -p)
+            dl.append(k*2.0)
         return dl
 
 
@@ -98,8 +98,7 @@ class TransmissionModel(SimpleForwardModel):
         self.debug('Contributionlist {}'.format(all_contrib))
         tau = np.sum(all_contrib,axis=0)
         self.debug('tau {} {}'.format(tau,tau.shape))
-        #print('tautemp {}'.format(tau[:,0]))
-        #quit()
+
         absorption,tau = self.compute_absorption(tau,dz)
 
         contrib_absorption = []
