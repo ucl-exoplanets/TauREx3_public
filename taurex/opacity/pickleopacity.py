@@ -35,7 +35,7 @@ class PickleOpacity(Opacity):
         self._wavenumber_grid = self._spec_dict['wno']
 
         self._temperature_grid = self._spec_dict['t']
-        self._pressure_grid = self._spec_dict['p']
+        self._pressure_grid = self._spec_dict['p']*1e5
         self._xsec_grid = self._spec_dict['xsecarr']
         self._resolution = np.average(np.diff(self._wavenumber_grid))
         self._molecule_name = self._spec_dict['name']
@@ -105,8 +105,8 @@ class PickleOpacity(Opacity):
 
             return np.zeros_like(self._xsec_grid[0,0])
 
-        check_pressure_max = P > self._max_pressure
-        check_temperature_max = T > self._max_temeprature
+        check_pressure_max = P >= self._max_pressure
+        check_temperature_max = T >= self._max_temeprature
 
         check_pressure_min = P < self._min_pressure
         check_temperature_min = T < self._min_temperature
@@ -174,5 +174,6 @@ class PickleOpacity(Opacity):
 
 
     def compute_opacity(self,temperature,pressure):
-        return self.interp_bilinear_grid(temperature,pressure/1e5
-                    ,*self.find_closest_index(temperature,pressure/1e5)) / 10000
+
+        return self.interp_bilinear_grid(temperature,pressure
+                    ,*self.find_closest_index(temperature,pressure)) / 10000
