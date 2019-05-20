@@ -75,18 +75,15 @@ class ACEGasProfile(GasProfile):
         self.He_abund_dex = self.ace_He_solar
 
 
-    def compute_active_gas_profile(self):
+    def initialize_chemistry(self,nlayers,temperature_profile,pressure_profile,altitude_profile):
         self._get_gas_mask()
         self.set_ace_params()
-        self._ace_profile = md_ace(self._specfile,self._thermfile,self.altitude_profile/1000.0,self.pressure_profile/1.e5,self.temperature_profile,
+        self._ace_profile = md_ace(self._specfile,self._thermfile,altitude_profile/1000.0,pressure_profile/1.e5,temperature_profile,
             self.He_abund_dex,self.C_abund_dex,self.O_abund_dex,self.N_abund_dex)
         
         self.active_mixratio_profile= self._ace_profile[self._active_mask,:]
         self.inactive_mixratio_profile = self._ace_profile[self._inactive_mask,:]
 
-    
-    def compute_inactive_gas_profile(self):
-        pass
     
 
     @fitparam(param_name='ace_metallicity',param_latex='Metallicity',default_mode='log',default_fit=False,default_bounds=[ -1, 4])
