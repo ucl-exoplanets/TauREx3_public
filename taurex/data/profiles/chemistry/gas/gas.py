@@ -20,4 +20,4 @@ class Gas(Fittable,Logger):
         raise NotImplementedError
 
     def initialize_profile(self,nlayers,temperature_profile,pressure_profile,altitude_profile):
-        raise NotImplementedError
+        pass
