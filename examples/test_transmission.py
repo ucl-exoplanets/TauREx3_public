@@ -6,7 +6,6 @@ os.environ['NUMBAPRO_NVVM'] = "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\
 os.environ['NUMBAPRO_LIBDEVICE'] = "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v9.1\\nvvm\\libdevice"
 
 #print(sys.path)
-from taurex.data.profiles.gas import ConstantGasProfile
 from taurex.data.profiles.pressure import SimplePressureProfile
 from taurex.data.profiles.temperature import Guillot2010,Isothermal
 from taurex.data.planet import Earth,Planet
@@ -18,10 +17,10 @@ import matplotlib
 from taurex.data.stellar import BlackbodyStar
 from taurex.constants import RSOL,MJUP,RJUP
 import matplotlib.pyplot as plt
-from taurex.model import EmissionModel
-#from taurex.contributions.cuda.absorption import GPUAbsorptionContribution
-#from taurex.contributions.cuda.cia import GPUCIAContribution
-#from taurex.contributions.cuda.rayleigh import GPURayleighContribution
+from taurex.model import EmissionModel,TransmissionModel
+
+from taurex.data.profiles.chemistry import TaurexChemistry,ConstantGas
+
 from taurex.contributions import CIAContribution,RayleighContribution,AbsorptionContribution
 import logging
 import numexpr as ne
@@ -33,13 +32,15 @@ OpacityCache().set_opacity_path('/Users/ahmed/Documents/taurex_files/xsec/TauRex
 CIACache().set_cia_path('/Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/cia/hitran/')
 absc = AbsorptionContribution()
 
-tm = EmissionModel(gas_profile=ConstantGasProfile(active_gases=['H2O'],active_gas_mix_ratio=[1e-6]),
+
+
+tm = TransmissionModel(
                        planet=Planet(),
                        star=BlackbodyStar(temperature=5800),
                        temperature_profile=Isothermal(),nlayers=30)
 tm.add_contribution(AbsorptionContribution())
-tm.add_contribution(CIAContribution(cia_pairs=['H2-H2','H2-He']))
-tm.add_contribution(RayleighContribution())
+#tm.add_contribution(CIAContribution(cia_pairs=['H2-H2','H2-He']))
+#tm.add_contribution(RayleighContribution())
 
 tm.build()
 

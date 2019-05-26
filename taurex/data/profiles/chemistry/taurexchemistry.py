@@ -56,7 +56,7 @@ class TaurexChemistry(Chemistry):
         return full_dict
 
     def initialize_chemistry(self,nlayers,temperature_profile,pressure_profile,altitude_profile):
-        
+        self.info('Initializing chemistry model')
         self.active_mixratio_profile = np.zeros(shape=(len(self._gases),nlayers))
         self.inactive_mixratio_profile = np.zeros((len(self.inActiveGases), nlayers))
 
@@ -84,7 +84,7 @@ class TaurexChemistry(Chemistry):
 
     @property
     def inActiveGasMixProfile(self):
-        self.inactive_mixratio_profile
+        return self.inactive_mixratio_profile
 
 
     def compute_absolute_gas_profile(self):

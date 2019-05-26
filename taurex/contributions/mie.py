@@ -154,7 +154,7 @@ class MieContribution(Contribution):
         self._nlayers = model.nLayers
         self._ngrid = wngrid.shape[0]
         self.sigma_mie = np.interp(wngrid,self.wavenumberGrid,self._sig_out_aver)*self._mix_cloud_mix
-        self._total_contrib = np.zeros(shape=(model.pressure_profile.nLayers,wngrid.shape[0],))
+        self._total_contrib = np.zeros(shape=(model.nLayers,wngrid.shape[0],))
 
     def write(self,output):
         contrib = super().write(output)

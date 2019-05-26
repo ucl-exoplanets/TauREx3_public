@@ -24,7 +24,7 @@ class SimpleForwardModel(ForwardModel):
                             star=None,
                             pressure_profile=None,
                             temperature_profile=None,
-                            gas_profile=None,
+                            chemistry=None,
                             nlayers=100,
                             atm_min_pressure=1e-4,
                             atm_max_pressure=1e6,
@@ -36,10 +36,10 @@ class SimpleForwardModel(ForwardModel):
 
         self._planet = planet
         self._star=star
-        self.pressure_profile = pressure_profile
+        self._pressure_profile = pressure_profile
         self._temperature_profile = temperature_profile
-        self._gas_profile = gas_profile
-        self.debug('Passed: {} {} {} {} {}'.format(planet,star,pressure_profile,temperature_profile,gas_profile))
+        self._chemistry = chemistry
+        self.debug('Passed: {} {} {} {} {}'.format(planet,star,pressure_profile,temperature_profile,chemistry))
         self.altitude_profile=None
         self.scaleheight_profile=None
         self.gravity_profile=None
@@ -69,11 +69,11 @@ class SimpleForwardModel(ForwardModel):
 
     def setup_defaults(self,nlayers,atm_min_pressure,atm_max_pressure):
 
-        if self.pressure_profile is None:
+        if self._pressure_profile is None:
             from taurex.data.profiles.pressure import SimplePressureProfile
             self.info('No pressure profile defined, using simple pressure profile with')
             self.info('parameters nlayers: {}, atm_pressure_range=({},{})'.format(nlayers,atm_min_pressure,atm_max_pressure))
-            self.pressure_profile = SimplePressureProfile(nlayers,atm_min_pressure,atm_max_pressure)
+            self._pressure_profile = SimplePressureProfile(nlayers,atm_min_pressure,atm_max_pressure)
 
         if self._planet is None:
             from taurex.data import Planet
@@ -86,13 +86,13 @@ class SimpleForwardModel(ForwardModel):
             self._temperature_profile = Isothermal()
 
 
-        if self._gas_profile is None:
+        if self._chemistry is None:
             from taurex.data.profiles.chemistry import TaurexChemistry,ConstantGas
             tc = TaurexChemistry()
             self.warning('No gas profile set, using constant profile with H2O and CH4')
             tc.addGas(ConstantGas('H2O',mix_ratio=1e-5))
             tc.addGas(ConstantGas('CH4',mix_ratio=1e-6))
-            self._gas_profile = tc
+            self._chemistry = tc
 
         if self._star is None:
             from taurex.data.stellar import BlackbodyStar
@@ -101,22 +101,22 @@ class SimpleForwardModel(ForwardModel):
     def initialize_profiles(self):
         self.info('Computing pressure profile')
         
-        self.pressure_profile.compute_pressure_profile()
+        self.pressure.compute_pressure_profile()
         
         self._temperature_profile.initialize_profile(self._planet,
-                    self.pressure_profile.nLayers,
-                    self.pressure_profile.profile)
+                    self.pressure.nLayers,
+                    self.pressure.profile)
         
         #Initialize the atmosphere with a constant gas profile
         if self._initialized is False:
-            self._inital_mu.initialize_chemistry(self.pressure_profile.nLayers,
+            self._inital_mu.initialize_chemistry(self.pressure.nLayers,
                                                 self.temperatureProfile,self.pressureProfile,
                                                 None)
             self.compute_altitude_gravity_scaleheight_profile(self._inital_mu.muProfile)
             self._initialized=True
         
         #Now initialize the gas profile
-        self._gas_profile.initialize_chemistry(self.pressure_profile.nLayers,
+        self._chemistry.initialize_chemistry(self.pressure.nLayers,
                                                 self.temperatureProfile,self.pressureProfile,
                                                 self.altitude_profile)
         
@@ -124,15 +124,19 @@ class SimpleForwardModel(ForwardModel):
         self.compute_altitude_gravity_scaleheight_profile()
 
         #quit()
-        
+    
+
+
+
+
     def collect_fitting_parameters(self):
         self.fitting_parameters = {}
         self.fitting_parameters.update(self._planet.fitting_parameters())
         if self._star is not None:
             self.fitting_parameters.update(self._star.fitting_parameters())
-        self.fitting_parameters.update(self.pressure_profile.fitting_parameters())
+        self.fitting_parameters.update(self.pressure.fitting_parameters())
         self.fitting_parameters.update(self._temperature_profile.fitting_parameters())
-        self.fitting_parameters.update(self._gas_profile.fitting_parameters())
+        self.fitting_parameters.update(self._chemistry.fitting_parameters())
 
         for contrib in self.contribution_list:
             self.fitting_parameters.update(contrib.fitting_parameters())
@@ -159,10 +163,10 @@ class SimpleForwardModel(ForwardModel):
     def compute_altitude_gravity_scaleheight_profile(self,mu_profile=None):
         from taurex.constants import KBOLTZ
         if mu_profile is None:
-            mu_profile=self._gas_profile.muProfile
+            mu_profile=self._chemistry.muProfile
 
         # build the altitude profile from the bottom up
-        nlayers = self.pressure_profile.nLayers
+        nlayers = self.pressure.nLayers
         H = np.zeros(nlayers)
         g = np.zeros(nlayers)
         z = np.zeros(nlayers)
@@ -172,7 +176,7 @@ class SimpleForwardModel(ForwardModel):
         H[0] = (KBOLTZ*self.temperatureProfile[0])/(mu_profile[0]*g[0]) # scaleheight at the surface (0th layer)
 
         for i in range(1, nlayers):
-            deltaz = (-1.)*H[i-1]*np.log(self.pressure_profile.pressure_profile_levels[i]/self.pressure_profile.pressure_profile_levels[i-1])
+            deltaz = (-1.)*H[i-1]*np.log(self.pressure.pressure_profile_levels[i]/self.pressure.pressure_profile_levels[i-1])
             z[i] = z[i-1] + deltaz # altitude at the i-th layer
 
             with np.errstate(over='ignore'):
@@ -187,7 +191,7 @@ class SimpleForwardModel(ForwardModel):
 
     @property
     def pressureProfile(self):
-        return self.pressure_profile.profile
+        return self.pressure.profile
 
     @property
     def temperatureProfile(self):
@@ -205,14 +209,25 @@ class SimpleForwardModel(ForwardModel):
 
     @property
     def nLayers(self):
-        return self.pressure_profile.nLayers
+        return self.pressure.nLayers
 
+    @property
+    def chemistry(self):
+        return self._chemistry
+    
+    @property
+    def pressure(self):
+        return self._pressure_profile
+
+    @property
+    def temperature(self):
+        return self._temperature_profile
 
 
     @property
     def nativeWavenumberGrid(self):
         from taurex.cache.opacitycache import OpacityCache
-        wavenumbergrid = [OpacityCache()[gas].wavenumberGrid for gas in self._gas_profile.active_gases]
+        wavenumbergrid = [OpacityCache()[gas].wavenumberGrid for gas in self._chemistry.active_gases]
 
         current_grid = None
         for wn in wavenumbergrid:
@@ -246,10 +261,10 @@ class SimpleForwardModel(ForwardModel):
 
         #Write Gas
 
-        self._gas_profile.write(model)
+        self._chemistry.write(model)
         self._temperature_profile.write(model)
         self._planet.write(model)
-        self.pressure_profile.write(model)
+        self.pressure.write(model)
         self._star.write(model)
         
         model.write_array('density_profile',self.densityProfile)
