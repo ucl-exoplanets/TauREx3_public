@@ -53,8 +53,10 @@ class SimpleForwardModel(ForwardModel):
 
 
     def _compute_inital_mu(self):
-        from taurex.data.profiles.gas import ConstantGasProfile
-        self._inital_mu=ConstantGasProfile()
+        from taurex.data.profiles.chemistry import TaurexChemistry,ConstantGas
+        tc = TaurexChemistry()
+        tc.addGas(ConstantGas('H2O'))
+        self._inital_mu=tc
 
     
 
@@ -85,9 +87,12 @@ class SimpleForwardModel(ForwardModel):
 
 
         if self._gas_profile is None:
-            from taurex.data.profiles.gas import ConstantGasProfile
+            from taurex.data.profiles.chemistry import TaurexChemistry,ConstantGas
+            tc = TaurexChemistry()
             self.warning('No gas profile set, using constant profile with H2O and CH4')
-            self._gas_profile = ConstantGasProfile()
+            tc.addGas(ConstantGas('H2O',mix_ratio=1e-5))
+            tc.addGas(ConstantGas('CH4',mix_ratio=1e-6))
+            self._gas_profile = tc
 
         if self._star is None:
             from taurex.data.stellar import BlackbodyStar
@@ -104,14 +109,14 @@ class SimpleForwardModel(ForwardModel):
         
         #Initialize the atmosphere with a constant gas profile
         if self._initialized is False:
-            self._inital_mu.initialize_profile(self.pressure_profile.nLayers,
+            self._inital_mu.initialize_chemistry(self.pressure_profile.nLayers,
                                                 self.temperatureProfile,self.pressureProfile,
                                                 None)
             self.compute_altitude_gravity_scaleheight_profile(self._inital_mu.muProfile)
             self._initialized=True
         
         #Now initialize the gas profile
-        self._gas_profile.initialize_profile(self.pressure_profile.nLayers,
+        self._gas_profile.initialize_chemistry(self.pressure_profile.nLayers,
                                                 self.temperatureProfile,self.pressureProfile,
                                                 self.altitude_profile)
         
