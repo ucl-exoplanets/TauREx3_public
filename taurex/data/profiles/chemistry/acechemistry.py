@@ -20,7 +20,25 @@ class ACEChemistry(Chemistry):
         self.ace_co = co_ratio
         self.active_gases = active_gases
         self._get_files(therm_file,spec_file)
+        self.active_gases=active_gases
+        self.active_mixratio_profile= None
+        self.inactive_mixratio_profile = None
 
+    @property
+    def activeGases(self):
+        return self.active_gases
+    
+    @property
+    def inActiveGases(self):
+        return self.inactive_gases
+    
+    @property
+    def activeGasMixProfile(self):
+        return self.active_mixratio_profile
+
+    @property
+    def inActiveGasMixProfile(self):
+        return self.inactive_mixratio_profile
 
 
     def _get_files(self,therm_file,spec_file):
@@ -78,13 +96,20 @@ class ACEChemistry(Chemistry):
     def compute_active_gas_profile(self,altitude_profile,pressure_profile,temperature_profile):
         self._get_gas_mask()
         self.set_ace_params()
-        self._ace_profile = md_ace(self._specfile,self._thermfile,self.altitude_profile/1000.0,self.pressure_profile/1.e5,self.temperature_profile,
+        self._ace_profile = md_ace(self._specfile,self._thermfile,altitude_profile/1000.0,pressure_profile/1.e5,temperature_profile,
             self.He_abund_dex,self.C_abund_dex,self.O_abund_dex,self.N_abund_dex)
         
         self.active_mixratio_profile= self._ace_profile[self._active_mask,:]
         self.inactive_mixratio_profile = self._ace_profile[self._inactive_mask,:]
 
-    
+
+    def initialize_chemistry(self,nlayers,temperature_profile,pressure_profile,altitude_profile):
+        self.info('Initializing chemistry model')
+        self.active_mixratio_profile = np.zeros(shape=(len(self.activeGases),nlayers))
+        self.inactive_mixratio_profile = np.zeros((len(self.inActiveGases), nlayers))
+        self.compute_active_gas_profile(altitude_profile,pressure_profile,temperature_profile)
+
+        super().initialize_chemistry(nlayers,temperature_profile,pressure_profile,altitude_profile)   
     
 
     @fitparam(param_name='ace_metallicity',param_latex='Metallicity',default_mode='log',default_fit=False,default_bounds=[ -1, 4])

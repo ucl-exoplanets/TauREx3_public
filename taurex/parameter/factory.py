@@ -121,7 +121,7 @@ def create_chemistry(config):
         log.error('No chemistry defined in input')
         raise KeyError    
 
-    if chemistry in ('ace','equlibrium'):
+    if chemistry in ('ace','equilibrium'):
         return create_ace(config)
     elif chemistry in ('taurex','complex','custom','defined'):
         from taurex.data.profiles.chemistry import TaurexChemistry

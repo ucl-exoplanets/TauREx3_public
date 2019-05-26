@@ -18,7 +18,7 @@ class Chemistry(Fittable,Logger,Writeable):
         Logger.__init__(self,name)
         Fittable.__init__(self)
 
-    
+        self.mu_profile = None
 
     @property
     def activeGases(self):
