@@ -1,6 +1,7 @@
 import unittest
 import numpy as np
 from taurex.data.profiles.chemistry.gas.constantgas import ConstantGas
+from taurex.data.profiles.chemistry.gas.twopointgas import TwoPointGas
 
 class ConstantGasTest(unittest.TestCase):
 
@@ -16,6 +17,37 @@ class ConstantGasTest(unittest.TestCase):
         self.assertEqual(h2o[2](),1e-4)
         self.assertEqual(gc.mixProfile,1e-4)
 
+class TwoPointGasProfileTest(unittest.TestCase):
+
+    def test_compute_profile(self):
+        cgp = TwoPointGas('CH4',1e-4,1e-8)  
+        params = cgp.fitting_parameters()
+
+
+
+        test_layers = 10
+
+        pres_prof = np.arange(1,test_layers+1)
+        self.assertIsNone(cgp.mixProfile)
+        cgp.initialize_profile(10,pres_prof,pres_prof,pres_prof)  
+        self.assertIsNotNone(cgp.mixProfile)
+
+
+    def test_fittingparams(self):
+        cgp = TwoPointGas('CH4',1e-4,1e-8)  
+        params = cgp.fitting_parameters()      
+
+        self.assertIn('CH4_S',params)
+        self.assertIn('CH4_T',params)
+        self.assertEqual(params['CH4_S'][2](),1e-4)
+        self.assertEqual(params['CH4_T'][2](),1e-8)
+        params['CH4_S'][3](1e-5)
+        params['CH4_T'][3](1e-7)
+        self.assertEqual(params['CH4_S'][2](),1e-5)
+        self.assertEqual(params['CH4_T'][2](),1e-7)       
+
+        self.assertEqual(cgp.mixRatioSurface,1e-5)
+        self.assertEqual(cgp.mixRatioTop,1e-7)     
 # class TaurexProfileTest(unittest.TestCase):
 
 #     def setUp(self):
