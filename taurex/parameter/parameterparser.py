@@ -105,20 +105,20 @@ class ParameterParser(Logger):
     def generate_model(self):
         config = self._raw_config.dict()
         if 'Model' in config:
-            gas = self.generate_gas_profile()
+            chemistry = self.generate_chemistry_profile()
             pressure = self.generate_pressure_profile()
             temperature = self.generate_temperature_profile()
             planet = self.generate_planet()
             star = self.generate_star()
-            model= create_model(config['Model'],gas,temperature,pressure,planet,star)
+            model= create_model(config['Model'],chemistry,temperature,pressure,planet,star)
         else:
             return None
         
         return model
-    def generate_gas_profile(self):
+    def generate_chemistry_profile(self):
         config = self._raw_config.dict()
-        if 'Gas' in config:
-            return create_gas_profile(config['Gas'])
+        if 'Chemistry' in config:
+            return create_chemistry(config['Chemistry'])
         else:
             return None
 

@@ -56,17 +56,14 @@ def create_profile(config,factory):
 
 def gas_factory(profile_type):
     if profile_type == 'constant':
-        from taurex.data.profiles.gas import ConstantGasProfile
-        return ConstantGasProfile
+        from taurex.data.profiles.chemistry import ConstantGas
+        return ConstantGas
     elif profile_type in ('twopoint', '2point',):
-        from taurex.data.profiles.gas import TwoPointGasProfile
-        return TwoPointGasProfile
-    elif profile_type == 'ace':
-        from taurex.data.profiles.gas import ACEGasProfile
-        return ACEGasProfile
+        from taurex.data.profiles.chemistry import TwoPointGas
+        return TwoPointGas
     elif profile_type in ('twolayer','2layer',):
-        from taurex.data.profiles.gas import TwoLayerGasProfile
-        return TwoLayerGasProfile
+        from taurex.data.profiles.chemistry import TwoLayerGas
+        return TwoLayerGas
     else:
         raise NotImplementedError('Gas profile {} not implemented'.format(profile_type))
 
@@ -112,6 +109,44 @@ def create_temperature_profile(config):
 
 def create_pressure_profile(config):
     return create_profile(config,pressure_factory)
+
+def create_ace(config):
+    from taurex.data.profiles.chemistry import ACEChemistry
+    return ACEChemistry(**config)
+
+def create_chemistry(config):
+    try:
+        chemistry = config.pop('chemistry_type').lower()
+    except KeyError:
+        log.error('No chemistry defined in input')
+        raise KeyError    
+
+    if chemistry in ('ace','equlibrium'):
+        return create_ace(config)
+    elif chemistry in ('taurex','complex','custom','defined'):
+        from taurex.data.profiles.chemistry import TaurexChemistry
+        gases = []
+        config_key=[]
+        for key,value in config.items():
+            
+            if isinstance(value,dict):
+                log.debug('FOUND GAS {} {}'.format(key,value))
+                config_key.append(key)
+                gas_type = value.pop('gas_type').lower()
+                klass = gas_factory(gas_type)
+                gases.append(klass(molecule_name=key,**value))
+
+        for k in config_key: del config[k]
+        log.debug('leftover keys {}'.format(config))
+        obj = TaurexChemistry(**config)
+        for g in gases:
+            obj.addGas(g)
+    
+        return obj
+    else:
+        raise ValueError('Unknown chemistry type {}'.format(chemistry))
+
+
 
 def model_factory(model_type):
     if model_type =='transmission':
@@ -205,7 +240,7 @@ def create_model(config,gas,temperature,pressure,planet,star):
     log.debug('Chosen_model is {}'.format(klass))
     kwargs = get_keywordarg_dict(klass)
     log.debug('Model kwargs {}'.format(kwargs))
-    log.debug('---------------{} {} {}--------------'.format(gas,gas.active_gases,gas.active_gas_mix_ratio))
+    log.debug('---------------{} {}--------------'.format(gas,gas.activeGases))
     kwargs['planet'] = planet
     kwargs['star'] = star
     kwargs['gas_profile'] = gas
