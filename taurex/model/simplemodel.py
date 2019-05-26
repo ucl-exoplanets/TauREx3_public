@@ -227,7 +227,7 @@ class SimpleForwardModel(ForwardModel):
     @property
     def nativeWavenumberGrid(self):
         from taurex.cache.opacitycache import OpacityCache
-        wavenumbergrid = [OpacityCache()[gas].wavenumberGrid for gas in self._chemistry.active_gases]
+        wavenumbergrid = [OpacityCache()[gas].wavenumberGrid for gas in self.chemistry.activeGases]
 
         current_grid = None
         for wn in wavenumbergrid:
