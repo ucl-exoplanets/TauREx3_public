@@ -22,7 +22,7 @@ class SimpleCloudsContribution(Contribution):
         pass
     
     def prepare(self,model,wngrid):
-        self._total_contrib = np.zeros(shape=(model.pressure_profile.nLayers,wngrid.shape[0],))
+        self._total_contrib = np.zeros(shape=(model.nLayers,wngrid.shape[0],))
 
     @fitparam(param_name='log_clouds_pressure',param_latex='$log(P_\mathrm{clouds})$',default_fit=False,default_bounds=[-3, 6])
     def cloudsPressure(self):
