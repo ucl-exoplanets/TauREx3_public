@@ -3,7 +3,7 @@ from taurex.external.ace import md_ace
 from taurex.data.fittable import fitparam
 import numpy as np
 import math
-class ACEGasProfile(Chemistry):
+class ACEChemistry(Chemistry):
 
     ace_H_solar = 12.
     ace_He_solar = 10.93
@@ -75,7 +75,7 @@ class ACEGasProfile(Chemistry):
         self.He_abund_dex = self.ace_He_solar
 
 
-    def compute_active_gas_profile(self):
+    def compute_active_gas_profile(self,altitude_profile,pressure_profile,temperature_profile):
         self._get_gas_mask()
         self.set_ace_params()
         self._ace_profile = md_ace(self._specfile,self._thermfile,self.altitude_profile/1000.0,self.pressure_profile/1.e5,self.temperature_profile,
