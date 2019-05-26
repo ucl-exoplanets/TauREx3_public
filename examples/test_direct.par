@@ -3,12 +3,14 @@ xsec_path = /Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/xsec/TauRex_
 cia_path = /Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/cia/hitran
 
 
-[Gas]
-profile_type = Constant
-mode = log
-active_gases = H2O
-he_h2_ratio = 0.17647
-log_H2O = -5
+[Chemistry]
+chemistry_type = taurex
+n2_mix_ratio=0
+he_h2_ratio=0.17647
+
+    [[H2O]]
+    gas_type=constant
+    mix_ratio = 1e-5
 
 
 [Temperature]
