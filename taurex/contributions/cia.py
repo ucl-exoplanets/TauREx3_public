@@ -53,13 +53,13 @@ class CIAContribution(Contribution):
     def prepare(self,model,wngrid):
         self._total_cia = len(self.ciaPairs)
         total_cia = self._total_cia
-        self._total_contrib = np.zeros(shape=(model.pressure_profile.nLayers,wngrid.shape[0],))
+        self._total_contrib = np.zeros(shape=(model.nLayers,wngrid.shape[0],))
         if self._total_cia == 0:
             return
-        self.sigma_cia = np.zeros(shape=(model.pressure_profile.nLayers,total_cia,wngrid.shape[0]))
+        self.sigma_cia = np.zeros(shape=(model.nLayers,total_cia,wngrid.shape[0]))
 
         self._total_cia = total_cia
-        self._nlayers = model.pressure_profile.nLayers
+        self._nlayers = model.nLayers
         self._ngrid = wngrid.shape[0]
         self.info('Computing CIA ')
         for cia_idx,pairName in enumerate(self.ciaPairs):
@@ -67,7 +67,7 @@ class CIAContribution(Contribution):
                 cia = self._cia_cache[pairName]
 
                 _cia_xsec = cia.cia(temperature,wngrid)
-                cia_factor = model._gas_profile.get_gas_mix_profile(cia.pairOne)*model._gas_profile.get_gas_mix_profile(cia.pairTwo)
+                cia_factor = model.chemistry.get_gas_mix_profile(cia.pairOne)*model.chemistry.get_gas_mix_profile(cia.pairTwo)
 
                 self.sigma_cia[idx_layer,cia_idx] = _cia_xsec*cia_factor[idx_layer]
 
