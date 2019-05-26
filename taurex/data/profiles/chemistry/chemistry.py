@@ -61,16 +61,6 @@ class Chemistry(Fittable,Logger,Writeable):
         else:
             raise KeyError  
 
-    def write(self,output):
-
-        gas_entry = output.create_group('Gas')
-        gas_entry.write_string('gas_profile_type',self.__class__.__name__)
-        gas_entry.write_string_array('active_gases',self.activeGases)
-        gas_entry.write_string_array('inactive_gases',self.inActiveGases)
-        gas_entry.write_array('active_gas_mix_profile',self.activeGasMixProfile)
-        gas_entry.write_array('inactive_gas_mix_profile',self.inActiveGasMixProfile)
-        gas_entry.write_array('mu_profile',self.muProfile)
-        return gas_entry
 
     def compute_mu_profile(self,nlayers):
         self.mu_profile= np.zeros(shape=(nlayers,))
@@ -80,3 +70,15 @@ class Chemistry(Fittable,Logger,Writeable):
         if self.inActiveGasMixProfile is not None:
             for idx, gasname in enumerate(self.inActiveGases):
                 self.mu_profile += self.inActiveGasMixProfile[idx,:]*get_molecular_weight(gasname)
+
+
+    def write(self,output):
+
+        gas_entry = output.create_group('Chemistry')
+        gas_entry.write_string('chemistry_type',self.__class__.__name__)
+        gas_entry.write_string_array('active_gases',self.activeGases)
+        gas_entry.write_string_array('inactive_gases',self.inActiveGases)
+        gas_entry.write_array('active_gas_mix_profile',self.activeGasMixProfile)
+        gas_entry.write_array('inactive_gas_mix_profile',self.inActiveGasMixProfile)
+        gas_entry.write_array('mu_profile',self.muProfile)
+        return gas_entry

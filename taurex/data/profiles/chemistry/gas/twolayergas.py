@@ -25,6 +25,26 @@ class TwoLayerGas(TwoPointGas):
         self._mix_ratio_smoothing = mix_ratio_smoothing
 
         self.add_P_param()
+
+
+    @property
+    def mixRatioPressure(self):
+        return self._mix_ratio_pressure
+    
+    @property
+    def mixRatioSmoothing(self):
+        return self._mix_ratio_smoothing
+
+    
+    @mixRatioPressure.setter
+    def mixRatioPressure(self,value):
+        self._mix_pressure = value
+    
+    @mixRatioSmoothing.setter
+    def mixRatioSmoothing(self,value):
+        self._mix_smoothing = value
+
+
     def add_P_param(self):
         mol_name = self.molecule
         mol_tex = molecule_texlabel(mol_name)
@@ -65,3 +85,10 @@ class TwoLayerGas(TwoPointGas):
         border = np.int((len(chemprofile) - len(C_smooth)) / 2)
         self._mix_profile =  chemprofile[::-1]
         self._mix_profile[border:-border] = C_smooth[::-1]
+
+    def write(self,output):
+        gas_entry = super().write(output)
+        gas_entry.write_scalar('mix_ratio_P',self.mixRatioPressure)
+        gas_entry.write_scalar('mix_ratio_smoothing',self.mixRatioSmoothing)
+
+        return gas_entry

@@ -121,3 +121,14 @@ class TaurexChemistry(Chemistry):
     @H2HeMixRatio.setter
     def H2HeMixRatio(self,value):
         self._he_h2_mix_ratio = value
+
+
+    def write(self,output):
+        gas_entry = super().write(output)
+
+        for gas in self._gases:
+            gas.write(gas_entry)
+
+        return gas_entry
+
+        

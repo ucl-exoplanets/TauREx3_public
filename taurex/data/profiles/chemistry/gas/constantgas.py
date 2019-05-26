@@ -39,3 +39,10 @@ class ConstantGas(Gas):
         
         default_fit = False
         self.add_fittable_param(param_name,param_tex,fget,fset,'log',default_fit,bounds) 
+    
+
+    def write(self,output):
+        gas_entry = super().write(output)
+        gas_entry.write_scalar('mix_ratio',self.mixProfile)
+
+        return gas_entry

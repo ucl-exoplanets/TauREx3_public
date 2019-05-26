@@ -100,3 +100,10 @@ class TwoPointGas(Gas):
         self._mix_profile[1:-1] =  10**(a * np.log10(pressure_profile[1:-1])+b)
         self._mix_profile[0] = chem_surf
         self._mix_profile[-1] = chem_top
+
+
+    def write(self,output):
+        gas_entry = super().write(output)
+        gas_entry.write_scalar('mix_ratio_top',self.mixRatioTop)
+        gas_entry.write_scalar('mix_ratio_surface',self.mixRatioSurface)
+        return gas_entry
