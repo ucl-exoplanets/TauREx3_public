@@ -7,7 +7,7 @@ class OpacityCache(Singleton):
         self.opacity_dict={}
         self._opacity_path = None
         self.log = Logger('OpacityCache')
-        self._default_interpolation = 'linear'
+        self._default_interpolation = 'exp'
 
     def set_opacity_path(self,opacity_path):
         self._opacity_path  = opacity_path
