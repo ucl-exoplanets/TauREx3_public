@@ -4,19 +4,12 @@ cia_path = /Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/cia/hitran
 
 
 [Chemistry]
-chemistry_type = taurex
-n2_mix_ratio=0
-he_h2_ratio=0.17647
-
-    [[H2O]]
-    gas_type=constant
-    mix_ratio = 1e-5
+chemistry_type = equilibrium
 
 
 [Temperature]
-profile_type = Isothermal
-T = 1500.0
-
+profile_type = isothermal
+iso_temp = 1500.0
 
 [Pressure]
 profile_type = Simple
@@ -31,29 +24,34 @@ planet_radius = 1.0
 
 [Star]
 star_type = blackbody
-temperature = 5800
 
 [Model]
-model_type = directimage
+model_type = transmission
 
     [[Absorption]]
-    [[CIA]]
-    cia_pairs = H2-He,H2-H2
-    [[Rayleigh]]
+    
+    #[[CIA]]
+    #cia_pairs = H2-He,H2-H2
+    
+    #[[Mie]]
+    #mie_path= /Users/ahmed/Documents/repos/TauREx3/src/MIE/MgSiO3.dat
+
+    #[[SimpleClouds]]
+    #clouds_pressure =5e3
 
 [Spectrum]
-#observed_spectrum = /Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_emission/SPECTRUM_out.dat
-grid_type = native
-wavenumber_grid = 0.0,10000.0,10000
-wavelength_grid = 0.01,10.0,10000
+observed_spectrum = /Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_transmission/SPECTRUM_out.dat
+grid_type = observed
+#wavenumber_grid = 0.0,10000.0,10000
+#wavelength_grid = 0.01,10.0,10000
 
 
 
 
 [Optimizer]
 optimizer = multinest
-num_live_points = 100
-max_iterations = 1000
+num_live_points = 50
+max_iterations = 100
 resume=False
 verbose_output=True
 multi_nest_path = ../multinest
@@ -63,6 +61,8 @@ multi_nest_path = ../multinest
 [Fitting]
 T:fit = True
 T:bounds = 1200.0,1600.0
-log_H2O:fit = True
-log_H2O:bounds = -2,-5
+planet_radius:fit = False
+H2O:fit = True
+H2O:bounds = 1e-2,1e-5
+H2O:mode = log
 

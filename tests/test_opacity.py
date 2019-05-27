@@ -3,12 +3,14 @@ from unittest.mock import patch, mock_open
 from taurex.opacity.opacity import Opacity
 from taurex.opacity.pickleopacity import PickleOpacity
 import numpy as np
+import logging
 
-pickle_test_data ={'t': np.arange(0,20),
-     'p': np.arange(0,25),
+
+pickle_test_data ={'t': np.arange(1,26),
+     'p': np.arange(1,26),
      'name': 'testMol',
       'wno': np.linspace(0,10000,1000),
-      'xsecarr': np.random.rand(25,20,1000)}
+      'xsecarr': np.random.rand(25,25,1000)}
 
 class OpacityTest(unittest.TestCase):
 
@@ -36,17 +38,18 @@ class PickleOpacityTest(unittest.TestCase):
         
         self.assertEqual(self.pop.moleculeName,'TESTMOL')
         np.testing.assert_equal(pickle_test_data['t'],self.pop.temperatureGrid)
-        np.testing.assert_equal(pickle_test_data['p'],self.pop.pressureGrid)
+        np.testing.assert_equal(pickle_test_data['p']*1e5,self.pop.pressureGrid)
         np.testing.assert_equal(pickle_test_data['wno'],self.pop.wavenumberGrid)
         np.testing.assert_equal(pickle_test_data['xsecarr'],self.pop._xsec_grid)
 
 
     def test_opacity_calc(self):
+        logging.basicConfig(level=logging.DEBUG)
+        t_list = pickle_test_data['t']
+        p_list = pickle_test_data['p']
 
-        t_list = [0,4,7]
-        p_list = [3,6,9]
-
-        for t_idx,p_idx in zip(t_list,p_list):
-            xsec = pickle_test_data['xsecarr'][p_idx,t_idx]
-            np.testing.assert_equal(xsec/10000,self.pop.compute_opacity(t_idx,p_idx))
+        for idx,vals in enumerate(zip(t_list,p_list)):
+            t_idx,p_idx = vals
+            xsec = pickle_test_data['xsecarr'][idx,idx]
+            np.testing.assert_almost_equal(xsec/10000,self.pop.compute_opacity(t_idx,p_idx*1e5))
 

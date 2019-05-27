@@ -61,7 +61,7 @@ class Rodgers2000(TemperatureProfile):
             fget_point = read_point
             fset_point = write_point
             default_fit = False
-            self.add_fittable_param(param_name,param_latex ,fget_point,fset_point,default_fit,bounds) 
+            self.add_fittable_param(param_name,param_latex ,fget_point,fset_point,'linear',default_fit,bounds) 
 
 
     def write(self,output):

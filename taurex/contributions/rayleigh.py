@@ -48,7 +48,7 @@ class RayleighContribution(Contribution):
 
         sigma_rayleigh_dict = {}
 
-        molecules = model._gas_profile.active_gases + model._gas_profile.inactive_gases
+        molecules = model.chemistry.activeGases + model.chemistry.inActiveGases
 
         for gasname in molecules:
 
@@ -126,18 +126,18 @@ class RayleighContribution(Contribution):
 
         self._ngrid = wngrid.shape[0]
         self._nmols = len(self.sigma_rayleigh_dict.keys())
-        self._nlayers = model.pressure_profile.nLayers
+        self._nlayers = model.nLayers
 
-        self.sigma_rayleigh = np.zeros(shape=(model.pressure_profile.nLayers,self._nmols,wngrid.shape[0]))
+        self.sigma_rayleigh = np.zeros(shape=(model.nLayers,self._nmols,wngrid.shape[0]))
         self.info('Computing Ray interpolation ')
         for rayleigh_idx,rayleigh in enumerate(self.sigma_rayleigh_dict.items()):
             gas,xsec = rayleigh
             for idx_layer in range(model.nLayers):
                 
                
-                ray_factor = model._gas_profile.get_gas_mix_profile(gas)
+                ray_factor = model.chemistry.get_gas_mix_profile(gas)
                 
 
                 self.sigma_rayleigh[idx_layer,rayleigh_idx]= ray_factor[idx_layer]*xsec[:]
         self.info('DONE!!!')
-        self._total_contrib = np.zeros(shape=(model.pressure_profile.nLayers,wngrid.shape[0],))
+        self._total_contrib = np.zeros(shape=(model.nLayers,wngrid.shape[0],))

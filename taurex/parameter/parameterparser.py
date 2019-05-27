@@ -40,7 +40,13 @@ class ParameterParser(Logger):
                 OpacityCache().set_opacity_path(config['Global']['xsec_path'])
             except KeyError:
                 self.warning('No xsec path set, opacities cannot be used in model')
-            
+            try:
+                
+                OpacityCache().set_interpolation(config['Global']['xsec_interpolation'])
+                self.info('Interpolation mode set to {}'.format(config['Global']['xsec_interpolation']))
+            except KeyError:
+                self.info('Interpolation mode set to linear')
+
             try:
                 CIACache().set_cia_path(config['Global']['cia_path'])
             except KeyError:
@@ -105,20 +111,20 @@ class ParameterParser(Logger):
     def generate_model(self):
         config = self._raw_config.dict()
         if 'Model' in config:
-            gas = self.generate_gas_profile()
+            chemistry = self.generate_chemistry_profile()
             pressure = self.generate_pressure_profile()
             temperature = self.generate_temperature_profile()
             planet = self.generate_planet()
             star = self.generate_star()
-            model= create_model(config['Model'],gas,temperature,pressure,planet,star)
+            model= create_model(config['Model'],chemistry,temperature,pressure,planet,star)
         else:
             return None
         
         return model
-    def generate_gas_profile(self):
+    def generate_chemistry_profile(self):
         config = self._raw_config.dict()
-        if 'Gas' in config:
-            return create_gas_profile(config['Gas'])
+        if 'Chemistry' in config:
+            return create_chemistry(config['Chemistry'])
         else:
             return None
 
@@ -163,8 +169,7 @@ class ParameterParser(Logger):
             for key,value in fitting_config.items():
                 fit_param,fit_type=key.split(':')
                 if not fit_param in fitting_params:
-                    fitting_params[fit_param] = {'fit':None,'bounds':None}
-                print(key,value)
+                    fitting_params[fit_param] = {'fit':None,'bounds':None,'mode':None}
                 fitting_params[fit_param][fit_type]=value
         
         return fitting_params

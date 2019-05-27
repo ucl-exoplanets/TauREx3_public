@@ -98,7 +98,7 @@ class NPoint(TemperatureProfile):
             fset_point = write_point
             self.debug('FGet_location {} {}'.format(fget_point,fget_point(self)))
             default_fit = False
-            self.add_fittable_param(param_name,param_latex ,fget_point,fset_point,default_fit,bounds) 
+            self.add_fittable_param(param_name,param_latex ,fget_point,fset_point,'log',default_fit,bounds) 
 
 
 
@@ -120,7 +120,7 @@ class NPoint(TemperatureProfile):
             fset_point = write_point
             self.debug('FGet_location {} {}'.format(fget_point,fget_point(self)))
             default_fit = False
-            self.add_fittable_param(param_name,param_latex ,fget_point,fset_point,default_fit,bounds)        
+            self.add_fittable_param(param_name,param_latex ,fget_point,fset_point,'linear',default_fit,bounds)        
 
 
 

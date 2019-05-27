@@ -47,6 +47,18 @@ class ForwardModel(Logger,Writeable):
 
 
     @property
+    def chemistry(self):
+        raise NotImplementedError
+    
+    @property
+    def temperature(self):
+        raise NotImplementedError
+
+    @property
+    def pressure(self):
+        raise NotImplementedError
+
+    @property
     def pressureProfile(self):
         raise NotImplementedError
 

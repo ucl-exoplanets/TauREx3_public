@@ -37,24 +37,23 @@ class AbsorptionContribution(Contribution):
     
     def prepare(self,model,wngrid):
         import numexpr as ne
-        ngases = len(model._gas_profile.activeGases)
+        ngases = len(model.chemistry.activeGases)
         self.debug('Creating crossection for wngrid {} with ngases {} and nlayers {}'.format(wngrid,ngases,model.nLayers))
 
-        sigma_xsec = np.zeros(shape=(model.pressure_profile.nLayers,ngases,wngrid.shape[0]))
+        sigma_xsec = np.zeros(shape=(model.nLayers,ngases,wngrid.shape[0]))
         
 
 
-        for idx_gas,gas in enumerate(model._gas_profile.activeGases):
+        for idx_gas,gas in enumerate(model.chemistry.activeGases):
 
             self.info('Recomputing active gas {} opacity'.format(gas))
             for idx_layer,tp in enumerate(zip(model.temperatureProfile,model.pressureProfile)):
                 self.debug('Got index,tp {} {}'.format(idx_layer,tp))
                 temperature,pressure = tp
-                pressure/=1e5
                 sigma_xsec[idx_layer,idx_gas] = self._opacity_cache[gas].opacity(temperature,pressure,wngrid)
                 self.debug('Sigma for T {}, P:{} is {}'.format(temperature,pressure,sigma_xsec[idx_layer,idx_gas]))
 
-        active_gas = model._gas_profile.activeGasMixProfile.transpose()[...,None]
+        active_gas = model.chemistry.activeGasMixProfile.transpose()[...,None]
         
 
         self.debug('Sigma is {}'.format(sigma_xsec))
@@ -62,7 +61,7 @@ class AbsorptionContribution(Contribution):
 
 
         self._ngrid = wngrid.shape[0]
-        self._nlayers = model.pressure_profile.nLayers
+        self._nlayers = model.nLayers
         self._nmols = ngases
 
         self.sigma_xsec= sigma_xsec*active_gas
@@ -71,7 +70,7 @@ class AbsorptionContribution(Contribution):
         self.debug('Final sigma is {}'.format(self.sigma_xsec))
         #quit()
         self.info('Done')
-        self._total_contrib = np.zeros(shape=(model.pressure_profile.nLayers,wngrid.shape[0],))
+        self._total_contrib = np.zeros(shape=(model.nLayers,wngrid.shape[0],))
         return self.sigma_xsec
 
     def finalize(self,model):
