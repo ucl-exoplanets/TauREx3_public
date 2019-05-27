@@ -29,7 +29,7 @@ class InterpolatingOpacity(Opacity):
 
 
     def set_interpolation_mode(self,interp_mode):
-        self._interp_mode = interp_mode
+        self._interp_mode = interp_mode.strip()
 
     
     def interp_temp_only(self,T,t_idx_min,t_idx_max,P):
@@ -38,14 +38,15 @@ class InterpolatingOpacity(Opacity):
         fx0=self.xsecGrid[P,t_idx_min]
         fx1 = self.xsecGrid[P,t_idx_max]
 
-        if self._interp_mode is 'linear':
+        if self._interp_mode == 'linear':
             return fx0 + (fx1-fx0)*(T-Tmin)/(Tmax-Tmin)
-        else:
+        elif self._interp_mode == 'exp':
             alpha = ne.evaluate('(1/(1/Tmax - 1/Tmin)) *(log(fx0/fx1))')
             beta = (T-Tmin)/(Tmax*T)
 
             return ne.evaluate('fx0*exp(alpha*beta)')  
-
+        else:
+            raise ValueError('Unknown interpolation mode {}'.format(self._interp_mode))
 
     def interp_pressure_only(self,P,p_idx_min,p_idx_max,T):
         Pmax = self.pressureGrid[p_idx_max]
@@ -114,14 +115,14 @@ class InterpolatingOpacity(Opacity):
         Pmin = self.pressureGrid[p_idx_min]
 
 
-        if self._interp_mode is 'linear':
+        if self._interp_mode == 'linear':
             diff = ((Tmax-Tmin)*(Pmax-Pmin))
             factor = 1.0/((Tmax-Tmin)*(Pmax-Pmin))
 
             self.debug('FACTOR {}'.format(factor))
 
             return ne.evaluate('factor*(q_11*(Pmax-P)*(Tmax-T) + q_21*(P-Pmin)*(Tmax-T) + q_12*(Pmax-P)*(T-Tmin) + q_22*(P-Pmin)*(T-Tmin))')
-        else:
+        elif self._interp_mode == 'exp':
             t_factor =(1/(1/Tmax - 1/Tmin)) 
             alpha = ne.evaluate('t_factor*log(q_11/q_12)')
             beta = (T-Tmin)/(Tmax*T)
@@ -133,7 +134,8 @@ class InterpolatingOpacity(Opacity):
 
             p_factor = (P-Pmin)/(Pmax-Pmin)
             return ne.evaluate('sigma + (sigma_2 - sigma)*p_factor')   
-    
+        else:
+            raise ValueError('Unknown interpolation mode {}'.format(self._interp_mode))
 
     def compute_opacity(self,temperature,pressure):
 
