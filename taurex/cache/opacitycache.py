@@ -7,10 +7,16 @@ class OpacityCache(Singleton):
         self.opacity_dict={}
         self._opacity_path = None
         self.log = Logger('OpacityCache')
+        self._default_interpolation = 'exp'
 
     def set_opacity_path(self,opacity_path):
         self._opacity_path  = opacity_path
     
+    def set_interpolation(self,interpolation_mode):
+        self._default_interpolation = interpolation_mode
+        for values in self.opacity_dict.values():
+            values.set_interpolation_mode(self._default_interpolation)
+
     def __getitem__(self,key):
         key = key.upper()
         if key in self.opacity_dict:
@@ -56,7 +62,7 @@ class OpacityCache(Singleton):
             if molecule_filter is not None:
                 if not splits[0] in molecule_filter:
                     continue
-            op = PickleOpacity(files)
+            op = PickleOpacity(files,interpolation_mode=self._default_interpolation)
             self.add_opacity(op,molecule_filter=molecule_filter)
 
     def load_opacity(self,opacities=None,opacity_path=None,molecule_filter=None):
