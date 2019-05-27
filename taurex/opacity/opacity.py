@@ -40,7 +40,8 @@ class Opacity(Logger):
 
 
     def opacity(self,temperature,pressure,wngrid=None):
-        orig=self.compute_opacity(temperature,pressure)
+        orig=np.nan_to_num(self.compute_opacity(temperature,pressure))
+
         if wngrid is None:
             return orig
         else:
