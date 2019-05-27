@@ -8,7 +8,7 @@ class PickleOpacity(Opacity):
 
     """
     
-    def __init__(self,filename):
+    def __init__(self,filename,interp_mode='linear'):
         super().__init__('PickleOpacity:{}'.format(pathlib.Path(filename).stem[0:10]))
 
         self._filename = filename
@@ -16,7 +16,7 @@ class PickleOpacity(Opacity):
         self._spec_dict = None
         self._resolution = None
         self._load_pickle_file(filename)
-
+        self._interp_mode = interp_mode
         
         
     @property
@@ -43,7 +43,7 @@ class PickleOpacity(Opacity):
         self._min_pressure = self._pressure_grid.min()
         self._max_pressure = self._pressure_grid.max()
         self._min_temperature = self._temperature_grid.min()
-        self._max_temeprature = self._temperature_grid.max()
+        self._max_temperature = self._temperature_grid.max()
         self.clean_molecule_name()
     def clean_molecule_name(self):
         splits = self.moleculeName.split('_')
@@ -75,6 +75,9 @@ class PickleOpacity(Opacity):
 
         return t_min,t_max,p_min,p_max
 
+
+  
+
     
     def interp_temp_only(self,T,t_idx_min,t_idx_max,P):
         Tmax = self._temperature_grid[t_idx_max]
@@ -82,7 +85,14 @@ class PickleOpacity(Opacity):
         fx0=self._xsec_grid[P,t_idx_min]
         fx1 = self._xsec_grid[P,t_idx_max]
 
-        return fx0 + (fx1-fx0)*(T-Tmin)/(Tmax-Tmin)
+        if self._interp_mode is 'linear':
+            return fx0 + (fx1-fx0)*(T-Tmin)/(Tmax-Tmin)
+        # else:
+        #     alpha = 1/(1/Tmax - 1/Tmin)*(np.log(fx0)/np.log(fx1))
+        #     beta = (T-Tmin)/(Tmax*T)
+
+        #     return fx0*np.exp(alpha*beta)  
+
 
     def interp_pressure_only(self,P,p_idx_min,p_idx_max,T):
         Pmax = self._pressure_grid[p_idx_max]
@@ -106,7 +116,7 @@ class PickleOpacity(Opacity):
             return np.zeros_like(self._xsec_grid[0,0])
 
         check_pressure_max = P >= self._max_pressure
-        check_temperature_max = T >= self._max_temeprature
+        check_temperature_max = T >= self._max_temperature
 
         check_pressure_min = P < self._min_pressure
         check_temperature_min = T < self._min_temperature
@@ -152,12 +162,27 @@ class PickleOpacity(Opacity):
         Pmax = self._pressure_grid[p_idx_max]
         Pmin = self._pressure_grid[p_idx_min]
 
-        diff = ((Tmax-Tmin)*(Pmax-Pmin))
-        factor = 1.0/((Tmax-Tmin)*(Pmax-Pmin))
 
-        self.debug('FACTOR {}'.format(factor))
+        if self._interp_mode is 'linear':
+            diff = ((Tmax-Tmin)*(Pmax-Pmin))
+            factor = 1.0/((Tmax-Tmin)*(Pmax-Pmin))
 
-        return ne.evaluate('factor*(q_11*(Pmax-P)*(Tmax-T) + q_21*(P-Pmin)*(Tmax-T) + q_12*(Pmax-P)*(T-Tmin) + q_22*(P-Pmin)*(T-Tmin))')
+            self.debug('FACTOR {}'.format(factor))
+
+            return ne.evaluate('factor*(q_11*(Pmax-P)*(Tmax-T) + q_21*(P-Pmin)*(Tmax-T) + q_12*(Pmax-P)*(T-Tmin) + q_22*(P-Pmin)*(T-Tmin))')
+        else:
+            t_factor = 1.0/((1.0/Tmax) - (1.0/Tmin))
+            b = ne.evaluate('t_factor*log(q_11/q_12)')
+            a = ne.evaluate('q_11*exp(b/Tmin)')
+            sigma = ne.evaluate('a*exp(-b/T)')
+
+            b = ne.evaluate('t_factor*log(q_21/q_22)')
+            a = ne.evaluate('q_21*exp(b/Tmin)')
+            sigma_2 = ne.evaluate('a*exp(-b/T)')
+
+            p_factor = (P-Pmin)/(Pmax-Pmin)
+            return ne.evaluate('sigma + (sigma_2 - sigma)*p_factor')
+
 
 
         #return factor*(q_11*(Pmax-P)*(Tmax-T) + q_21*(P-Pmin)*(Tmax-T) + q_12*(Pmax-P)*(T-Tmin) + q_22*(P-Pmin)*(T-Tmin))
