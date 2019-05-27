@@ -40,7 +40,13 @@ class ParameterParser(Logger):
                 OpacityCache().set_opacity_path(config['Global']['xsec_path'])
             except KeyError:
                 self.warning('No xsec path set, opacities cannot be used in model')
-            
+            try:
+                
+                OpacityCache().set_interpolation(config['Global']['xsec_interpolation'])
+                self.info('Interpolation mode set to {}'.format(config['Global']['xsec_interpolation']))
+            except KeyError:
+                self.info('Interpolation mode set to linear')
+
             try:
                 CIACache().set_cia_path(config['Global']['cia_path'])
             except KeyError:
