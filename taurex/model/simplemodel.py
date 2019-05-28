@@ -2,7 +2,7 @@ from taurex.log import Logger
 import numpy as np
 import math
 from .model import ForwardModel
-
+from taurex.util import bindown
 
 class SimpleForwardModel(ForwardModel):
     """ A 'simple' base model in the sense that its just
@@ -130,18 +130,19 @@ class SimpleForwardModel(ForwardModel):
 
 
     def collect_fitting_parameters(self):
-        self.fitting_parameters = {}
-        self.fitting_parameters.update(self._planet.fitting_parameters())
+        self._fitting_parameters = {}
+        self._fitting_parameters.update(self.fitting_parameters())
+        self._fitting_parameters.update(self._planet.fitting_parameters())
         if self._star is not None:
-            self.fitting_parameters.update(self._star.fitting_parameters())
-        self.fitting_parameters.update(self.pressure.fitting_parameters())
-        self.fitting_parameters.update(self._temperature_profile.fitting_parameters())
-        self.fitting_parameters.update(self._chemistry.fitting_parameters())
+            self._fitting_parameters.update(self._star.fitting_parameters())
+        self._fitting_parameters.update(self.pressure.fitting_parameters())
+        self._fitting_parameters.update(self._temperature_profile.fitting_parameters())
+        self._fitting_parameters.update(self._chemistry.fitting_parameters())
 
         for contrib in self.contribution_list:
-            self.fitting_parameters.update(contrib.fitting_parameters())
+            self._fitting_parameters.update(contrib.fitting_parameters())
 
-        self.debug('Available Fitting params: {}'.format(list(self.fitting_parameters.keys())))
+        self.debug('Available Fitting params: {}'.format(list(self._fitting_parameters.keys())))
     def build(self):
         self.info('Building model........')
         self._compute_inital_mu()
@@ -242,12 +243,21 @@ class SimpleForwardModel(ForwardModel):
                 
 
 
-    def model(self,wngrid,return_contrib=False):
+    def model(self,wngrid=None,return_contrib=False):
         self.initialize_profiles()
-        self._star.initialize(wngrid)
+
+        native_grid = self.nativeWavenumberGrid
+
+        self._star.initialize(native_grid)
         for contrib in self.contribution_list:
-            contrib.prepare(self,wngrid)
-        return self.path_integral(wngrid,return_contrib)
+            contrib.prepare(self,native_grid)
+        absorp,tau,contrib = self.path_integral(native_grid,return_contrib)
+
+        if wngrid is None:
+            return absorp,absorp,tau,contrib
+        else:
+            new_absp = bindown(native_grid,absorp,wngrid)
+            return absorp,new_absp,tau,contrib
 
     def path_integral(self,wngrid,return_contrib):
         raise NotImplementedError
