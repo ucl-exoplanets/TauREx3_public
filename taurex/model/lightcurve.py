@@ -35,8 +35,8 @@ class LightCurveModel(ForwardModel):
     def _load_file(self):
         # input data from lightcurve, not from spectrum.
 
-        with open(self.file_loc) as f:
-            self.lc_data = pickle.load(f)
+        with open(self.file_loc,'rb') as f:
+            self.lc_data = pickle.load(f,encoding='latin1')
 
     def _load_orbital_profile(self):
         """Load orbital information"""
@@ -62,16 +62,16 @@ class LightCurveModel(ForwardModel):
 
         for i in self.lc_data['data']:
             # raw data includes data and datastd.
-            raw_data = self.lc_data['data'][i][:len(self.lc_data['data'][i])/2]
-            data_std = self.lc_data['data'][i][len(self.lc_data['data'][i])/2:]
+            raw_data = self.lc_data['data'][i][:len(self.lc_data['data'][i])//2]
+            data_std = self.lc_data['data'][i][len(self.lc_data['data'][i])//2:]
 
 
 
         if self.spitzer:
             instr = 'spitzer'
             self.time_series_spitzer = self.lc_data['time_series']['spitzer']
-            raw_data = self.lc_data['data'][instr][:len(self.lc_data['data'][instr]) / 2]
-            data_std = self.lc_data['data'][instr][len(self.lc_data['data'][instr]) / 2:]
+            raw_data = self.lc_data['data'][instr][:len(self.lc_data['data'][instr]) //2]
+            data_std = self.lc_data['data'][instr][len(self.lc_data['data'][instr]) //2:]
             raw_data_list = np.append(raw_data_list,raw_data.flatten())
             data_std_list = np.append(data_std_list,data_std.flatten())
             max = np.max(raw_data, axis=1)
@@ -81,8 +81,8 @@ class LightCurveModel(ForwardModel):
         if self.wfc3:
             instr = 'wfc3'
             self.time_series_wfc3 = self.lc_data['time_series']['wfc3']
-            raw_data = self.lc_data['data'][instr][:len(self.lc_data['data'][instr]) / 2]
-            data_std = self.lc_data['data'][instr][len(self.lc_data['data'][instr]) / 2:]
+            raw_data = self.lc_data['data'][instr][:len(self.lc_data['data'][instr]) //2]
+            data_std = self.lc_data['data'][instr][len(self.lc_data['data'][instr]) //2:]
             raw_data_list = np.append(raw_data_list, raw_data.flatten())
             data_std_list = np.append(data_std_list, data_std.flatten())
             max = np.max(raw_data, axis=1)
@@ -92,8 +92,8 @@ class LightCurveModel(ForwardModel):
         if self.stis:
             instr = 'stis'
             self.time_series_stis = self.lc_data['time_series']['stis']
-            raw_data = self.lc_data['data'][instr][:len(self.lc_data['data'][instr]) / 2]
-            data_std = self.lc_data['data'][instr][len(self.lc_data['data'][instr]) / 2:]
+            raw_data = self.lc_data['data'][instr][:len(self.lc_data['data'][instr]) //2]
+            data_std = self.lc_data['data'][instr][len(self.lc_data['data'][instr]) //2:]
             raw_data_list = np.append(raw_data_list, raw_data.flatten())
             data_std_list = np.append(data_std_list, data_std.flatten())
             max = np.max(raw_data, axis=1)
@@ -173,7 +173,7 @@ class LightCurveModel(ForwardModel):
 
             self.add_fittable_param(param_name,param_latex,readN,writeN,default_mode,default_fit,default_bounds)    
 
-    def instrument_light_curve(self,model):
+    def instrument_light_curve(self,model,wlgrid):
         """Combine light-curves from different instrucments together."""
         result = np.array([])
         sma_over_rs_value = self.sma_over_rs
@@ -181,8 +181,7 @@ class LightCurveModel(ForwardModel):
         mid_time_value = self.mid_time
         Nfactor = self._nfactor
         if self.spitzer:
-            index = \
-            np.where(np.logical_and(self.obs_wlgrid > 3.4, self.obs_wlgrid < 8.2))[0]
+            index = np.logical_and(wlgrid > 3.4, wlgrid < 8.2)
             result = np.append(result,self.light_curve_chain(model[index], time_array=self.time_series_spitzer, period=self.period,
                                             sma_over_rs=sma_over_rs_value, eccentricity=self.ecc,
                                             inclination=inclination_value, periastron=self.periastron,
@@ -190,7 +189,7 @@ class LightCurveModel(ForwardModel):
                                             Nfactor=Nfactor[index]))
 
         if self.wfc3:
-            index = np.where(np.logical_and(self.obs_wlgrid>1.1 ,self.obs_wlgrid < 1.8))[0]
+            index = np.logical_and(wlgrid>1.1 ,wlgrid < 1.8)
             result = np.append(result,self.light_curve_chain(model[index], time_array=self.time_series_wfc3, period=self.period,
                            sma_over_rs=sma_over_rs_value, eccentricity=self.ecc,
                            inclination=inclination_value, periastron=self.periastron,
@@ -198,8 +197,7 @@ class LightCurveModel(ForwardModel):
                            Nfactor=Nfactor[index]))
 
         if self.stis:
-            index = \
-            np.where(np.logical_and(self.obs_wlgrid > 0.3, self.obs_wlgrid < 1.0))[0]
+            index = np.logical_and(wlgrid > 0.3, wlgrid < 1.0)
             result = np.append(result,self.light_curve_chain(model[index], time_array=self.time_series_stis, period=self.period,
                                             sma_over_rs=sma_over_rs_value, eccentricity=self.ecc,
                                             inclination=inclination_value, periastron=self.periastron,
@@ -236,26 +234,29 @@ class LightCurveModel(ForwardModel):
     
     def build(self):
         self._fitting_parameters = {}
+        self._fitting_parameters.update(self.fitting_parameters())
 
         self._forward_model.build()
-
+        
         self._fitting_parameters.update(self._forward_model.fittingParameters)
-
 
     @property
     def nativeWavenumberGrid(self):
         return self._forward_model.nativeWavenumberGrid
 
 
-    def model(self,wngrid=None,return_contrib=True):
+    def model(self,wngrid=None,return_contrib=False):
         """Computes the forward model for a wngrid"""
-        binned_model,model,tau,contrib = self._forward_model(wngrid,return_contrib)
+        binned_model,model,tau,contrib = self._forward_model.model(wngrid,return_contrib)
+        if wngrid is None:
+            wngrid = self.nativeWavenumberGrid
+        
+        wlgrid = 10000/wngrid
+
+        result = self.instrument_light_curve(binned_model,wlgrid)
 
 
-        result = self.instrument_light_curve(binned_model)
-
-
-        return result
+        return result,model,tau,contrib
 
     
     
