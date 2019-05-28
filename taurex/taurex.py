@@ -109,9 +109,9 @@ def main():
         logging.getLogger().setLevel(logging.INFO)
 
     #Run the model
-    absp,tau,contrib=model.model(native_grid,return_contrib=True)
+    new_absp,absp,tau,contrib=model.model(bindown_wngrid,return_contrib=True)
     #Get out new binned down model
-    new_absp = bindown(native_grid,absp,bindown_wngrid)
+    #new_absp = bindown(native_grid,absp,bindown_wngrid)
 
     if args.output_file:
         #Output taurex data
