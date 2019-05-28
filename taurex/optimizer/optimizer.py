@@ -121,7 +121,7 @@ class Optimizer(Logger):
 
         #wngrid = obs_bins
 
-        _,final_model,_,_ = self._model.model(obs_bins)
+        final_model,_,_,_ = self._model.model(obs_bins)
 
 #        final_model =bindown(wngrid,model_out,obs_bins)
         res = (data[:-1] - final_model) / datastd[:-1]
