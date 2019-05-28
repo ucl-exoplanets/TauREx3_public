@@ -117,13 +117,13 @@ class Optimizer(Logger):
         self.update_model(fit_params)
 
         obs_bins= self._observed.wavenumberGrid
-        wngrid = self._wngrid
+        #wngrid = self._wngrid
 
         #wngrid = obs_bins
 
-        model_out,_,_ = self._model.model(wngrid)
+        _,final_model,_,_ = self._model.model(obs_bins)
 
-        final_model =bindown(wngrid,model_out,obs_bins)
+#        final_model =bindown(wngrid,model_out,obs_bins)
         res = (data[:-1] - final_model) / datastd[:-1]
 
         res = np.nansum(res*res)
