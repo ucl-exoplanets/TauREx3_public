@@ -257,7 +257,7 @@ class SimpleForwardModel(ForwardModel):
             return absorp,absorp,tau,contrib
         else:
             new_absp = bindown(native_grid,absorp,wngrid)
-            return absorp,new_absp,tau,contrib
+            return new_absp,absorp,tau,contrib
 
     def path_integral(self,wngrid,return_contrib):
         raise NotImplementedError
