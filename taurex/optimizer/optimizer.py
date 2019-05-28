@@ -124,7 +124,7 @@ class Optimizer(Logger):
         final_model,_,_,_ = self._model.model(obs_bins)
 
 #        final_model =bindown(wngrid,model_out,obs_bins)
-        res = (data[:-1] - final_model) / datastd[:-1]
+        res = (data - final_model) / datastd
 
         res = np.nansum(res*res)
         if res == 0:

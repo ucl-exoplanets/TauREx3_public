@@ -118,8 +118,10 @@ def bindown(original_bin,original_data,new_bin):
     
     """
     import numpy as np
-    return(np.histogram(original_bin, new_bin, weights=original_data)[0] /
-              np.histogram(original_bin, new_bin)[0])
+    #print(original_bin.shape,original_data.shape)
+
+    return(np.histogram(original_bin, np.append(-0.5,new_bin), weights=original_data)[0] /
+              np.histogram(original_bin, np.append(-0.5,new_bin))[0])
 
 
 

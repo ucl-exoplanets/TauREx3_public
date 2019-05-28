@@ -252,7 +252,6 @@ class SimpleForwardModel(ForwardModel):
         for contrib in self.contribution_list:
             contrib.prepare(self,native_grid)
         absorp,tau,contrib = self.path_integral(native_grid,return_contrib)
-
         if wngrid is None:
             return absorp,absorp,tau,contrib
         else:

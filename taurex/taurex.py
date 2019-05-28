@@ -129,7 +129,7 @@ def main():
         if args.contrib:
             for name,value in contrib:
                 new_value = bindown(native_grid,value,bindown_wngrid)
-                plt.plot(wlgrid[:-1],new_value,label=name)
+                plt.plot(wlgrid,new_value,label=name)
 
         #If we have an observation then plot it
         if observed is not None:
@@ -137,7 +137,7 @@ def main():
 
         
         #Plot the absorption
-        plt.plot(wlgrid[:-1],new_absp,label='forward model')
+        plt.plot(wlgrid,new_absp,label='forward model')
 
 
 
