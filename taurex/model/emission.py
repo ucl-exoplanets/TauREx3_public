@@ -23,7 +23,7 @@ class EmissionModel(SimpleForwardModel):
                             star=None,
                             pressure_profile=None,
                             temperature_profile=None,
-                            gas_profile=None,
+                            chemistry=None,
                             nlayers=100,
                             atm_min_pressure=1e-4,
                             atm_max_pressure=1e6
@@ -32,7 +32,7 @@ class EmissionModel(SimpleForwardModel):
                             star,
                             pressure_profile,
                             temperature_profile,
-                            gas_profile,
+                            chemistry,
                             nlayers,
                             atm_min_pressure,
                             atm_max_pressure)
