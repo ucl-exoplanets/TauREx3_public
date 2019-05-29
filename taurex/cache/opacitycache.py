@@ -63,6 +63,7 @@ class OpacityCache(Singleton):
                 if not splits[0] in molecule_filter:
                     continue
             op = PickleOpacity(files,interpolation_mode=self._default_interpolation)
+            op._molecule_name = splits[0]
             self.add_opacity(op,molecule_filter=molecule_filter)
 
     def load_opacity(self,opacities=None,opacity_path=None,molecule_filter=None):

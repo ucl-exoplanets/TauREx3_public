@@ -243,7 +243,7 @@ def create_model(config,gas,temperature,pressure,planet,star):
     log.debug('---------------{} {}--------------'.format(gas,gas.activeGases))
     kwargs['planet'] = planet
     kwargs['star'] = star
-    kwargs['gas_profile'] = gas
+    kwargs['chemistry'] = gas
     kwargs['temperature_profile'] =temperature
     kwargs['pressure_profile'] = pressure
     log.debug('New Model kwargs {}'.format(kwargs))
