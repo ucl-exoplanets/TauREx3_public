@@ -85,7 +85,7 @@ extensions.append(Extension("taurex.external.mie",  # indicate where it should b
                         extra_compile_args=["-I./src/MIE/"],
                         language="c"))
 
-extensions = cythonize(extensions, language_level = "3")
+extensions = cythonize(extensions, language_level = 3)
 
 entry_points = {'console_scripts': console_scripts,}
 
