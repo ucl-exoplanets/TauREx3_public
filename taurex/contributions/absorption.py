@@ -10,7 +10,7 @@ def absorption_numba(startK,endK,density_offset,sigma,density,path,nlayers,ngrid
         _path = path[k]
         _density = density[k+density_offset]
         for mol in range(nmols):
-            for wn in numba.prange(ngrid):
+            for wn in range(ngrid):
                 tau[wn] += sigma[k+layer,mol,wn]*_path*_density
     return tau
 #

@@ -11,7 +11,7 @@ def mie_numba(startK,endK,density_offset,sigma,density,path,nlayers,ngrid,layer)
     for k in range(startK,endK):
         _path = path[k]
         _density = density[k+density_offset]
-        for wn in range(ngrid):
+        for wn in  numba.prange(ngrid):
             tau[wn] += sigma[wn]*_path*_density
 
     return tau

@@ -10,7 +10,7 @@ def rayleigh_numba(startK,endK,density_offset,sigma,density,path,nlayers,ngrid,n
         _path = path[k]
         _density = density[k+density_offset]
         for mol in range(nmols):
-            for wn in range(ngrid):
+            for wn in  range(ngrid):
                 tau[wn] += sigma[k+layer,mol,wn]*_path*_density
     return tau
 
@@ -49,10 +49,12 @@ class RayleighContribution(Contribution):
         sigma_rayleigh_dict = {}
 
         molecules = model.chemistry.activeGases + model.chemistry.inActiveGases
-
         for gasname in molecules:
 
             gasname = gasname.upper()
+            #print(gasname)
+            if np.sum(model.chemistry.get_gas_mix_profile(gasname)) == 0.0:
+                continue
 
             # get the refractive index. Formulae taken from Allen Astrophysical Quantities if not otherwise specified
             n_formula = True # assume we have a formula for the refractive index of gasname
@@ -101,8 +103,7 @@ class RayleighContribution(Contribution):
                 n_formula = False
                 self.warning('There is no formula for the refractive index of %s. '
                                 'Cannot compute the cross section' % gasname)
-
-
+                continue
             if n_formula: # only if the refractive index was computed
                 Ns = 2.6867805e25 # in m^-3
                 with np.errstate(divide='ignore'):
@@ -119,9 +120,10 @@ class RayleighContribution(Contribution):
 
                 self.info('Rayleigh scattering cross section of %s correctly computed' % (gasname))
                 sigma_rayleigh_dict[gasname] = sigma
+
+            
             #else:
             #    sigma_rayleigh_dict[gasname] = np.zeros((len(wn)))
-
         self.sigma_rayleigh_dict = sigma_rayleigh_dict
 
         self._ngrid = wngrid.shape[0]
