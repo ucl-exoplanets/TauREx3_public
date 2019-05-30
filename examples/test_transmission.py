@@ -48,27 +48,27 @@ tm.build()
 wngrid = OpacityCache()['H2O'].wavenumberGrid
 
 absp,absorption,tau,contributions = tm.model(wngrid,return_contrib=True)
-
+total_runs = 50
 start = time.time()
-for x in range(10):
-    tm.model(wngrid,return_contrib=True)
+for x in range(total_runs):
+    tm.model(wngrid)
 
 end = time.time()
 
-print('Total time taken for 10 iterations {} s time per iteration {}'.format(end-start,(end-start)/10))
+print('Total time taken for 10 iterations {} s time per iteration {}'.format(end-start,(end-start)/total_runs))
 
-wlgrid = np.log10(10000/wngrid)
+# wlgrid = np.log10(10000/wngrid)
 
-fig = plt.figure()
+# fig = plt.figure()
 
-for name,value in contributions:
-    plt.plot(wlgrid,value,label=name)
+# for name,value in contributions:
+#     plt.plot(wlgrid,value,label=name)
 
 
 
-plt.plot(wlgrid,absorption,label='total')
-plt.legend()
-plt.show()
+# plt.plot(wlgrid,absorption,label='total')
+# plt.legend()
+# plt.show()
 
 
 
