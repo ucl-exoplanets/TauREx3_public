@@ -2,7 +2,7 @@ from .contribution import Contribution
 import numpy as np
 import numba
 from taurex.cache import CIACache
-@numba.jit(nopython=True,parallel=True)
+@numba.jit(nopython=True)
 def cia_numba(startK,endK,density_offset,sigma,density,path,nlayers,ngrid,nmols,layer):
     tau = np.zeros(shape=(ngrid,))
     for k in range(startK,endK):

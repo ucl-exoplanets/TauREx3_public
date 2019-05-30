@@ -3,7 +3,7 @@ from .contribution import Contribution
 import numpy as np
 import numba
 from taurex.cache import OpacityCache
-@numba.jit(nopython=True, nogil=True,parallel=True)
+@numba.jit(nopython=True, nogil=True)
 def absorption_numba(startK,endK,density_offset,sigma,density,path,nlayers,ngrid,nmols,layer):
     tau = np.zeros(shape=(ngrid,))
     for k in range(startK,endK):
