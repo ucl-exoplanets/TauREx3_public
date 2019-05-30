@@ -40,14 +40,14 @@ tm = TransmissionModel(
                        star=BlackbodyStar(temperature=5800),
                        temperature_profile=Isothermal(),nlayers=30)
 tm.add_contribution(AbsorptionContribution())
-#tm.add_contribution(CIAContribution(cia_pairs=['H2-H2','H2-He']))
-#tm.add_contribution(RayleighContribution())
+tm.add_contribution(CIAContribution(cia_pairs=['H2-H2','H2-He']))
+tm.add_contribution(RayleighContribution())
 
 tm.build()
 
 wngrid = OpacityCache()['H2O'].wavenumberGrid
 
-absorption,tau,contributions = tm.model(wngrid,return_contrib=True)
+absp,absorption,tau,contributions = tm.model(wngrid,return_contrib=True)
 
 start = time.time()
 for x in range(10):
