@@ -113,7 +113,7 @@ class Optimizer(Logger):
 
     def chisq_trans(self, fit_params,data,datastd):
         from taurex.util import bindown
-
+        import numexpr as ne
         self.update_model(fit_params)
 
         obs_bins= self._observed.wavenumberGrid
@@ -124,8 +124,8 @@ class Optimizer(Logger):
         final_model,_,_,_ = self._model.model(obs_bins)
 
 #        final_model =bindown(wngrid,model_out,obs_bins)
-        res = (data - final_model) / datastd
-
+        res = ne.evaluate('(data - final_model) / datastd')
+        #print(res)
         res = np.nansum(res*res)
         if res == 0:
             res = np.nan
