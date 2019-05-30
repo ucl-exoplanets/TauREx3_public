@@ -24,13 +24,13 @@ class SimpleCloudsContribution(Contribution):
     def prepare(self,model,wngrid):
         self._total_contrib = np.zeros(shape=(model.nLayers,wngrid.shape[0],))
 
-    @fitparam(param_name='log_clouds_pressure',param_latex='$log(P_\mathrm{clouds})$',default_fit=False,default_bounds=[-3, 6])
+    @fitparam(param_name='clouds_pressure',param_latex='$P_\mathrm{clouds}$',default_mode='log',default_fit=False,default_bounds=[1e-3, 1e6])
     def cloudsPressure(self):
-        return math.log10(self._cloud_pressure)
+        return self._cloud_pressure
     
     @cloudsPressure.setter
     def cloudsPressure(self,value):
-        self._cloud_pressure = 10**value
+        self._cloud_pressure = value
 
     @property
     def totalContribution(self):
