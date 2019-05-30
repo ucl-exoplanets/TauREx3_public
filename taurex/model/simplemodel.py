@@ -247,6 +247,12 @@ class SimpleForwardModel(ForwardModel):
         self.initialize_profiles()
 
         native_grid = self.nativeWavenumberGrid
+        if wngrid is not None:
+            wn_min = wngrid.min()*0.9
+            wn_max = wngrid.max()*1.1
+            native_filter = (native_grid >= wn_min) & (native_grid <= wn_max)
+            native_grid = native_grid[native_filter]
+
 
         self._star.initialize(native_grid)
         for contrib in self.contribution_list:
