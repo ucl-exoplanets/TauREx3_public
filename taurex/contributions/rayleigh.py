@@ -1,17 +1,8 @@
  
-from .contribution import Contribution
+from .contribution import Contribution,contribute_tau
 import numpy as np
 import numba
 
-@numba.jit(nopython=True,parallel=True, nogil=True)
-def rayleigh_numba(startK,endK,density_offset,sigma,density,path,nlayers,ngrid,nmols,layer):
-    tau = np.zeros(shape=(ngrid,))
-    for k in range(startK,endK):
-        _path = path[k]
-        _density = density[k+density_offset]
-        for wn in range(ngrid):
-            tau[wn] += sigma[k+layer,wn]*_path*_density
-    return tau
 
 
 class RayleighContribution(Contribution):
@@ -23,7 +14,7 @@ class RayleighContribution(Contribution):
 
     def contribute(self,model,start_horz_layer,end_horz_layer,density_offset,layer,density,path_length=None):
 
-        contrib = rayleigh_numba(start_horz_layer,end_horz_layer,
+        contrib = contribute_tau(start_horz_layer,end_horz_layer,
             density_offset,self.sigma_rayleigh,density,path_length,self._nlayers,self._ngrid,self._nmols,layer)
         self._total_contrib[layer,:]+=contrib
         return contrib
@@ -143,3 +134,9 @@ class RayleighContribution(Contribution):
 
         self.info('DONE!!!')
         self._total_contrib = np.zeros(shape=(model.nLayers,wngrid.shape[0],))
+
+
+
+    @property
+    def sigma(self):
+        return self.sigma_rayleigh

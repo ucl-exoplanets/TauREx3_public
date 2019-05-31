@@ -1,17 +1,7 @@
-from .contribution import Contribution
+from .contribution import Contribution,contribute_tau
 import numpy as np
 import numba
 from taurex.cache import CIACache
-@numba.jit(nopython=True,parallel=True)
-def cia_numba(startK,endK,density_offset,sigma,density,path,nlayers,ngrid,nmols,layer):
-    tau = np.zeros(shape=(ngrid,))
-    for k in range(startK,endK):
-        _path = path[k]
-        _density = density[k+density_offset]
-        #for mol in range(nmols):
-        for wn in range(ngrid):
-            tau[wn] += sigma[k+layer,wn]*_path*_density*_density
-    return tau
 
 
 class CIAContribution(Contribution):
@@ -37,11 +27,11 @@ class CIAContribution(Contribution):
 
     def contribute(self,model,start_horz_layer,end_horz_layer,density_offset,layer,density,path_length=None):
         if self._total_cia > 0:
-            contrib =cia_numba(start_horz_layer,end_horz_layer,density_offset,self.sigma_cia,density,path_length,self._nlayers,self._ngrid,self._total_cia,layer)
+            contrib =contribute_tau(start_horz_layer,end_horz_layer,density_offset,self.sigma_cia,density,path_length,self._nlayers,self._ngrid,self._total_cia,layer)
             self._total_contrib[layer] += contrib
             return contrib
         else:
-            return np.zeros_like(self._total_contrib[0])
+            return 0.0
         #if self._total_cia > 0:
             #self._total_contrib[layer,:]+=cia_numba(self.sigma_cia,density,path_length,self._nlayers,self._ngrid,self._total_cia,layer)
 
@@ -83,3 +73,9 @@ class CIAContribution(Contribution):
         contrib = super().write(output)
         contrib.write_string_array('cia-pairs',self.ciaPairs)
         return contrib
+
+
+
+    @property
+    def sigma(self):
+        return self.sigma_cia
