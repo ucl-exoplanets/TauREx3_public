@@ -13,9 +13,9 @@ he_h2_ratio=0.17647
     gas_type=constant
     mix_ratio=1e-5
 
-    #[[CH4]]
-    #mix_ratio=1e-6
-    #gas_type=constant
+   # [[CH4]]
+   # mix_ratio=1e-6
+   # gas_type=constant
 
 
 [Temperature]
@@ -41,9 +41,11 @@ model_type = transmission
 
     [[Absorption]]
     
-    #[[CIA]]
-    #cia_pairs = H2-He,H2-H2
+    [[CIA]]
+    cia_pairs = H2-He,H2-H2
     
+    [[Rayleigh]]
+
     #[[Mie]]
     #mie_path= /Users/ahmed/Documents/repos/TauREx3/src/MIE/MgSiO3.dat
 
@@ -60,20 +62,18 @@ grid_type = observed
 
 
 [Optimizer]
-optimizer = multinest
-num_live_points = 50
-max_iterations = 100
-resume=False
-verbose_output=True
-multi_nest_path = ../multinest
-
+optimizer = polychord
+polychord_path = /Users/ahmed/Documents/repos/TauREx3/examples/chains
+evidence_tolerance=0.5
+resume = True
 
 
 [Fitting]
 T:fit = True
 T:bounds = 1200.0,1600.0
-planet_radius:fit = True
+planet_radius:fit = False
 H2O:fit = True
 H2O:bounds = 1e-2,1e-5
 H2O:mode = log
+#CH4:fit = True
 

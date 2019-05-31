@@ -10,23 +10,23 @@ class HDF5OutputGroup(OutputGroup):
         self._entry = entry
 
     def write_array(self,array_name,array):
-        self._entry.create_dataset(array_name, data=array)
+        self._entry.create_dataset(str(array_name), data=array)
     
 
     def write_scalar(self,scalar_name,scalar):
-        self._entry.create_dataset(scalar_name, data=scalar)
+        self._entry.create_dataset(str(scalar_name), data=scalar)
     
     def write_string(self,string_name,string):
-        self._entry.create_dataset(string_name, data=string)
+        self._entry.create_dataset(str(string_name), data=string)
 
     def create_group(self,group_name):
-        entry = self._entry.create_group(group_name)
+        entry = self._entry.create_group(str(group_name))
         return HDF5OutputGroup(entry)
 
     def write_string_array(self,string_name,string_array):
 
         asciiList = [n.encode("ascii", "ignore") for n in string_array]
-        self._entry.create_dataset(string_name, (len(asciiList),1),'S64', asciiList)
+        self._entry.create_dataset(str(string_name), (len(asciiList),1),'S64', asciiList)
 class HDF5Output(Output):
     def __init__(self,filename):
         super().__init__('HDF5Output')
@@ -48,7 +48,7 @@ class HDF5Output(Output):
         
 
     def create_group(self,group_name):
-        entry = self.fd.create_group(group_name)
+        entry = self.fd.create_group(str(group_name))
         return HDF5OutputGroup(entry)
 
 

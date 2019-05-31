@@ -5,7 +5,7 @@ from pypolychord.priors import UniformPrior
 import numpy as np
 import os
 
-from taurex.util.util import read_table,read_error_line,read_error_into_dict,quantile_corner,recursively_save_dict_contents_to_output
+from taurex.util.util import read_table,read_error_line,read_error_into_dict,quantile_corner,recursively_save_dict_contents_to_output,weighted_avg_and_std
 
 class PolyChordOptimizer(Optimizer):
 
@@ -38,13 +38,13 @@ class PolyChordOptimizer(Optimizer):
         # importance nested sampling
 
         self.dir_polychord = polychord_path
-
+        self._polychord_output = None
         self.resume = resume
         self.verbose = verbosity
 
 
     def compute_fit(self):
-
+        self._polychord_output = None
         data = self._observed.spectrum
         datastd = self._observed.errorBar
         sqrtpi = np.sqrt(2*np.pi)
@@ -79,6 +79,8 @@ class PolyChordOptimizer(Optimizer):
         
 
 
+
+
         datastd_mean = np.mean(datastd)
         
 
@@ -90,12 +92,159 @@ class PolyChordOptimizer(Optimizer):
         settings.precision_criterion = self.evidence_tolerance
         settings.logzero = -1e70
         settings.read_resume = self.resume
-
+        settings.base_dir = self.dir_polychord
+        settings.file_root='1-'
         self.warning('Number of dimensions {}'.format(ndim))
         self.warning('Fitting parameters {}'.format(self.fitting_parameters))
 
         self.info('Beginning fit......')
-        output = pypolychord.run_polychord(polychord_loglike, ndim, 1, settings, polychord_uniform_prior)
-    
-        print(output)
+        pypolychord.run_polychord(polychord_loglike, ndim, 1, settings, polychord_uniform_prior)
+        self._polychord_output = self.store_polychord_solutions()
+        print(self._polychord_output)
 
+    def write_optimizer(self,output):
+        opt = super().write_optimizer(output)
+
+        # sampling efficiency (parameter, ...)
+        opt.write_scalar('do_clustering',int(self.do_clustering))
+        # run in constant efficiency mode
+        # set log likelihood tolerance. If change is smaller, multinest will have converged
+        opt.write_scalar('evidence_tolerance',self.evidence_tolerance)
+        opt.write_scalar('mode_tolerance',self.mode_tolerance)
+        # importance nested samplin     
+        
+        return opt
+    
+    def write_fit(self,output):
+        fit = super().write_fit(output)
+
+        if self._polychord_output:
+            recursively_save_dict_contents_to_output(output,self._polychord_output)
+
+
+
+        return fit
+
+
+    def store_polychord_solutions(self):
+
+        self.warning('Store the polychord results')
+        NEST_out = {'solutions': {}}
+        data = np.loadtxt(os.path.join(self.dir_polychord, '1-.txt'))
+
+        self.get_poly_cluster_number(self.dir_polychord)
+        NEST_stats = self.get_poly_stats(self.dir_polychord)
+        NEST_out['NEST_POLY_stats'] = NEST_stats
+        NEST_out['global_logE'] = (NEST_out['NEST_POLY_stats']['global evidence'], NEST_out['NEST_POLY_stats']['global evidence error'])
+
+        modes_array = []
+        modes_weights = []
+        num_fit_params = len(self.fit_names)
+        if self.do_clustering:
+            #if clustering is switched on, checking how many clusters exist
+            num_clusters = self.get_poly_cluster_number(self.dir_polychord)
+            if num_clusters == 1:
+                # Get chains directly from file 1-.txt
+                modes_array = [data[:,2:num_fit_params+2]]
+                modes_weights = [data[:,0]]
+            else:
+                #cycle through clusters                          
+                for midx in range(num_clusters):
+                    data = np.loadtxt(os.path.join(self.dir_polychord, 'clusters/1-_{0}.txt'.format(midx+1)))
+                    modes_array.append(data[:,2:num_fit_params+2])
+                    modes_weights.append(data[:,0])
+        else:
+            # Get chains directly from file 1-.txt
+            modes_array = [data[:,2:num_fit_params+2]]
+            modes_weights = [data[:,0]]
+
+        modes_array = np.asarray(modes_array)
+        modes_weights = np.asarray(modes_weights)
+
+
+        for nmode in range(num_clusters):
+
+            mydict = {'type': 'nest_poly',
+                    'local_logE': (NEST_out['NEST_POLY_stats']['modes'][0]['local log-evidence'],  NEST_out['NEST_POLY_stats']['modes'][0]['local log-evidence error']),
+                    'weights': np.asarray(modes_weights[nmode]),
+                    'tracedata': modes_array[nmode],
+                    'fit_params': {}}
+
+            for idx, param_name in enumerate(self.fit_names):
+
+                trace = modes_array[nmode][:,idx]
+                q_16, q_50, q_84 = quantile_corner(trace, [0.16, 0.5, 0.84],
+                                                   weights=np.asarray(modes_weights[nmode]))
+                mydict['fit_params'][param_name] = {
+                    'value' : q_50,
+                    'sigma_m' : q_50-q_16,
+                    'sigma_p' : q_84-q_50,
+                    'nest_map': NEST_stats['modes'][nmode]['maximum a posterior'][idx],
+                    'nest_mean': NEST_stats['modes'][nmode]['mean'][idx],
+                    'nest_sigma': NEST_stats['modes'][nmode]['sigma'][idx],
+                    'trace': trace,
+                }
+
+
+            NEST_out['solutions']['solution{}'.format(idx)] = mydict
+        
+        return NEST_out
+
+    def get_poly_cluster_number(self,dir):
+        import glob
+        '''counts polychord cluster files in 'clusters' folder'''
+        cluster_list = glob.glob(os.path.join(dir,'clusters/1-*.txt'))
+        c_idx = []
+        for file in cluster_list:
+            if file[-5].isdigit():
+                c_idx.append(int(file[-5]))
+        return np.max(c_idx)
+
+    def get_poly_stats(self,dir):
+        '''replicates some of PyMultiNest.Analyzer for PolyChord'''
+        stats = {}
+        stats['modes'] ={}
+
+        #re-count number of cluster files
+        num_clusters = self.get_poly_cluster_number(dir)
+
+        nmode = 0 #mode index
+        #open .stats file and reading global/local evidences
+        with open(os.path.join(self.dir_polychord, '1-.stats')) as f:
+            lines = f.readlines()
+            for idx, line in enumerate(lines):
+                if idx == 8: # skip to global evidence line
+                    tmp_line = line.split()
+                    gL_mu = tmp_line[2]
+                    gL_sig= tmp_line[-1]
+                    stats['global evidence'] = gL_mu
+                    stats['global evidence error'] = gL_sig
+                if idx > 13: #skip to local evidence
+                    tmp_line = line.split()
+                    stats['modes'][nmode] = {}
+                    stats['modes'][nmode]['local log-evidence'] = tmp_line[3]
+                    stats['modes'][nmode]['local log-evidence error'] = tmp_line[5]
+                    nmode += 1
+                    if idx == (13 + num_clusters): #stopping reading file when clusters are exhausted
+                        break
+
+        #opening cluster files (or global file if no clustering) and get MAP, mean, sigma for parameters
+        if self.do_clustering:
+            for midx in range(num_clusters):
+                #cycling through cluster files 
+                data = np.loadtxt(os.path.join(self.dir_polychord, 'clusters/1-_{0}.txt'.format(midx+1)))
+                #find maximum likelihood index 
+                mL_idx = np.where(data[:,1] == np.min(data[:,1]))
+                stats['modes'][midx]['maximum a posterior'] = {}
+                stats['modes'][midx]['mean'] = {}
+                stats['modes'][midx]['sigma'] = {}
+                for idx in range(len(self.fit_names)):
+                    #cycle through parameters 
+                    #maximum likelihood values
+                    stats['modes'][midx]['maximum a posterior'][idx] = data[mL_idx,2+idx]
+                    #weighted average and sigma 
+                    mu,sig = weighted_avg_and_std(data[:,2+idx], data[:,0])
+                    stats['modes'][midx]['mean'][idx] = mu
+                    stats['modes'][midx]['sigma'][idx] = sig
+
+        return stats
