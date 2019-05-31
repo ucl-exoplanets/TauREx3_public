@@ -89,7 +89,9 @@ class LightCurveModel(ForwardModel):
             min_n = np.min(raw_data, axis=1)
             Nfactor_range = np.column_stack([max_n, min_n])
             Nfactor_range_list.append((min_n,max_n))
-
+            min_t = self.time_series_wfc3.min()
+            max_t = self.time_series_wfc3.max()
+            self.modify_bounds('mid_transit_time',[min_t,max_t])
         if self.stis:
             instr = 'stis'
             self.time_series_stis = self.lc_data['time_series']['stis']
