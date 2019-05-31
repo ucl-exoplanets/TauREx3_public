@@ -29,7 +29,7 @@ class AbsorptionContribution(Contribution):
         ngases = len(model.chemistry.activeGases)
         self.debug('Creating crossection for wngrid {} with ngases {} and nlayers {}'.format(wngrid,ngases,model.nLayers))
 
-        sigma_xsec = np.zeros(shape=(model.nLayers,ngases,wngrid.shape[0]))
+        sigma_xsec = np.zeros(shape=(model.nLayers,wngrid.shape[0]))
         
 
 
@@ -39,7 +39,7 @@ class AbsorptionContribution(Contribution):
             for idx_layer,tp in enumerate(zip(model.temperatureProfile,model.pressureProfile)):
                 self.debug('Got index,tp {} {}'.format(idx_layer,tp))
                 temperature,pressure = tp
-                sigma_xsec[idx_layer,idx_gas] = self._opacity_cache[gas].opacity(temperature,pressure,wngrid)*gas_mix[idx_layer]
+                sigma_xsec[idx_layer] += self._opacity_cache[gas].opacity(temperature,pressure,wngrid)*gas_mix[idx_layer]
                 self.debug('Sigma for T {}, P:{} is {}'.format(temperature,pressure,sigma_xsec[idx_layer,idx_gas]))
 
         
@@ -52,7 +52,7 @@ class AbsorptionContribution(Contribution):
         self._nlayers = model.nLayers
         self._nmols = ngases
 
-        self.sigma_xsec= np.sum(sigma_xsec,axis=1)
+        self.sigma_xsec= sigma_xsec
 
 
         self.debug('Final sigma is {}'.format(self.sigma_xsec))
