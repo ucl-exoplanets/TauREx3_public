@@ -85,10 +85,11 @@ class LightCurveModel(ForwardModel):
             data_std = self.lc_data['data'][instr][len(self.lc_data['data'][instr]) //2:]
             raw_data_list = np.append(raw_data_list, raw_data.flatten())
             data_std_list = np.append(data_std_list, data_std.flatten())
-            max = np.max(raw_data, axis=1)
-            min = np.min(raw_data, axis=1)
-            Nfactor_range = np.column_stack([max, min])
-            Nfactor_range_list.append(Nfactor_range)
+            max_n = np.max(raw_data, axis=1)
+            min_n = np.min(raw_data, axis=1)
+            Nfactor_range = np.column_stack([max_n, min_n])
+            Nfactor_range_list.append((min_n,max_n))
+
         if self.stis:
             instr = 'stis'
             self.time_series_stis = self.lc_data['time_series']['stis']
@@ -100,10 +101,13 @@ class LightCurveModel(ForwardModel):
             min = np.min(raw_data, axis=1)
             Nfactor_range = np.column_stack([max, min])
             Nfactor_range_list.append(Nfactor_range)
+        
 
-        print(np.shape(raw_data_list))
-
-
+        for m,n in Nfactor_range_list:
+            for idx,v in enumerate(zip(m,n)):
+                
+                self.modify_bounds('Nfactor_{}'.format(idx),list(v))
+                #print(self._param_dict['Nfactor_{}'.format(idx)])
         return np.array(raw_data_list),np.array(data_std_list),np.array(Nfactor_range_list),np.array(self.time_series_wfc3)
 
 

@@ -61,6 +61,11 @@ class Fittable(object):
             self.add_fittable_param(param_name,param_latex,get_func,set_func,def_mode,def_fit,def_bounds)
 
 
+    def modify_bounds(self,parameter,new_bounds):
+        name,latex,fget,fset,mode,to_fit,bounds = self._param_dict[parameter]
+        bounds = new_bounds
+        self._param_dict[parameter] = name,latex,fget,fset,mode,to_fit,bounds
+
     def __getitem__(self,key):
         param = self._param_dict[key]
 
