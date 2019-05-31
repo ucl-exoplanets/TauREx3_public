@@ -1,5 +1,5 @@
 from taurex.constants import AMU
-
+import math
 _mol_weight = {
     'HE':
         4.,
@@ -214,3 +214,11 @@ def recursively_save_dict_contents_to_output(output, dic):
             recursively_save_dict_contents_to_output(group, item)
         else:
             raise ValueError('Cannot save %s type'%type(item))
+
+
+
+def weighted_avg_and_std(values, weights, axis=None):
+    import numpy as np
+    average = np.average(values, weights=weights)
+    variance = np.average((values-average)**2, weights=weights, axis=axis)  # Fast and numerically precise
+    return (average, math.sqrt(variance))
