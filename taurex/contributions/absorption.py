@@ -16,7 +16,7 @@ class AbsorptionContribution(Contribution):
     
 
     def contribute(self,model,start_horz_layer,end_horz_layer,density_offset,layer,density,path_length=None):
-        contrib =contribute_tau(start_horz_layer,end_horz_layer,density_offset,self.sigma_xsec,density,path_length,self._nlayers,self._ngrid,self._nmols,layer)
+        contrib =contribute_tau(start_horz_layer,end_horz_layer,density_offset,self.sigma_xsec,density,path_length,self._nlayers,self._ngrid,layer)
         self._total_contrib[layer] += contrib
         return contrib
 

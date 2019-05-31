@@ -4,7 +4,7 @@ import numpy as np
 from taurex.output.writeable import Writeable
 import numba
 @numba.jit(nopython=True, nogil=True)
-def contribute_tau(startK,endK,density_offset,sigma,density,path,nlayers,ngrid,nmols,layer):
+def contribute_tau(startK,endK,density_offset,sigma,density,path,nlayers,ngrid,layer):
     tau = np.zeros(shape=(ngrid,))
     for k in range(startK,endK):
         _path = path[k]
