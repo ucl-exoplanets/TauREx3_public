@@ -3,15 +3,15 @@ from .contribution import Contribution
 import numpy as np
 import numba
 from taurex.cache import OpacityCache
-@numba.jit(nopython=True, nogil=True,parallel=True)
+@numba.jit(nopython=True, nogil=True)
 def absorption_numba(startK,endK,density_offset,sigma,density,path,nlayers,ngrid,nmols,layer):
     tau = np.zeros(shape=(ngrid,))
     for k in range(startK,endK):
         _path = path[k]
         _density = density[k+density_offset]
-        for mol in range(nmols):
-            for wn in numba.prange(ngrid):
-                tau[wn] += sigma[k+layer,mol,wn]*_path*_density
+        # for mol in range(nmols):
+        for wn in range(ngrid):
+            tau[wn] += sigma[k+layer,wn]*_path*_density
     return tau
 #
 #sigma_interp[wn + nwngrid*(k + l*nlayers)] * active_mixratio[k+nlayers*l] * density[k] * dz[k]
@@ -45,26 +45,25 @@ class AbsorptionContribution(Contribution):
 
 
         for idx_gas,gas in enumerate(model.chemistry.activeGases):
-
+            gas_mix = model.chemistry.get_gas_mix_profile(gas)
             self.info('Recomputing active gas {} opacity'.format(gas))
             for idx_layer,tp in enumerate(zip(model.temperatureProfile,model.pressureProfile)):
                 self.debug('Got index,tp {} {}'.format(idx_layer,tp))
                 temperature,pressure = tp
-                sigma_xsec[idx_layer,idx_gas] = self._opacity_cache[gas].opacity(temperature,pressure,wngrid)
+                sigma_xsec[idx_layer,idx_gas] = self._opacity_cache[gas].opacity(temperature,pressure,wngrid)*gas_mix[idx_layer]
                 self.debug('Sigma for T {}, P:{} is {}'.format(temperature,pressure,sigma_xsec[idx_layer,idx_gas]))
 
-        active_gas = model.chemistry.activeGasMixProfile.transpose()[...,None]
+        
         
 
         self.debug('Sigma is {}'.format(sigma_xsec))
-        self.debug('Active gas mix ratio is {}'.format(active_gas))
 
 
         self._ngrid = wngrid.shape[0]
         self._nlayers = model.nLayers
         self._nmols = ngases
 
-        self.sigma_xsec= sigma_xsec*active_gas
+        self.sigma_xsec= np.sum(sigma_xsec,axis=1)
 
 
         self.debug('Final sigma is {}'.format(self.sigma_xsec))

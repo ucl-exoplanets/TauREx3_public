@@ -9,9 +9,8 @@ def rayleigh_numba(startK,endK,density_offset,sigma,density,path,nlayers,ngrid,n
     for k in range(startK,endK):
         _path = path[k]
         _density = density[k+density_offset]
-        for mol in range(nmols):
-            for wn in range(ngrid):
-                tau[wn] += sigma[k+layer,mol,wn]*_path*_density
+        for wn in range(ngrid):
+            tau[wn] += sigma[k+layer,wn]*_path*_density
     return tau
 
 
@@ -139,5 +138,8 @@ class RayleighContribution(Contribution):
                 
 
                 self.sigma_rayleigh[idx_layer,rayleigh_idx]= ray_factor[idx_layer]*xsec[:]
+        
+        self.sigma_rayleigh = np.sum(self.sigma_rayleigh,axis=1)
+
         self.info('DONE!!!')
         self._total_contrib = np.zeros(shape=(model.nLayers,wngrid.shape[0],))

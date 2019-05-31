@@ -8,9 +8,9 @@ def cia_numba(startK,endK,density_offset,sigma,density,path,nlayers,ngrid,nmols,
     for k in range(startK,endK):
         _path = path[k]
         _density = density[k+density_offset]
-        for mol in range(nmols):
-            for wn in range(ngrid):
-                tau[wn] += sigma[k+layer,mol,wn]*_path*_density*_density
+        #for mol in range(nmols):
+        for wn in range(ngrid):
+            tau[wn] += sigma[k+layer,wn]*_path*_density*_density
     return tau
 
 
@@ -71,6 +71,7 @@ class CIAContribution(Contribution):
 
                 self.sigma_cia[idx_layer,cia_idx] = _cia_xsec*cia_factor[idx_layer]
 
+        self.sigma_cia = np.sum(self.sigma_cia,axis=1)
         
 
     @property
