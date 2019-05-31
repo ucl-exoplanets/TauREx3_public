@@ -2,6 +2,18 @@ from taurex.log import Logger
 from taurex.data.fittable import fitparam,Fittable
 import numpy as np
 from taurex.output.writeable import Writeable
+import numba
+@numba.jit(nopython=True, nogil=True)
+def contribute_tau(startK,endK,density_offset,sigma,density,path,nlayers,ngrid,layer):
+    tau = np.zeros(shape=(ngrid,))
+    for k in range(startK,endK):
+        _path = path[k]
+        _density = density[k+density_offset]
+        # for mol in range(nmols):
+        for wn in range(ngrid):
+            tau[wn] += sigma[k+layer,wn]*_path*_density
+    return tau
+
 
 class Contribution(Fittable,Logger,Writeable):
 
@@ -29,6 +41,11 @@ class Contribution(Fittable,Logger,Writeable):
         raise NotImplementedError
 
     def finalize(self,model):
+        raise NotImplementedError
+
+
+    @property
+    def sigma(self):
         raise NotImplementedError
 
     @property
