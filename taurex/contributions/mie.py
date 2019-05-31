@@ -1,20 +1,11 @@
  
-from .contribution import Contribution
+from .contribution import Contribution,contribute_tau
 import numpy as np
 import numba
 import math
 from taurex.data.fittable import fitparam
 from taurex.external.mie import bh_mie
-@numba.jit(nopython=True,parallel=True, nogil=True)
-def mie_numba(startK,endK,density_offset,sigma,density,path,nlayers,ngrid,layer):
-    tau = np.zeros(shape=(ngrid,))
-    for k in range(startK,endK):
-        _path = path[k]
-        _density = density[k+density_offset]
-        for wn in  numba.prange(ngrid):
-            tau[wn] += sigma[wn]*_path*_density
 
-    return tau
 
 
 class MieContribution(Contribution):
@@ -106,7 +97,7 @@ class MieContribution(Contribution):
 
     def contribute(self,model,start_horz_layer,end_horz_layer,density_offset,layer,density,path_length=None):
         if model.pressureProfile[layer] <= self._cloud_bottom_pressure and model.pressureProfile[layer] >= self._cloud_top_pressure :
-            contrib = mie_numba(start_horz_layer,end_horz_layer,
+            contrib = contribute_tau(start_horz_layer,end_horz_layer,
                 density_offset,self.sigma_mie,density,path_length,self._nlayers,self._ngrid,layer)
             self._total_contrib[layer,:]+=contrib
             return contrib
