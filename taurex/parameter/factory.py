@@ -168,6 +168,9 @@ def optimizer_factory(optimizer):
     elif optimizer in ('multinest','pymultinest',):
         from taurex.optimizer.multinest import MultiNestOptimizer
         return MultiNestOptimizer
+    elif optimizer in ('polychord','pypolychord'):
+        from taurex.optimizer.polychord import PolyChordOptimizer
+        return PolyChordOptimizer
     else:
         raise NotImplementedError('Optimizer {} not implemented'.format(optimizer))    
 
