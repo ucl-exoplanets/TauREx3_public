@@ -22,7 +22,7 @@ chemistry.addGas(ConstantGas('H2O'))
 
 temp = Isothermal(iso_temp=1550)
 
-tm = TransmissionModel(nlayers=30,chemistry= gas,temperature_profile=temp
+tm = TransmissionModel(nlayers=30,chemistry= chemistry,temperature_profile=temp
                 ,atm_min_pressure=1e-5,atm_max_pressure=1e6)
 tm.add_contribution(CIAContribution(cia_pairs=['H2-He','H2-H2']))
 tm.add_contribution(RayleighContribution())
@@ -32,8 +32,9 @@ from taurex.optimizer.multinest import MultiNestOptimizer
 
 from taurex.optimizer.nestle import NestleOptimizer
 from taurex.data.spectrum.observed import ObservedSpectrum
-
-opt = MultiNestOptimizer('/Users/ahmed/Documents/taurex_files/multinest',model=tm)
+from taurex.optimizer.polychord import PolyChordOptimizer
+#opt = MultiNestOptimizer('/Users/ahmed/Documents/taurex_files/multinest',model=tm)
+opt = PolyChordOptimizer('/Users/ahmed/Documents/repos/TauREx3/examples/chains',model=tm,num_live_points=50)
 #opt = NestleOptimizer(model=tm)
 obs = ObservedSpectrum('/Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_transmission/SPECTRUM_fit.dat')
 
@@ -49,14 +50,14 @@ opt.compile_params()
 opt.enable_fit('T')
 opt.set_boundary('T',[1300.0, 1800.0])
 opt.enable_fit('planet_radius')
-opt.enable_fit('N2')
-opt.enable_fit('H2_He')
-opt.enable_fit('H2O')
+# opt.enable_fit('N2')
+# opt.enable_fit('H2_He')
+# opt.enable_fit('H2O')
 
 
-opt.set_boundary('H2O',[1e-12, 1e12])
-opt.set_boundary('N2',[1e-12, 0.0])
-opt.set_boundary('H2_He',[1e-12, 0.0])
+# opt.set_boundary('H2O',[1e-12, 1e12])
+# opt.set_boundary('N2',[1e-12, 0.0])
+# opt.set_boundary('H2_He',[1e-12, 0.0])
 
 opt.compile_params()
 
