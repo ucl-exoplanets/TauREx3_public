@@ -87,7 +87,7 @@ class PolyChordOptimizer(Optimizer):
         settings = PolyChordSettings(ndim,1)
         settings.nlive     = ndim * 25
         settings.num_repeats = ndim * 5
-        settings.do_clustering = True
+        settings.do_clustering = self.do_clustering
         settings.num_repeats=ndim
         settings.precision_criterion = self.evidence_tolerance
         settings.logzero = -1e70
@@ -132,7 +132,7 @@ class PolyChordOptimizer(Optimizer):
         NEST_out = {'solutions': {}}
         data = np.loadtxt(os.path.join(self.dir_polychord, '1-.txt'))
 
-        self.get_poly_cluster_number(self.dir_polychord)
+        #self.get_poly_cluster_number(self.dir_polychord)
         NEST_stats = self.get_poly_stats(self.dir_polychord)
         NEST_out['NEST_POLY_stats'] = NEST_stats
         NEST_out['global_logE'] = (NEST_out['NEST_POLY_stats']['global evidence'], NEST_out['NEST_POLY_stats']['global evidence error'])
@@ -200,6 +200,7 @@ class PolyChordOptimizer(Optimizer):
         for file in cluster_list:
             if file[-5].isdigit():
                 c_idx.append(int(file[-5]))
+        print(c_idx)
         return np.max(c_idx)
 
     def get_poly_stats(self,dir):
@@ -208,7 +209,10 @@ class PolyChordOptimizer(Optimizer):
         stats['modes'] ={}
 
         #re-count number of cluster files
-        num_clusters = self.get_poly_cluster_number(dir)
+        if self.do_clustering:
+            num_clusters = self.get_poly_cluster_number(dir)
+        else:
+            num_clusters = 1
 
         nmode = 0 #mode index
         #open .stats file and reading global/local evidences

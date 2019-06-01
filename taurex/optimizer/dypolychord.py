@@ -5,7 +5,7 @@ import dyPolyChord.python_likelihoods as likelihoods  # Import some example pyth
 import dyPolyChord.python_priors as priors  # Import some example python priors
 import dyPolyChord.pypolychord_utils
 import dyPolyChord
-
+import time
 class dyPolyChordOptimizer(PolyChordOptimizer):
 
 
@@ -80,11 +80,11 @@ class dyPolyChordOptimizer(PolyChordOptimizer):
 
         # Specify sampler settings (see run_dynamic_ns.py documentation for more details)
         dynamic_goal = 1.0  # whether to maximise parameter estimation or evidence accuracy.
-        ninit = ndim * 25          # number of live points to use in initial exploratory run.
-        nlive_const = 500   # total computational budget is the same as standard nested sampling with nlive_const live points.
+        ninit =   ndim*5       # number of live points to use in initial exploratory run.
+        nlive_const = ndim * 25   # total computational budget is the same as standard nested sampling with nlive_const live points.
         settings_dict = {'nlive': ndim * 25,
             'num_repeats': ndim * 5,
-            'do_clustering': True,
+            'do_clustering': self.do_clustering,
             'num_repeats':ndim,
             'precision_criterion': self.evidence_tolerance,
             'logzero': -1e70,
@@ -106,7 +106,7 @@ class dyPolyChordOptimizer(PolyChordOptimizer):
 
 
 
-
+        time.sleep(2.0)
 
         #pypolychord.run_polychord(polychord_loglike, ndim, 1, settings, polychord_uniform_prior)
         self._polychord_output = self.store_polychord_solutions()
