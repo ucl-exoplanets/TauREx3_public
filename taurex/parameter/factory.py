@@ -171,6 +171,9 @@ def optimizer_factory(optimizer):
     elif optimizer in ('polychord','pypolychord'):
         from taurex.optimizer.polychord import PolyChordOptimizer
         return PolyChordOptimizer
+    elif optimizer in ('dypolychord','dynamic-polychord'):
+        from taurex.optimizer.dypolychord import dyPolyChordOptimizer
+        return dyPolyChordOptimizer
     else:
         raise NotImplementedError('Optimizer {} not implemented'.format(optimizer))    
 

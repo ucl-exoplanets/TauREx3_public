@@ -32,9 +32,9 @@ from taurex.optimizer.multinest import MultiNestOptimizer
 
 from taurex.optimizer.nestle import NestleOptimizer
 from taurex.data.spectrum.observed import ObservedSpectrum
-from taurex.optimizer.polychord import PolyChordOptimizer
+from taurex.optimizer.dypolychord import dyPolyChordOptimizer
 #opt = MultiNestOptimizer('/Users/ahmed/Documents/taurex_files/multinest',model=tm)
-opt = PolyChordOptimizer('/Users/ahmed/Documents/repos/TauREx3/examples/chains',model=tm,num_live_points=50)
+opt = dyPolyChordOptimizer('/Users/ahmed/Documents/repos/TauREx3/examples/chains',model=tm,num_live_points=50)
 #opt = NestleOptimizer(model=tm)
 obs = ObservedSpectrum('/Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_transmission/SPECTRUM_fit.dat')
 
