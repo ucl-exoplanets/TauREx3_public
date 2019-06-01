@@ -200,8 +200,11 @@ class PolyChordOptimizer(Optimizer):
         for file in cluster_list:
             if file[-5].isdigit():
                 c_idx.append(int(file[-5]))
-        print(c_idx)
-        return np.max(c_idx)
+        try:
+            num = np.max(c_idx)
+        except ValueError:
+            num = 1
+        return num
 
     def get_poly_stats(self,dir):
         '''replicates some of PyMultiNest.Analyzer for PolyChord'''
