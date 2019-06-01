@@ -82,7 +82,7 @@ class dyPolyChordOptimizer(PolyChordOptimizer):
         dynamic_goal = 1.0  # whether to maximise parameter estimation or evidence accuracy.
         ninit =   ndim*5       # number of live points to use in initial exploratory run.
         nlive_const = ndim * 25   # total computational budget is the same as standard nested sampling with nlive_const live points.
-        settings_dict = {'nlive': ndim * 25,
+        settings_dict = {
             'num_repeats': ndim * 5,
             'do_clustering': self.do_clustering,
             'num_repeats':ndim,
