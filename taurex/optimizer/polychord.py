@@ -140,6 +140,8 @@ class PolyChordOptimizer(Optimizer):
         modes_array = []
         modes_weights = []
         num_fit_params = len(self.fit_names)
+        num_clusters = 1
+
         if self.do_clustering:
             #if clustering is switched on, checking how many clusters exist
             num_clusters = self.get_poly_cluster_number(self.dir_polychord)
