@@ -23,6 +23,11 @@ class LightCurveData(Logger):
     def __init__(self,lc_data,instrument_name,wavelength_region):
         super().__init__(self.__class__.__name__)
         self._instrument_name = instrument_name
+        if self._instrument_name not in lc_data['data']:
+            self.error('Instrument with key {} not found in pickled lightcurve file'.format(self._instrument_name))
+            raise KeyError()
+
+
         self._wavelength_region = wavelength_region
         self._load_data(lc_data)
 

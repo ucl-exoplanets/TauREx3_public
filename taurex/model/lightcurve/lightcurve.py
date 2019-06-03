@@ -81,8 +81,8 @@ class LightCurveModel(ForwardModel):
     
     def _initialize_lightcurves(self):
 
-        min_n_factors = np.concatenate([ins.minNfactors for ins in self._instruments])
-        max_n_factors = np.concatenate([ins.maxNfactors for ins in self._instruments]) 
+        min_n_factors = np.concatenate([ins.minNFactors for ins in self._instruments])
+        max_n_factors = np.concatenate([ins.maxNFactors for ins in self._instruments]) 
         
         self._nfactor = np.ones_like(min_n_factors)
 
@@ -92,6 +92,11 @@ class LightCurveModel(ForwardModel):
             min_n,max_n = value
             self.modify_bounds('Nfactor_{}'.format(idx),[min_n,max_n])
 
+
+        min_time = min([ins.timeSeries.min() for ins in self._instruments])
+        max_time = max([ins.timeSeries.max() for ins in self._instruments])
+
+        self.modify_bounds('mid_transit_time',[min_time,max_time])
 
     @fitparam(param_name='sma_over_rs',param_latex='sma_over_rs',
             default_mode='linear',default_fit=False,default_bounds=[1.001,60.0])
@@ -125,9 +130,8 @@ class LightCurveModel(ForwardModel):
         import itertools
         
 
-        ins_name = itertools.chain(*tuple([[ins.instrumentName]*ins.minNfactors.shape[0] for ins in self._instruments]))
-        ins_number = itertools.chain(*tuple([list(range(ins.minNfactors.shape[0])) for ins in self._instruments]))
-
+        ins_name = list(itertools.chain(*tuple([[ins.instrumentName]*ins.minNFactors.shape[0] for ins in self._instruments])))
+        ins_number = list(itertools.chain(*tuple([list(range(ins.minNFactors.shape[0])) for ins in self._instruments])))
         for idx,val in enumerate(zip(ins_name,ins_number)):
             name,no = val
             param_name = 'Nfactor_{}'.format(idx)
