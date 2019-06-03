@@ -54,7 +54,7 @@ def main():
     #Setup global parameters
     pp.setup_globals()
     #Generate a model from the input
-    model = pp.generate_model()
+    model = pp.generate_appropriate_model()
 
     #build the model
     model.build()
@@ -109,9 +109,9 @@ def main():
         logging.getLogger().setLevel(logging.INFO)
 
     #Run the model
-    absp,tau,contrib=model.model(native_grid,return_contrib=True)
+    new_absp,absp,tau,contrib=model.model(bindown_wngrid,return_contrib=True)
     #Get out new binned down model
-    new_absp = bindown(native_grid,absp,bindown_wngrid)
+    #new_absp = bindown(native_grid,absp,bindown_wngrid)
 
     if args.output_file:
         #Output taurex data
@@ -129,7 +129,7 @@ def main():
         if args.contrib:
             for name,value in contrib:
                 new_value = bindown(native_grid,value,bindown_wngrid)
-                plt.plot(wlgrid[:-1],new_value,label=name)
+                plt.plot(wlgrid,new_value,label=name)
 
         #If we have an observation then plot it
         if observed is not None:
@@ -137,7 +137,7 @@ def main():
 
         
         #Plot the absorption
-        plt.plot(wlgrid[:-1],new_absp,label='forward model')
+        plt.plot(wlgrid,new_absp,label='forward model')
 
 
 

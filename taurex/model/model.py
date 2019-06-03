@@ -2,26 +2,28 @@ from taurex.log import Logger
 import numpy as np
 import math
 import pathlib
+from taurex.data.fittable import Fittable
 from taurex.output.writeable import Writeable
-class ForwardModel(Logger,Writeable):
+class ForwardModel(Logger,Fittable,Writeable):
     """A base class for producing forward models"""
 
     def __init__(self,name):
-        super().__init__(name)
+        Logger.__init__(self,name)
+        Fittable.__init__(self)
         self.opacity_dict = {}
         self.cia_dict = {}
         
         self._native_grid = None
 
-        self.fitting_parameters = {}
+        self._fitting_parameters = {}
 
         self.contribution_list = []
 
     def __getitem__(self,key):
-        return self.fitting_parameters[key][2]()
+        return self._fitting_parameters[key][2]()
 
     def __setitem__(self,key,value):
-        return self.fitting_parameters[key][3](value) 
+        return self._fitting_parameters[key][3](value) 
 
 
 
@@ -41,38 +43,16 @@ class ForwardModel(Logger,Writeable):
     def build(self):
         raise NotImplementedError
 
-    def model(self,wngrid,return_contrib=True):
+    def model(self,wngrid=None,return_contrib=True):
         """Computes the forward model for a wngrid"""
         raise NotImplementedError
 
 
-    @property
-    def chemistry(self):
-        raise NotImplementedError
-    
-    @property
-    def temperature(self):
-        raise NotImplementedError
 
-    @property
-    def pressure(self):
-        raise NotImplementedError
-
-    @property
-    def pressureProfile(self):
-        raise NotImplementedError
-
-    @property
-    def temperatureProfile(self):
-        raise NotImplementedError
-    
-    @property
-    def altitudeProfile(self):
-        raise NotImplementedError
     
     @property
     def fittingParameters(self):
-        return self.fitting_parameters
+        return self._fitting_parameters
     
 
     def write(self,output):
