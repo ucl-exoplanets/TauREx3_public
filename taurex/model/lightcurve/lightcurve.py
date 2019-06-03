@@ -1,10 +1,10 @@
-from .model import ForwardModel
+from taurex.model import ForwardModel
 import numpy as np
 import math
 import pathlib
 import pickle
 import pylightcurve as plc
-
+from .lightcurvedata import LightCurveData
 from taurex.data.fittable import fitparam
 
 class LightCurveModel(ForwardModel):
@@ -13,21 +13,22 @@ class LightCurveModel(ForwardModel):
 
 
 
-    def __init__(self,forward_model,file_loc,load_spitzer,load_wfc3,load_stis,load_nfactor,load_orbital):
+    def __init__(self,forward_model,file_loc,instruments = None):
         super().__init__('LightCurveModel')
 
         self._forward_model = forward_model
         self.file_loc = file_loc
-        self.spitzer = load_spitzer
-        self.wfc3 = load_wfc3
-        self.stis = load_stis
-        self.nfactor = load_nfactor
-        self.orbital  = load_orbital
         self._load_file()
         self._load_ldcoeff()
         self._load_orbital_profile()
-        self.load_wl_profile()
-        self.load_data_file()
+
+        if instruments is None:
+            instruments = 'all'
+        
+        if instruments == 'all' or 'all' in instruments:
+            instruments = ['wfc3','spitzer','stis']
+
+        self._load_data_file(instruments)
 
 
             
@@ -54,85 +55,27 @@ class LightCurveModel(ForwardModel):
         self.ld_coeff_file = self.lc_data['ld_coeff']
         assert np.shape(self.ld_coeff_file)[1] == 4, "please use 4 ldcoeff law."
 
-    def load_data_file(self):
+
+    def _load_instruments(self,instruments):
+        self._instruments = []
+
+        for ins in instruments:
+            self._instruments.append(LightCurveData.fromInstrumentName(ins,self.lc_data))
+
+
+    def _load_data_file(self,instruments):
         """load data from different instruments."""
-        Nfactor_range_list = []
-        raw_data_list = np.array([])
-        data_std_list = np.array([])
+
+        raw_data = []
+        data_std = []
 
         for i in self.lc_data['data']:
             # raw data includes data and datastd.
-            raw_data = self.lc_data['data'][i][:len(self.lc_data['data'][i])//2]
-            data_std = self.lc_data['data'][i][len(self.lc_data['data'][i])//2:]
-
-
-
-        if self.spitzer:
-            instr = 'spitzer'
-            self.time_series_spitzer = self.lc_data['time_series']['spitzer']
-            raw_data = self.lc_data['data'][instr][:len(self.lc_data['data'][instr]) //2]
-            data_std = self.lc_data['data'][instr][len(self.lc_data['data'][instr]) //2:]
-            raw_data_list = np.append(raw_data_list,raw_data.flatten())
-            data_std_list = np.append(data_std_list,data_std.flatten())
-            max = np.max(raw_data, axis=1)
-            min = np.min(raw_data, axis=1)
-            Nfactor_range = np.column_stack([max, min])
-            Nfactor_range_list.append(Nfactor_range)
-        if self.wfc3:
-            instr = 'wfc3'
-            self.time_series_wfc3 = self.lc_data['time_series']['wfc3']
-            raw_data = self.lc_data['data'][instr][:len(self.lc_data['data'][instr]) //2]
-            data_std = self.lc_data['data'][instr][len(self.lc_data['data'][instr]) //2:]
-            raw_data_list = np.append(raw_data_list, raw_data.flatten())
-            data_std_list = np.append(data_std_list, data_std.flatten())
-            max_n = np.max(raw_data, axis=1)
-            min_n = np.min(raw_data, axis=1)
-            Nfactor_range = np.column_stack([max_n, min_n])
-            Nfactor_range_list.append((min_n,max_n))
-            min_t = self.time_series_wfc3.min()
-            max_t = self.time_series_wfc3.max()
-            self.modify_bounds('mid_transit_time',[min_t,max_t])
-        if self.stis:
-            instr = 'stis'
-            self.time_series_stis = self.lc_data['time_series']['stis']
-            raw_data = self.lc_data['data'][instr][:len(self.lc_data['data'][instr]) //2]
-            data_std = self.lc_data['data'][instr][len(self.lc_data['data'][instr]) //2:]
-            raw_data_list = np.append(raw_data_list, raw_data.flatten())
-            data_std_list = np.append(data_std_list, data_std.flatten())
-            max = np.max(raw_data, axis=1)
-            min = np.min(raw_data, axis=1)
-            Nfactor_range = np.column_stack([max, min])
-            Nfactor_range_list.append(Nfactor_range)
-        
-
-        for m,n in Nfactor_range_list:
-            for idx,v in enumerate(zip(m,n)):
-                
-                self.modify_bounds('Nfactor_{}'.format(idx),list(v))
-                #print(self._param_dict['Nfactor_{}'.format(idx)])
-        return np.array(raw_data_list),np.array(data_std_list),np.array(Nfactor_range_list),np.array(self.time_series_wfc3)
-
-
-    def load_wl_profile(self):
-        """Load wavelength profile from the light-curve data, not from obs spectrum."""
-        self.info('Create Observe Spectrum from Pipeline data')
-        obs_spectrum = np.empty([len(self.lc_data['lc_info'][:, 0]), 4])
-        obs_spectrum[:, 0] = self.lc_data['lc_info'][:, 0]
-        obs_spectrum[:, 1] = self.lc_data['lc_info'][:, 3]
-        obs_spectrum[:, 2] = self.lc_data['lc_info'][:, 1]
-        obs_spectrum[:, 3] = self.lc_data['lc_info'][:, 2]
-        # obs_spectrum = obs_spectrum[obs_spectrum[:, 0].argsort(axis=0)[::-1]]  # sort in wavenumber
-
-        # assert obs_spectrum[:, 0].argmin() != 0, "list not sorted"
-        self.obs_wlgrid = self.lc_data['lc_info'][:, 0]
-        obs_wngrid = 10000. / self.obs_wlgrid
-        obs_nwlgrid = len(self.obs_wlgrid)
+            raw_data.append(self.lc_data['data'][i][:len(self.lc_data['data'][i])//2])
+            data_std.append(self.lc_data['data'][i][len(self.lc_data['data'][i])//2:])
         
         
-        self._nfactor = np.ones_like(self.obs_wlgrid)
-        self.create_normalization_fitparams()
 
-        return obs_spectrum,self.obs_wlgrid,obs_wngrid,obs_nwlgrid
 
     @fitparam(param_name='sma_over_rs',param_latex='sma_over_rs',
             default_mode='linear',default_fit=False,default_bounds=[1.001,60.0])
