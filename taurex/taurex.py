@@ -54,7 +54,7 @@ def main():
     #Setup global parameters
     pp.setup_globals()
     #Generate a model from the input
-    model = pp.generate_model()
+    model = pp.generate_appropriate_model()
 
     #build the model
     model.build()

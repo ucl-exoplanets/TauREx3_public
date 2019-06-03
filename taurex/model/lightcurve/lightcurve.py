@@ -160,7 +160,7 @@ class LightCurveModel(ForwardModel):
         for ins in self._instruments:
             min_wl,max_wl = ins.wavelengthRegion
             index = (wlgrid > min_wl) & (wlgrid < max_wl)
-            lc = self.light_curve_chain(model[index], time_array=ins.timeArray, period=self.period,
+            lc = self.light_curve_chain(model[index], time_array=ins.timeSeries, period=self.period,
                                                         sma_over_rs=sma_over_rs_value, eccentricity=self.ecc,
                                                         inclination=inclination_value, periastron=self.periastron,
                                                         mid_time=mid_time_value, ldcoeff=self.ld_coeff_file[index],
@@ -218,7 +218,7 @@ class LightCurveModel(ForwardModel):
     def write(self,output):
         lc = output.create_group('Lightcurve')
 
-        lc_grps = output.create_group('Instrument')
+        lc_grps = lc.create_group('Instrument')
         for ins in self._instruments:
             ins.write(lc_grps)
         
