@@ -31,7 +31,7 @@ install_requires = ['numpy','cython',
         'numpy',
         'scipy',
         'nestle',
-        'h5py']
+        'h5py','pylightcurve']
 
 
 
