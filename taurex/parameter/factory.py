@@ -20,6 +20,7 @@ def get_keywordarg_dict(klass):
     return init_dicts
 
 
+
 def create_klass(config,klass):
     kwargs = get_keywordarg_dict(klass)
     
@@ -66,6 +67,8 @@ def gas_factory(profile_type):
         return TwoLayerGas
     else:
         raise NotImplementedError('Gas profile {} not implemented'.format(profile_type))
+
+
 
 def temp_factory(profile_type):
     if profile_type == 'isothermal':

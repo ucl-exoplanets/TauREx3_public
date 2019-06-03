@@ -64,6 +64,25 @@ class ParameterParser(Logger):
         config = self._raw_config.dict()
         self.debug('Config file is {}, filename is {}'.format(config,filename))
 
+    def generate_lightcurve(self):
+        config = self._raw_config.dict()
+        if 'Lightcurve' in config:
+            from taurex.model.lightcurve.lightcurve import LightCurveModel
+            model = self.generate_model()
+            lightcurvefile = config['Lightcurve']['lc_pickle']
+            return LightCurveModel(model,lightcurvefile)
+        else:
+            raise KeyError
+
+    
+    def generate_appropriate_model(self):
+
+        try:
+            return self.generate_lightcurve()
+        except KeyError:
+            return self.generate_model()
+
+
 
     def generate_optimizer(self):
         config = self._raw_config.dict()
@@ -79,7 +98,11 @@ class ParameterParser(Logger):
         observed = None
         if 'Spectrum' in config:
             spectrum_config = config['Spectrum']
-            if 'observed_spectrum' in spectrum_config:
+            if 'lightcurve' in spectrum_config:
+                from taurex.data.spectrum.lightcurve import ObservedLightCurve
+                observed = ObservedLightCurve(spectrum_config['lightcurve'])
+
+            elif 'observed_spectrum' in spectrum_config:
                 from taurex.data.spectrum.observed import ObservedSpectrum
                 observed = ObservedSpectrum(spectrum_config['observed_spectrum'])
 

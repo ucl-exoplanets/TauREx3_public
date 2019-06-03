@@ -1,7 +1,8 @@
 from taurex.log import Logger
 import logging
 import numpy as np
-class LightCurveData(Logger):
+from taurex.output.writeable import Writeable
+class LightCurveData(Logger,Writeable):
 
     availableInstruments = ['wfc3','spitzer','stis']
 
@@ -70,3 +71,17 @@ class LightCurveData(Logger):
     @property
     def maxNFactors(self):
         return self._max_nfactor
+
+    def write(self,output):
+        
+        lc_grp = output.create_group(self.instrumentName)
+
+        lc_grp.write_array('raw_data',self.rawData)
+        lc_grp.write_array('data_error',self.dataError)
+        lc_grp.write_array('min_n_factors',self.minNFactors)
+        lc_grp.write_array('max_n_factors',self.maxNFactors)
+        lc_grp.write_array('time_series',self.timeSeries)
+        lc_grp.write_array('min_wavelength',self.wavelengthRegion[0])
+        lc_grp.write_array('max_wavelength',self.wavelengthRegion[1])
+
+        return lc_grp

@@ -216,5 +216,20 @@ class LightCurveModel(ForwardModel):
     
 
     def write(self,output):
-        raise NotImplementedError
+        lc = output.create_group('Lightcurve')
+
+        lc_grps = output.create_group('Instrument')
+        for ins in self._instruments:
+            ins.write(lc_grps)
+        
+        lc.write_scalar('mid_time',self.mid_time)
+        lc.write_scalar('inclination',self._inclination)
+        lc.write_scalar('period',self.period)
+        lc.write_scalar('periastron',self.periastron)
+        lc.write_scalar('sma_over_rs',self.sma_over_rs)
+        lc.write_scalar('eccentricity',self.ecc)
+
+        self._forward_model.write(output)
+
+        return None
 
