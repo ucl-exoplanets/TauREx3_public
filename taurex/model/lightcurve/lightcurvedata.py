@@ -3,6 +3,7 @@ import logging
 import numpy as np
 class LightCurveData(Logger):
 
+    availableInstruments = ['wfc3','spitzer','stis']
 
     @classmethod
     def fromInstrumentName(cls, name,lc_data):
@@ -34,7 +35,9 @@ class LightCurveData(Logger):
         self._min_nfactor = np.min(self._raw_data, axis=1)
 
         
-
+    @property
+    def instrumentName(self):
+        return self._instrument_name
     
 
     @property

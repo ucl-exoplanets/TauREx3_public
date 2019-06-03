@@ -13,7 +13,7 @@ class LightCurveModel(ForwardModel):
 
 
 
-    def __init__(self,forward_model,file_loc,instruments = None):
+    def __init__(self,forward_model,file_loc,instruments=None):
         super().__init__('LightCurveModel')
 
         self._forward_model = forward_model
@@ -28,7 +28,9 @@ class LightCurveModel(ForwardModel):
         if instruments == 'all' or 'all' in instruments:
             instruments = ['wfc3','spitzer','stis']
 
-        self._load_data_file(instruments)
+        self._load_instruments(instruments)
+
+        self._initialize_lightcurves()
 
 
             
@@ -48,8 +50,6 @@ class LightCurveModel(ForwardModel):
         self.periastron = self.lc_data['corr_orbital'][3]
         self.sma_over_rs = self.lc_data['corr_orbital'][4]
         self.ecc = self.lc_data['corr_orbital'][5]
-        self.seq_length = len(self.lc_data['lc_info'].T[0])
-        self.orbital_list = [self.mid_time,self._inclination,self.period,self.periastron,self.sma_over_rs,self.ecc]
 
     def _load_ldcoeff(self):
         self.ld_coeff_file = self.lc_data['ld_coeff']
@@ -59,22 +59,38 @@ class LightCurveModel(ForwardModel):
     def _load_instruments(self,instruments):
         self._instruments = []
 
+        ins_keys = self.lc_data['data'].keys()
+
         for ins in instruments:
-            self._instruments.append(LightCurveData.fromInstrumentName(ins,self.lc_data))
+            if ins in ins_keys:
+                self.info('Loading {} light curves'.format(ins))
+                self._instruments.append(LightCurveData.fromInstrumentName(ins,self.lc_data))
+            else:
+                self.info('Could not find {} in instrument keys'.format(ins))
 
+    # def _load_data_file(self,instruments):
+    #     """load data from different instruments."""
 
-    def _load_data_file(self,instruments):
-        """load data from different instruments."""
+    #     raw_data = []
+    #     data_std = []
 
-        raw_data = []
-        data_std = []
+    #     for i in self.lc_data['data']:
+    #         # raw data includes data and datastd.
+    #         raw_data.append(self.lc_data['data'][i][:len(self.lc_data['data'][i])//2])
+    #         data_std.append(self.lc_data['data'][i][len(self.lc_data['data'][i])//2:])
+    
+    def _initialize_lightcurves(self):
 
-        for i in self.lc_data['data']:
-            # raw data includes data and datastd.
-            raw_data.append(self.lc_data['data'][i][:len(self.lc_data['data'][i])//2])
-            data_std.append(self.lc_data['data'][i][len(self.lc_data['data'][i])//2:])
+        min_n_factors = np.concatenate([ins.minNfactors for ins in self._instruments])
+        max_n_factors = np.concatenate([ins.maxNfactors for ins in self._instruments]) 
         
-        
+        self._nfactor = np.ones_like(min_n_factors)
+
+        self.create_normalization_fitparams()
+
+        for idx,value in enumerate(zip(min_n_factors,max_n_factors)):
+            min_n,max_n = value
+            self.modify_bounds('Nfactor_{}'.format(idx),[min_n,max_n])
 
 
     @fitparam(param_name='sma_over_rs',param_latex='sma_over_rs',
@@ -106,10 +122,16 @@ class LightCurveModel(ForwardModel):
 
 
     def create_normalization_fitparams(self):
+        import itertools
+        
 
-        for idx,_ in enumerate(self._nfactor):
+        ins_name = itertools.chain(*tuple([[ins.instrumentName]*ins.minNfactors.shape[0] for ins in self._instruments]))
+        ins_number = itertools.chain(*tuple([list(range(ins.minNfactors.shape[0])) for ins in self._instruments]))
+
+        for idx,val in enumerate(zip(ins_name,ins_number)):
+            name,no = val
             param_name = 'Nfactor_{}'.format(idx)
-            param_latex = 'N_{}'.format(idx)
+            param_latex = '{}_{}'.format(name,no)
 
             default_fit = False
             default_bounds = [0,1]
@@ -129,55 +151,34 @@ class LightCurveModel(ForwardModel):
         inclination_value = self.inclination
         mid_time_value = self.mid_time
         Nfactor = self._nfactor
-        if self.spitzer:
-            index = np.logical_and(wlgrid > 3.4, wlgrid < 8.2)
-            result = np.append(result,self.light_curve_chain(model[index], time_array=self.time_series_spitzer, period=self.period,
-                                            sma_over_rs=sma_over_rs_value, eccentricity=self.ecc,
-                                            inclination=inclination_value, periastron=self.periastron,
-                                            mid_time=mid_time_value, ldcoeff=self.ld_coeff_file[index],
-                                            Nfactor=Nfactor[index]))
 
-        if self.wfc3:
-            index = np.logical_and(wlgrid>1.1 ,wlgrid < 1.8)
-            result = np.append(result,self.light_curve_chain(model[index], time_array=self.time_series_wfc3, period=self.period,
-                           sma_over_rs=sma_over_rs_value, eccentricity=self.ecc,
-                           inclination=inclination_value, periastron=self.periastron,
-                           mid_time=mid_time_value, ldcoeff=self.ld_coeff_file[index],
-                           Nfactor=Nfactor[index]))
+        result = []
+        for ins in self._instruments:
+            min_wl,max_wl = ins.wavelengthRegion
+            index = (wlgrid > min_wl) & (wlgrid < max_wl)
+            lc = self.light_curve_chain(model[index], time_array=ins.timeArray, period=self.period,
+                                                        sma_over_rs=sma_over_rs_value, eccentricity=self.ecc,
+                                                        inclination=inclination_value, periastron=self.periastron,
+                                                        mid_time=mid_time_value, ldcoeff=self.ld_coeff_file[index],
+                                                        Nfactor=Nfactor[index])
+            result.append(lc)
 
-        if self.stis:
-            index = np.logical_and(wlgrid > 0.3, wlgrid < 1.0)
-            result = np.append(result,self.light_curve_chain(model[index], time_array=self.time_series_stis, period=self.period,
-                                            sma_over_rs=sma_over_rs_value, eccentricity=self.ecc,
-                                            inclination=inclination_value, periastron=self.periastron,
-                                            mid_time=mid_time_value, ldcoeff=self.ld_coeff_file[index],
-                                            Nfactor=Nfactor[index]))
-
-        return result
+        return np.concatenate(result)
         #!# incomplete
     
     def light_curve_chain(self, model, time_array, period, sma_over_rs, eccentricity, inclination, periastron,
                           mid_time, ldcoeff, Nfactor ):
         """Create model light-curve and lightcurve chain."""
-        result = np.array([])
+        result = []
         # self.info('Creating Lightcurve chain.')
         for n in range(len(model)):
             transit_light_curve = plc.transit('claret', ldcoeff[n], np.sqrt(model[n]), period,
                                           sma_over_rs, eccentricity, inclination, periastron,
                                           mid_time, time_array)
-            result = np.append(result, transit_light_curve * Nfactor[n])
+            result.append(transit_light_curve * Nfactor[n])
 
-        return result
+        return np.concatenate(result)
 
-    def instrument_info(self,instr):
-        """extract data, ldcoeff etc instrument specific data from the pickle file"""
-        data = self.lc_data['data'][instr][:len(self.lc_data['data'][instr]) / 2]
-        time_array = self.lc_data['time_series'][instr]
-        return data, time_array, self.ld_coeff_file, self.obs_wlgrid
-
-
-    def return_orbital(self):
-        return self.orbital_list
 
              
     

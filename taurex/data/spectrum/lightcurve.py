@@ -1,6 +1,6 @@
 from .spectrum import BaseSpectrum
 import numpy as np
-
+from taurex.model.lightcurve.lightcurvedata import LightCurveData
 
 class ObservedLightCurve(BaseSpectrum):
     """Loads an observed lightcurve from a file and computes bin
@@ -27,17 +27,32 @@ class ObservedLightCurve(BaseSpectrum):
         import pickle
         with open(filename,'rb') as f:
             lc_data = pickle.load(f,encoding='latin1')
-            wfc_data = lc_data['data']['wfc3']
+            
         self.obs_spectrum = np.empty(shape=(len(lc_data['lc_info'][:, 0]), 4))
         self.obs_spectrum[:, 0] = lc_data['lc_info'][:, 0]
         self.obs_spectrum[:, 1] = lc_data['lc_info'][:, 3]
         self.obs_spectrum[:, 2] = lc_data['lc_info'][:, 1]
         self.obs_spectrum[:, 3] = lc_data['lc_info'][:, 2]
-        
-        total_wfc = wfc_data.shape[0]//2
 
-        self._spec = wfc_data[:total_wfc].flatten()
-        self._std = wfc_data[total_wfc:].flatten()
+        self._spec,self._std = self._load_data_file(lc_data)
+
+
+
+    def _load_data_file(self,lc_data):
+        """load data from different instruments."""
+
+        raw_data = []
+        data_std = []
+
+        for i in LightCurveData.availableInstruments:
+
+            if i in lc_data['data']:
+            # raw data includes data and datastd.
+                raw_data.append(lc_data['data'][i][:len(lc_data['data'][i])//2])
+                data_std.append(lc_data['data'][i][len(lc_data['data'][i])//2:])
+        
+        return np.concatenate(raw_data),np.concatenate(data_std)
+
 
     @property
     def spectrum(self):
