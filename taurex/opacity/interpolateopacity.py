@@ -2,6 +2,9 @@ from taurex.log import Logger
 import numpy as np
 from .opacity import Opacity
 import numexpr as ne
+from taurex.util.math import *
+
+
 class InterpolatingOpacity(Opacity):
     """
     Provides interpolation methods
@@ -39,12 +42,9 @@ class InterpolatingOpacity(Opacity):
         fx1 = self.xsecGrid[P,t_idx_max]
 
         if self._interp_mode == 'linear':
-            return fx0 + (fx1-fx0)*(T-Tmin)/(Tmax-Tmin)
+            return interp_lin_only(fx0,fx1,T,Tmin,Tmax)
         elif self._interp_mode == 'exp':
-            alpha = ne.evaluate('(1/(1/Tmax - 1/Tmin)) *(log(fx0/fx1))')
-            beta = (T-Tmin)/(Tmax*T)
-
-            return ne.evaluate('fx0*exp(alpha*beta)')  
+            return interp_exp_only(fx0,fx1,T,Tmin,Tmax)
         else:
             raise ValueError('Unknown interpolation mode {}'.format(self._interp_mode))
 
@@ -54,7 +54,7 @@ class InterpolatingOpacity(Opacity):
         fx0=self.xsecGrid[p_idx_min,T]
         fx1 = self.xsecGrid[p_idx_max,T]
 
-        return fx0 + (fx1-fx0)*(P-Pmin)/(Pmax-Pmin)
+        return interp_lin_only(fx0,fx1,P,Pmin,Pmax)
 
 
     def interp_bilinear_grid(self,T,P,t_idx_min,t_idx_max,p_idx_min,p_idx_max):
@@ -116,24 +116,9 @@ class InterpolatingOpacity(Opacity):
 
 
         if self._interp_mode == 'linear':
-            diff = ((Tmax-Tmin)*(Pmax-Pmin))
-            factor = 1.0/((Tmax-Tmin)*(Pmax-Pmin))
-
-            self.debug('FACTOR %s',factor)
-
-            return ne.evaluate('factor*(q_11*(Pmax-P)*(Tmax-T) + q_21*(P-Pmin)*(Tmax-T) + q_12*(Pmax-P)*(T-Tmin) + q_22*(P-Pmin)*(T-Tmin))')
+            return intepr_bilin(q_11,q_12,q_21,q_22,T,Tmin,Tmax,P,Pmin,Pmax)
         elif self._interp_mode == 'exp':
-            t_factor =(1/(1/Tmax - 1/Tmin)) 
-            alpha = ne.evaluate('t_factor*log(q_11/q_12)')
-            beta = (T-Tmin)/(Tmax*T)
-
-            sigma=ne.evaluate('q_11*exp(alpha*beta)')  
-
-            alpha = ne.evaluate('t_factor*log(q_21/q_22)')
-            sigma_2 = ne.evaluate('q_21*exp(alpha*beta)')
-
-            p_factor = (P-Pmin)/(Pmax-Pmin)
-            return ne.evaluate('sigma + (sigma_2 - sigma)*p_factor')   
+            return interp_exp_and_lin(q_11,q_12,q_21,q_22,T,Tmin,Tmax,P,Pmin,Pmax)
         else:
             raise ValueError('Unknown interpolation mode {}'.format(self._interp_mode))
 
