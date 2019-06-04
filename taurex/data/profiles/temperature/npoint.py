@@ -33,12 +33,12 @@ class NPoint(TemperatureProfile):
 
         if len(temperature_points) != len(pressure_points):
             self.error('Number of temeprature points != number of pressure points')
-            self.error('len(t_points) = {} /= len(p_points) = {}'.format(len(temperature_points),len(pressure_points)))
+            self.error('len(t_points) = %s /= len(p_points) = %s',len(temperature_points),len(pressure_points))
             raise Exception('Incorrect_number of temp and pressure points')
         
         self.info('Npoint temeprature profile is initialized')
-        self.debug('Passed temeprature points {}'.format(temperature_points))
-        self.debug('Passed pressure points {}'.format(pressure_points))
+        self.debug('Passed temeprature points %s',temperature_points)
+        self.debug('Passed pressure points %s',pressure_points)
         self._t_points = temperature_points
         self._p_points = pressure_points
         self._T_surface = T_surface
@@ -96,7 +96,7 @@ class NPoint(TemperatureProfile):
 
             fget_point = read_point
             fset_point = write_point
-            self.debug('FGet_location {} {}'.format(fget_point,fget_point(self)))
+            self.debug('FGet_location %s %s',fget_point,fget_point(self))
             default_fit = False
             self.add_fittable_param(param_name,param_latex ,fget_point,fset_point,'log',default_fit,bounds) 
 
@@ -118,7 +118,7 @@ class NPoint(TemperatureProfile):
 
             fget_point = read_point
             fset_point = write_point
-            self.debug('FGet_location {} {}'.format(fget_point,fget_point(self)))
+            self.debug('FGet_location %s %s',fget_point,fget_point(self))
             default_fit = False
             self.add_fittable_param(param_name,param_latex ,fget_point,fset_point,'linear',default_fit,bounds)        
 

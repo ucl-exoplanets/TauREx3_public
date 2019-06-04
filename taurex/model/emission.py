@@ -42,7 +42,7 @@ class EmissionModel(SimpleForwardModel):
     def compute_final_flux(self,f_total):
         star_sed = self._star.spectralEmissionDensity
 
-        self.debug('Star SED: {}'.format(star_sed))
+        self.debug('Star SED: %s',star_sed)
         #quit()
         star_radius = self._star.radius
         planet_radius = self._planet.fullRadius
@@ -85,8 +85,8 @@ class EmissionModel(SimpleForwardModel):
         #for layer in range(total_layers):
         for contrib in self.contribution_list:
             surface_tau += contrib.contribute(self,0,total_layers,0,0,density,path_length=dz)
-        self.debug('density = {}'.format(density[0]))
-        self.debug('surface_tau = {}'.format(surface_tau))
+        self.debug('density = %s',density[0])
+        self.debug('surface_tau = %s',surface_tau)
 
         BB = black_body(wngrid,temperature[0])/PI
 
@@ -94,7 +94,7 @@ class EmissionModel(SimpleForwardModel):
         I2 = ne.evaluate('BB * ( exp(-surface_tau/mu2))')
         I3 = ne.evaluate('BB * ( exp(-surface_tau/mu3))')
         I4 = ne.evaluate('BB * ( exp(-surface_tau/mu4))')
-        self.debug('I1_pre {}'.format(I1))
+        self.debug('I1_pre %s',I1)
         #Loop upwards
         for layer in range(total_layers):
             layer_tau[...] = 0.0
@@ -108,20 +108,20 @@ class EmissionModel(SimpleForwardModel):
             tau[layer] += _tau
             #for contrib in self.contribution_list:
 
-            self.debug('Layer_tau[{}]={}'.format(layer,layer_tau))
+            self.debug('Layer_tau[%s]=%s',layer,layer_tau)
             
             dtau += layer_tau
-            self.debug('dtau[{}]={}'.format(layer,dtau))
+            self.debug('dtau[%s]=%s',layer,dtau)
             BB = black_body(wngrid,temperature[layer])/PI
-            self.debug('BB[{}]={},{}'.format(layer,temperature[layer],BB))
+            self.debug('BB[%s]=%s,%s',layer,temperature[layer],BB)
             I1 += ne.evaluate('BB * ( exp(-layer_tau/mu1) - exp(-dtau/mu1))')
             I2 += ne.evaluate('BB * ( exp(-layer_tau/mu2) - exp(-dtau/mu2))')
             I3 += ne.evaluate('BB * ( exp(-layer_tau/mu3) - exp(-dtau/mu3))')
             I4 += ne.evaluate('BB * ( exp(-layer_tau/mu4) - exp(-dtau/mu4))')            
 
         
-        self.debug('I1: {}'.format(I1))
+        self.debug('I1: %s',I1)
         flux_total = ne.evaluate('2.0*PI*(I1*mu1*w1 + I2*mu2*w2 + I3*mu3*w3 + I4*mu4*w4)')
-        self.debug('flux_total {}'.format(flux_total))
+        self.debug('flux_total %s',flux_total)
         
         return self.compute_final_flux(flux_total),tau,[]

@@ -39,7 +39,7 @@ class SimpleForwardModel(ForwardModel):
         self._pressure_profile = pressure_profile
         self._temperature_profile = temperature_profile
         self._chemistry = chemistry
-        self.debug('Passed: {} {} {} {} {}'.format(planet,star,pressure_profile,temperature_profile,chemistry))
+        self.debug('Passed: %s %s %s %s %s',planet,star,pressure_profile,temperature_profile,chemistry)
         self.altitude_profile=None
         self.scaleheight_profile=None
         self.gravity_profile=None
@@ -72,7 +72,7 @@ class SimpleForwardModel(ForwardModel):
         if self._pressure_profile is None:
             from taurex.data.profiles.pressure import SimplePressureProfile
             self.info('No pressure profile defined, using simple pressure profile with')
-            self.info('parameters nlayers: {}, atm_pressure_range=({},{})'.format(nlayers,atm_min_pressure,atm_max_pressure))
+            self.info('parameters nlayers: %s, atm_pressure_range=(%s,%s)',nlayers,atm_min_pressure,atm_max_pressure)
             self._pressure_profile = SimplePressureProfile(nlayers,atm_min_pressure,atm_max_pressure)
 
         if self._planet is None:
@@ -142,7 +142,7 @@ class SimpleForwardModel(ForwardModel):
         for contrib in self.contribution_list:
             self._fitting_parameters.update(contrib.fitting_parameters())
 
-        self.debug('Available Fitting params: {}'.format(list(self._fitting_parameters.keys())))
+        self.debug('Available Fitting params: %s',list(self._fitting_parameters.keys()))
     def build(self):
         self.info('Building model........')
         self._compute_inital_mu()

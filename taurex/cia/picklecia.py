@@ -23,7 +23,7 @@ class PickleCIA(CIA):
     def _load_pickle_file(self,filename):
 
         #Load the pickle file
-        self.info('Loading cia cross section from {}'.format(filename))
+        self.info('Loading cia cross section from %s',filename)
         with open(filename,'rb') as f:
             self._spec_dict = pickle.load(f, encoding='latin1')
         

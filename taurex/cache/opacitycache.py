@@ -29,25 +29,25 @@ class OpacityCache(Singleton):
                 return self.opacity_dict[key]
             else:
                 #Otherwise throw an error
-                self.log.error('Opacity for molecule {} could not be loaded'.format(key))
-                self.log.error('It could not be found in the local dictionary {}'.format(list(self.opacity_dict.keys())))
-                self.log.error('Or paths {}'.format(self._opacity_path))
+                self.log.error('Opacity for molecule %s could not be loaded',key)
+                self.log.error('It could not be found in the local dictionary %s',list(self.opacity_dict.keys()))
+                self.log.error('Or paths %s',self._opacity_path)
                 self.log.error('Try loading it manually/ putting it in a path')
                 raise Exception('Opacity could notn be loaded')
 
 
 
     def add_opacity(self,opacity,molecule_filter=None):
-        self.log.info('Reading opacity {}'.format(opacity.moleculeName))
+        self.log.info('Reading opacity %s',opacity.moleculeName)
         if opacity.moleculeName in self.opacity_dict:
-            self.log.warning('Opacity with name {} already in opactiy dictionary {}'.format(opacity.moleculeName,self.opacity_dict.keys()))
+            self.log.warning('Opacity with name %s already in opactiy dictionary %s',opacity.moleculeName,self.opacity_dict.keys())
             return
         if molecule_filter is not None:
             if opacity.moleculeName in molecule_filter:
-                self.log.info('Loading opacity {} into model'.format(opacity.moleculeName))
+                self.log.info('Loading opacity %s into model',opacity.moleculeName)
                 self.opacity_dict[opacity.moleculeName] = opacity       
         else:     
-            self.log.info('Loading opacity {} into model'.format(opacity.moleculeName))
+            self.log.info('Loading opacity %s into model',opacity.moleculeName)
             self.opacity_dict[opacity.moleculeName] = opacity    
     def load_opacity_from_path(self,path,molecule_filter=None):
         from glob import glob
@@ -56,7 +56,7 @@ class OpacityCache(Singleton):
         glob_path = os.path.join(path,'*.pickle')
 
         file_list = glob(glob_path)
-        self.log.debug('File list {}'.format(file_list))
+        self.log.debug('File list %s',file_list)
         for files in file_list:
             splits = pathlib.Path(files).stem.split('.')
             if molecule_filter is not None:
@@ -80,8 +80,8 @@ class OpacityCache(Singleton):
             elif isinstance(opacities,Opacity):
                 self.add_opacity(opacities,molecule_filter=molecule_filter)
             else:
-                self.log.error('Unknown type {} passed into opacities, should be a list, single \
-                     opacity or None if reading a path'.format(type(opacities)))
+                self.log.error('Unknown type %s passed into opacities, should be a list, single \
+                     opacity or None if reading a path',type(opacities))
                 raise Exception('Unknown type passed into opacities')
         elif opacity_path is not None:
 

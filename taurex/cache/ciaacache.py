@@ -25,20 +25,20 @@ class CIACache(Singleton):
                 return self.cia_dict[key]
             else:
                 #Otherwise throw an error
-                self.log.error('CIA for pair {} could not be loaded'.format(key))
-                self.log.error('It could not be found in the local dictionary {}'.format(list(self.cia_dict.keys())))
-                self.log.error('Or paths {}'.format(self._cia_path))
+                self.log.error('CIA for pair %s could not be loaded',key)
+                self.log.error('It could not be found in the local dictionary %s',list(self.cia_dict.keys()))
+                self.log.error('Or paths %s',self._cia_path)
                 self.log.error('Try loading it manually/ putting it in a path')
                 raise Exception('cia could notn be loaded')
 
     def add_cia(self,cia,pair_filter=None):
-        self.log.info('Loading cia {} into model'.format(cia.pairName))
+        self.log.info('Loading cia %s into model',cia.pairName)
         if cia.pairName in self.cia_dict:
-            self.log.error('cia with name {} already in opactiy dictionary {}'.format(cia.pairName,self.cia_dict.keys()))
-            raise Exception('cia for molecule {} already exists')
+            self.log.error('cia with name %s already in opactiy dictionary %s',cia.pairName,self.cia_dict.keys())
+            raise Exception('cia for molecule %s already exists')
         if pair_filter is not None:
             if cia.pairName in pair_filter:
-                self.log.info('Loading cia {} into model'.format(cia.pairName))
+                self.log.info('Loading cia %s into model',cia.pairName)
                 self.cia_dict[cia.pairName] = cia               
         self.cia_dict[cia.pairName] = cia   
     
@@ -52,11 +52,11 @@ class CIACache(Singleton):
         glob_path = os.path.join(path,'*.db')
 
         file_list = glob(glob_path)
-        self.log.debug('Glob list: {}'.format(glob_path))
-        self.log.debug('File list FOR CIA {}'.format(file_list))
+        self.log.debug('Glob list: %s',glob_path)
+        self.log.debug('File list FOR CIA %s',file_list)
         for files in file_list:
             pairname=Path(files).stem.split('_')[0].upper()
-            self.log.debug('pairname found {}'.format(pairname))
+            self.log.debug('pairname found %s',pairname)
             if pair_filter is not  None:
                 if not pairname in pair_filter:
                     continue
@@ -67,7 +67,7 @@ class CIACache(Singleton):
         glob_path = os.path.join(path,'*.cia')
 
         file_list = glob(glob_path)
-        self.log.debug('File list {}'.format(file_list))
+        self.log.debug('File list %s',file_list)
         
         for files in file_list:
             from taurex.cia import HitranCIA
@@ -85,7 +85,7 @@ class CIACache(Singleton):
         if cia_path is None:
             cia_path = self._cia_path
         
-        self.log.debug('CIA XSEC, CIA_PATH {} {}'.format(cia_xsec,cia_path))
+        self.log.debug('CIA XSEC, CIA_PATH %s %s',cia_xsec,cia_path)
         if cia_xsec is not None:
             if isinstance(cia_xsec,(list,)):
                 self.log.debug('cia passed is list')
@@ -94,8 +94,8 @@ class CIACache(Singleton):
             elif isinstance(cia_xsec,CIA):
                 self.add_cia(cia_xsec,pair_filter=pair_filter)
             else:
-                self.log.error('Unknown type {} passed into cia, should be a list, single \
-                     cia or None if reading a path'.format(type(xsec)))
+                self.log.error('Unknown type %s passed into cia, should be a list, single \
+                     cia or None if reading a path',type(xsec))
                 raise Exception('Unknown type passed into cia')
         elif cia_path is not None:
 
