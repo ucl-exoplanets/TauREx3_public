@@ -33,8 +33,6 @@ OpacityCache().set_interpolation('exp')
 CIACache().set_cia_path('/Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/cia/hitran/')
 
 
-
-
 tm = TransmissionModel(
                        planet=Planet(),
                        star=BlackbodyStar(temperature=5800),
