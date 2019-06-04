@@ -11,7 +11,7 @@ he_h2_ratio=0.17647
 
     [[H2O]]
     gas_type=constant
-    mix_ratio=1e-4
+    mix_ratio=1e-5
 
     #[[CH4]]
     #gas_type=twolayer
