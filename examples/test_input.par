@@ -1,7 +1,7 @@
 [Global]
-xsec_path = C:/Users/Ahmed/Documents/TaurexData/xsec/xsec_sampled_R15000_0.3-15
+xsec_path = /Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/xsec/TauRex_sampled_xsecs_R10000_0.3-15/
 xsec_interpolation = exp
-cia_path = C:/Users/Ahmed/Documents/TaurexData/cia/hitran
+cia_path = /Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/cia/hitran
 
 
 [Chemistry]
@@ -13,11 +13,11 @@ he_h2_ratio=0.17647
     gas_type=constant
     mix_ratio=1e-4
 
-    [[CH4]]
-    gas_type=twolayer
-    mix_ratio_surface=1e-4
-    mix_ratio_top=1e-10
-    mix_ratio_P=1e2
+    #[[CH4]]
+    #gas_type=twolayer
+    #mix_ratio_surface=1e-4
+    #mix_ratio_top=1e-10
+    #mix_ratio_P=1e2
     
 
 
@@ -27,7 +27,7 @@ iso_temp = 1500.0
 
 [Pressure]
 profile_type = Simple
-atm_min_pressure = 1e-5
+atm_min_pressure = 1e-4
 atm_max_pressure = 1e6
 nlayers = 100
 
@@ -47,7 +47,7 @@ model_type = transmission
     [[CIA]]
     cia_pairs = H2-He,H2-H2
     
-    [[Rayleigh]]
+    #[[Rayleigh]]
 
     #[[Mie]]
     #mie_path= /Users/ahmed/Documents/repos/TauREx3/src/MIE/MgSiO3.dat
@@ -56,7 +56,7 @@ model_type = transmission
     #clouds_pressure =5e3
 
 [Spectrum]
-observed_spectrum = C:/Users/Ahmed/Documents/TaurexData/tests/test_0_transmission/SPECTRUM_out.dat
+observed_spectrum = /Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_transmission/SPECTRUM_out.dat
 grid_type = observed
 #wavenumber_grid = 0.0,10000.0,10000
 #wavelength_grid = 0.01,10.0,10000

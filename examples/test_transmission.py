@@ -38,7 +38,7 @@ absc = AbsorptionContribution()
 tm = TransmissionModel(
                        planet=Planet(),
                        star=BlackbodyStar(temperature=5800),
-                       temperature_profile=Isothermal(),nlayers=30)
+                       temperature_profile=Isothermal(),nlayers=100)
 tm.add_contribution(AbsorptionContribution())
 tm.add_contribution(CIAContribution(cia_pairs=['H2-H2','H2-He']))
 tm.add_contribution(RayleighContribution())
@@ -48,7 +48,7 @@ tm.build()
 wngrid = OpacityCache()['H2O'].wavenumberGrid
 
 absp,absorption,tau,contributions = tm.model(wngrid,return_contrib=True)
-total_runs = 50
+total_runs = 10
 start = time.time()
 for x in range(total_runs):
     tm.model(wngrid)
