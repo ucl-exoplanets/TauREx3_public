@@ -27,7 +27,7 @@ class AbsorptionContribution(Contribution):
     def prepare(self,model,wngrid):
         import numexpr as ne
         ngases = len(model.chemistry.activeGases)
-        self.debug('Creating crossection for wngrid {} with ngases {} and nlayers {}'.format(wngrid,ngases,model.nLayers))
+        self.debug('Creating crossection for wngrid %s with ngases %s and nlayers %s',wngrid,ngases,model.nLayers)
 
         sigma_xsec = np.zeros(shape=(model.nLayers,wngrid.shape[0]))
         
@@ -37,15 +37,15 @@ class AbsorptionContribution(Contribution):
             gas_mix = model.chemistry.get_gas_mix_profile(gas)
             self.info('Recomputing active gas {} opacity'.format(gas))
             for idx_layer,tp in enumerate(zip(model.temperatureProfile,model.pressureProfile)):
-                self.debug('Got index,tp {} {}'.format(idx_layer,tp))
+                self.debug('Got index,tp %s %s',idx_layer,tp)
                 temperature,pressure = tp
                 sigma_xsec[idx_layer] += self._opacity_cache[gas].opacity(temperature,pressure,wngrid)*gas_mix[idx_layer]
-                self.debug('Sigma for T {}, P:{} is {}'.format(temperature,pressure,sigma_xsec[idx_layer,idx_gas]))
+                self.debug('Sigma for T %s, P:%s is %s',temperature,pressure,sigma_xsec[idx_layer,idx_gas])
 
         
         
 
-        self.debug('Sigma is {}'.format(sigma_xsec))
+        self.debug('Sigma is %s',sigma_xsec)
 
 
         self._ngrid = wngrid.shape[0]
@@ -55,7 +55,7 @@ class AbsorptionContribution(Contribution):
         self.sigma_xsec= sigma_xsec
 
 
-        self.debug('Final sigma is {}'.format(self.sigma_xsec))
+        self.debug('Final sigma is %s',self.sigma_xsec)
         #quit()
         self.info('Done')
         self._total_contrib = np.zeros(shape=(model.nLayers,wngrid.shape[0],))
