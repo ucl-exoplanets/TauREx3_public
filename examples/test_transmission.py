@@ -29,7 +29,7 @@ import numexpr as ne
 logging.basicConfig(level=logging.INFO)
 
 OpacityCache().set_opacity_path('/Users/ahmed/Documents/taurex_files/xsec/TauRex_sampled_xsecs_R10000_0.3-15')
-OpacityCache().set_interpolation('linear')
+OpacityCache().set_interpolation('exp')
 CIACache().set_cia_path('/Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/cia/hitran/')
 absc = AbsorptionContribution()
 
