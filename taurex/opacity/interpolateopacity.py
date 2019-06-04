@@ -61,8 +61,8 @@ class InterpolatingOpacity(Opacity):
         import numexpr as ne
         
 
-        self.debug('Interpolating {} {} {} {} {} {}'.format(T,P,t_idx_min,t_idx_max,p_idx_min,p_idx_max))
-        #self.debug('Stats are {} {} {} {}'.format(self.temperatureGrid[-1],self.pressureGrid[-1],self._max_temperature_id,self._max_pressure_id))
+        self.debug('Interpolating %s %s %s %s %s %s',T,P,t_idx_min,t_idx_max,p_idx_min,p_idx_max)
+
         if p_idx_max == 0 and t_idx_max == 0:
 
             return np.zeros_like(self.xsecGrid[0,0])
@@ -74,8 +74,8 @@ class InterpolatingOpacity(Opacity):
         check_temperature_min = T < self._min_temperature
 
 
-        self.debug('Check pressure min/max {}/{}'.format(check_pressure_min,check_pressure_max))
-        self.debug('Check temeprature min/max {}/{}'.format(check_temperature_min,check_temperature_max))
+        self.debug('Check pressure min/max %s/%s',check_pressure_min,check_pressure_max)
+        self.debug('Check temeprature min/max %s/%s',check_temperature_min,check_temperature_max)
         #Are we both max?
         if check_pressure_max and check_temperature_max:
             self.debug('Maximum Temperature pressure reached. Using last')
@@ -119,7 +119,7 @@ class InterpolatingOpacity(Opacity):
             diff = ((Tmax-Tmin)*(Pmax-Pmin))
             factor = 1.0/((Tmax-Tmin)*(Pmax-Pmin))
 
-            self.debug('FACTOR {}'.format(factor))
+            self.debug('FACTOR %s',factor)
 
             return ne.evaluate('factor*(q_11*(Pmax-P)*(Tmax-T) + q_21*(P-Pmin)*(Tmax-T) + q_12*(Pmax-P)*(T-Tmin) + q_22*(P-Pmin)*(T-Tmin))')
         elif self._interp_mode == 'exp':

@@ -35,7 +35,7 @@ class AbsorptionContribution(Contribution):
 
         for idx_gas,gas in enumerate(model.chemistry.activeGases):
             gas_mix = model.chemistry.get_gas_mix_profile(gas)
-            self.info('Recomputing active gas {} opacity'.format(gas))
+            self.info('Recomputing active gas %s opacity',gas)
             for idx_layer,tp in enumerate(zip(model.temperatureProfile,model.pressureProfile)):
                 self.debug('Got index,tp %s %s',idx_layer,tp)
                 temperature,pressure = tp

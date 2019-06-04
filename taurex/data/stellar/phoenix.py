@@ -25,17 +25,17 @@ class PhoenixStar(BlackbodyStar):
 
 
         self._temperature_grid = np.array([x[0] for x in T_list])
-        self.debug('Detected temepratures = {}'.format(self._temperature_grid))
+        self.debug('Detected temepratures = %s',self._temperature_grid)
         self._avail_max_temp = max(self._temperature_grid)
         self._avail_min_temp = min(self._temperature_grid)
     
-        self.debug('Temperature range = [{}-{}] '.format(self._avail_min_temp,self._avail_max_temp))
+        self.debug('Temperature range = [%s-%s] ',self._avail_min_temp,self._avail_max_temp)
         self._max_index = self._temperature_grid.shape[0]
         self.spectra_grid = []
 
         #Load in all arrays
         for temp,f in T_list:
-            self.debug('Loading {} {}'.format(temp,f))
+            self.debug('Loading %s %s',temp,f)
             arr = np.loadtxt(f)
             self.wngrid = np.copy(arr[:,0])
             self.spectra_grid.append(arr[:,1]*10.0) #To SI
@@ -77,7 +77,7 @@ class PhoenixStar(BlackbodyStar):
             try:
                 _T = float(split[1])
             except Exception:
-                self.warning('Problem when reading filename {}'.format(f))
+                self.warning('Problem when reading filename %s',f)
                 continue
             temp_list.append( (_T,f) )
         

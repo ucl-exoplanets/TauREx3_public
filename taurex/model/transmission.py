@@ -49,7 +49,7 @@ class TransmissionModel(SimpleForwardModel):
         total_layers = self.nLayers
 
         z = self.altitudeProfile
-        self.debug('Computing path_length: \n z={} \n dz={}'.format(z,dz))
+        self.debug('Computing path_length: \n z=%s \n dz=%s',z,dz)
         for layer in range(0,total_layers):
 
             p = (planet_radius+dz[0]/2 + z[layer])**2
@@ -84,20 +84,20 @@ class TransmissionModel(SimpleForwardModel):
 
         for layer in range(total_layers):
 
-            self.debug('Computing layer {}'.format(layer))
+            self.debug('Computing layer %s',layer)
             dl = path_length[layer]
 
             endK = total_layers-layer
 
             for contrib in self.contribution_list:
-                self.debug('Adding contribution from {}'.format(contrib.name))
+                self.debug('Adding contribution from %s',contrib.name)
                 contrib.contribute(self,0,endK,layer,layer,density_profile,path_length=dl)
 
         all_contrib = [c.totalContribution for c in self.contribution_list]
 
-        self.debug('Contributionlist {}'.format(all_contrib))
+        self.debug('Contributionlist %s',all_contrib)
         tau = np.sum(all_contrib,axis=0)
-        self.debug('tau {} {}'.format(tau,tau.shape))
+        self.debug('tau %s %s',tau,tau.shape)
 
         absorption,tau = self.compute_absorption(tau,dz)
 
