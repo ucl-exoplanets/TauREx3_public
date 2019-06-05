@@ -2,18 +2,17 @@
 Welcome to taurex's documentation!
 ==================================
 
-.. automodule:: taurex.util.math
-    :members:
-
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
+    User Guide <user/index>
+    Development Guide <devel/index>
+    Full API <api/modules>
+    Project Page <https://github.com/ucl-exoplanets/TauREx3/>
 
+    
+Taurex Documentation
+=====================
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+Taurex 3 aint shit cept hos n tricks
