@@ -4,7 +4,7 @@ __all__ = ['Logger']
 
 
 root_logger = logging.getLogger('taurex')
-
+"""Root logger for taurex"""
 
 class TauRexHandler(logging.StreamHandler):
     def __init__(self,stream=None):
@@ -183,11 +183,3 @@ class Logger(object):
 #     def critical(self,message,*args, **kwargs):
 #         """ See :class:`logging.Logger` """
 #         self._log_queue.put( (self._log_name,logging.CRITICAL,message,args,kwargs) )
-
-
-
-
-def main():
-    pass
-if __name__=="__main__":
-    main()
