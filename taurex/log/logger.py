@@ -2,7 +2,9 @@ import logging
 __all__ = ['Logger']
 
 
+
 root_logger = logging.getLogger('taurex')
+
 
 class TauRexHandler(logging.StreamHandler):
     def __init__(self,stream=None):
@@ -11,7 +13,8 @@ class TauRexHandler(logging.StreamHandler):
 
         self._rank = get_rank()
     def emit(self,record):
-        if self._rank == 0 or record.level >= logging.ERROR:
+        #print(record)
+        if self._rank == 0 or record.levelno >= logging.ERROR:
             msg = '[{}] {}'.format(self._rank,record.msg)
             record.msg = msg
             return super(TauRexHandler,self).emit(record)
@@ -19,9 +22,13 @@ class TauRexHandler(logging.StreamHandler):
             pass
 
 rh = TauRexHandler()
-
+formatter = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
+rh.setFormatter(formatter)
+rh.setLevel(logging.DEBUG)
 root_logger.addHandler(rh)
-root_logger = logging.getLogger('taurex')
+root_logger.setLevel(logging.INFO)
+
+root_logger.info('Root logger initialized')
 # class TauRexLogger(object):
 #     """Base class for logging in TauRex
 
@@ -124,7 +131,6 @@ class Logger(object):
         self._log_name = 'taurex.{}'.format(name)
     
         self._logger = logging.getLogger('taurex.{}'.format(name))
-        self._logger.addHandler(rh)
         
 
     def info(self,message,*args, **kwargs):

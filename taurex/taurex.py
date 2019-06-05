@@ -29,6 +29,8 @@ def main():
     import os
     import logging
     import numpy as np
+    from taurex.mpi import get_rank,nprocs
+    from taurex.log import Logger
     from taurex.parameter import ParameterParser
     from taurex.util import bindown
     from taurex.output.hdf5 import HDF5Output
@@ -43,10 +45,10 @@ def main():
 
     args=parser.parse_args()
 
-    if args.debug:
-        logging.basicConfig(level=logging.DEBUG,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    else:
-        logging.basicConfig(level=logging.INFO,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    # if args.debug:
+    #     logging.basicConfig(level=logging.DEBUG,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    # else:
+    #     logging.basicConfig(level=logging.INFO,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     #Parse the input file
     pp = ParameterParser()
     pp.read(args.input_file)
@@ -102,18 +104,18 @@ def main():
             if mode:
                 optimizer.set_mode(key,mode.lower())
 
-        logging.getLogger().setLevel(logging.WARNING)
+        logging.getLogger('taurex').setLevel(logging.WARNING)
 
         optimizer.fit()
 
-        logging.getLogger().setLevel(logging.INFO)
+        logging.getLogger('taurex').setLevel(logging.INFO)
 
     #Run the model
     new_absp,absp,tau,contrib=model.model(bindown_wngrid,return_contrib=True)
     #Get out new binned down model
     #new_absp = bindown(native_grid,absp,bindown_wngrid)
 
-    if args.output_file:
+    if args.output_file and get_rank()==0:
         #Output taurex data
         with HDF5Output(args.output_file) as o:
             model.write(o)
@@ -125,24 +127,28 @@ def main():
     
     wlgrid = np.log10(10000/bindown_wngrid)
     if args.plot:
-        import matplotlib.pyplot as plt
-        if args.contrib:
-            for name,value in contrib:
-                new_value = bindown(native_grid,value,bindown_wngrid)
-                plt.plot(wlgrid,new_value,label=name)
+        if get_rank()==0  and nprocs()==1:
+            import matplotlib.pyplot as plt
+            if args.contrib:
+                for name,value in contrib:
+                    new_value = bindown(native_grid,value,bindown_wngrid)
+                    plt.plot(wlgrid,new_value,label=name)
 
-        #If we have an observation then plot it
-        if observed is not None:
-            plt.errorbar(np.log10(observed.wavelengthGrid),observed.spectrum,observed.errorBar,label='observed')
+            #If we have an observation then plot it
+            if observed is not None:
+                plt.errorbar(np.log10(observed.wavelengthGrid),observed.spectrum,observed.errorBar,label='observed')
 
+            
+            #Plot the absorption
+            plt.plot(wlgrid,new_absp,label='forward model')
+
+
+
+            plt.legend()
+            plt.show()
         
-        #Plot the absorption
-        plt.plot(wlgrid,new_absp,label='forward model')
-
-
-
-        plt.legend()
-        plt.show()
+        else:
+            logging.getLogger('taurex').warning('Number of processes > 1 so not plotting')
     
 
 
