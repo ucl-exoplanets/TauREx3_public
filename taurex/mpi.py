@@ -1,4 +1,4 @@
-"""Module for MPI functions (future use)"""
+"""Module for wrapping MPI functions (future use)"""
 
 def nprocs():
     """Gets number of processes or returns 1 if mpi is not installed
