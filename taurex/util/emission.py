@@ -1,13 +1,28 @@
+"""Functions related to computing emission spectrums"""
+
 import scipy.constants as con
 import numpy as np
 import ctypes as C
 from scipy.stats.mstats_basic import tmean
 
 def black_body(lamb, temp):
-    #small function calculating plank black body
-    #input: WN, kelvin
-    #output: W/m^2/micron
+    """Computes black body radiation spectrum
+
+    Parameters
+    ----------
+    lambda: array
+        Wavenumber array in cm-1
     
+    temp: float
+        Temeprature in Kelvin
+
+    Returns
+    -------
+    array:
+        Blackbody spectrum
+    
+    """
+
     h = 6.62606957e-34
     c = 299792458
     k = 1.3806488e-23

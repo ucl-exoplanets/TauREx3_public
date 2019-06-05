@@ -1,3 +1,6 @@
+"""Defines constants used in taurex"""
+
+
 AMU = 1.660538921e-27
 KBOLTZ = 1.380648813e-23
 G = 6.67384e-11
