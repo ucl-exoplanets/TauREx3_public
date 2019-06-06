@@ -2,7 +2,7 @@
 
 TauREx3 is the newest version of the TauREx retrieval code that was created by a disturbed man.
 
-##Prerequisites
+## Prerequisites
 
 * numpy
     - Specifically **numpy.f2py** to compile Fortran extensions
@@ -16,7 +16,8 @@ TauREx3 is the newest version of the TauREx retrieval code that was created by a
 
 
 
-##Installing
+## Installing
+
 Clone the directory using:
 
 ```
