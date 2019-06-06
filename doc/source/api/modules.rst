@@ -1,5 +1,5 @@
-taurex
-======
+Taurex API Documentation
+========================
 
 .. toctree::
    :maxdepth: 4
