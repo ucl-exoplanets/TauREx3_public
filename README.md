@@ -12,7 +12,7 @@ TauREx3 is the newest version of the TauREx retrieval code that was created by a
 
 * Fortran and C++ compilers
     * For Windows this can be easily achieved using Anaconda3 and doing:
-        `conda install libpython m2w64-toolchain````
+        `conda install libpython m2w64-toolchain`
 
 
 
