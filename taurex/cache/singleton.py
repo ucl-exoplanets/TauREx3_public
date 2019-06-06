@@ -1,4 +1,7 @@
+"""Just contains a singleton class. Pretty useful"""
+
 class Singleton(object):
+    """A singleton for your usage"""
     def __new__(cls, *args, **kwds):
         it = cls.__dict__.get("__it__")
         if it is not None:

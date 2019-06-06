@@ -2,7 +2,40 @@ from .singleton import Singleton
 from taurex.log import Logger
 import pathlib
 class OpacityCache(Singleton):
-    """Implements a lazy load of opacities"""
+    """
+    Implements a lazy load of opacities. A singleton that
+    loads and caches xsections as they are needed. Calling
+
+    >>> opt = OpacityCache()
+    >>> opt2 = OpacityCache()
+
+    Reveals that:
+
+    >>> opt == opt2
+    True
+    
+    Importantly this class will automatically search directories for cross-sections
+    set using the :func:`set_opacity_path` method:
+
+    >>> opt.set_opacity_path('path/to/crossections')
+
+    Currently only :obj:`.pickle` files are supported.
+
+    To get the cross-section object for a particular molecule use the square bracket operator:
+
+    >>> opt['H2O']
+    <taurex.opacity.pickleopacity.PickleOpacity at 0x107a60be0>
+
+    This returns a :class:`PickleOpacity` object for you to compute H2O cross sections from.
+    When called for the first time, a directory search is performed and, if found, the appropriate cross-section is loaded. Subsequent calls will immediately
+    return the already loaded object:
+
+    >>> h2o_a = opt['H2O']
+    >>> h2o_b = opt['H2O']
+    >>> h2o_a == h2o_b
+    True
+
+    """
     def init(self):
         self.opacity_dict={}
         self._opacity_path = None
@@ -10,9 +43,48 @@ class OpacityCache(Singleton):
         self._default_interpolation = 'exp'
 
     def set_opacity_path(self,opacity_path):
+        """
+        Set the path that will be searched for cross-sections. Cross-section in this path
+        must be *.pickle* files and must have names of the form:
+
+        - ``Molecule Name``.Whatever.pickle
+
+        For H2O:
+
+            - ``H2O.R1000.pickle``
+            - ``H2O.pickle``
+            - ``H2O.R1000.xxx420summergirllovesgreenday420xxx.pickle``
+        
+        Are all valid
+
+        """
+        
+
         self._opacity_path  = opacity_path
     
     def set_interpolation(self,interpolation_mode):
+        """
+        Sets the interpolation mode for all currently loaded (and future loaded) cross-sections
+
+        Can either be ``linear`` for linear interpolation of both temeprature and pressure:
+
+        >>> OpacityCache().set_interpolation('linear')
+
+        or ``exp`` for natural exponential interpolation of temperature
+        and linear for pressure
+
+        >>> OpacityCache().set_interpolation('exp')
+        
+
+        Parameters
+        ----------
+        interpolation_mode: str
+            Either ``linear`` for bilinear interpolation or ``exp`` for exp-linear interpolation
+        
+
+
+        """
+
         self._default_interpolation = interpolation_mode
         for values in self.opacity_dict.values():
             values.set_interpolation_mode(self._default_interpolation)
@@ -67,6 +139,8 @@ class OpacityCache(Singleton):
             self.add_opacity(op,molecule_filter=molecule_filter)
 
     def load_opacity(self,opacities=None,opacity_path=None,molecule_filter=None):
+        """
+        """
         from taurex.opacity import Opacity
         
         if opacity_path is None:
@@ -92,4 +166,7 @@ class OpacityCache(Singleton):
                     self.load_opacity_from_path(path,molecule_filter=molecule_filter)
     
     def clear_cache(self):
+        """
+        Clears all currently loaded cross-sections
+        """
         self.opacity_dict = {}
