@@ -10,7 +10,6 @@ Installation
 
 TauREx3 only works with Python 3. If you need to use Python 2.7 consider using TauREx2_.
 
-.. _TauREx2: https://github.com/ucl-exoplanets/TauREx_public
 
 Prerequisites
 ~~~~~~~~~~~~~
@@ -103,3 +102,4 @@ additional dependancies:
 .. _PolyChord: https://polychord.io/
 .. _pypolychord: https://pypi.org/project/pypolychord/
 .. _dypolychord: https://github.com/ejhigson/dyPolyChord/
+.. _TauREx2: https://github.com/ucl-exoplanets/TauREx_public
