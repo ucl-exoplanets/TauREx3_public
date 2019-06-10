@@ -29,7 +29,8 @@ install_requires = ['numpy','cython',
         'numexpr',
         'numpy',
         'nestle',
-        'h5py']
+        'h5py',
+        'tabulate',]
 
 
 

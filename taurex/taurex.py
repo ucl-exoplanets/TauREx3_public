@@ -128,7 +128,7 @@ def main():
     
     wlgrid = np.log10(10000/bindown_wngrid)
     if args.plot:
-        if get_rank()==0  and nprocs()==1:
+        if get_rank()==0  and nprocs()<=1:
             import matplotlib.pyplot as plt
             if args.contrib:
                 for name,value in contrib:

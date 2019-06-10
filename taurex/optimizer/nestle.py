@@ -3,6 +3,7 @@ import nestle
 import numpy as np
 import os
 import time
+from taurex.util.util import quantile_corner,recursively_save_dict_contents_to_output
 class NestleOptimizer(Optimizer):
 
     def __init__(self,observed=None,model=None,num_live_points=1500,method='multi',tol=0.5):
@@ -11,7 +12,7 @@ class NestleOptimizer(Optimizer):
         self._method = method # use MutliNest algorithm
         
         self._tol = tol       # the stopping criterion
-    
+        self._nestle_output = None
 
     @property
     def tolerance(self):
@@ -57,7 +58,7 @@ class NestleOptimizer(Optimizer):
             
 
         ndim = len(self.fitting_parameters)
-        self.info('Beginning fit......')
+        self.warning('Beginning fit......')
         ndims = ndim        # two parameters
 
         t0 = time.time()
@@ -66,7 +67,89 @@ class NestleOptimizer(Optimizer):
         t1 = time.time()
 
         timenestle = (t1-t0)
-
-        self.info("Time taken to run 'Nestle' is {} seconds".format(timenestle))
         
-        self.info('Fit complete.....')
+        print(res.summary())
+
+        self.warning("Time taken to run 'Nestle' is %s seconds",timenestle)
+        
+        self.warning('Fit complete.....')
+
+        self._nestle_output = self.store_nestle_output(res)
+
+    def write_optimizer(self,output):
+        opt = super().write_optimizer(output)
+
+        # number of live points
+        opt.write_scalar('num_live_points',self._nlive)
+        # maximum no. of iterations (0=inf)
+        opt.write_string('method',self._method)
+        # search for multiple modes
+        opt.write_scalar('tol',self._tol)
+
+
+
+        return opt
+    
+    def write_fit(self,output):
+        fit = super().write_fit(output)
+
+        if self._nestle_output:
+            recursively_save_dict_contents_to_output(output,self._nestle_output)
+
+
+
+        return fit
+
+    def store_nestle_output(self,result):
+        """This turns the output fron nestle into a dictionary that can be output to HDF5
+
+        Parameters
+        ----------
+        result: :obj:`dict`
+            Result from a nestle sample call
+        
+        Returns
+        -------
+        dict
+            Formatted dictionary for output
+
+        """
+
+        nestle_output = {}
+        nestle_output['Stats'] = {}
+        nestle_output['Stats']['Log-Evidence'] = result.logz
+        nestle_output['Stats']['Log-Evidence-Error'] = result.logzerr
+        nestle_output['Stats']['Peakiness'] = result.h
+
+        fit_param = self.fit_names
+
+        samples = result.samples
+        weights = result.weights
+
+        mean,cov = nestle.mean_and_cov(samples,weights)
+        nestle_output['solution'] = {}
+        nestle_output['solution']['samples'] = samples
+        nestle_output['solution']['weights'] = weights
+        nestle_output['solution']['covariance'] = cov
+        nestle_output['solution']['fitparams'] = {}
+        for idx,param_name in enumerate(fit_param):
+            param = {}
+            param['mean'] = mean[idx]
+            param['sigma'] = cov[idx]
+            trace = samples[:,idx]
+            q_16, q_50, q_84 = quantile_corner(trace, [0.16, 0.5, 0.84],
+                        weights=np.asarray(weights))
+            param['value']= q_50
+            param['sigma_m']= q_50-q_16
+            param['sigma_p']= q_84-q_50          
+
+
+            nestle_output['solution']['fitparams'][param_name]= param
+        return nestle_output
+    
+
+
+
+
+
+
