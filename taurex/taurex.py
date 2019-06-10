@@ -72,7 +72,8 @@ def main():
     #If we bin down then get the appropriate grid
     if bindown_wngrid is None:
         bindown_wngrid = native_grid
-    
+    else:
+        native_grid = native_grid[(native_grid >= bindown_wngrid.min()*0.9) & (native_grid<= bindown_wngrid.max()*1.1) ]
     optimizer = None
 
     if args.retrieval is True:
