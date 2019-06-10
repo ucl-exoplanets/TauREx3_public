@@ -67,8 +67,6 @@ class NestleOptimizer(Optimizer):
 
         timenestle = (t1-t0)
 
-        print("Time taken to run 'Nestle' is {} seconds".format(timenestle))
+        self.info("Time taken to run 'Nestle' is {} seconds".format(timenestle))
         
         self.info('Fit complete.....')
-
-        print(res)
