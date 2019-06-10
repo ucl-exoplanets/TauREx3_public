@@ -122,9 +122,8 @@ class Optimizer(Logger):
         #wngrid = obs_bins
 
         final_model,_,_,_ = self._model.model(obs_bins)
-
 #        final_model =bindown(wngrid,model_out,obs_bins)
-        res = ne.evaluate('(data - final_model) / datastd')
+        res = (data.flatten() - final_model.flatten()) / datastd.flatten()
         #print(res)
         res = np.nansum(res*res)
         if res == 0:
@@ -137,8 +136,22 @@ class Optimizer(Logger):
 
 
     def fit(self):
-
+        from tabulate import tabulate
         self.compile_params()
+
+        fit_names = self.fit_names
+        fit_boundaries = self.fit_boundaries
+
+        fit_min = [x[0] for x in fit_boundaries]
+        fit_max = [x[1] for x in fit_boundaries]
+
+        fit_values = self.fit_values
+
+        print('Dimensionality of fit:',len(fit_names))
+        output = tabulate(zip(fit_names,fit_values,fit_min,fit_max), headers=['Param', 'Value','Bound-min', 'Bound-max'])
+        print(output)
+        
+
 
         self.compute_fit()
 
