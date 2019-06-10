@@ -122,9 +122,8 @@ class Optimizer(Logger):
         #wngrid = obs_bins
 
         final_model,_,_,_ = self._model.model(obs_bins)
-
 #        final_model =bindown(wngrid,model_out,obs_bins)
-        res = ne.evaluate('(data - final_model) / datastd')
+        res = (data.flatten() - final_model.flatten()) / datastd.flatten()
         #print(res)
         res = np.nansum(res*res)
         if res == 0:
