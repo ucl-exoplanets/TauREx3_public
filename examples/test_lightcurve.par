@@ -64,15 +64,18 @@ grid_type = observed
 
 
 
+#[Optimizer]
+#optimizer = multinest
+#num_live_points = 50
+#max_iterations = 100
+#resume=False
+#verbose_output=True
+#multi_nest_path = ../multinest
+
 [Optimizer]
-optimizer = multinest
+optimizer = nestle
 num_live_points = 50
-max_iterations = 100
-resume=False
-verbose_output=True
-multi_nest_path = ../multinest
-
-
+method = single
 
 [Fitting]
 T:fit = True
