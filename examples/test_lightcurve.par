@@ -50,6 +50,8 @@ model_type = transmission
     [[Rayleigh]]
 
 
+    [[SimpleClouds]]
+    clouds_pressure =1e3
 [Lightcurve]
 lc_pickle = C:/Users/Ahmed/Downloads/lc_input_correct_wfc3.pickle
 
@@ -79,9 +81,12 @@ method = single
 
 [Fitting]
 T:fit = True
-T:bounds = 1200.0,1600.0
+T:bounds = 1300.0,1900.0
 planet_radius:fit = True
+planet_radius:bounds = 1.2,1.4,
 H2O:fit = True
 H2O:bounds = 1e-2,1e-5
 H2O:mode = log
-
+clouds_pressure:fit = True
+clouds_pressure:bounds = 1e3,1e5,
+clouds_pressure:mode = log
