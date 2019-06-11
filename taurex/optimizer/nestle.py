@@ -115,6 +115,8 @@ class NestleOptimizer(Optimizer):
 
         """
 
+        from tabulate import tabulate
+
         nestle_output = {}
         nestle_output['Stats'] = {}
         nestle_output['Stats']['Log-Evidence'] = result.logz
@@ -132,6 +134,9 @@ class NestleOptimizer(Optimizer):
         nestle_output['solution']['weights'] = weights
         nestle_output['solution']['covariance'] = cov
         nestle_output['solution']['fitparams'] = {}
+
+        table_data = []
+
         for idx,param_name in enumerate(fit_param):
             param = {}
             param['mean'] = mean[idx]
@@ -142,9 +147,17 @@ class NestleOptimizer(Optimizer):
             param['value']= q_50
             param['sigma_m']= q_50-q_16
             param['sigma_p']= q_84-q_50          
-
+            table_data.append((param_name,q_50,q_50-q_16))
 
             nestle_output['solution']['fitparams'][param_name]= param
+
+        print()
+        print('------------------------------')
+        print('-------Retrieval output-------')
+        print('------------------------------')
+        print()
+        print(tabulate(table_data,headers=['Parameter','Value','Sigma']))
+        print()
         return nestle_output
     
 
