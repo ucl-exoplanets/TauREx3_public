@@ -26,7 +26,7 @@ class OpacityCache(Singleton):
     >>> opt['H2O']
     <taurex.opacity.pickleopacity.PickleOpacity at 0x107a60be0>
 
-    This returns a :class:`PickleOpacity` object for you to compute H2O cross sections from.
+    This returns a :class:`~taurex.opacity.pickleopacity.PickleOpacity` object for you to compute H2O cross sections from.
     When called for the first time, a directory search is performed and, if found, the appropriate cross-section is loaded. Subsequent calls will immediately
     return the already loaded object:
 
