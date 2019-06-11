@@ -146,10 +146,16 @@ class Optimizer(Logger):
         fit_max = [x[1] for x in fit_boundaries]
 
         fit_values = self.fit_values
-
+        print()
+        print('-------------------------------------')
+        print('------Retrieval Parameters-----------')
+        print('-------------------------------------')
+        print()
         print('Dimensionality of fit:',len(fit_names))
+        print()
         output = tabulate(zip(fit_names,fit_values,fit_min,fit_max), headers=['Param', 'Value','Bound-min', 'Bound-max'])
         print(output)
+        print()
         
 
 
