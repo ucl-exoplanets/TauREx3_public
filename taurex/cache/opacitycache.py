@@ -90,6 +90,26 @@ class OpacityCache(Singleton):
             values.set_interpolation_mode(self._default_interpolation)
 
     def __getitem__(self,key):
+        """
+        For a molecule return the relevant :class:`~taurex.opacity.opacity.Opacity` object.
+
+
+        Parameter
+        ---------
+        key : str
+            molecule name
+
+        Returns
+        -------
+        :class:`~taurex.opacity.pickleopacity.PickleOpacity`
+            Cross-section object desired
+        
+        Raise
+        -----
+        Exception
+            If molecule could not be loaded/found
+
+        """
         key = key.upper()
         if key in self.opacity_dict:
             return self.opacity_dict[key]
@@ -110,6 +130,7 @@ class OpacityCache(Singleton):
 
 
     def add_opacity(self,opacity,molecule_filter=None):
+    
         self.log.info('Reading opacity %s',opacity.moleculeName)
         if opacity.moleculeName in self.opacity_dict:
             self.log.warning('Opacity with name %s already in opactiy dictionary %s',opacity.moleculeName,self.opacity_dict.keys())
