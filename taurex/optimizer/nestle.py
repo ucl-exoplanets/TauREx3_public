@@ -128,7 +128,7 @@ class NestleOptimizer(Optimizer):
         return fit
 
     def store_nestle_output(self,result):
-        """This turns the output fron nestle into a dictionary that can be output to HDF5
+        """This turns the output fron nestle into a dictionary that can be output by Taurex
 
         Parameters
         ----------
