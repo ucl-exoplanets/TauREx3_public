@@ -2,7 +2,16 @@ from .singleton import Singleton
 from taurex.log import Logger
 import pathlib
 class CIACache(Singleton):
-    """Implements a lazy load of opacities"""
+    """
+    Implements a lazy load of collisionally induced absorpiton cross-sections
+    Supports pickle files and HITRAN cia files. Functionally behaves the same as
+    :class:`~taurex.cache.opacitycache.OpacityCache` except the keys are now cia pairs
+    e.g:
+
+    >>>CIACache()['H2-H2']
+    <taurex.cia.picklecia.PickleCIA at 0x107a60be0>
+
+    """
     def init(self):
         self.cia_dict={}
         self._cia_path = None
@@ -14,6 +23,28 @@ class CIACache(Singleton):
 
 
     def __getitem__(self,key):
+        """
+        For a CIA pair, load from the set path and return the
+        relevant :class:`~taurex.cia.cia.CIA` object
+
+        Parameter
+        ---------
+        key : str
+            cia pair name
+
+        Returns
+        -------
+        :class:`~taurex.cia.picklecia.PickleCIA` or :class:`~taurex.cia.hitrancia.HitranCIA`
+            Desire CIA object, format depends on what is found in the path set by :func:`set_cia_path`
+        
+        Raise
+        -----
+        Exception
+            If desired CIA pair could not be loaded
+
+        """
+
+
         key = key.upper()
         if key in self.cia_dict:
             return self.cia_dict[key]
