@@ -1,3 +1,7 @@
+"""
+Contains caching class for Molecular cross section files
+"""
+
 from .singleton import Singleton
 from taurex.log import Logger
 import pathlib
