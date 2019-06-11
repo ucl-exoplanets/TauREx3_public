@@ -1,8 +1,4 @@
-"""
-
-Contains the abstract class used by all collisionally induced absorption objects.
-
-"""
+"""Contains the abstract class used by all collisionally induced absorption objects."""
 
 from taurex.log import Logger
 import numpy as np
