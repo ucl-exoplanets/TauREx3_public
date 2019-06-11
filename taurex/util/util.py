@@ -1,3 +1,5 @@
+"""General utility functions"""
+
 from taurex.constants import AMU
 import math
 _mol_weight = {
@@ -43,6 +45,8 @@ _mol_weight = {
         66.9409,
 
 }
+"""Dictionary of molecular weights"""
+
 
 _mol_latex={
 
@@ -75,10 +79,23 @@ _mol_latex={
     'SO2':
         'SO$_2$',
 }
-
+"""Latex versions of molecule names"""
 
 def get_molecular_weight(gasname):
-
+    """
+    For a given molecule return the molecular weight in atomic units
+    
+    Parameters
+    ----------
+    gasname : str
+        Name of molecule
+    
+    Returns
+    -------
+    float : 
+        molecular weight in amu or 0 if not found
+    
+    """
     gasname = gasname.upper()
 
     try:
@@ -91,6 +108,21 @@ def get_molecular_weight(gasname):
 
 
 def molecule_texlabel(gasname):
+    """
+    For a given molecule return its latex form
+    
+    Parameters
+    ----------
+    gasname : str
+        Name of molecule
+    
+    Returns
+    -------
+    str : 
+        Latex form of the molecule or just the passed name if not found
+
+    
+    """
     gasname = gasname.upper()
 
     try:
@@ -115,6 +147,11 @@ def bindown(original_bin,original_data,new_bin):
     new_bin: :obj:`numpy.array`
         The new binnings we want to use (must have less points than the original)
     
+    Returns
+    -------
+    :obj:`array`
+        Binned mean of ``original_data``
+
     
     """
     import numpy as np
@@ -126,6 +163,23 @@ def bindown(original_bin,original_data,new_bin):
 
 
 def movingaverage(a, n=3) :
+    """
+    Computes moving average
+
+    Parameters
+    ----------
+    a : :obj:`array`
+        Array to compute average
+    
+    n : int
+        Averaging window
+
+    Returns
+    -------
+    :obj:`array`
+        Resultant array
+
+    """
     import numpy as np
     ret = np.cumsum(a)
     ret[n:] = ret[n:] - ret[:-n]
@@ -139,10 +193,27 @@ def quantile_corner(x, q, weights=None):
     __copyright__ = "Copyright 2013-2015 Daniel Foreman-Mackey"
 
     Like numpy.percentile, but:
-
+    
     * Values of q are quantiles [0., 1.] rather than percentiles [0., 100.]
     * scalar q not supported (q must be iterable)
     * optional weights on x
+
+    Parameters
+    ----------
+
+    x : :obj:`array`
+        Input array or object that can be converted to an array.
+    
+    q : :obj:`array` or float
+        Percentile or sequence of percentiles to compute, which must be between 0 and 1 inclusive.
+    
+    weights : :obj:`array` or float , optional
+        Weights on x
+
+    Returns
+    -------
+    percentile : scalar or ndarray
+        
 
     """
     import numpy as np
@@ -156,12 +227,22 @@ def quantile_corner(x, q, weights=None):
         return np.interp(q, cdf, xsorted).tolist()
 
 def loadtxt2d(intext):
-	try:
-		return np.loadtxt(intext, ndmin=2)
-	except:
-		return np.loadtxt(intext)
+    """
+    
+    Wraps loadtext and either returns a 2d array
+    or 1d array
+
+    """
+
+    try:
+        return np.loadtxt(intext, ndmin=2)
+    except:
+        return np.loadtxt(intext)
 
 def read_error_line(l):
+    """ 
+    Reads line?
+    """
     print('_read_error_line -> line>', l)
     name, values = l.split('   ', 1)
     print('_read_error_line -> name>', name)
@@ -172,11 +253,17 @@ def read_error_line(l):
     return name, float(v), float(error)
 
 def read_error_into_dict(l, d):
+    """
+    Reads the error into dict?
+    """
     name, v, error = read_error_line(l)
     d[name.lower()] = v
     d['%s error' % name.lower()] = error
 
 def read_table(txt, d=None, title=None):
+    """
+    Yeah whatever i give up
+    """
     from io import StringIO
     import numpy as np
     if title is None:
@@ -194,7 +281,16 @@ def read_table(txt, d=None, title=None):
 
 def recursively_save_dict_contents_to_output(output, dic):
     """
-    ....
+    Will recursive write a dictionary into output.
+
+    Parameters
+    ----------
+    output : :class:`~taurex.output.output.Output` or :class:`~taurex.output.output.OutputGroup`
+        Group (or root) in output file to write to
+    
+    dic : :obj:`dict`
+        Dictionary we want to write
+
     """
     import numpy as np
 
@@ -220,6 +316,21 @@ def recursively_save_dict_contents_to_output(output, dic):
 
 
 def weighted_avg_and_std(values, weights, axis=None):
+    """
+    Computes weight average and standard deviation
+
+    Parameters
+    ----------
+    values : :obj:`array`
+        Input array
+    
+    weights : :obj:`array`
+        Must be same shape as ``values``
+    
+    axis : int , optional
+        axis to perform weighting
+    
+    """
     import numpy as np
     average = np.average(values, weights=weights)
     variance = np.average((values-average)**2, weights=weights, axis=axis)  # Fast and numerically precise
