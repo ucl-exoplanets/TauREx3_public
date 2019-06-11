@@ -2,7 +2,7 @@
 
 class Singleton(object):
     """
-    A singleton for your usage. When inheriting do not overide __init__ instead
+    A singleton for your usage. When inheriting do not implement __init__ instead
     override :func:`init`
     
     
