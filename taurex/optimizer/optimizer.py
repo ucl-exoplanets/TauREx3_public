@@ -14,10 +14,10 @@ class Optimizer(Logger):
     name:  str
         Name to be used in logging
 
-    observed : :class:`BaseSpectrum`, optional
+    observed : :class:`~taurex.data.spectrum.spectrum.BaseSpectrum`, optional
         See :func:`set_observed`
     
-    model : :class:`ForwardModel`, optional
+    model : :class:`~taurex.model.model.ForwardModel`, optional
         See :func:`set_model`
 
 
@@ -36,7 +36,7 @@ class Optimizer(Logger):
 
         Parameters
         ----------
-        model : :class:`ForwardModel`
+        model : :class:`~taurex.model.model.ForwardModel`
             The forward model we wish to optimize
         
         """
@@ -48,7 +48,7 @@ class Optimizer(Logger):
 
         Parameters
         ----------
-        observed : :class:`BaseSpectrum`
+        observed : :class:`~taurex.data.spectrum.spectrum.BaseSpectrum`
             Observed spectrum we will optimize to
         
         """
@@ -60,7 +60,7 @@ class Optimizer(Logger):
 
 
         Goes through and compiles all parameters within the model that
-        we will be retrieving. Called before :obj:`compute_fit`
+        we will be retrieving. Called before :func:`compute_fit`
 
 
         """
@@ -162,7 +162,7 @@ class Optimizer(Logger):
 
         Returns
         -------
-        list:
+        :obj:`list`:
             List of boundaries for each fitting parameter. It takes the form of
             a python :obj:`tuple` with the form ( ``bound_min`` , ``bound_max`` )
         
@@ -370,12 +370,12 @@ class Optimizer(Logger):
 
         Parameters
         ----------
-        output:  :class:`Output` or :class:`OutputGroup`
+        output:  :class:`~taurex.output.output.Output` or :class:`~taurex.output.output.OutputGroup`
             Group (or root) in output file to write to
 
         Returns
         -------
-        :class:`Output` or :class:`OutputGroup`
+        :class:`~taurex.output.output.Output` or :class:`~taurex.output.output.OutputGroup`
             Group (or root) in output file written to
 
         """
@@ -389,12 +389,12 @@ class Optimizer(Logger):
 
         Parameters
         ----------
-        output : :class:`Output` or :class:`OutputGroup`
+        output : :class:`~taurex.output.output.Output` or :class:`~taurex.output.output.OutputGroup`
             Group (or root) in output file to write to
 
         Returns
         -------
-        :class:`Output` or :class:`OutputGroup`
+        :class:`~taurex.output.output.Output` or :class:`~taurex.output.output.OutputGroup`
             Group (or root) in output file written to
 
         """
@@ -415,7 +415,7 @@ class Optimizer(Logger):
 
         Parameters
         ----------
-        output : :class:`Output` or :class:`OutputGroup`
+        output : :class:`~taurex.output.output.Output` or :class:`~taurex.output.output.OutputGroup`
             Group (or root) in output file to write to
 
 
