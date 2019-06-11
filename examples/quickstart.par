@@ -49,13 +49,9 @@ grid_type = observed
 
 
 [Optimizer]
-optimizer = multinest
-num_live_points = 100
-max_iterations = 1000
-resume=False
-verbose_output=True
-constant_efficiency_mode = True
-multi_nest_path = ./multinest
+optimizer = nestle
+num_live_points=100
+method = single
 
 
 
@@ -66,5 +62,3 @@ planet_radius:fit = False
 N2:fit = False
 H2_He:fit = False
 H2O:fit = False
-H2O:bounds = 1e-2,1e-5
-H2O:mode = log
