@@ -5,6 +5,29 @@ import os
 import time
 from taurex.util.util import quantile_corner,recursively_save_dict_contents_to_output
 class NestleOptimizer(Optimizer):
+    """ An optimizer that uses the `nestle <http://kylebarbary.com/nestle/>`_ library
+    to perform optimization. 
+
+    Parameters
+    ----------
+    observed : :class:`~taurex.data.spectrum.spectrum.BaseSpectrum`, optional
+        Observed spectrum to optimize to
+    
+    model : :class:`~taurex.model.model.ForwardModel`, optional
+        Forward model to optimize
+    
+    num_live_points : int, optional
+        Number of live points to use in sampling
+    
+    method : ``classic``, ``single`` or ``multi``
+        Nested sampling method to use. ``classic`` uses MCMC exploration,
+        ``single`` uses a single ellipsoid and ``multi`` uses multiple ellipsoids (similar to Multinest) 
+
+    tol : float
+        Evidence tolerance value to stop the fit. This is based on an estimate of the remaining prior volumes
+        contribution to the evidence.
+
+    """
 
     def __init__(self,observed=None,model=None,num_live_points=1500,method='multi',tol=0.5):
         super().__init__('Nestle',observed,model)
@@ -34,7 +57,11 @@ class NestleOptimizer(Optimizer):
 
 
     def compute_fit(self):
+        """
+        
+        Computes the fit using nestle
 
+        """
         data = self._observed.spectrum
         datastd = self._observed.errorBar
         sqrtpi = np.sqrt(2*np.pi)
