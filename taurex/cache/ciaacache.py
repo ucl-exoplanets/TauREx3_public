@@ -8,8 +8,13 @@ class CIACache(Singleton):
     :class:`~taurex.cache.opacitycache.OpacityCache` except the keys are now cia pairs
     e.g:
 
-    >>>CIACache()['H2-H2']
+    >>> CIACache()['H2-H2']
     <taurex.cia.picklecia.PickleCIA at 0x107a60be0>
+
+    Pickle ``.db`` and HITRAN ``.cia`` files are supported and automatically
+    loaded.
+
+
 
     """
     def init(self):
@@ -18,6 +23,16 @@ class CIACache(Singleton):
         self.log = Logger('CIACache')
 
     def set_cia_path(self,cia_path):
+        """
+
+        Sets the path to search for CIA files
+        
+        Parameters
+        ----------
+        cia_path : str or :obj:`list` of str
+            Either a single path or a list of paths that contain CIA files
+
+        """
         self._cia_path  = cia_path
 
 
@@ -63,6 +78,23 @@ class CIACache(Singleton):
                 raise Exception('cia could notn be loaded')
 
     def add_cia(self,cia,pair_filter=None):
+        """
+
+        Adds a :class:`~taurex.cia.cia.CIA` object to the cache to then be
+        used by Taurex 3
+
+        Parameters
+        ----------
+        cia : :class:`~taurex.cia.cia.CIA`
+            CIA object to add to the cache
+        
+        pair_filter : :obj:`list` of str , optional
+            If provided, the cia object will only be included
+            if its pairname is in the list. Mostly used by the 
+            :func:`__getitem__` for filtering
+
+        """
+
         self.log.info('Loading cia %s into model',cia.pairName)
         if cia.pairName in self.cia_dict:
             self.log.error('cia with name %s already in opactiy dictionary %s',cia.pairName,self.cia_dict.keys())
@@ -74,6 +106,23 @@ class CIACache(Singleton):
         self.cia_dict[cia.pairName] = cia   
     
     def load_cia_from_path(self,path,pair_filter=None):
+        """
+        Searches path for CIA files, creates and loads them into the cache
+        ``.db`` will be loaded as :class:`~taurex.cia.picklecia.PickleCIA` and 
+        ``.cia`` files will be loaded as :class:`~taurex.cia.hitrancia.HitranCIA`
+        
+
+        Parameters
+        ----------
+        path : str
+            Path to search for CIA files
+        
+        pair_filter : :obj:`list` of str , optional
+            If provided, the cia will only be loaded
+            if its pairname is in the list. Mostly used by the 
+            :func:`__getitem__` for filtering
+
+        """ 
         from glob import glob
         from pathlib import Path
         import os
@@ -112,6 +161,30 @@ class CIACache(Singleton):
             
 
     def load_cia(self,cia_xsec=None,cia_path=None,pair_filter=None):
+        """
+        Main function to use when loading CIA files. Handles both 
+        cross sections and paths. Handles lists of either so lists of 
+        :class:`~taurex.cia.cia.CIA` objects or lists of paths can be used
+        to load multiple files/objects
+
+        
+
+        Parameters
+        ----------
+        cia_xsec : :class:`~taurex.cia.cia.CIA` or :obj:`list` of :class:`~taurex.cia.cia.CIA` , optional
+            Object(s) to include in cache
+        
+        cia_path : str or :obj:`list` of str, optional
+            search path(s) to look for cias
+        
+        pair_filter : :obj:`list` of str , optional
+            If provided, the cia will only be loaded
+            if its pair name is in this list. Mostly used by the 
+            :func:`__getitem__` for filtering
+
+        """ 
+
+
         from taurex.cia import CIA
         if cia_path is None:
             cia_path = self._cia_path
@@ -128,7 +201,7 @@ class CIACache(Singleton):
                 self.log.error('Unknown type %s passed into cia, should be a list, single \
                      cia or None if reading a path',type(xsec))
                 raise Exception('Unknown type passed into cia')
-        elif cia_path is not None:
+        if cia_path is not None:
 
             if isinstance(cia_path,str):
                 self.load_cia_from_path(cia_path,pair_filter=pair_filter)

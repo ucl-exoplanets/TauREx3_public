@@ -19,6 +19,10 @@ class OpacityCache(Singleton):
 
     >>> opt.set_opacity_path('path/to/crossections')
 
+    Multiple paths can be set as well
+
+    >>> opt.set_opacity_path(['/path/to/crosssections','/another/path/to/crosssections'])
+
     Currently only :obj:`.pickle` files are supported.
 
     To get the cross-section object for a particular molecule use the square bracket operator:
@@ -34,6 +38,16 @@ class OpacityCache(Singleton):
     >>> h2o_b = opt['H2O']
     >>> h2o_a == h2o_b
     True
+    
+    Lastly if you've got a hot new opacity format that doesn't suck balls you can try out
+    this shit by manually adding it into the cache:
+    
+    >>> new_h2o = MyNewOpacityFormat()
+    >>> opt.add_opacity(new_h2o)
+    >>> opt['H2O]
+    <MyNewOpacityFormat at 0x107a60be0>
+
+    Now Taurex will use it instead in all calculations!
 
     """
     def init(self):
@@ -44,7 +58,7 @@ class OpacityCache(Singleton):
 
     def set_opacity_path(self,opacity_path):
         """
-        Set the path that will be searched for cross-sections. Cross-section in this path
+        Set the path(s) that will be searched for cross-sections. Cross-section in this path
         must be *.pickle* files and must have names of the form:
 
         - ``Molecule Name``.Whatever.pickle
@@ -56,6 +70,14 @@ class OpacityCache(Singleton):
             - ``H2O.R1000.xxx420summergirllovesgreenday420xxx.pickle``
         
         Are all valid
+
+        Parameters
+        ----------
+
+        opacity_path : str or :obj:`list` of str, optional
+            search path(s) to look for molecular opacities
+
+
 
         """
         
@@ -81,7 +103,6 @@ class OpacityCache(Singleton):
         interpolation_mode: str
             Either ``linear`` for bilinear interpolation or ``exp`` for exp-linear interpolation
         
-
 
         """
 
@@ -130,7 +151,22 @@ class OpacityCache(Singleton):
 
 
     def add_opacity(self,opacity,molecule_filter=None):
-    
+        """
+
+        Adds a :class:`~taurex.opacity.opacity.Opacity` object to the cache to then be
+        used by Taurex 3
+
+        Parameters
+        ----------
+        opacity : :class:`~taurex.opacity.opacity.Opacity`
+            Opacity object to add to the cache
+        
+        molecule_filter : :obj:`list` of str , optional
+            If provided, the opacity object will only be included
+            if its molecule is in the list. Mostly used by the 
+            :func:`__getitem__` for filtering
+
+        """
         self.log.info('Reading opacity %s',opacity.moleculeName)
         if opacity.moleculeName in self.opacity_dict:
             self.log.warning('Opacity with name %s already in opactiy dictionary %s',opacity.moleculeName,self.opacity_dict.keys())
@@ -143,6 +179,22 @@ class OpacityCache(Singleton):
             self.log.info('Loading opacity %s into model',opacity.moleculeName)
             self.opacity_dict[opacity.moleculeName] = opacity    
     def load_opacity_from_path(self,path,molecule_filter=None):
+        """
+        Searches path for molecular cross-section files, creates and loads them into the cache
+        ``.pickle`` will be loaded as :class:`~taurex.opacity.pickleopacity.PickleOpacity`
+        
+
+        Parameters
+        ----------
+        path : str
+            Path to search for molecular cross-section files
+        
+        molecule_filter : :obj:`list` of str , optional
+            If provided, the opacity will only be loaded
+            if its molecule is in this list. Mostly used by the 
+            :func:`__getitem__` for filtering
+
+        """ 
         from glob import glob
         import os
         from taurex.opacity import PickleOpacity
@@ -161,7 +213,26 @@ class OpacityCache(Singleton):
 
     def load_opacity(self,opacities=None,opacity_path=None,molecule_filter=None):
         """
-        """
+        Main function to use when loading molecular opacities. Handles both 
+        cross sections and paths. Handles lists of either so lists of 
+        :class:`~taurex.opacity.opacity.Opacity` objects or lists of paths can be used
+        to load multiple files/objects
+
+
+        Parameters
+        ----------
+        opacities : :class:`~taurex.opacity.opacity.Opacity` or :obj:`list` of :class:`~taurex.opacity.opacity.Opacity` , optional
+            Object(s) to include in cache
+        
+        opacity_path : str or :obj:`list` of str, optional
+            search path(s) to look for molecular opacities
+        
+        molecule_filter : :obj:`list` of str , optional
+            If provided, the opacity will only be loaded
+            if its molecule is in this list. Mostly used by the 
+            :func:`__getitem__` for filtering
+
+        """ 
         from taurex.opacity import Opacity
         
         if opacity_path is None:
