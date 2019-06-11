@@ -325,7 +325,7 @@ class Optimizer(Logger):
 
         Raises
         ------
-        NotImplementedError :
+        NotImplementedError
             Raised when a derived class does override this function
 
         """
@@ -335,7 +335,7 @@ class Optimizer(Logger):
     def fit(self):
         """
 
-        Performs fit. 
+        Performs fit.
 
         """
         from tabulate import tabulate
