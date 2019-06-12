@@ -84,7 +84,6 @@ def main():
         optimizer = pp.generate_optimizer()
         optimizer.set_model(model)
         optimizer.set_observed(observed)
-        optimizer.set_wavenumber_grid(bindown_wngrid)
 
         fitting_parameters = pp.generate_fitting_parameters()
 
