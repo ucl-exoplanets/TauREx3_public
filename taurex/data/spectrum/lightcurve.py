@@ -47,7 +47,7 @@ class ObservedLightCurve(BaseSpectrum):
                 raw_data.append(lc_data['data'][i][:len(lc_data['data'][i])//2])
                 data_std.append(lc_data['data'][i][len(lc_data['data'][i])//2:])
         
-        return np.concatenate(raw_data).flatten(),np.concatenate(data_std).flatten()
+        return np.concatenate(raw_data),np.concatenate(data_std)
 
 
     @property
