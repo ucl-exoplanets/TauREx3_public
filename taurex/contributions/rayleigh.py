@@ -38,7 +38,7 @@ class RayleighContribution(Contribution):
 
         sigma_rayleigh_dict = {}
 
-        molecules = model.chemistry.activeGases + model.chemistry.inActiveGases
+        molecules = model.chemistry.activeGases + model.chemistry.inactiveGases
         for gasname in molecules:
 
             gasname = gasname.upper()

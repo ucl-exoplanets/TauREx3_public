@@ -40,7 +40,7 @@ class TaurexChemistry(Chemistry):
 
 
     @property
-    def inActiveGases(self):
+    def inactiveGases(self):
         return  ['H2', 'HE', 'N2']
 
 
@@ -58,7 +58,7 @@ class TaurexChemistry(Chemistry):
     def initialize_chemistry(self,nlayers,temperature_profile,pressure_profile,altitude_profile):
         self.info('Initializing chemistry model')
         self.active_mixratio_profile = np.zeros(shape=(len(self._gases),nlayers))
-        self.inactive_mixratio_profile = np.zeros((len(self.inActiveGases), nlayers))
+        self.inactive_mixratio_profile = np.zeros((len(self.inactiveGases), nlayers))
 
         for idx,gas in enumerate(self._gases):
             gas.initialize_profile(nlayers,temperature_profile,pressure_profile,altitude_profile)
@@ -83,7 +83,7 @@ class TaurexChemistry(Chemistry):
         return self.active_mixratio_profile
 
     @property
-    def inActiveGasMixProfile(self):
+    def inactiveGasMixProfile(self):
         return self.inactive_mixratio_profile
 
 

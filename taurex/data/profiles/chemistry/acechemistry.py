@@ -29,7 +29,7 @@ class ACEChemistry(Chemistry):
         return self.active_gases
     
     @property
-    def inActiveGases(self):
+    def inactiveGases(self):
         return self.inactive_gases
     
     @property
@@ -37,7 +37,7 @@ class ACEChemistry(Chemistry):
         return self.active_mixratio_profile
 
     @property
-    def inActiveGasMixProfile(self):
+    def inactiveGasMixProfile(self):
         return self.inactive_mixratio_profile
 
 
@@ -106,7 +106,7 @@ class ACEChemistry(Chemistry):
     def initialize_chemistry(self,nlayers,temperature_profile,pressure_profile,altitude_profile):
         self.info('Initializing chemistry model')
         self.active_mixratio_profile = np.zeros(shape=(len(self.activeGases),nlayers))
-        self.inactive_mixratio_profile = np.zeros((len(self.inActiveGases), nlayers))
+        self.inactive_mixratio_profile = np.zeros((len(self.inactiveGases), nlayers))
         self.compute_active_gas_profile(altitude_profile,pressure_profile,temperature_profile)
 
         super().initialize_chemistry(nlayers,temperature_profile,pressure_profile,altitude_profile)   
