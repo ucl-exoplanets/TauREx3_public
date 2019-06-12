@@ -11,9 +11,9 @@ class Planet(Fittable,Logger,Writeable):
     -----------
 
     mass: float
-        mass in kg of the planet
-    radius
-        radius of the planet in meters
+        mass in terms of Jupiter mass of the planet
+    radius : float
+        radius in terms of Jupiter radii of the planet
 
     """
     
@@ -28,6 +28,9 @@ class Planet(Fittable,Logger,Writeable):
     
     @fitparam(param_name='planet_mass',param_latex='$M_p$',default_fit=False,default_bounds=[0.5,1.5])
     def mass(self):
+        """
+        Planet mass in Jupiter mass
+        """
         return self._mass/MJUP
     
     @mass.setter
@@ -37,6 +40,9 @@ class Planet(Fittable,Logger,Writeable):
 
     @fitparam(param_name='planet_radius',param_latex='$R_p$',default_fit=True,default_bounds=[0.9,1.1])
     def radius(self):
+        """
+        Planet radius in Jupiter radii
+        """
         return self._radius/RJUP
     
     @radius.setter
@@ -45,10 +51,16 @@ class Planet(Fittable,Logger,Writeable):
     
     @property
     def fullRadius(self):
+        """
+        Planet radius in metres
+        """
         return self._radius
 
     @property
     def fullMass(self):
+        """
+        Planet mass in kg
+        """
         return self._mass
 
     # @fitparam(param_name='planet_ld_coeff',param_latex=None,default_fit=False)
@@ -70,10 +82,27 @@ class Planet(Fittable,Logger,Writeable):
 
     @property
     def gravity(self):
+        """
+        Surface gravity in ms-2
+        """
         return (G * self.fullMass) / (self.fullRadius**2) 
 
     
     def gravity_at_height(self,height):
+        """
+        Gravity at height (m) from planet in ms-2
+
+        Parameters
+        ----------
+        height : float
+            Height in metres from planet surface
+        
+        Returns
+        -------
+        g : float
+
+        """
+
         return (G * self.fullMass) / ((self.fullRadius+height)**2) 
 
     def write(self,output):
