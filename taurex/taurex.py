@@ -130,18 +130,32 @@ def main():
     if args.plot:
         if get_rank()==0  and nprocs()<=1:
             import matplotlib.pyplot as plt
-            if args.contrib:
+            is_lightcurve = False
+            try:
+                from taurex.model.lightcurve.lightcurve import LightCurveModel
+                is_lightcurve = isinstance(model,LightCurveModel)
+            except ImportError:
+                pass
+
+            if args.contrib and not is_lightcurve:
                 for name,value in contrib:
                     new_value = bindown(native_grid,value,bindown_wngrid)
                     plt.plot(wlgrid,new_value,label=name)
 
-            #If we have an observation then plot it
-            if observed is not None:
-                plt.errorbar(np.log10(observed.wavelengthGrid),observed.spectrum,observed.errorBar,label='observed')
 
             
+            #If we have an observation then plot it
+            if observed is not None:
+                if is_lightcurve:
+                    plt.plot(observed.spectrum.flatten(),label='observed')
+                else:
+                    plt.errorbar(np.log10(observed.wavelengthGrid),observed.spectrum,observed.errorBar,label='observed')
+
+            if is_lightcurve:
+                plt.plot(new_absp,label='forward model')
+            else:
             #Plot the absorption
-            plt.plot(wlgrid,new_absp,label='forward model')
+                plt.plot(wlgrid,new_absp,label='forward model')
 
 
 
