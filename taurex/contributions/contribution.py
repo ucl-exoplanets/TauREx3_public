@@ -45,7 +45,7 @@ def contribute_tau(startK,endK,density_offset,sigma,density,path,nlayers,ngrid,l
     
     Returns
     -------
-    tau - array_like 
+    tau : array_like 
         optical depth (well almost you still need to do ``exp(-tau)`` yourself )
 
     """
