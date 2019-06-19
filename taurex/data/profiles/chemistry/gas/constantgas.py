@@ -3,12 +3,18 @@ from taurex.util import molecule_texlabel
 class ConstantGas(Gas):
     """
 
-    Constant gas profile
+    Constant gas profile. Mixing profile is the same at each layer of the atmosphere
+
+
 
 
     Parameters
     -----------
+    molecule_name : str
+        Name of molecule
 
+    mix_ratio : float
+        Mixing ratio of the molecule
 
     """
 
@@ -20,6 +26,14 @@ class ConstantGas(Gas):
 
     @property
     def mixProfile(self):
+        """
+
+        Returns
+        -------
+        mix_ratio : float
+            Mix ratio for every layer
+
+        """
         return self._mix_ratio
 
     def add_active_gas_param(self):

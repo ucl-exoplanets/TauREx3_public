@@ -5,12 +5,27 @@ import numpy as np
 class TwoLayerGas(TwoPointGas):
     """
 
-    Constant gas profile
+    Two layer gas profile.
+
+    A gas profile with two different mixing layers at the surface of the planet and
+    top of the atmosphere seperated at a defined
+    pressure point and smoothened.
+
 
 
     Parameters
     -----------
+    molecule_name : str
+        Name of molecule
 
+    mix_ratio_surface : float
+        Mixing ratio of the molecule on the planet surface
+
+    mix_ratio_top : float
+        Mixing ratio of the molecule at the top of the atmosphere
+
+    mix_ratio_smoothing : float , optional
+        smoothing window 
 
     """
 
