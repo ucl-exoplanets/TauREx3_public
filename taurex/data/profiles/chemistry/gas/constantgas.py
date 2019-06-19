@@ -34,9 +34,15 @@ class ConstantGas(Gas):
             Mix ratio for every layer
 
         """
+
         return self._mix_ratio
 
     def add_active_gas_param(self):
+        """
+        Adds the mixing ratio as a fitting parameter
+        as the name of the molecule
+        """
+        
         mol_name = self.molecule
         param_name = self.molecule
         param_tex = molecule_texlabel(mol_name)
