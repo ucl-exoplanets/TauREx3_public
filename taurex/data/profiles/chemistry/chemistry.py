@@ -7,8 +7,12 @@ import math
 
 class Chemistry(Fittable,Logger,Writeable):
     """
-    Skeleton for defining new chemistry profiles. Must define
+    Skeleton for defining chemistry.
 
+    Parameters
+    ----------
+    name : str
+        Name used in logging
 
     """
 
@@ -23,16 +27,43 @@ class Chemistry(Fittable,Logger,Writeable):
 
     @property
     def activeGases(self):
+        """
+        **Requires implementation**
+
+        Should return a list of molecule names
+
+        Returns
+        -------
+        active : :obj:`list`
+            List of active gases
+
+        """
         raise NotImplementedError
     
 
     @property
     def inactiveGases(self):
+        """
+        **Requires implementation**
+
+        Should return a list of molecule names
+
+        Returns
+        -------
+        inactive : :obj:`list`
+            List of inactive gases
+        
+        """
         raise NotImplementedError
     
 
     def initialize_chemistry(self,nlayers,temperature_profile,pressure_profile,altitude_profile):
-        
+        """
+        **Requires implementation**
+
+        Derived classes should implement this to compute the active and inactive gas profiles
+
+        """
 
 
         self.compute_mu_profile(nlayers)
@@ -40,19 +71,51 @@ class Chemistry(Fittable,Logger,Writeable):
 
     @property
     def activeGasMixProfile(self):
+        """
+        **Requires implementation**
+
+        Should return profiles of shape ``(nactivegases,nlayers)``. Active refers
+        to gases that are actively absorbing in the atmosphere. Another way to put it
+        these are gases where molecular cross-sections are used
+
+        """
+
         raise NotImplementedError
 
     @property
     def inactiveGasMixProfile(self):
+        """
+        **Requires implementation**
+
+        Should return profiles of shape ``(ninactivegases,nlayers)``. 
+        These general refer to gases: ``H2``, ``He`` and ``N2``
+
+        
+        """
         raise NotImplementedError
 
 
     @property
-    def muProfile(self):
+    def muProfile(self):   
+
         return self.mu_profile
 
 
     def get_gas_mix_profile(self,gas_name):
+        """
+        Returns the mix profile of a particular gas
+
+        Parameters
+        ----------
+        gas_name : str
+            Name of gas
+
+        Returns
+        -------
+        mixprofile : :obj:`array`
+            Mix profile of gas with shape ``(nlayer)``
+        
+        """
         if gas_name in self.activeGases:
             idx = self.activeGases.index(gas_name)
             return self.activeGasMixProfile[idx,:]
