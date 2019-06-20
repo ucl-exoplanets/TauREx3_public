@@ -24,6 +24,7 @@ temp = Isothermal(iso_temp=1550)
 
 tm = TransmissionModel(nlayers=30,chemistry= chemistry,temperature_profile=temp
                 ,atm_min_pressure=1e-5,atm_max_pressure=1e6)
+tm.add_contribution(AbsorptionContribution())
 tm.add_contribution(CIAContribution(cia_pairs=['H2-He','H2-H2']))
 tm.add_contribution(RayleighContribution())
 tm.build()
@@ -44,7 +45,6 @@ print(tm.fittingParameters.keys())
 
 opt.set_observed(obs)
 
-opt.set_wavenumber_grid(obs.wavenumberGrid)
 
 opt.compile_params()
 opt.enable_fit('T')
