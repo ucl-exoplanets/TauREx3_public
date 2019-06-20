@@ -172,7 +172,7 @@ we should start by creating our ``[Fitting]`` section and disabling the ``planet
 the syntax is pretty simple, its essentially ``parameter_name:option`` with ``option`` being either 
 ``fit``, ``bounds`` and ``mode``. ``fit`` is simply tells the optimizer whether to fit the parameter, ``bounds``
 describes the parameter space to optimize in and ``mode`` instructs the optimizer to fit in either ``linear``
-or ``logorithmic`` space.
+or ``log`` space.
 The parameter we are interested in is isothermal temperature which is represented as ``T``, and we will fit
 it within *1200 K* and *1400 K*::
 
@@ -180,6 +180,9 @@ it within *1200 K* and *1400 K*::
     planet_radius:fit = False
     T:fit = True
     T:bounds = 1200.0,1400.0
+
+We don't need to include ``mode`` as by default ``T`` fits in linear space. Some parameters such as
+abundances fit in log space by default.
 
 Running taurex like before will just plot our forward model. To run the retrieval we simply add
 the ``--retrieval`` keyword like so::
