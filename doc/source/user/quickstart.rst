@@ -41,10 +41,10 @@ And we should get:
    Our first forward model
 
 Lets try plotting it against our observation. Under the ``[Spectrum]`` header
-we can add in the ``observed`` keyword and point it to our ``test_data.dat`` file like so::
+we can add in the ``observed_spectrum`` keyword and point it to our ``test_data.dat`` file like so::
 
     [Spectrum]
-    observed = /path/to/test_data.dat
+    observed_spectrum = /path/to/test_data.dat
     grid_type = observed
 
 The ``grid_type`` dictates which grid the forward model is binned on. The ``native`` keyword uses the

@@ -1,6 +1,6 @@
 [Global]
-xsec_path = /Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/xsec/TauRex_sampled_xsecs_R10000_0.3-15
-cia_path = /Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/cia/hitran
+xsec_path = /put/path/here
+cia_path = /put/another/path/here
 
 
 
@@ -9,8 +9,8 @@ chemistry_type = taurex
 n2_mix_ratio=3.00739e-9
 he_h2_ratio=4.8962e-2
 
-    [[H2O]]
-    gas_type=constant
+    [[CH4]]
+    gas_type = constant
     mix_ratio=1.1185e-4
 
 
@@ -38,27 +38,11 @@ model_type = transmission
 
     [[Absorption]]
 
-    [[CIA]]
-    cia_pairs = H2-He,H2-H2
-
-    [[Rayleigh]]
-
 [Spectrum]
-observed_spectrum = /Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_transmission/SPECTRUM_fit.dat
-grid_type = observed
+grid_type = native
 
 
 [Optimizer]
 optimizer = nestle
 num_live_points=100
 method = single
-
-
-
-[Fitting]
-T:fit = True
-T:bounds = 1100.0,1400.0
-planet_radius:fit = False
-N2:fit = False
-H2_He:fit = False
-H2O:fit = False
