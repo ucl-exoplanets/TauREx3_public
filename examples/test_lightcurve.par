@@ -35,7 +35,7 @@ nlayers = 100
 [Planet]
 planet_type = Simple
 planet_mass = 1.0 
-planet_radius = 1.38
+planet_radius = 1.20
 
 [Star]
 star_type = blackbody
@@ -85,13 +85,5 @@ num_live_points = 50
 method = single
 
 [Fitting]
-T:fit = True
-T:bounds = 1300.0,1900.0
 planet_radius:fit = True
 planet_radius:bounds = 1.2,1.4,
-H2O:fit = True
-H2O:bounds = 1e-2,1e-5
-H2O:mode = log
-clouds_pressure:fit = True
-clouds_pressure:bounds = 1e3,1e5,
-clouds_pressure:mode = log
