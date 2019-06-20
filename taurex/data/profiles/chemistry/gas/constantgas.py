@@ -3,7 +3,7 @@ from taurex.util import molecule_texlabel
 class ConstantGas(Gas):
     """
 
-    Constant gas profile. Mixing profile is the same at each layer of the atmosphere
+    Constant gas profile. Molecular abundace is constant at each layer of the atmosphere
 
 
 
