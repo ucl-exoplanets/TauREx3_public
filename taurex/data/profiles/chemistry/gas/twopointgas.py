@@ -40,10 +40,12 @@ class TwoPointGas(Gas):
 
     @property
     def mixRatioSurface(self):
+        """Abundance on the planets surface"""
         return self._mix_surface
     
     @property
     def mixRatioTop(self):
+        """Abundance on the top of atmosphere"""
         return self._mix_top
 
     

@@ -97,7 +97,14 @@ class Chemistry(Fittable,Logger,Writeable):
 
     @property
     def muProfile(self):   
+        """
+        Mix profile of atmopshere
 
+        Returns
+        -------
+        mix_profile : :obj:`array`
+
+        """
         return self.mu_profile
 
 

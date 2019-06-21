@@ -25,6 +25,13 @@ class PressureProfile(Fittable,Logger):
 
     @property
     def profile(self):
+        """
+        Returns pressure at each atmospheric layer (Pascal)
+
+        Returns
+        -------
+        pressure_profile : :obj:`array`
+        """
         raise NotImplementedError
 
     def write(self,output):
@@ -35,7 +42,21 @@ class PressureProfile(Fittable,Logger):
         return pressure
 
 class SimplePressureProfile(PressureProfile):
+    """
+    A basic pressure profile.
 
+    Parameters
+    ----------
+    nlayers : int
+        Number of layers in atmosphere
+    
+    atm_min_pressure : float
+        minimum pressure in Pascal (top of atmosphere)
+    
+    atm_max_pressure : float
+        maximum pressure in Pascal (surface of planet)
+
+    """
     def __init__(self,nlayers=100,atm_min_pressure=1e-4,atm_max_pressure=1e6):
         super().__init__('pressure_profile',nlayers)
         self.pressure_profile = None
@@ -60,6 +81,7 @@ class SimplePressureProfile(PressureProfile):
 
     @fitparam(param_name='min_atm_pressure',param_latex='$P_\mathrm{min}$',default_mode='log',default_fit=False,default_bounds=[0.1,1.0])
     def minAtmospherePressure(self):
+        """Minimum pressure of atmosphere (top layer) in Pascal"""
         return self._atm_min_pressure
     
     @minAtmospherePressure.setter
@@ -68,6 +90,8 @@ class SimplePressureProfile(PressureProfile):
 
     @fitparam(param_name='max_atm_pressure',param_latex='$P_\\mathrm{max}$',default_mode='log',default_fit=False,default_bounds=[0.1,1.0])
     def maxAtmospherePressure(self):
+        """Maximum pressure of atmosphere (surface) in Pascal"""
+
         return self._atm_max_pressure
     
     @maxAtmospherePressure.setter

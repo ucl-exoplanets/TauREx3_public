@@ -8,7 +8,7 @@ class Isothermal(TemperatureProfile):
     Parameters
     ----------
     
-    iso_temp : :obj:`float`
+    iso_temp : float
         Isothermal Temperature to set
 
     """
@@ -22,6 +22,7 @@ class Isothermal(TemperatureProfile):
 
     @fitparam(param_name='T',param_latex='$T$',default_fit=False,default_bounds=[300.0, 2000.0])
     def isoTemperature(self):
+        """Isothermal temperature in Kelvin"""
         return self._iso_temp
 
     @isoTemperature.setter

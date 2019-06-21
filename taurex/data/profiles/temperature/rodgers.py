@@ -4,6 +4,25 @@ from taurex.data.fittable import fitparam
 from taurex.util import movingaverage
 class Rodgers2000(TemperatureProfile):
     """
+    Layer-by-layer temperature - pressure profile retrieval using dampening factor
+    Introduced in Rodgers (2000): Inverse Methods for Atmospheric Sounding (equation 3.26)
+    Featured in NEMESIS code (Irwin et al., 2008, J. Quant. Spec., 109, 1136 (equation 19)
+    Used in all Barstow et al. papers.   
+
+    Parameters
+    ----------
+    temperature_layers : :obj:`list`
+        Temperature in Kelvin per layer of pressure
+    
+    correlation_length : float
+        In scaleheights, Line et al. 2013 sets this to 7, Irwin et al sets this to 1.5
+        may be left as free and Pressure dependent parameter later.
+
+    covariance_matrix : :obj:`array` , optional
+        User can supply their own covaraince matrix
+
+
+
     """
 
     def __init__(self,temperature_layers=[],correlation_length=5.0,covariance_matrix=None):
@@ -15,6 +34,9 @@ class Rodgers2000(TemperatureProfile):
         self.generate_temperature_fitting_params()
 
     def gen_covariance(self):
+        """
+        Generate the covariance matrix if None is supplied
+        """
         h = self._tp_corr_length
         pres_prof = (self.pressure_profile)
 
@@ -22,7 +44,6 @@ class Rodgers2000(TemperatureProfile):
     
 
     def correlate_temp(self,cov_mat):
-
         cov_mat_sum = np.sum(cov_mat,axis=0)
         weights = cov_mat[:,:]/cov_mat_sum[:,None]  
         return weights.dot(self._T_layers)
@@ -39,6 +60,9 @@ class Rodgers2000(TemperatureProfile):
 
     @fitparam(param_name='corr_length',param_latex='$C_\{L\}$',default_fit=False,default_bounds=[1.0,10.0])
     def correlationLength(self):
+        """
+        Correlation length in scale heights
+        """
         return self._tp_corr_length
     
     @correlationLength.setter
@@ -46,7 +70,11 @@ class Rodgers2000(TemperatureProfile):
         self._tp_corr_length = value
 
     def generate_temperature_fitting_params(self):
-
+        """
+        Generates the temperature fitting parameters for each layer of the atmosphere
+        For a 4 layer atmosphere the fitting parameters generated are ``T_0``, ``T_1``,
+        ``T_2`` and ``T_3``
+        """
 
         bounds = [1e5,1e3]
         for idx,val in enumerate(self._T_layers):
