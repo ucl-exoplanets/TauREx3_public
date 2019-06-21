@@ -11,3 +11,16 @@ User Guide
     Installation <installation>
     Supported Data Formats <support_data_formats>
     Quickstart Guide <quickstart>
+    Input File <inputfile>
+    Global Settings <global>
+    Chemistry <chemistry>
+    Temperature <temperature>
+    Pressure <pressure>
+    Models <model>
+    Lightcurves <lightcurve>
+    Retrieval <retrieval>
+    Cheatsheet <cheatsheet>
+
+
+
+
