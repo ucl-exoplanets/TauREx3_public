@@ -24,6 +24,9 @@ class TwoLayerGas(TwoPointGas):
     mix_ratio_top : float
         Mixing ratio of the molecule at the top of the atmosphere
 
+    mix_ratio_P : float
+        Boundary Pressure point between the two layers 
+
     mix_ratio_smoothing : float , optional
         smoothing window 
 
