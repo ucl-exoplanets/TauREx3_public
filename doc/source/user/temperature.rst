@@ -105,6 +105,16 @@ Rodgers 2000 Profile
 Layer-by-layer temperature - pressure profile retrieval using dampening factor
 Introduced in Rodgers (2000): Inverse Methods for Atmospheric Sounding (equation 3.26)
 
+Variables are:
+
+    - ``temperature_layers``
+        - list of floats
+        - Temperature in Kelvin for each layer
+
+    - ``correlation_length``
+        - float
+        - In scaleheights, Line et al. 2013 sets this to 7, Irwin et al sets this to 1.5
+          may be left as free and Pressure dependent parameter later.
 
 .. figure::  _static/rodgers.png
    :align:   left
