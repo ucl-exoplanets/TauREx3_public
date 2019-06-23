@@ -8,7 +8,7 @@ This header describes the chemical composition of the
 atmosphere. The type of model used is defined by the
 ``chemistry_type`` variable.
 
-The available ``chemistry_types`` are:
+The available ``chemistry_type`` are:
     - ``ace``
         - ACE equlibrium chemistry
         - Class: :class:`~taurex.data.profiles.chemistry.acechemistry.ACEChemistry`
