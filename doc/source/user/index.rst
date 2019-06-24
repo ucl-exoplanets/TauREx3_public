@@ -16,6 +16,8 @@ User Guide
     Chemistry <chemistry>
     Temperature <temperature>
     Pressure <pressure>
+    Planet <planet>
+    Star <star>
     Models <model>
     Lightcurves <lightcurve>
     Retrieval <retrieval>
