@@ -25,8 +25,11 @@ Of course comments are handled with ``#``
     - ``[Chemistry]``
     - ``[Temperature]``
     - ``[Pressure]``
+    - ``[Planet]``
+    - ``[Star]``
     - ``[Model]``
     - ``[LightCurve]``
+    - ``[Spectrum]``
     - ``[Optimizer]``
     - ``[Fitting]``
 
@@ -90,5 +93,5 @@ However setting ``iso_temp`` will throw an error as it doesn't exist anymore::
     iso_temp=1500
     kappa_irr=0.05
 
-This also applies to fitting parameters, profiles provide ceertain fitting parameters
+This also applies to fitting parameters, profiles provide certain fitting parameters
 and changing the model means that these parameters may not exist anymore.
