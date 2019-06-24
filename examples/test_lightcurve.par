@@ -1,9 +1,9 @@
 [Global]
 #xsec_path = C:/Users/Ahmed/Documents/TaurexData/xsec/xsec_sampled_R15000_0.3-15
-xsec_path = /Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/xsec/TauRex_sampled_xsecs_R10000_0.3-15
+xsec_path = "/Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/xsec/TauRex_sampled_xsecs_R10000_0.3-15"
 xsec_interpolation = exp
 #cia_path = C:/Users/Ahmed/Documents/TaurexData/cia/hitran
-cia_path = /Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/cia/hitran
+cia_path = "/Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/cia/hitran"
 
 [Chemistry]
 chemistry_type = taurex
