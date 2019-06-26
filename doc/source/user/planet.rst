@@ -8,13 +8,11 @@ This header is used to define planetary properties. Currently, only ``planet_typ
 is supported and must be included.
 
 The variables that can be defined are:
-    ``mass``
+    - ``mass``
         - float
         - Mass in Jupiter mass
         - Default: ``mass = 1.0``
-    
-    ``radius``
+    - ``radius``
         - float
         - Radius in Jupiter radius
         - Default: ``radius = 1.0``
-    

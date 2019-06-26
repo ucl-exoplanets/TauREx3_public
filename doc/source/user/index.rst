@@ -18,7 +18,7 @@ User Guide
     Pressure <pressure>
     Planet <planet>
     Star <star>
-    Models <model>
+    Models <models>
     Lightcurves <lightcurve>
     Retrieval <retrieval>
     Cheatsheet <cheatsheet>
