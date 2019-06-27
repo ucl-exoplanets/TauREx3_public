@@ -20,29 +20,51 @@ Blackbody
 ---------
 ``star_type = blackbody``
 
-Star is considered a blackbody. Available variables are:
+Star is considered a blackbody.
+
+Variables
+~~~~~~~~~
+
     - ``radius``
         - float
         - Radius in Solar radii
         - Default: ``radius = 1.0``
-    - `` temperature``
+    - ``temperature``
         - float
         - Temperature in Kelvin
         - Default ``temperature = 5800``
+
+Examples
+~~~~~~~~
+
+A Sun like star as a black body::
+
+    [Star]
+    star_type = blackbody
+    radius = 1.0
+    temperature = 5800
+
 
 PHOENIX
 -------
 ``star_type = phoenix``
 
-Stellar emission spectrum is read from the PHOENIX_ library and interpolated to the correct temperature.
+Stellar emission spectrum is read from the PHOENIX_ library ``.fmt`` files and interpolated to the correct temperature.
 Any temperature outside of the range provided by PHOENIX will use a blackbody SED instead.
-The variables available are:
+The ``.fmt`` filenames must include the temperature as the first number. TauREx3 splits the filename
+in terms of numbers so any text can be included in the beginning of the file name, therefore these are valid::
+    lte05600.fmt  # 5600 Kelvin
+    abunchofothertext-andanother-here05660-0.4_0.5.0.8.fmt #5660 Kelvin
+    5700-056-034-0434.fmt #5700 Kelvin
+
+Variables
+~~~~~~~~~
 
     - ``radius``
         - float
         - Radius in Solar radii
         - Default: ``radius = 1.0``
-    - `` temperature``
+    - ``temperature``
         - float
         - Temperature in Kelvin
         - Default ``temperature = 5800``
@@ -51,16 +73,20 @@ The variables available are:
         - Path to ``.fmt`` files
         - **Required**
 
-The ``.fmt`` filenames must include the temperature as the first number. TauREx3 splits the filename
-in terms of numbers so any text can be included in the beginning of the file name, therefore these are valid::
-    lte05600.fmt  # 5600 Kelvin
-    abunchofothertext-andanother-here05660-0.4_0.5.0.8.fmt #5660 Kelvin
-    5700-056-034-0434.fmt #5700 Kelvin
+
+Examples
+~~~~~~~~
+
+A Sun like star using PHOENIX spectra::
+
+    [Star]
+    star_type = phoenix
+    radius = 1.0
+    temperature = 5800
+    phoenix_path = /mypath/to/fmtfiles/
 
 
 
 
 
-
-
-.. _PHOENIX: <https://arxiv.org/abs/1303.5632>
+.. _PHOENIX: https://arxiv.org/abs/1303.5632

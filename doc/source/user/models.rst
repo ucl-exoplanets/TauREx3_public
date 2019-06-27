@@ -18,7 +18,7 @@ There are only four distinct forward ``model_type``:
 
 
 Mars
-====
+----
 
 .. warning::
     This will be completed once the current Mars branch is finished.
@@ -43,11 +43,32 @@ The available contributions are:
             - ``cia_pairs``
                 - list of comma seperated 
                   molecule pairs. e.g ``H2-He``, ``N2-N2``
-    - ``[[Rayeleigh]]``
+    - ``[[Rayleigh]]``
         - Added Rayleigh scattering to FM
         - Class: :class:`~taurex.contributions.rayleigh.RayleighContribution`
         - No variables
 
 Examples
 --------
+
+Transmission spectrum with molecular absorption and CIA from ``H2-He`` and ``H2-H2``::
+
+    [Model]
+    model_type = transmission
+        [[Absorption]]
+
+        [[CIA]]
+        cia_pairs = H2-He,He-He
+    
+Emission spectrum with molecular absorption, CIA and Rayleigh scattering::
+
+    [Model]
+    model_type = emission
+        [[Absorption]]
+
+        [[CIA]]
+        cia_pairs = H2-He,He-He  
+
+        [[Rayleigh]]
+
 

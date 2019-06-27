@@ -34,12 +34,23 @@ Constant temperature throughout atmosphere
    :align:   left
    :width: 80%
 
-Variables are:
+Variables
+~~~~~~~~~
 
     - ``iso_temp``
         - float
         - Temperature in Kelvin
         - Default: ``iso_temp = 1500.0``
+
+Examples
+~~~~~~~~
+
+A basic isothermal profile::
+
+    [Temperature]
+    profile_type = isothermal
+    iso_temp = 1500
+
 
 
 Guillot 2010 Profile
