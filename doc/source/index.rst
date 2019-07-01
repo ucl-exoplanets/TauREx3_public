@@ -1,7 +1,3 @@
-.. taurex documentation master file, created by
-   sphinx-quickstart on Tue Apr 16 14:06:30 2019.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
 
 Welcome to taurex's documentation!
 ==================================
@@ -10,11 +6,13 @@ Welcome to taurex's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+    User Guide <user/index>
+    Development Guide <devel/index>
+    Full API <api/modules>
+    Project Page <https://github.com/ucl-exoplanets/TauREx3/>
 
+    
+Taurex Documentation
+=====================
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+Taurex 3 aint shit cept hos n tricks

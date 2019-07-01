@@ -4,15 +4,45 @@ from taurex.data.fittable import fitparam
 import numpy as np
 import math
 class ACEChemistry(Chemistry):
+    """
+    Equilibrium chemistry
+    Computes chemical profile using the Aerotherm Chemical Equilibrium (ACE) Fortran code
+
+    Parameters
+    ----------
+
+    active_gases : :obj:`list` of str
+        List of actively absorbing molecules in the atmosphere (Should be removed and detected
+        automatically)
+    
+    metallicity : float
+        Stellar metallicity in solar units
+
+    co_ratio : float
+        C/O ratio
+    
+    therm_file : str , optional
+        Location of NASA.therm file. If not set will use file included in library
+    
+    spec_file : str , optional
+        Location of composes.dat.  If not set will use file included in library
+
+
+    """
 
     ace_H_solar = 12.
+    """H solar abundance"""
     ace_He_solar = 10.93
+    """He solar abundance"""
     ace_C_solar = 8.43
+    """C solar abundance"""
     ace_O_solar = 8.69
+    """O solar abundance"""
     ace_N_solar = 7.83 
+    """N solar abundance"""
 
 
-    def __init__(self,active_gases=['H2O','CH4'],metallicity=1,co_ratio=0.54951,therm_file = None,spec_file=None,mode='linear'):
+    def __init__(self,active_gases=['H2O','CH4'],metallicity=1,co_ratio=0.54951,therm_file = None,spec_file=None):
         super().__init__('ACE')
 
         self.inactive_gases = ['H2', 'HE', 'N2']
@@ -26,18 +56,58 @@ class ACEChemistry(Chemistry):
 
     @property
     def activeGases(self):
+        """Returns names of actively absorbing molecules
+
+        Returns
+        -------
+
+        active : :obj:`list` of str
+            List of molecules    
+
+        """
         return self.active_gases
     
     @property
-    def inActiveGases(self):
+    def inactiveGases(self):
+        """Returns names of molecules not actively absorbing
+
+        Returns
+        -------
+
+        inactive : :obj:`list` of str
+            List of molecules    
+
+        """
         return self.inactive_gases
     
     @property
     def activeGasMixProfile(self):
+        """
+        Layer by layer mixing ratio of ``active`` molecules
+
+        Returns
+        -------
+
+        mix_profile :  :obj:`array`
+            Array of shape ``(nactivegases,nlayers)``
+        
+
+        """
         return self.active_mixratio_profile
 
     @property
-    def inActiveGasMixProfile(self):
+    def inactiveGasMixProfile(self):
+        """
+        Layer by layer mixing ratio of ``inactive`` molecules
+
+        Returns
+        -------
+
+        mix_profile :  :obj:`array`
+            Array of shape ``(ninactivegases,nlayers)``
+        
+        
+        """
         return self.inactive_mixratio_profile
 
 
@@ -94,6 +164,22 @@ class ACEChemistry(Chemistry):
 
 
     def compute_active_gas_profile(self,altitude_profile,pressure_profile,temperature_profile):
+        """Computes gas profiles of both active and inactive molecules for each layer
+
+        Parameters
+        ----------
+
+        altitude_profile : array_like
+            Altitude profile of atmosphere (usually computed in model)
+        
+        pressure_profile : array_like
+            Pressure profile of atmosphere 
+
+        temperature_profile : array_like
+            Temperature profile of atmosphere 
+
+        """
+
         self._get_gas_mask()
         self.set_ace_params()
         self._ace_profile = md_ace(self._specfile,self._thermfile,altitude_profile/1000.0,pressure_profile/1.e5,temperature_profile,
@@ -104,9 +190,30 @@ class ACEChemistry(Chemistry):
 
 
     def initialize_chemistry(self,nlayers,temperature_profile,pressure_profile,altitude_profile):
+        """Sets up and and constructs chemical profiles. Called by forward model before path calculation
+
+
+
+        Parameters
+        ----------
+
+        nlayers : int
+            Number of layers in atmosphere
+
+        altitude_profile : array_like
+            Altitude profile of atmosphere (usually computed in model)
+        
+        pressure_profile : array_like
+            Pressure profile of atmosphere 
+
+        temperature_profile : array_like
+            Temperature profile of atmosphere 
+
+        """
+
         self.info('Initializing chemistry model')
         self.active_mixratio_profile = np.zeros(shape=(len(self.activeGases),nlayers))
-        self.inactive_mixratio_profile = np.zeros((len(self.inActiveGases), nlayers))
+        self.inactive_mixratio_profile = np.zeros((len(self.inactiveGases), nlayers))
         self.compute_active_gas_profile(altitude_profile,pressure_profile,temperature_profile)
 
         super().initialize_chemistry(nlayers,temperature_profile,pressure_profile,altitude_profile)   
@@ -114,6 +221,9 @@ class ACEChemistry(Chemistry):
 
     @fitparam(param_name='ace_metallicity',param_latex='Metallicity',default_mode='log',default_fit=False,default_bounds=[ -1, 4])
     def aceMetallicity(self):
+        """
+        Metallicity of star in solar units
+        """
         return self.ace_metallicity
     
     @aceMetallicity.setter
@@ -123,6 +233,9 @@ class ACEChemistry(Chemistry):
 
     @fitparam(param_name='ace_co',param_latex='C/O',default_fit=False,default_bounds=[0, 2])
     def aceCORatio(self):
+        """
+        CO ratio of star
+        """
         return self.ace_co
     
     @aceCORatio.setter

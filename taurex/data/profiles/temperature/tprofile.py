@@ -6,7 +6,12 @@ class TemperatureProfile(Fittable,Logger,Writeable):
     Defines temperature profile for an atmosphere
 
     Must define a profile() function that returns
-    a Temperature, (T, P, X) grid 
+    a Temperature at each layer
+
+    Parameters
+    ----------
+    name : str
+        Name used in logging
 
     """
     
@@ -17,6 +22,20 @@ class TemperatureProfile(Fittable,Logger,Writeable):
 
 
     def initialize_profile(self,planet,nlayers,pressure_profile):
+        """
+        Initializes the profile
+
+        Parameters
+        ----------
+        planet : :class:`~taurex.data.planet.Planet`
+
+        nlayers : int
+            Number of layers in atmosphere
+
+        pressure_profile : :obj:`array`
+            Pressure at each layer of the atmosphere
+        
+        """
         self.nlayers=nlayers
         self.nlevels = nlayers+1
         self.pressure_profile = pressure_profile
@@ -25,6 +44,7 @@ class TemperatureProfile(Fittable,Logger,Writeable):
 
     @property
     def profile(self):
+        """Returns temperature profile at each layer of the atmosphere"""
         raise NotImplementedError
 
 

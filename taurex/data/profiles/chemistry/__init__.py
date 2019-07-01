@@ -1,3 +1,7 @@
+"""
+Atmospheric chemistry related modules
+"""
+
 try:
     from .acechemistry import ACEChemistry
 except ImportError:

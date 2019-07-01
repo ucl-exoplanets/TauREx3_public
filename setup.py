@@ -27,12 +27,10 @@ install_requires = ['numpy','cython',
         'configobj',
         'numba',
         'numexpr',
-        'matplotlib',
         'numpy',
-        'scipy',
         'nestle',
-        'tabulate',
-        'h5py','pylightcurve']
+        'h5py',
+        'tabulate',]
 
 
 

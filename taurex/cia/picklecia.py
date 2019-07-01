@@ -2,9 +2,23 @@ from .cia import CIA
 import pickle
 import numpy as np
 from pathlib import Path
+from taurex.util.math import interp_lin_only
+
 class PickleCIA(CIA):
     """
-    This is the base class for computing opactities
+    Class for using pickled (``.db``) collisionally induced absorptions
+    Very simple since the format is simple
+
+
+    Parameters
+    ----------
+    filename : str
+        Path to pickle
+    
+    pair_name : str , optional
+        Whilst the name of the pair is determined by the pickle filename
+        since these can be different you can optionally force the name through this
+        parameter
 
     """
     
@@ -21,6 +35,15 @@ class PickleCIA(CIA):
         self._load_pickle_file(filename)
 
     def _load_pickle_file(self,filename):
+        """
+        Loads pickle file
+
+        Parameters
+        ----------
+        filename : str
+            Path to pickle cia file
+
+        """
 
         #Load the pickle file
         self.info('Loading cia cross section from %s',filename)
@@ -34,36 +57,99 @@ class PickleCIA(CIA):
 
     @property
     def wavenumberGrid(self):
+        """
+
+        Returns
+        -------
+        :obj:`array`
+            Native wavenumber grid
+
+        """
         return self._wavenumber_grid
 
     @property
     def temperatureGrid(self):
+        """
+
+        Returns
+        -------
+        :obj:`array`
+            Native temperature grid in Kelvin
+
+        """
+        
         return self._temperature_grid
 
 
     def find_closest_temperature_index(self,temperature):
-        nearest_idx = np.abs(temperature-self.temperatureGrid).argmin() 
-        t_idx_min = -1
-        t_idx_max = -1
-        if self._temperature_grid[nearest_idx] > temperature:
-            t_idx_max = nearest_idx
-            t_idx_min = nearest_idx-1
-        else:
-            t_idx_min = nearest_idx
-            t_idx_max = nearest_idx+1
-        return t_idx_min,t_idx_max
+        """
+        Finds the nearest indices for a particular temperature
+
+        Parameters
+        ----------
+        temperature : float
+            Temeprature in Kelvin
+        
+        Returns
+        -------
+        t_min : int
+            index on temprature grid to the left of ``temperature``
+
+        t_max : int
+            index on temprature grid to the right of ``temperature``
+
+        """
+        t_min=self.temperatureGrid.searchsorted(temperature,side='right')-1
+        t_max = t_min+1
+        return t_min,t_max
     
 
     def interp_linear_grid(self,T,t_idx_min,t_idx_max):
+        """
+        For a given temperature and indicies. Interpolate the cross-sections linearly
+        from temperature grid to temperature ``T``
+
+        Parameters
+        ----------
+        temperature : float
+            Temeprature in Kelvin
+        
+        t_min : int
+            index on temprature grid to the left of ``temperature``
+
+        t_max : int
+            index on temprature grid to the right of ``temperature``
+
+        Returns
+        -------
+        out : :obj:`array`
+            Interpolated cross-section
+
+        """
         Tmax = self._temperature_grid[t_idx_max]
         Tmin = self._temperature_grid[t_idx_min]
         fx0=self._xsec_grid[t_idx_min]
         fx1 = self._xsec_grid[t_idx_max]
 
-        return fx0 + (fx1-fx0)*(T-Tmin)/(Tmax-Tmin)
+        return interp_lin_only(fx0,fx1,T,Tmin,Tmax)
 
 
     def compute_cia(self,temperature):
+        """
+        Computes the collisionally induced absorption cross-section
+        using our native temperature and cross-section grids
+
+        Parameters
+        ----------
+        temperature : float
+            Temperature in Kelvin
+        
+        Returns
+        -------
+        out : :obj:`array`
+            Temperature interpolated cross-section
+
+        """
         return self.interp_linear_grid(temperature,*self.find_closest_temperature_index(temperature))
 
     

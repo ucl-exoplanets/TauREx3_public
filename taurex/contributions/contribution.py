@@ -1,10 +1,54 @@
+"""
+Base contribution classes and functions for computing optical depth
+"""
+
 from taurex.log import Logger
 from taurex.data.fittable import fitparam,Fittable
 import numpy as np
 from taurex.output.writeable import Writeable
 import numba
+
 @numba.jit(nopython=True, nogil=True)
 def contribute_tau(startK,endK,density_offset,sigma,density,path,nlayers,ngrid,layer):
+    """
+    Generic contribution function for tau, numba-fied for performance.
+
+    Parameters
+    ----------
+    startK : int
+        starting horizontal layer index of the atmosphere to loop
+    
+    endK : int
+        ending horizontal layer index of the atmosphere to loop
+    
+    density_offset : int
+        Which part of the density profile to start from
+    
+    sigma : array_like
+        cross-section to compute contribution
+    
+    density : array_like
+        density profile of atmosphere
+    
+    path : array_like
+        path-length or altitude gradient
+    
+    nlayers : int
+        Total number of layers (unused)
+    
+    ngrid : int
+        total number of grid points 
+    
+    layer : int
+        Which layer we currently on
+
+    
+    Returns
+    -------
+    tau : array_like 
+        optical depth (well almost you still need to do ``exp(-tau)`` yourself )
+
+    """
     tau = np.zeros(shape=(ngrid,))
     for k in range(startK,endK):
         _path = path[k]

@@ -5,11 +5,23 @@ import numpy as np
 class TwoPointGas(Gas):
     """
 
-    Constant gas profile
+    Two point gas profile.
+
+    A gas profile with two different mixing layers at the surface of the planet and
+    top of the atmosphere and interpolated between the two
+
 
 
     Parameters
     -----------
+    molecule_name : str
+        Name of molecule
+
+    mix_ratio_surface : float
+        Mixing ratio of the molecule on the planet surface
+
+    mix_ratio_top : float
+        Mixing ratio of the molecule at the top of the atmosphere
 
 
     """
@@ -28,10 +40,12 @@ class TwoPointGas(Gas):
 
     @property
     def mixRatioSurface(self):
+        """Abundance on the planets surface"""
         return self._mix_surface
     
     @property
     def mixRatioTop(self):
+        """Abundance on the top of atmosphere"""
         return self._mix_top
 
     

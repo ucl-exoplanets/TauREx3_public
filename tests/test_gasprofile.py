@@ -109,9 +109,9 @@ class TwoLayerProfileTest(unittest.TestCase):
 #         self.assertEqual(self.tp.activeGasMixProfile.shape[0],2)
 #         self.assertEqual(self.tp.activeGasMixProfile.shape[1],10)
 
-#         self.assertIsNotNone(self.tp.inActiveGasMixProfile)
-#         self.assertEqual(self.tp.inActiveGasMixProfile.shape[0],3)
-#         self.assertEqual(self.tp.inActiveGasMixProfile.shape[1],10)
+#         self.assertIsNotNone(self.tp.inactiveGasMixProfile)
+#         self.assertEqual(self.tp.inactiveGasMixProfile.shape[0],3)
+#         self.assertEqual(self.tp.inactiveGasMixProfile.shape[1],10)
 
 
 #         self.assertEqual(self.tp.muProfile.shape[0],10)

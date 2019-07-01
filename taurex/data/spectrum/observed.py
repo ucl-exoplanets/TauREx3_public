@@ -1,22 +1,22 @@
 from .spectrum import BaseSpectrum
+from taurex.output.writeable import Writeable
 import numpy as np
 
-class ObservedSpectrum(BaseSpectrum):
-    """Loads an observed spectrum from a file and computes bin
-    edges and bin widths
+class ObservedSpectrum(BaseSpectrum,Writeable):
+    """
+    Loads an observed spectrum from a text file and computes bin
+    edges and bin widths. Spectrum must be 3-4 columns with ordering:
+        1. wavelength
+        2. spectral data
+        3. error
+        4. (optional) bin width
+    
+    If no bin width is present then they are computed.
 
     Parameters
     -----------
     filename: string
-        File name of observed spectrum. Spectrum must be 3-4 columns
-        1st column: 
-            wavelength
-        2nd column:
-            spectral data
-        3rd column:
-            error
-        4th(optional):
-            bin width
+        Path to observed spectrum file. 
 
     """
 
@@ -37,10 +37,16 @@ class ObservedSpectrum(BaseSpectrum):
 
 
     def _read_file(self):
+        """Reads the txt file into an array"""
         self._obs_spectrum = np.loadtxt(self._filename)
         self._obs_spectrum = self._obs_spectrum[self._obs_spectrum[:,0].argsort(axis=0)[::-1]]
 
     def _process_spectrum(self):
+        """
+        Seperates out the observed data, error, grid and binwidths
+        from raw file array. If bin widths are not present then they are
+        calculated here
+        """
         if self.rawData.shape[1] == 4:
             self._bin_widths = self._obs_spectrum[:,3]
             obs_wl = self.wavelengthGrid[::-1]
@@ -81,17 +87,22 @@ class ObservedSpectrum(BaseSpectrum):
 
     @property
     def binEdges(self):
+        """ Bin edges"""
         return self._bin_edges
     @property
     def binWidths(self):
+        """bin widths"""
         return self._bin_widths
 
     @property
     def errorBar(self):
+        """ Error bars for the spectrum"""
         return self.rawData[:,2]
 
     def manual_binning(self):
-        
+        """
+        Performs the calculation of bin edges when none are present
+        """
         bin_edges = []
         wl_grid = self.wavelengthGrid
 

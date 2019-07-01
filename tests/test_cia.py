@@ -60,5 +60,4 @@ class PickleCIATest(unittest.TestCase):
             self.assertEqual(pop.pairName,'HEH-2HF')
 
     def test_cia_calc(self):
-
-        np.testing.assert_equal(self.pop.cia(225),pickle_test_data['xsecarr'][1])
+        np.testing.assert_allclose(self.pop.cia(225),pickle_test_data['xsecarr'][1])

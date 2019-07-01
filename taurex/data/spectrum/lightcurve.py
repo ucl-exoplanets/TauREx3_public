@@ -1,23 +1,19 @@
+"""
+Module dealing with observed lightcurves
+"""
+
 from .spectrum import BaseSpectrum
 import numpy as np
 from taurex.model.lightcurve.lightcurvedata import LightCurveData
 
 class ObservedLightCurve(BaseSpectrum):
-    """Loads an observed lightcurve from a file and computes bin
-    edges and bin widths
+    """Loads an observed lightcurve from a pickle file.
 
     Parameters
-    -----------
-    filename: string
-        File name of observed spectrum. Spectrum must be 3-4 columns
-        1st column: 
-            wavelength
-        2nd column:
-            spectral data
-        3rd column:
-            error
-        4th(optional):
-            bin width
+    ----------
+
+    filename : str
+        Path to pickle file containing lightcurve data
 
     """
 
@@ -56,26 +52,80 @@ class ObservedLightCurve(BaseSpectrum):
 
     @property
     def spectrum(self):
+        """ 
+        Returns Light curve spectrum.
+        The lightcurve spectrum comes in the form of multiple lightcurves stuck together into
+        one long spectrum. The number of lightcurves is equal to the number of bins in
+        :func:`wavelengthGrid`.
+
+        Returns
+        -------
+        spectrum : :obj:`array`
+
+        """
         return self._spec
 
     @property
     def rawData(self):
+        """
+        Raw lightcurve data read from file
+
+        Returns
+        -------
+        lc_data : :obj:`array`
+
+        """
         self.obs_spectrum
 
     @property
     def wavelengthGrid(self):
+        """
+        Returns wavelength grid in microns
+
+        Returns
+        -------
+        wlgrid : :obj:`array`
+
+        """
         return self.obs_spectrum[:,0]
     
 
+
     @property
     def binEdges(self):
+        """
+        Returns bin edges for wavelength grid
+
+        Returns
+        -------
+        out : :obj:`array`
+        
+        """
         return self.obs_spectrum[:, 3]
     
     @property
     def binWidths(self):
+        """
+        Widths for each bin in wavelength grid
+
+        Returns
+        -------
+        out : :obj:`array`
+        
+        """
         return None
 
 
     @property
     def errorBar(self):
+        """
+        Like :func:`spectrum` except its the error at each point in the
+        lightcurve spectrum
+
+        Returns
+        -------
+        err : :obj:`array` 
+            Error at each point in lightcurve spectrum
+        
+        """
         return self._std

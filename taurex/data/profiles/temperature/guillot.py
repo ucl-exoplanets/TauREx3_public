@@ -36,6 +36,7 @@ class Guillot2010(TemperatureProfile):
     
     @fitparam(param_name='T_irr',param_latex='$T_\\mathrm{irr}$',default_fit=True,default_bounds=[1300, 2500])
     def equilTemperature(self):
+        """Planet equilibrium temperature"""
         return self.T_irr
     
     @equilTemperature.setter
@@ -44,6 +45,7 @@ class Guillot2010(TemperatureProfile):
 
     @fitparam(param_name='kappa_ir',param_latex='$k_\\mathrm{ir}$',default_fit=False,default_bounds=[-10,1])
     def meanInfraOpacity(self):
+        """mean infra-red opacity"""
         return self.kappa_ir
 
     @meanInfraOpacity.setter
@@ -52,6 +54,7 @@ class Guillot2010(TemperatureProfile):
 
     @fitparam(param_name='kappa_v1',param_latex='$k_\\mathrm{1}$',default_fit=False,default_bounds=[-10,1])
     def meanOpticalOpacity1(self):
+        """mean optical opacity one"""
         return self.kappa_v1
 
     @meanOpticalOpacity1.setter
@@ -60,6 +63,7 @@ class Guillot2010(TemperatureProfile):
 
     @fitparam(param_name='kappa_v2',param_latex='$k_\\mathrm{2}$',default_fit=False,default_bounds=[-10,1])
     def meanOpticalOpacity2(self):
+        """mean optical opacity two"""
         return self.kappa_v2
 
     @meanOpticalOpacity2.setter
@@ -68,6 +72,7 @@ class Guillot2010(TemperatureProfile):
 
     @fitparam(param_name='alpha',param_latex='$\\alpha$',default_fit=False,default_bounds=[0.0,1.0])
     def opticalRatio(self):
+        """ratio between kappa_v1 and kappa_v2 """
         return self.alpha
 
     @opticalRatio.setter
@@ -81,8 +86,8 @@ class Guillot2010(TemperatureProfile):
         Returns
         --------
         
-        :obj:np.array(float)
-            temperature profile
+        temperature_profile : :obj:np.array(float)
+
         """
 
         planet_grav = self.planet.gravity

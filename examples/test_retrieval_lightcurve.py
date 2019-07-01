@@ -66,9 +66,6 @@ opt.set_boundary('H2O',[1.0e-12, 1.0e-1])
 opt.set_boundary('planet_radius',[ 0.5, 2.0])
 
 
-
-
-1
 opt.compile_params()
 
 

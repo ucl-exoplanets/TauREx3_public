@@ -5,28 +5,49 @@ from taurex.util import movingaverage
 class NPoint(TemperatureProfile):
     """
 
-    TP profile from Guillot 2010, A&A, 520, A27 (equation 49)
-    Using modified 2stream approx. from Line et al. 2012, ApJ, 749,93 (equation 19)
+    A temperature profile that is defined at various heights of the
+    atmopshere and then smoothend. 
+    
+    At minimum, temepratures on both the top ``T_top`` and surface ``T_surface`` must be defined.
+    If any intermediate points are given as ``temperature_points`` then the same number of ``pressure_points``
+    must be given as well.
+
+    A 2-point temperature profile has ``len(temperature_points) == 0``
+    A 3-point temperature profile has ``len(temperature_points) == 1``
+
+    etc.
+
 
 
     Parameters
     -----------
-        T_irr: :obj:`float` 
-            planet equilibrium temperature (Line fixes this but we keep as free parameter)
-        kappa_ir: :obj:`float`
-            mean infra-red opacity
-        kappa_v1: :obj:`float` 
-            mean optical opacity one
-        kappa_v2: :obj:`float` 
-            mean optical opacity two
-        alpha: :obj:`float` 
-            ratio between kappa_v1 and kappa_v2 downwards radiation stream
+        T_surface : float
+            Temperature at the planets surface in Kelvin
+
+        T_top : float
+            Temperature at the top of the atmosphere in Kelvin
+
+        P_surface : float , optional
+            Pressure for ``T_surface`` (Optional) otherwise uses surface pressure from forward model
+
+        P_top : float , optional
+            Pressure for ``T_top`` (Optional) otherwise uses top pressure from forward model
+
+        temperature_points : :obj:`list`
+            temperature points between ``T_top`` and ``T_surface``
+
+        pressure_points : :obj:`list`
+            pressure points that the each temperature in ``temperature_points`` lie on
+
+        smoothing_window : int
+            smoothing window
+
 
     """
 
 
     def __init__(self,T_surface=100.0,T_top=20.0,P_surface=None,P_top=None,temperature_points=[],pressure_points=[],smoothing_window=10):
-        super().__init__('{}Point'.format(len(temperature_points)+1))
+        super().__init__('{}Point'.format(len(temperature_points)+2))
 
         if not isinstance(temperature_points,list):
             raise Exception('t_point is not a list')
@@ -50,6 +71,7 @@ class NPoint(TemperatureProfile):
         self.generate_temperature_fitting_params()
     @fitparam(param_name='T_surface',param_latex='$T_\\mathrm{surf}$',default_fit=False,default_bounds=[ 300,2500])
     def temperatureSurface(self):
+        """Temperature at planet surface in Kelvin"""
         return self._T_surface
     
     @temperatureSurface.setter
@@ -58,6 +80,7 @@ class NPoint(TemperatureProfile):
 
     @fitparam(param_name='T_top',param_latex='$T_\\mathrm{top}$',default_fit=False,default_bounds=[ 300,2500])
     def temperatureTop(self):
+        """Temperature at top of atmosphere in Kelvin"""
         return self._T_top
     
     @temperatureTop.setter
@@ -82,7 +105,11 @@ class NPoint(TemperatureProfile):
  
 
     def generate_pressure_fitting_params(self):
-
+        """Generates the fitting parameters for the pressure points
+        These are given the name ``P_point(number)`` for example, if two extra
+        pressure points are defined between the top and surface then the fitting
+        parameters generated are ``P_point0`` and ``P_point1``
+        """
 
         bounds = [1e5,1e3]
         for idx,val in enumerate(self._p_points):
@@ -103,7 +130,11 @@ class NPoint(TemperatureProfile):
 
 
     def generate_temperature_fitting_params(self):
-
+        """Generates the fitting parameters for the temeprature points
+        These are given the name ``T_point(number)`` for example, if two extra
+        temeprature points are defined between the top and surface then the fitting
+        parameters generated are ``T_point0`` and ``T_point1``
+        """
 
         bounds = [300,2500]
         for idx,val in enumerate(self._t_points):

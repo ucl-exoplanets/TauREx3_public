@@ -11,9 +11,9 @@ class AceChemistryTest(unittest.TestCase):
         test_layers = 10
 
         cgp.activeGases
-        cgp.inActiveGases
+        cgp.inactiveGases
         self.assertIsNone(cgp.activeGasMixProfile)
-        self.assertIsNone(cgp.inActiveGasMixProfile)
+        self.assertIsNone(cgp.inactiveGasMixProfile)
         self.assertIsNone(cgp.muProfile)
 
         pres_prof = np.ones(test_layers)
@@ -21,5 +21,5 @@ class AceChemistryTest(unittest.TestCase):
         cgp.initialize_chemistry(10,pres_prof,pres_prof,pres_prof)   
 
         self.assertIsNotNone(cgp.activeGasMixProfile)
-        self.assertIsNotNone(cgp.inActiveGasMixProfile)
+        self.assertIsNotNone(cgp.inactiveGasMixProfile)
         self.assertIsNotNone(cgp.muProfile)
