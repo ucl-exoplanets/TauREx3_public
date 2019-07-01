@@ -124,7 +124,7 @@ class ParameterParser(Logger):
                         return observed,np.linspace(start,end,int(size))
                     elif 'wavelength_grid' in spectrum_config:
                         start,end,size = spectrum_config['wavelength_grid']
-                        return observed,10000/np.linspace(start,end,int(size))
+                        return observed,np.linspace(10000/end,10000/start,int(size))
                     else:
                        self.critical('grid type is manual yet neither wavelength_grid or wavenumber_grid is defined')
                        raise Exception('wavenumber_grid/wavelength_grid not defined in input for manual grid_type')
