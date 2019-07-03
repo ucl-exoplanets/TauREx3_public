@@ -70,8 +70,11 @@ class PhoenixStar(BlackbodyStar):
         for temp,f in T_list:
             self.debug('Loading %s %s',temp,f)
             arr = np.loadtxt(f)
-            self.wngrid = 10000/np.copy(arr[:,0])
-            self.spectra_grid.append(arr[:,1]*10.0) #To SI
+            grid = 10000/np.copy(arr[:,0])
+            sorted_idx = np.argsort(grid)
+
+            self.wngrid = 10000/np.copy(arr[sorted_idx,0])
+            self.spectra_grid.append(arr[sorted_idx,1]*10.0) #To SI
 
 
 
@@ -181,4 +184,14 @@ class PhoenixStar(BlackbodyStar):
         else:
             sed = self.interpolate_linear_temp(self.temperature)
             self.sed = np.interp(wngrid,self.wngrid,sed)
-            
+
+    @property
+    def spectralEmissionDensity(self):
+        """
+        Spectral emmision density
+
+        Returns
+        -------
+        sed : :obj:`array`
+        """
+        return self.sed
