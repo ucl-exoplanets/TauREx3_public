@@ -70,7 +70,7 @@ class PhoenixStar(BlackbodyStar):
         for temp,f in T_list:
             self.debug('Loading %s %s',temp,f)
             arr = np.loadtxt(f)
-            self.wngrid = np.copy(arr[:,0])
+            self.wngrid = 10000/np.copy(arr[:,0])
             self.spectra_grid.append(arr[:,1]*10.0) #To SI
 
 
