@@ -61,3 +61,7 @@ class PickleCIATest(unittest.TestCase):
 
     def test_cia_calc(self):
         np.testing.assert_allclose(self.pop.cia(225),pickle_test_data['xsecarr'][1])
+    
+    def test_max_min_temps(self):
+        np.testing.assert_equal(self.pop.cia(100000000),self.pop._xsec_grid[-1])
+        np.testing.assert_equal(self.pop.cia(0.0000001),self.pop._xsec_grid[0])
