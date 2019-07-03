@@ -126,6 +126,12 @@ class PickleCIA(CIA):
             Interpolated cross-section
 
         """
+        if T > self._temperature_grid.max():
+            return self._temperature_grid[-1]
+        elif T < self._temperature_grid.min():
+            return self._temperature_grid[0]
+
+
         Tmax = self._temperature_grid[t_idx_max]
         Tmin = self._temperature_grid[t_idx_min]
         fx0=self._xsec_grid[t_idx_min]
