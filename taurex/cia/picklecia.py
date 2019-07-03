@@ -127,9 +127,9 @@ class PickleCIA(CIA):
 
         """
         if T > self._temperature_grid.max():
-            return self._temperature_grid[-1]
+            return self._xsec_grid[[-1]
         elif T < self._temperature_grid.min():
-            return self._temperature_grid[0]
+            return self._xsec_grid[[0]
 
 
         Tmax = self._temperature_grid[t_idx_max]
