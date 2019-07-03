@@ -53,6 +53,9 @@ class BlackbodyStar(Fittable,Logger,Writeable):
         """
         return self._temperature
 
+    @temperature.setter
+    def temperature(self,value):
+        self._temperature = value
 
 
     def initialize(self,wngrid):
