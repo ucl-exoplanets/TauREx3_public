@@ -31,17 +31,17 @@ model_type = transmission
 
     [[Absorption]]
     
-    #[[CIA]]
-    #cia_pairs = H2-He,H2-H2
+    [[CIA]]
+    cia_pairs = H2-He,H2-H2
     
-    #[[Rayleigh]]
+    [[Rayleigh]]
 
 
 [Spectrum]
 #observed_spectrum = C:/Users/Ahmed/Documents/TaurexData/tests/test_0_transmission/SPECTRUM_fit.dat
 grid_type = manual
 #wavenumber_grid = 0.0,10000.0,10000
-wavelength_grid = 0.01,10.0,30000
+wavelength_grid = 0.01,15.0,30000
 
 
 
