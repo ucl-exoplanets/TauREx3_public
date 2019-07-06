@@ -67,6 +67,14 @@ class TestOpacityCache(unittest.TestCase):
         opacity2['optest2']
         self.assertIn('OPTEST2',opacity1.opacity_dict)
 
+    def test_find_molecules(self):
+        opacity1 = OpacityCache()
+        opacity1.set_opacity_path(self.test_dir)
+
+        opList = opacity1.find_list_of_molecules()
+
+        self.assertIn('OPTEST0',opList)
+
 
 
     def tearDown(self):

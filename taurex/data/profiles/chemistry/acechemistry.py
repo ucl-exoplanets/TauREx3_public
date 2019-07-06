@@ -3,6 +3,7 @@ from taurex.external.ace import md_ace
 from taurex.data.fittable import fitparam
 import numpy as np
 import math
+from taurex.cache import OpacityCache
 class ACEChemistry(Chemistry):
     """
     Equilibrium chemistry
@@ -11,9 +12,6 @@ class ACEChemistry(Chemistry):
     Parameters
     ----------
 
-    active_gases : :obj:`list` of str
-        List of actively absorbing molecules in the atmosphere (Should be removed and detected
-        automatically)
     
     metallicity : float
         Stellar metallicity in solar units
@@ -30,7 +28,7 @@ class ACEChemistry(Chemistry):
 
     """
 
-    ace_H_solar = 12.
+    ace_H_solar = 12.0
     """H solar abundance"""
     ace_He_solar = 10.93
     """He solar abundance"""
@@ -42,15 +40,13 @@ class ACEChemistry(Chemistry):
     """N solar abundance"""
 
 
-    def __init__(self,active_gases=['H2O','CH4'],metallicity=1,co_ratio=0.54951,therm_file = None,spec_file=None):
+    def __init__(self,metallicity=1.0,co_ratio=0.54951,therm_file = None,spec_file=None):
         super().__init__('ACE')
-
-        self.inactive_gases = ['H2', 'HE', 'N2']
         self.ace_metallicity = metallicity
         self.ace_co = co_ratio
-        self.active_gases = active_gases
+        self.active_gases = None
+        self.inactive_gases = None
         self._get_files(therm_file,spec_file)
-        self.active_gases=active_gases
         self.active_mixratio_profile= None
         self.inactive_mixratio_profile = None
 
@@ -128,19 +124,22 @@ class ACEChemistry(Chemistry):
         self._active_mask = np.ndarray(shape=(105,),dtype=np.bool)
         self._inactive_mask = np.ndarray(shape=(105,),dtype=np.bool)
 
-        self._active_mask[...] = False
-        self._inactive_mask[...] = False
         new_active_gases=[]
         new_inactive_gases=[]
         with open(self._specfile, 'r') as textfile:
+
+            molecules_i_have = OpacityCache().find_list_of_molecules()
+            self.info('MOLECULES %s',molecules_i_have)
             for line in textfile:
                 sl = line.split()
-                idx = int(sl[0])
+                idx = int(sl[0])-1
                 molecule = sl[1].upper()
-                if molecule in self.active_gases:
+
+
+                if molecule in molecules_i_have:
                     self._active_mask[idx] = True
                     new_active_gases.append((molecule,idx))
-                if molecule in self.inactive_gases:
+                else:
                     self._inactive_mask[idx] = True
                     new_inactive_gases.append((molecule,idx))
         #Create a new list where the gases are in the correct order 
@@ -149,7 +148,8 @@ class ACEChemistry(Chemistry):
 
         self.active_gases=[molecule for molecule,idx in new_active_gases]
         self.inactive_gases=[molecule for molecule,idx in new_inactive_gases]
-
+        self.info('Active gases: {}'.format(self.active_gases))
+        self.info('Inactive gases: {}'.format(self.inactive_gases))
 
     def set_ace_params(self):
 
@@ -163,7 +163,7 @@ class ACEChemistry(Chemistry):
         self.He_abund_dex = self.ace_He_solar
 
 
-    def compute_active_gas_profile(self,altitude_profile,pressure_profile,temperature_profile):
+    def compute_active_gas_profile(self,nlayers,altitude_profile,pressure_profile,temperature_profile):
         """Computes gas profiles of both active and inactive molecules for each layer
 
         Parameters
@@ -181,6 +181,8 @@ class ACEChemistry(Chemistry):
         """
 
         self._get_gas_mask()
+        self.active_mixratio_profile = np.zeros(shape=(len(self.activeGases),nlayers))
+        self.inactive_mixratio_profile = np.zeros((len(self.inactiveGases), nlayers))
         self.set_ace_params()
         self._ace_profile = md_ace(self._specfile,self._thermfile,altitude_profile/1000.0,pressure_profile/1.e5,temperature_profile,
             self.He_abund_dex,self.C_abund_dex,self.O_abund_dex,self.N_abund_dex)
@@ -212,9 +214,8 @@ class ACEChemistry(Chemistry):
         """
 
         self.info('Initializing chemistry model')
-        self.active_mixratio_profile = np.zeros(shape=(len(self.activeGases),nlayers))
-        self.inactive_mixratio_profile = np.zeros((len(self.inactiveGases), nlayers))
-        self.compute_active_gas_profile(altitude_profile,pressure_profile,temperature_profile)
+
+        self.compute_active_gas_profile(nlayers,altitude_profile,pressure_profile,temperature_profile)
 
         super().initialize_chemistry(nlayers,temperature_profile,pressure_profile,altitude_profile)   
     
