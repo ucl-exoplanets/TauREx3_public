@@ -27,10 +27,6 @@ ACE Equlibrium Chemistry
 Equilibrium chemistry using the ACE FORTRAN program.
 
 The variables available are:
-    - ``active_gases``
-        - List of molecules
-        - Defines which molecules are actively absorbing
-        - Default: ``active_gases = H2O,CH4``
     - ``metallicity``
         - float
         - Stellar metallicity in solar units
@@ -46,18 +42,19 @@ Taurex Chemistry
 
 
 This chemistry type allows you to define individual
-abundance profiles for each molecule.
+abundance profiles for each molecule. Molecules are either active or inactive depending on
+whats available. If no cross-sections are available then the moelcule is not actively absorbing.
 
 On its own it has the variables:
-    - ``n2_mix_ratio``
-        - float
-        - Abundance of ``N2``
-        - Default: ``n2_mix_ratio = 0``
+    - ``fill_gases``
+        - str or :obj:`list`
+        - Gas or gases to fill the atmosphere with
+        - Default: ``fill_gases = H2,He,``
 
-    - ``he_h2_ratio``
+    - ``ratio``
         - float
-        - Ratio of ``H2`` to ``He`` to fill remainder of atmosphere with
-        - Default: ``he_h2_ratio = 0.17647``
+        - If a pair of fill gases are defined, then this is the ratio between the two
+        - Default: ``ratio = 0.17647``
 
 However molecules are defined as *subheaders* with the subheader being the name of the molecule.
 Each molecule can be assigned an abundance profile through the ``gas_type`` variable.
@@ -66,7 +63,7 @@ is simply done like so::
 
     [Chemistry]
     chemistry_type = taurex
-    he_h2_ratio = 0.1524
+    ratio = 0.1524
 
         [[H2O]]
         gas_type = constant
