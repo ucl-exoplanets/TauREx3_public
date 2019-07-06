@@ -121,20 +121,26 @@ class ACEChemistry(Chemistry):
     
     def _get_gas_mask(self):
         import operator
+        from taurex.constants import AMU
         self._active_mask = np.ndarray(shape=(105,),dtype=np.bool)
         self._inactive_mask = np.ndarray(shape=(105,),dtype=np.bool)
-
+        self._active_mask[:] = False
+        self._inactive_mask[:] = False
         new_active_gases=[]
         new_inactive_gases=[]
+
+        self._molecule_weight = {}
+
+
         with open(self._specfile, 'r') as textfile:
 
             molecules_i_have = OpacityCache().find_list_of_molecules()
-            self.info('MOLECULES %s',molecules_i_have)
+            self.debug('MOLECULES %s',molecules_i_have)
             for line in textfile:
                 sl = line.split()
                 idx = int(sl[0])-1
-                molecule = sl[1].upper()
-
+                molecule = sl[1]
+                self._molecule_weight[molecule] = float(sl[2])*AMU
 
                 if molecule in molecules_i_have:
                     self._active_mask[idx] = True
@@ -148,8 +154,8 @@ class ACEChemistry(Chemistry):
 
         self.active_gases=[molecule for molecule,idx in new_active_gases]
         self.inactive_gases=[molecule for molecule,idx in new_inactive_gases]
-        self.info('Active gases: {}'.format(self.active_gases))
-        self.info('Inactive gases: {}'.format(self.inactive_gases))
+        self.info('Active gases: %s',self.active_gases)
+        self.info('Inactive gases: %s',self.inactive_gases)
 
     def set_ace_params(self):
 
@@ -217,7 +223,7 @@ class ACEChemistry(Chemistry):
 
         self.compute_active_gas_profile(nlayers,altitude_profile,pressure_profile,temperature_profile)
 
-        super().initialize_chemistry(nlayers,temperature_profile,pressure_profile,altitude_profile)   
+        self.compute_mu_profile(nlayers)  
     
 
     @fitparam(param_name='ace_metallicity',param_latex='Metallicity',default_mode='log',default_fit=False,default_bounds=[ -1, 4])
@@ -229,7 +235,7 @@ class ACEChemistry(Chemistry):
     
     @aceMetallicity.setter
     def aceMetallicity(self,value):
-        self.ace_metallicity = 10.0
+        self.ace_metallicity = value
     
 
     @fitparam(param_name='ace_co',param_latex='C/O',default_fit=False,default_bounds=[0, 2])
@@ -251,3 +257,14 @@ class ACEChemistry(Chemistry):
         gas_entry.write_scalar('co_ratio',self.ace_co)
 
         return gas_entry
+
+
+
+    def compute_mu_profile(self,nlayers):
+        self.mu_profile= np.zeros(shape=(nlayers,))
+        if self.activeGasMixProfile is not None:
+            for idx, gasname in enumerate(self.activeGases):
+                self.mu_profile += self.activeGasMixProfile[idx,:]*self._molecule_weight[gasname]
+        if self.inactiveGasMixProfile is not None:
+            for idx, gasname in enumerate(self.inactiveGases):
+                self.mu_profile += self.inactiveGasMixProfile[idx,:]*self._molecule_weight[gasname]

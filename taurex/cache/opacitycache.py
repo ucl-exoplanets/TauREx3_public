@@ -138,7 +138,6 @@ class OpacityCache(Singleton):
             If molecule could not be loaded/found
 
         """
-        key = key.upper()
         if key in self.opacity_dict:
             return self.opacity_dict[key]
         else:
@@ -200,7 +199,7 @@ class OpacityCache(Singleton):
         molecules = []
         for files in file_list:
             splits = pathlib.Path(files).stem.split('.')       
-            molecules.append(splits[0].upper())
+            molecules.append(splits[0])
         return molecules
     def load_opacity_from_path(self,path,molecule_filter=None):
         """

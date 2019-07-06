@@ -87,7 +87,7 @@ class TaurexChemistry(Chemistry):
 
     @property
     def inactiveGases(self):
-        return  ['H2', 'HE', 'N2']
+        return  ['H2', 'He', 'N2']
 
 
     def fitting_parameters(self):

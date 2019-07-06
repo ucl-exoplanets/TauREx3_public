@@ -27,7 +27,7 @@ class Gas(Fittable,Logger,Writeable):
     def __init__(self,name,molecule_name):
         Logger.__init__(self,name)
         Fittable.__init__(self)
-        self._molecule_name = molecule_name.upper()
+        self._molecule_name = molecule_name
         self.mix_profile=None
     
 
