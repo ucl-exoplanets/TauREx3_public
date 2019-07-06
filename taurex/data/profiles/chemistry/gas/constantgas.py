@@ -1,5 +1,6 @@
 from .gas import Gas
 from taurex.util import molecule_texlabel
+import numpy as np
 class ConstantGas(Gas):
     """
 
@@ -35,7 +36,10 @@ class ConstantGas(Gas):
 
         """
 
-        return self._mix_ratio
+        return self._mix_array
+
+    def initialize_profile(self,nlayers,temperature_profile,pressure_profile,altitude_profile):
+        self._mix_array = self._mix_ratio*np.ones(nlayers)
 
     def add_active_gas_param(self):
         """

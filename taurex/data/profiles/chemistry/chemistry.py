@@ -125,10 +125,10 @@ class Chemistry(Fittable,Logger,Writeable):
         """
         if gas_name in self.activeGases:
             idx = self.activeGases.index(gas_name)
-            return self.activeGasMixProfile[idx,:]
+            return self.activeGasMixProfile[idx]
         elif gas_name in self.inactiveGases:
             idx = self.inactiveGases.index(gas_name)
-            return self.inactiveGasMixProfile[idx,:]  
+            return self.inactiveGasMixProfile[idx]  
         else:
             raise KeyError  
 
@@ -137,10 +137,10 @@ class Chemistry(Fittable,Logger,Writeable):
         self.mu_profile= np.zeros(shape=(nlayers,))
         if self.activeGasMixProfile is not None:
             for idx, gasname in enumerate(self.activeGases):
-                self.mu_profile += self.activeGasMixProfile[idx,:]*get_molecular_weight(gasname)
+                self.mu_profile += self.activeGasMixProfile[idx]*get_molecular_weight(gasname)
         if self.inactiveGasMixProfile is not None:
             for idx, gasname in enumerate(self.inactiveGases):
-                self.mu_profile += self.inactiveGasMixProfile[idx,:]*get_molecular_weight(gasname)
+                self.mu_profile += self.inactiveGasMixProfile[idx]*get_molecular_weight(gasname)
 
 
     def write(self,output):

@@ -1,17 +1,19 @@
 import unittest
 from taurex.optimizer.optimizer import Optimizer
 from taurex.model import TransmissionModel
-
+from unittest.mock import patch
 
 
 class OptimizerTest(unittest.TestCase):
 
 
     def test_fit_params(self):
-
+        from taurex.cache import OpacityCache
         #spin up a model
-        tm = TransmissionModel()
-        tm.build()
+        with patch.object(OpacityCache,"find_list_of_molecules") as mock_my_method:
+            mock_my_method.return_value = ['H2O','CH4']
+            tm = TransmissionModel()
+            tm.build()
         opt = Optimizer('test',model=tm)
 
         

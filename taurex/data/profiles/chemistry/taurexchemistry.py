@@ -3,6 +3,7 @@ from taurex.data.fittable import fitparam
 import numpy as np
 import math
 from taurex.util import *
+from taurex.cache import OpacityCache
 class TaurexChemistry(Chemistry):
     """
     The standard chemical model used in Taurex. This allows for the combination
@@ -36,25 +37,68 @@ class TaurexChemistry(Chemistry):
     Parameters
     ----------
 
-    n2_mix_ratio : float
-        Mix ratio of N2 in atmosphere
+    fill_gases : str or obj:`list`
+        Gas or gas-pair to fill the remainder of the atmosphere
+        with. Defaults to H2 and He
 
-    he_h2_ratio : float
-        Ratio between He and H2. The rest of the atmosphere
-        is filled with these molecules.
+    ratio : float
+        If a pair of fill molecules are defined, whats the ratio between them?
 
 
     """
-    def __init__(self,n2_mix_ratio=0,he_h2_ratio=0.1764):
+    def __init__(self,fill_gases=['H2','He'],ratio=0.17567):
         super().__init__('ChemistryModel')
 
 
-        self._n2_mix_ratio = n2_mix_ratio
-        self._he_h2_mix_ratio = he_h2_ratio
-
         self._gases = []
+        self._active = []
+        self._inactive = []
+
+        if hasattr(fill_gases,'__len__'):
+            if len(fill_gases)> 2:
+                self.error('Only maximum of two fill gases allowed')
+                raise Exception('Fill_gases')
+
+
+        self._fill_gases = fill_gases
+        self._fill_ratio = ratio
         self.active_mixratio_profile = None
         self.inactive_mixratio_profile = None
+        self.molecules_i_have = OpacityCache().find_list_of_molecules()
+        self.debug('MOLECULES I HAVE %s',self.molecules_i_have)
+        self.setup_fill_params()
+
+    def setup_fill_params(self):
+        if not hasattr(self._fill_gases,'__len__') or len(self._fill_gases)< 2:
+            return
+        
+        mol_name = '{}_{}'.format(*self._fill_gases)
+        param_name = mol_name
+        param_tex = '{}/{}'.format(molecule_texlabel(self._fill_gases[1]),molecule_texlabel(self._fill_gases[0]))
+        
+        def read_mol(self):
+            return self._fill_ratio
+        def write_mol(self,value):
+            self._fill_ratio = value
+
+        fget = read_mol
+        fset = write_mol
+        
+        bounds = [1.0e-12, 0.1]
+        
+        default_fit = False
+        self.add_fittable_param(param_name,param_tex,fget,fset,'log',default_fit,bounds) 
+
+
+    def isActive(self,gas):
+        """
+        Determines if the gas is active or not (Whether we have cross-sections)
+        """
+        if gas in self.molecules_i_have:
+            return True
+        else:
+            return False
+
 
     def addGas(self,gas):
         """
@@ -67,8 +111,12 @@ class TaurexChemistry(Chemistry):
             on next initialization call.
 
         """
+        if gas.molecule in [x.molecule for x in self._gases]:
+            self.error('Gas already exists')
+            raise Exception('Gas already exists')
+        
         self._gases.append(gas)
-
+        
 
 
 
@@ -82,12 +130,12 @@ class TaurexChemistry(Chemistry):
 
     @property
     def activeGases(self):
-        return [gas.molecule for gas in self._gases]
+        return self._active
 
 
     @property
     def inactiveGases(self):
-        return  ['H2', 'He', 'N2']
+        return  self._inactive
 
 
     def fitting_parameters(self):
@@ -118,23 +166,67 @@ class TaurexChemistry(Chemistry):
 
         """
         self.info('Initializing chemistry model')
-        self.active_mixratio_profile = np.zeros(shape=(len(self._gases),nlayers))
-        self.inactive_mixratio_profile = np.zeros((len(self.inactiveGases), nlayers))
 
-        for idx,gas in enumerate(self._gases):
+        
+
+
+
+        #self.active_mixratio_profile = np.zeros(shape=(len(self._gases),nlayers))
+        #self.inactive_mixratio_profile = np.zeros((len(self.inactiveGases), nlayers))
+
+        active_profile = []
+        inactive_profile = []
+
+        self._active = []
+        self._inactive = []
+        for gas in self._gases:
             gas.initialize_profile(nlayers,temperature_profile,pressure_profile,altitude_profile)
-            self.active_mixratio_profile[idx,:] = gas.mixProfile
+            if self.isActive(gas.molecule):
+                active_profile.append(gas.mixProfile)
+                self._active.append(gas.molecule)
+            else:
+                inactive_profile.append(gas.mixProfile)
+                self._inactive.append(gas.molecule)
 
 
+        total_mix = sum(active_profile) + sum(inactive_profile)
         
 
 
-        #Since this can either be a scalar one or an array lets do it the old fashion way
+        mixratio_remainder = 1. - total_mix
+        if isinstance(self._fill_gases,str) or len(self._fill_gases) ==1:
+            #Simple, only one molecule so use that
+            if self.isActive(self._fill_gases):
+                active_profile.append(mixratio_remainder)
+                self._active.append(self._fill_gases)
+            else:
+                inactive_profile.append(mixratio_remainder)
+                self._inactive.append(self._fill_gases)
+        else:
+            first_pair = mixratio_remainder/(1. + self._fill_ratio) # H2
+            second_pair =  self._fill_ratio * first_pair
+            if self.isActive(self._fill_gases[0]):
+                active_profile.append(first_pair)
+                self._active.append(self._fill_gases[0])
+            else:
+                inactive_profile.append(first_pair)
+                self._inactive.append(self._fill_gases[0])
+            if self.isActive(self._fill_gases[1]):
+                active_profile.append(second_pair)
+                self._active.append(self._fill_gases[1])
+            else:
+                inactive_profile.append(second_pair)
+                self._inactive.append(self._fill_gases[1])
 
 
-        self.compute_absolute_gas_profile()
-        
-
+        if len(active_profile) > 0:
+            self.active_mixratio_profile = np.vstack(active_profile)
+        else:
+            self.active_mixratio_profile = 0.0
+        if len(inactive_profile) > 0:
+            self.inactive_mixratio_profile = np.vstack(inactive_profile)
+        else:
+            self.inactive_mixratio_profile = 0.0
         super().initialize_chemistry(nlayers,temperature_profile,pressure_profile,altitude_profile)
         
 
@@ -163,73 +255,6 @@ class TaurexChemistry(Chemistry):
         """
         return self.inactive_mixratio_profile
 
-
-    def compute_absolute_gas_profile(self):
-        """
-        Fills whats left of the atmosphere with H2-He
-
-        """
-        
-        self.inactive_mixratio_profile[2, :] = self._n2_mix_ratio
-        # first get the sum of the mixing ratio of all active gases
-
-
-        active_mixratio_sum = np.sum(self.active_mixratio_profile, axis = 0)
-        
-        active_mixratio_sum += self.inactive_mixratio_profile[2, :]
-        
-
-
-        mixratio_remainder = 1. - active_mixratio_sum
-        self.inactive_mixratio_profile[0, :] = mixratio_remainder/(1. + self._he_h2_mix_ratio) # H2
-        self.inactive_mixratio_profile[1, :] =  self._he_h2_mix_ratio * self.inactive_mixratio_profile[0, :] 
-
-
-
-    @fitparam(param_name='N2',param_latex=molecule_texlabel('N2'),default_mode='log',default_fit=False,default_bounds=[1e-12,1.0])
-    def N2MixRatio(self):
-        """
-        N2 mix ratio
-
-        Parameters
-        ----------
-        value : float
-            New mix ratio to set, must be between 0.0 and 1.0
-
-
-        Returns
-        -------
-        n2_mix : float
-        """
-        return self._n2_mix_ratio
-    
-    @N2MixRatio.setter
-    def N2MixRatio(self,value):
-        self._n2_mix_ratio = value
-
-    @fitparam(param_name='H2_He',param_latex=molecule_texlabel('H$_2$/He'),default_mode='log',default_fit=False,default_bounds=[1e-12,1.0])
-    def H2HeMixRatio(self):
-        """
-        Ratio between H2 and He to fill the rest of the atmosphere. 
-        H2 = 1 - ``H2HeMixRatio``
-        He = ``H2HeMixRatio``
-
-
-        Parameters
-        ----------
-        value : float
-            New ratio to set, must be between 0.0 and 1.0
-
-
-        Returns
-        -------
-        h2he_ratio : float
-        """
-        return self._he_h2_mix_ratio
-    
-    @H2HeMixRatio.setter
-    def H2HeMixRatio(self,value):
-        self._he_h2_mix_ratio = value
 
 
     def write(self,output):

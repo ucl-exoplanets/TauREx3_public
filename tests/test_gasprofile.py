@@ -8,15 +8,17 @@ class ConstantGasTest(unittest.TestCase):
 
     def test_init(self):
         gc = ConstantGas()
+        gc.initialize_profile(10,None,None,None)
         self.assertEqual(gc.molecule,'H2O')
-        self.assertEqual(gc.mixProfile,1e-5)
+        np.testing.assert_equal(gc.mixProfile,np.ones(10)*1e-5)
         param = gc.fitting_parameters()
 
         h2o=param['H2O']
         self.assertEqual(h2o[2](),1e-5)
         h2o[3](1e-4)
         self.assertEqual(h2o[2](),1e-4)
-        self.assertEqual(gc.mixProfile,1e-4)
+        gc.initialize_profile(10,None,None,None)
+        np.testing.assert_equal(gc.mixProfile,np.ones(10)*1e-4)
 
 class TwoPointGasProfileTest(unittest.TestCase):
 
