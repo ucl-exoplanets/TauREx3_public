@@ -54,10 +54,11 @@ class TaurexChemistry(Chemistry):
         self._active = []
         self._inactive = []
 
-        if hasattr(fill_gases,'__len__'):
-            if len(fill_gases)> 2:
-                self.error('Only maximum of two fill gases allowed')
-                raise Exception('Fill_gases')
+        if isinstance(fill_gases,str):
+            fill_gases = [fill_gases]
+
+        if isinstance(ratio,float):
+            ratio = [ratio]
 
 
         self._fill_gases = fill_gases
@@ -194,30 +195,9 @@ class TaurexChemistry(Chemistry):
 
 
         mixratio_remainder = 1. - total_mix
-        if isinstance(self._fill_gases,str) or len(self._fill_gases) ==1:
-            #Simple, only one molecule so use that
-            if self.isActive(self._fill_gases):
-                active_profile.append(mixratio_remainder)
-                self._active.append(self._fill_gases)
-            else:
-                inactive_profile.append(mixratio_remainder)
-                self._inactive.append(self._fill_gases)
-        else:
-            first_pair = mixratio_remainder/(1. + self._fill_ratio) # H2
-            second_pair =  self._fill_ratio * first_pair
-            if self.isActive(self._fill_gases[0]):
-                active_profile.append(first_pair)
-                self._active.append(self._fill_gases[0])
-            else:
-                inactive_profile.append(first_pair)
-                self._inactive.append(self._fill_gases[0])
-            if self.isActive(self._fill_gases[1]):
-                active_profile.append(second_pair)
-                self._active.append(self._fill_gases[1])
-            else:
-                inactive_profile.append(second_pair)
-                self._inactive.append(self._fill_gases[1])
-
+        remain_active,remain_inactive=self.fill_atmosphere(mixratio_remainder)
+        active_profile.extend(remain_active)
+        inactive_profile.extend(remain_inactive)
 
         if len(active_profile) > 0:
             self.active_mixratio_profile = np.vstack(active_profile)
@@ -229,6 +209,37 @@ class TaurexChemistry(Chemistry):
             self.inactive_mixratio_profile = 0.0
         super().initialize_chemistry(nlayers,temperature_profile,pressure_profile,altitude_profile)
         
+
+    def fill_atmosphere(self,mixratio_remainder):
+        active_profile = []
+        inactive_profile = []
+
+        if len(self._fill_gases) ==1:
+            if self.isActive(self._fill_gases):
+                active_profile.append(mixratio_remainder)
+                self._active.append(self._fill_gases)
+            else:
+                inactive_profile.append(mixratio_remainder)
+                self._inactive.append(self._fill_gases)
+        else:
+            main_molecule =  mixratio_remainder/(1. + sum(self._fill_ratio))
+            if self.isActive(self._fill_gases[0]):
+                active_profile.append(main_molecule)
+                self._active.append(self._fill_gases[0])
+            else:
+                inactive_profile.append(main_molecule)
+                self._inactive.append(self._fill_gases[0])
+            for molecule,ratio in zip(self._fill_gases[1:],self._fill_ratio):
+                second_molecule = ratio * main_molecule
+
+                if self.isActive(molecule):
+                    active_profile.append(second_molecule)
+                    self._active.append(molecule)
+                else:
+                    inactive_profile.append(second_molecule)
+                    self._inactive.append(molecule)
+        return active_profile,inactive_profile
+    
 
 
     @property

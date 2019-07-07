@@ -45,3 +45,8 @@ class TaurexChemistryTest(unittest.TestCase):
         self.assertIn('CH4_P',params)
 
         self.assertIsNotNone(tc.muProfile)
+
+    
+
+    def test_fill_gas(self):
+       tc = TaurexChemistry(fill_gases='CH4')
