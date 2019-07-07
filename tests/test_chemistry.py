@@ -50,3 +50,5 @@ class TaurexChemistryTest(unittest.TestCase):
 
     def test_fill_gas(self):
        tc = TaurexChemistry(fill_gases='CH4')
+
+       

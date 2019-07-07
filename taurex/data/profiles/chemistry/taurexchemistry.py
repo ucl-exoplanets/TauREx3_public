@@ -38,11 +38,11 @@ class TaurexChemistry(Chemistry):
     ----------
 
     fill_gases : str or obj:`list`
-        Gas or gas-pair to fill the remainder of the atmosphere
-        with. Defaults to H2 and He
+        Either a single gas or list of gases to fill the atmosphere with
 
-    ratio : float
-        If a pair of fill molecules are defined, whats the ratio between them?
+    ratio : float or :obj:`list`
+        If a bunch of molecules are used to fill an atmosphere, whats the ratio between them?
+        The first fill gas is considered the main one with others defined as ``molecule / main_molecule``
 
 
     """
@@ -60,6 +60,11 @@ class TaurexChemistry(Chemistry):
         if isinstance(ratio,float):
             ratio = [ratio]
 
+        if len(fill_gases) > 1 and len(ratio)!= len(fill_gases)-1:
+            self.error('Fill gases and ratio count are not correctly matched')
+            self.error('There should be %s ratios, you have defined %s',len(fill_gases)-1,len(ratio))
+            raise Exception('Incorrect number of ratios given')
+
 
         self._fill_gases = fill_gases
         self._fill_ratio = ratio
@@ -73,22 +78,26 @@ class TaurexChemistry(Chemistry):
         if not hasattr(self._fill_gases,'__len__') or len(self._fill_gases)< 2:
             return
         
-        mol_name = '{}_{}'.format(*self._fill_gases)
-        param_name = mol_name
-        param_tex = '{}/{}'.format(molecule_texlabel(self._fill_gases[1]),molecule_texlabel(self._fill_gases[0]))
-        
-        def read_mol(self):
-            return self._fill_ratio
-        def write_mol(self,value):
-            self._fill_ratio = value
+        main_gas = self._fill_gases[0]
 
-        fget = read_mol
-        fset = write_mol
-        
-        bounds = [1.0e-12, 0.1]
-        
-        default_fit = False
-        self.add_fittable_param(param_name,param_tex,fget,fset,'log',default_fit,bounds) 
+        for idx,value in enumerate(zip(self._fill_gases[1:],self._fill_ratio)):
+            gas,ratio = value
+            mol_name = '{}_{}'.format(main_gas,gas)
+            param_name = mol_name
+            param_tex = '{}/{}'.format(molecule_texlabel(gas),molecule_texlabel(main_gas))
+            
+            def read_mol(self,idx=idx):
+                return self._fill_ratio[idx]
+            def write_mol(self,value,idx=idx):
+                self._fill_ratio[idx] = value
+
+            fget = read_mol
+            fset = write_mol
+            
+            bounds = [1.0e-12, 0.1]
+            
+            default_fit = False
+            self.add_fittable_param(param_name,param_tex,fget,fset,'log',default_fit,bounds) 
 
 
     def isActive(self,gas):
