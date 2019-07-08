@@ -6,6 +6,9 @@ import re
 import os
 import pathlib
 import numpy as np
+from taurex.constants import MSOL,RSOL
+import math
+
 from taurex.util.math import interp_lin_only
 class PhoenixStar(BlackbodyStar):
     """
@@ -40,7 +43,7 @@ class PhoenixStar(BlackbodyStar):
 
 
 
-    def __init__(self,temperature=5000,radius=1.0,phoenix_path=None):
+    def __init__(self,temperature=5000,radius=1.0,metallicity=1.0,mass=1.0,phoenix_path=None):
         super().__init__(temperature=temperature,radius=radius)
         if phoenix_path is None:
             self.error('No file path to phoenix files defined')
@@ -48,8 +51,31 @@ class PhoenixStar(BlackbodyStar):
         
         self.info('Star is PHOENIX type')
         self._phoenix_path = phoenix_path
-        self.preload_phoenix_spectra()
 
+        self._mass = mass * MSOL
+        
+        self._logg = self.compute_logg()
+
+
+
+
+        #self.preload_phoenix_spectra()
+
+
+    def compute_logg(self):
+        import astropy.units as u
+        from astropy.constants import G
+        mass = self._mass * u.kg
+        radius = self._radius * u.m
+
+
+
+
+        small_g = (G * mass) / (radius**2)
+
+        small_g = small_g.to(u.cm/u.s**2)
+
+        return  math.log10(small_g.value)
 
     def preload_phoenix_spectra(self):
         
