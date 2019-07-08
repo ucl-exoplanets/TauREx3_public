@@ -64,7 +64,6 @@ class CIACache(Singleton):
         """
 
 
-        key = key.upper()
         if key in self.cia_dict:
             return self.cia_dict[key]
         else:
@@ -139,7 +138,7 @@ class CIACache(Singleton):
         self.log.debug('Glob list: %s',glob_path)
         self.log.debug('File list FOR CIA %s',file_list)
         for files in file_list:
-            pairname=Path(files).stem.split('_')[0].upper()
+            pairname=Path(files).stem.split('_')[0]
             self.log.debug('pairname found %s',pairname)
             if pair_filter is not  None:
                 if not pairname in pair_filter:
@@ -155,7 +154,7 @@ class CIACache(Singleton):
         
         for files in file_list:
             from taurex.cia import HitranCIA
-            pairname=Path(files).stem.split('_')[0].upper()
+            pairname=Path(files).stem.split('_')[0]
 
             if pair_filter is not  None:
                 if not pairname in pair_filter:

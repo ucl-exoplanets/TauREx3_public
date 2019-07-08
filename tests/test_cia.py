@@ -47,7 +47,7 @@ class PickleCIATest(unittest.TestCase):
     def test_properties(self):
 
         
-        self.assertEqual(self.pop.pairName,'HEH-2HF')
+        self.assertEqual(self.pop.pairName,'HeH-2HF')
         np.testing.assert_equal(pickle_test_data['t'],self.pop.temperatureGrid)
         np.testing.assert_equal(pickle_test_data['wno'],self.pop.wavenumberGrid)
         np.testing.assert_equal(pickle_test_data['xsecarr'],self.pop._xsec_grid)
@@ -57,7 +57,7 @@ class PickleCIATest(unittest.TestCase):
         with patch("builtins.open", mock_open(read_data=self.data)) as mock_file:
             pop=PickleCIA('/unittestfile/HeH-2HF.db')
             mock_file.assert_called_once_with('/unittestfile/HeH-2HF.db','rb')
-            self.assertEqual(pop.pairName,'HEH-2HF')
+            self.assertEqual(pop.pairName,'HeH-2HF')
 
     def test_cia_calc(self):
         np.testing.assert_allclose(self.pop.cia(225),pickle_test_data['xsecarr'][1])

@@ -4,20 +4,8 @@ cia_path = /Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/cia/hitran
 
 
 [Chemistry]
-chemistry_type = taurex
-fill_gases = H2,He
-ratio=0.17647
+chemistry_type = ace
 
-    [[H2O]]
-    gas_type=constant
-    mix_ratio=1e-5
-
-    #[[CH4]]
-    #gas_type=twolayer
-    #mix_ratio_surface=1e-4
-    #mix_ratio_top=1e-10
-    #mix_ratio_P=1e2
-    
 
 
 [Temperature]
@@ -50,10 +38,10 @@ model_type = transmission
 
 
 [Spectrum]
-observed_spectrum = /Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_transmission/SPECTRUM_fit.dat
-grid_type = observed
+#observed_spectrum = C:/Users/Ahmed/Documents/TaurexData/tests/test_0_transmission/SPECTRUM_fit.dat
+grid_type = manual
 #wavenumber_grid = 0.0,10000.0,10000
-#wavelength_grid = 0.01,10.0,10000
+wavelength_grid = 0.01,15.0,30000
 
 
 

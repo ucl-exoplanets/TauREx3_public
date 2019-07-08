@@ -76,8 +76,8 @@ there are other more complex profiles but for now we'll keep it simple::
 
     [Chemistry]
     chemistry_type = taurex
-    n2_mix_ratio=3.00739e-9
-    he_h2_ratio=4.8962e-2
+    fill_gases = H2,He
+    ratio=4.8962e-2
 
         [[H2O]]
         gas_type = constant
@@ -87,6 +87,9 @@ there are other more complex profiles but for now we'll keep it simple::
         gas_type=constant
         mix_ratio=1.1185e-4
 
+        [[N2]]
+        gas_type = constant
+        mix_ratio = 3.00739e-9
 
 Plotting it gives:
 
@@ -97,8 +100,8 @@ by commenting it out::
 
     [Chemistry]
     chemistry_type = taurex
-    n2_mix_ratio=3.00739e-9
-    he_h2_ratio=4.8962e-2
+    fill_gases = H2,He
+    ratio=4.8962e-2
 
         [[H2O]]
         gas_type = constant
@@ -107,6 +110,10 @@ by commenting it out::
         #[[CH4]]
         #gas_type=constant
         #mix_ratio=1.1185e-4
+
+        [[N2]]
+        gas_type = constant
+        mix_ratio = 3.00739e-9
 
 .. image::  _static/h2o_only.png
 

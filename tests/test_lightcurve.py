@@ -1,5 +1,6 @@
 import unittest
 from unittest.mock import patch, mock_open
+from unittest import mock
 from taurex.model.lightcurve.lightcurve import LightCurveData,LightCurveModel
 from taurex.model import TransmissionModel
 import numpy as np

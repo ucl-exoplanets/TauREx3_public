@@ -41,7 +41,6 @@ class RayleighContribution(Contribution):
         molecules = model.chemistry.activeGases + model.chemistry.inactiveGases
         for gasname in molecules:
 
-            gasname = gasname.upper()
             #print(gasname)
             if np.sum(model.chemistry.get_gas_mix_profile(gasname)) == 0.0:
                 continue
@@ -55,7 +54,7 @@ class RayleighContribution(Contribution):
 
             with np.errstate(divide='ignore'):
                 wltmp = 10000./wn
-            if gasname == 'HE':
+            if gasname == 'He':
                  # C. R. Mansfield and E. R. Peck. Dispersion of helium, J. Opt. Soc. Am. 59, 199-203 (1969)
                 ns = 1 + 0.01470091/(423.98-(wltmp)**-2)
                 # king is one for He

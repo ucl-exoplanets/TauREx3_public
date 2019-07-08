@@ -85,7 +85,10 @@ class OpacityCache(Singleton):
 
         """
         
-
+        import os
+        if not os.path.isdir(opacity_path):
+            self.log.error('PATH: %s does not exist!!!',opacity_path)
+            raise NotADirectoryError
         self._opacity_path  = opacity_path
     
     def set_interpolation(self,interpolation_mode):
@@ -135,7 +138,6 @@ class OpacityCache(Singleton):
             If molecule could not be loaded/found
 
         """
-        key = key.upper()
         if key in self.opacity_dict:
             return self.opacity_dict[key]
         else:
@@ -181,7 +183,24 @@ class OpacityCache(Singleton):
                 self.opacity_dict[opacity.moleculeName] = opacity       
         else:     
             self.log.info('Loading opacity %s into model',opacity.moleculeName)
-            self.opacity_dict[opacity.moleculeName] = opacity    
+            self.opacity_dict[opacity.moleculeName] = opacity   
+
+
+    def find_list_of_molecules(self):
+        from glob import glob
+        import os
+        from taurex.opacity import PickleOpacity
+        if self._opacity_path is None:
+            return []
+        glob_path = os.path.join(self._opacity_path,'*.pickle')
+
+        file_list = glob(glob_path)
+        self.log.debug('File list %s',file_list)
+        molecules = []
+        for files in file_list:
+            splits = pathlib.Path(files).stem.split('.')       
+            molecules.append(splits[0])
+        return molecules
     def load_opacity_from_path(self,path,molecule_filter=None):
         """
         Searches path for molecular cross-section files, creates and loads them into the cache

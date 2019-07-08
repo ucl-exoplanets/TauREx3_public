@@ -40,7 +40,7 @@ class CIA(Logger):
             The pair of molecules of this object in the form: ``Molecule1``-``Molecule2``
 
         """
-        return self._pair_name.upper()
+        return self._pair_name
 
 
     @property
@@ -55,7 +55,7 @@ class CIA(Logger):
             
         """
 
-        return self._pair_name.split('-')[0].upper()
+        return self._pair_name.split('-')[0]
 
     @property
     def pairTwo(self):
@@ -69,7 +69,7 @@ class CIA(Logger):
             
         """
 
-        return self._pair_name.split('-')[-1].upper()
+        return self._pair_name.split('-')[-1]
     def compute_cia(self,temperature):
         """
         Computes the collisionaly induced cross-section for a given temeprature

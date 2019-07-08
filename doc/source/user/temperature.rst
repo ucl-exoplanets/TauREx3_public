@@ -85,6 +85,10 @@ N-Point Profile
 
 Temperature defined at various heights in the atmosphere. Smoothing is then applied.
 
+.. figure::  _static/npoint.png
+   :align:   left
+   :width: 80%
+
 Variables are:
 
     - ``T_surface``
@@ -106,15 +110,17 @@ Variables are:
         - int
         - Smoothing width in atmospherice layers
 
-.. figure::  _static/npoint.png
-   :align:   left
-   :width: 80%
+
 
 Rodgers 2000 Profile
 --------------------
 
 Layer-by-layer temperature - pressure profile retrieval using dampening factor
 Introduced in Rodgers (2000): Inverse Methods for Atmospheric Sounding (equation 3.26)
+
+.. figure::  _static/rodgers.png
+   :align:   left
+   :width: 80%
 
 Variables are:
 
@@ -127,6 +133,3 @@ Variables are:
         - In scaleheights, Line et al. 2013 sets this to 7, Irwin et al sets this to 1.5
           may be left as free and Pressure dependent parameter later.
 
-.. figure::  _static/rodgers.png
-   :align:   left
-   :width: 80%

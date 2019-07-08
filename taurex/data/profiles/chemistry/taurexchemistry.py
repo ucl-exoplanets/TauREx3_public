@@ -3,6 +3,7 @@ from taurex.data.fittable import fitparam
 import numpy as np
 import math
 from taurex.util import *
+from taurex.cache import OpacityCache
 class TaurexChemistry(Chemistry):
     """
     The standard chemical model used in Taurex. This allows for the combination
@@ -36,25 +37,78 @@ class TaurexChemistry(Chemistry):
     Parameters
     ----------
 
-    n2_mix_ratio : float
-        Mix ratio of N2 in atmosphere
+    fill_gases : str or obj:`list`
+        Either a single gas or list of gases to fill the atmosphere with
 
-    he_h2_ratio : float
-        Ratio between He and H2. The rest of the atmosphere
-        is filled with these molecules.
+    ratio : float or :obj:`list`
+        If a bunch of molecules are used to fill an atmosphere, whats the ratio between them?
+        The first fill gas is considered the main one with others defined as ``molecule / main_molecule``
 
 
     """
-    def __init__(self,n2_mix_ratio=0,he_h2_ratio=0.1764):
+    def __init__(self,fill_gases=['H2','He'],ratio=0.17567):
         super().__init__('ChemistryModel')
 
 
-        self._n2_mix_ratio = n2_mix_ratio
-        self._he_h2_mix_ratio = he_h2_ratio
-
         self._gases = []
+        self._active = []
+        self._inactive = []
+
+        if isinstance(fill_gases,str):
+            fill_gases = [fill_gases]
+
+        if isinstance(ratio,float):
+            ratio = [ratio]
+
+        if len(fill_gases) > 1 and len(ratio)!= len(fill_gases)-1:
+            self.error('Fill gases and ratio count are not correctly matched')
+            self.error('There should be %s ratios, you have defined %s',len(fill_gases)-1,len(ratio))
+            raise Exception('Incorrect number of ratios given')
+
+
+        self._fill_gases = fill_gases
+        self._fill_ratio = ratio
         self.active_mixratio_profile = None
         self.inactive_mixratio_profile = None
+        self.molecules_i_have = OpacityCache().find_list_of_molecules()
+        self.debug('MOLECULES I HAVE %s',self.molecules_i_have)
+        self.setup_fill_params()
+
+    def setup_fill_params(self):
+        if not hasattr(self._fill_gases,'__len__') or len(self._fill_gases)< 2:
+            return
+        
+        main_gas = self._fill_gases[0]
+
+        for idx,value in enumerate(zip(self._fill_gases[1:],self._fill_ratio)):
+            gas,ratio = value
+            mol_name = '{}_{}'.format(main_gas,gas)
+            param_name = mol_name
+            param_tex = '{}/{}'.format(molecule_texlabel(gas),molecule_texlabel(main_gas))
+            
+            def read_mol(self,idx=idx):
+                return self._fill_ratio[idx]
+            def write_mol(self,value,idx=idx):
+                self._fill_ratio[idx] = value
+
+            fget = read_mol
+            fset = write_mol
+            
+            bounds = [1.0e-12, 0.1]
+            
+            default_fit = False
+            self.add_fittable_param(param_name,param_tex,fget,fset,'log',default_fit,bounds) 
+
+
+    def isActive(self,gas):
+        """
+        Determines if the gas is active or not (Whether we have cross-sections)
+        """
+        if gas in self.molecules_i_have:
+            return True
+        else:
+            return False
+
 
     def addGas(self,gas):
         """
@@ -67,8 +121,12 @@ class TaurexChemistry(Chemistry):
             on next initialization call.
 
         """
+        if gas.molecule in [x.molecule for x in self._gases]:
+            self.error('Gas already exists')
+            raise Exception('Gas already exists')
+        
         self._gases.append(gas)
-
+        
 
 
 
@@ -82,12 +140,12 @@ class TaurexChemistry(Chemistry):
 
     @property
     def activeGases(self):
-        return [gas.molecule for gas in self._gases]
+        return self._active
 
 
     @property
     def inactiveGases(self):
-        return  ['H2', 'HE', 'N2']
+        return  self._inactive
 
 
     def fitting_parameters(self):
@@ -118,25 +176,79 @@ class TaurexChemistry(Chemistry):
 
         """
         self.info('Initializing chemistry model')
-        self.active_mixratio_profile = np.zeros(shape=(len(self._gases),nlayers))
-        self.inactive_mixratio_profile = np.zeros((len(self.inactiveGases), nlayers))
 
-        for idx,gas in enumerate(self._gases):
+        
+
+
+
+        #self.active_mixratio_profile = np.zeros(shape=(len(self._gases),nlayers))
+        #self.inactive_mixratio_profile = np.zeros((len(self.inactiveGases), nlayers))
+
+        active_profile = []
+        inactive_profile = []
+
+        self._active = []
+        self._inactive = []
+        for gas in self._gases:
             gas.initialize_profile(nlayers,temperature_profile,pressure_profile,altitude_profile)
-            self.active_mixratio_profile[idx,:] = gas.mixProfile
+            if self.isActive(gas.molecule):
+                active_profile.append(gas.mixProfile)
+                self._active.append(gas.molecule)
+            else:
+                inactive_profile.append(gas.mixProfile)
+                self._inactive.append(gas.molecule)
 
 
+        total_mix = sum(active_profile) + sum(inactive_profile)
         
 
 
-        #Since this can either be a scalar one or an array lets do it the old fashion way
+        mixratio_remainder = 1. - total_mix
+        remain_active,remain_inactive=self.fill_atmosphere(mixratio_remainder)
+        active_profile.extend(remain_active)
+        inactive_profile.extend(remain_inactive)
 
-
-        self.compute_absolute_gas_profile()
-        
-
+        if len(active_profile) > 0:
+            self.active_mixratio_profile = np.vstack(active_profile)
+        else:
+            self.active_mixratio_profile = 0.0
+        if len(inactive_profile) > 0:
+            self.inactive_mixratio_profile = np.vstack(inactive_profile)
+        else:
+            self.inactive_mixratio_profile = 0.0
         super().initialize_chemistry(nlayers,temperature_profile,pressure_profile,altitude_profile)
         
+
+    def fill_atmosphere(self,mixratio_remainder):
+        active_profile = []
+        inactive_profile = []
+
+        if len(self._fill_gases) ==1:
+            if self.isActive(self._fill_gases):
+                active_profile.append(mixratio_remainder)
+                self._active.append(self._fill_gases)
+            else:
+                inactive_profile.append(mixratio_remainder)
+                self._inactive.append(self._fill_gases)
+        else:
+            main_molecule =  mixratio_remainder/(1. + sum(self._fill_ratio))
+            if self.isActive(self._fill_gases[0]):
+                active_profile.append(main_molecule)
+                self._active.append(self._fill_gases[0])
+            else:
+                inactive_profile.append(main_molecule)
+                self._inactive.append(self._fill_gases[0])
+            for molecule,ratio in zip(self._fill_gases[1:],self._fill_ratio):
+                second_molecule = ratio * main_molecule
+
+                if self.isActive(molecule):
+                    active_profile.append(second_molecule)
+                    self._active.append(molecule)
+                else:
+                    inactive_profile.append(second_molecule)
+                    self._inactive.append(molecule)
+        return active_profile,inactive_profile
+    
 
 
     @property
@@ -163,73 +275,6 @@ class TaurexChemistry(Chemistry):
         """
         return self.inactive_mixratio_profile
 
-
-    def compute_absolute_gas_profile(self):
-        """
-        Fills whats left of the atmosphere with H2-He
-
-        """
-        
-        self.inactive_mixratio_profile[2, :] = self._n2_mix_ratio
-        # first get the sum of the mixing ratio of all active gases
-
-
-        active_mixratio_sum = np.sum(self.active_mixratio_profile, axis = 0)
-        
-        active_mixratio_sum += self.inactive_mixratio_profile[2, :]
-        
-
-
-        mixratio_remainder = 1. - active_mixratio_sum
-        self.inactive_mixratio_profile[0, :] = mixratio_remainder/(1. + self._he_h2_mix_ratio) # H2
-        self.inactive_mixratio_profile[1, :] =  self._he_h2_mix_ratio * self.inactive_mixratio_profile[0, :] 
-
-
-
-    @fitparam(param_name='N2',param_latex=molecule_texlabel('N2'),default_mode='log',default_fit=False,default_bounds=[1e-12,1.0])
-    def N2MixRatio(self):
-        """
-        N2 mix ratio
-
-        Parameters
-        ----------
-        value : float
-            New mix ratio to set, must be between 0.0 and 1.0
-
-
-        Returns
-        -------
-        n2_mix : float
-        """
-        return self._n2_mix_ratio
-    
-    @N2MixRatio.setter
-    def N2MixRatio(self,value):
-        self._n2_mix_ratio = value
-
-    @fitparam(param_name='H2_He',param_latex=molecule_texlabel('H$_2$/He'),default_mode='log',default_fit=False,default_bounds=[1e-12,1.0])
-    def H2HeMixRatio(self):
-        """
-        Ratio between H2 and He to fill the rest of the atmosphere. 
-        H2 = 1 - ``H2HeMixRatio``
-        He = ``H2HeMixRatio``
-
-
-        Parameters
-        ----------
-        value : float
-            New ratio to set, must be between 0.0 and 1.0
-
-
-        Returns
-        -------
-        h2he_ratio : float
-        """
-        return self._he_h2_mix_ratio
-    
-    @H2HeMixRatio.setter
-    def H2HeMixRatio(self,value):
-        self._he_h2_mix_ratio = value
 
 
     def write(self,output):
