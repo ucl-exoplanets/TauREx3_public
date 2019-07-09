@@ -203,7 +203,7 @@ def molecule_texlabel(gasname):
         return gasname
 
 
-def bindown(original_bin,original_data,new_bin):
+def bindown(original_bin,original_data,new_bin,last_point=None):
     """
     This method quickly bins down by taking the mean.
     The numpy histogram function is exploited to do this quickly
@@ -228,11 +228,17 @@ def bindown(original_bin,original_data,new_bin):
     """
     import numpy as np
     #print(original_bin.shape,original_data.shape)
-    calc_bin = np.append(new_bin,new_bin[-1]+0.5)
-    return(np.histogram(original_bin, calc_bin, weights=original_data)[0] /
-              np.histogram(original_bin,calc_bin)[0])
+    #if last_point is None:
+    #    last_point = new_bin[-1]*2
+    
+    #calc_bin = np.append(new_bin,last_point)
+    #return(np.histogram(original_bin, calc_bin, weights=original_data)[0] /
+    #          np.histogram(original_bin,calc_bin)[0])
 
 
+    digitized = np.digitize(original_bin, new_bin,right=True)-1
+    bin_means = [original_data[digitized == i].mean() for i in range(0, len(new_bin))]
+    return np.array(bin_means)
 
 def movingaverage(a, n=3) :
     """
