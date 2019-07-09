@@ -28,7 +28,7 @@ class PhoenixStar(BlackbodyStar):
         Stellar radius in Solar radius
     
     metallicity : float
-        Metallicity in some units or rather
+        Metallicity in solar values
     
     mass : float
         Stellar mass in solar mass
