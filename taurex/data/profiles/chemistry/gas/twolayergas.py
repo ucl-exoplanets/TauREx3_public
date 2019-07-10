@@ -89,7 +89,10 @@ class TwoLayerGas(TwoPointGas):
         smooth_window = self._mix_ratio_smoothing
         P_layer = np.abs(pressure_profile - self._mix_ratio_pressure).argmin()
 
-        Pnodes = [pressure_profile[0], pressure_profile[int(P_layer-smooth_window/2)], pressure_profile[int(P_layer+smooth_window/2)], pressure_profile[-1]]
+        start_layer = max(int(P_layer-smooth_window/2),0)
+        end_layer = min(int(P_layer+smooth_window/2),nlayers-1)
+
+        Pnodes = [pressure_profile[0], pressure_profile[start_layer], pressure_profile[end_layer], pressure_profile[-1]]
         Cnodes = [self.mixRatioSurface, self.mixRatioSurface, self.mixRatioTop,self.mixRatioTop]
 
         
