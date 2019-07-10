@@ -91,3 +91,10 @@ method = single
 [Fitting]
 planet_radius:fit = True
 planet_radius:bounds = 1.37,1.4
+T:fit = True
+T:bounds = 800,1500
+H2O:fit = True
+HCN:fit = True
+NH3:fit = True
+CH4:fit = True
+clouds_pressure:fit = True
