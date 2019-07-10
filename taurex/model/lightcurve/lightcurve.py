@@ -26,7 +26,7 @@ class LightCurveModel(ForwardModel):
             instruments = 'all'
         
         if instruments == 'all' or 'all' in instruments:
-            instruments = ['wfc3','spitzer','stis']
+            instruments = LightCurveData.availableInstruments
 
         self._load_instruments(instruments)
 
@@ -60,7 +60,6 @@ class LightCurveModel(ForwardModel):
         self._instruments = []
 
         ins_keys = self.lc_data['data'].keys()
-
         for ins in instruments:
             if ins in ins_keys:
                 self.info('Loading {} light curves'.format(ins))
@@ -80,20 +79,31 @@ class LightCurveModel(ForwardModel):
     #         data_std.append(self.lc_data['data'][i][len(self.lc_data['data'][i])//2:])
     
     def _initialize_lightcurves(self):
-
-        min_n_factors = np.concatenate([ins.minNFactors for ins in self._instruments])
-        max_n_factors = np.concatenate([ins.maxNFactors for ins in self._instruments]) 
         
-        self._nfactor = np.ones_like(min_n_factors)
+        nFactor = [ins.minNFactors for ins in self._instruments]
+        
+        min_n_factors = None
 
-        self.create_normalization_fitparams()
+        max_n_factors = None
+        if len(nFactor) > 0:
+            min_n_factors = np.concatenate(nFactor)
+        
+        nFactor = [ins.maxNFactors for ins in self._instruments]
+        if len(nFactor) > 0:
+            max_n_factors = np.concatenate(nFactor) 
+    
 
-        for idx,value in enumerate(zip(min_n_factors,max_n_factors)):
-            min_n,max_n = value
-            self.modify_bounds('Nfactor_{}'.format(idx),[min_n,max_n])
+        if max_n_factors is not None and min_n_factors is not None:
+            self.create_normalization_fitparams()
+
+            for idx,value in enumerate(zip(min_n_factors,max_n_factors)):
+                min_n,max_n = value
+                self.modify_bounds('Nfactor_{}'.format(idx),[min_n,max_n])
+
 
 
         min_time = min([ins.timeSeries.min() for ins in self._instruments])
+        
         max_time = max([ins.timeSeries.max() for ins in self._instruments])
 
         self.modify_bounds('mid_transit_time',[min_time,max_time])
@@ -154,7 +164,10 @@ class LightCurveModel(ForwardModel):
         sma_over_rs_value = self.sma_over_rs
         inclination_value = self.inclination
         mid_time_value = self.mid_time
-        Nfactor = self._nfactor
+        try:
+            Nfactor = self._nfactor
+        except AttributeError:
+            Nfactor = np.ones_like(wlgrid)
 
         result = []
         for ins in self._instruments:

@@ -4,7 +4,7 @@ import numpy as np
 from taurex.output.writeable import Writeable
 class LightCurveData(Logger,Writeable):
 
-    availableInstruments = ['wfc3','spitzer','stis']
+    availableInstruments = ['wfc3','spitzer','stis','twinkle']
 
     @classmethod
     def fromInstrumentName(cls, name,lc_data):
@@ -37,10 +37,12 @@ class LightCurveData(Logger,Writeable):
 
     def _load_data(self,lc_data):
         self._time_series = lc_data['time_series'][self._instrument_name]
+        
         self._raw_data = lc_data['data'][self._instrument_name][:len(lc_data['data'][self._instrument_name]) //2]
         self._data_std = lc_data['data'][self._instrument_name][len(lc_data['data'][self._instrument_name]) //2:]
         self._max_nfactor = np.max(self._raw_data, axis=1)
         self._min_nfactor = np.min(self._raw_data, axis=1)
+        
 
         
     @property
