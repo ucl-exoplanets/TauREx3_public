@@ -4,21 +4,18 @@ xsec_path = "/Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/xsec/TauRex
 xsec_interpolation = exp
 #cia_path = C:/Users/Ahmed/Documents/TaurexData/cia/hitran
 cia_path = "/Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/cia/hitran"
-
-taregt_file
-
 [Chemistry]
 chemistry_type = taurex
-n2_mix_ratio=0
-he_h2_ratio=0.17647
+fill_gases = H2,He
+ratio = 4.8962e-2
 
-    [[H2O]]
-    gas_type=constant
-    mix_ratio=5.62341e-5
+    [[CH4]]
+    gas_type = constant
+    mix_ratio=1.1185e-4
 
-    #[[CH4]]
-    #mix_ratio=1e-6
-    #gas_type=constant
+    [[N2]]
+    gas_type = constant
+    mix_ratio = 3.00739e-9
 
 
 
@@ -35,12 +32,12 @@ atm_max_pressure = 1e6
 nlayers = 100
 
 [Planet]
-planet_type = target
+planet_type = simple
 planet_mass = 1.0 
 planet_radius = 1.20
 
 [Star]
-star_type = target
+star_type = blackbody
 radius = 1.155
 
 [Model]
@@ -57,24 +54,16 @@ model_type = transmission
     [[SimpleClouds]]
     clouds_pressure =1e4
 
-[ArielRad]
-config_file = MyconfigFile.xml
-
 
 [Lightcurve]
 lc_pickle = /Users/ahmed/Downloads/lc_input_correct_wfc3.pickle
 
 
-#lc_pickle = C:/Users/Ahmed/Downloads/lc_input_correct_wfc3.pickle
-
 
 
 [Spectrum]
 lightcurve = /Users/ahmed/Downloads/lc_input_correct_wfc3.pickle
-#lightcurve = C:/Users/Ahmed/Downloads/lc_input_correct_wfc3.pickle
 grid_type = observed
-#wavenumber_grid = 0.0,10000.0,10000
-#wavelength_grid = 0.01,10.0,10000
 
 
 

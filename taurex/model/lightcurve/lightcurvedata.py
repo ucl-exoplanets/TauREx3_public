@@ -15,6 +15,8 @@ class LightCurveData(Logger,Writeable):
             return cls(lc_data,'spitzer',(3.4,8.2))
         elif name.lower() in ('stis',):
             return cls(lc_data,'stis',(0.3,1.0))
+        elif name.lower() in ('twinkle',):
+            return cls(lc_data,'twinkle',(0.4,4.5))
         else:
             log.error('LightCurve of instrument {} not recognized or implemented'.format(name))
             raise KeyError
