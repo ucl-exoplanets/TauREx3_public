@@ -19,6 +19,14 @@ def nprocs():
     return comm.Get_size()   
 
 
+def broadcast(array,rank=0):
+    try:
+        from mpi4py import MPI
+    except ImportError:
+        return array
+    comm = MPI.COMM_WORLD
+    return comm.Bcast(array, root=rank)
+
 def get_rank():
     """Gets rank or returns 0 if mpi is not installed
     
