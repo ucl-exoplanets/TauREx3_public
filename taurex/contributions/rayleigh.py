@@ -90,7 +90,7 @@ class RayleighContribution(Contribution):
             else:
                 # this sets sigma_R to zero for all other gases
                 n_formula = False
-                self.warning('There is no formula for the refractive index of %s. '
+                self.info('There is no formula for the refractive index of %s. '
                                 'Cannot compute the cross section' % gasname)
                 continue
             if n_formula: # only if the refractive index was computed
