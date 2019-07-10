@@ -31,20 +31,20 @@ class OutputGroup(Output):
         self._name = name
     
 
-    def write_array(self,array_name,array):
+    def write_array(self,array_name,array,metadata=None):
         raise NotImplementedError
     
-    def write_list(self,list_name,list_array):
+    def write_list(self,list_name,list_array,metadata=None):
         arr = np.array(list_array)
         self.write_array(list_name,arr)
 
-    def write_scalar(self,scalar_name,scalar):
+    def write_scalar(self,scalar_name,scalar,metadata=None):
         raise NotImplementedError
     
-    def write_string(self,string_name,string):
+    def write_string(self,string_name,string,metadata=None):
         raise NotImplementedError
     
-    def write_string_array(self,string_name,string_array):
+    def write_string_array(self,string_name,string_array,metadata=None):
         raise NotImplementedError
 
 

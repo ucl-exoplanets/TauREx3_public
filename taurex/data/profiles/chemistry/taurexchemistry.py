@@ -279,8 +279,8 @@ class TaurexChemistry(Chemistry):
 
     def write(self,output):
         gas_entry = super().write(output)
-        gas_entry.write_scalar('n2_mix_ratio',self._n2_mix_ratio)
-        gas_entry.write_scalar('he_h2_ratio',self._he_h2_mix_ratio)
+        gas_entry.write_scalar('ratio',self._fill_ratio)
+        output.write_string_array('Fill-gases',self._fill_gases)
         for gas in self._gases:
             gas.write(gas_entry)
 
