@@ -12,3 +12,4 @@ from .taurexchemistry import TaurexChemistry
 from .gas.constantgas import ConstantGas
 from .gas.twolayergas import TwoLayerGas
 from .gas.twopointgas import TwoPointGas
+from .filechemistry import ChemistryFile
