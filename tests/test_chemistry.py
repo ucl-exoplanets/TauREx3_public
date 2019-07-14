@@ -59,4 +59,5 @@ class TaurexChemistryTest(unittest.TestCase):
 
         tc.initialize_chemistry(test_layers,pres_prof,pres_prof,pres_prof)       
 
+        self.assertEqual(tc.muProfile.shape[0],test_layers)
        

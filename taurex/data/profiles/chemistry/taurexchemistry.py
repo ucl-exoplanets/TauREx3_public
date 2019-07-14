@@ -204,6 +204,7 @@ class TaurexChemistry(Chemistry):
 
 
         mixratio_remainder = 1. - total_mix
+        mixratio_remainder += np.zeros(shape=(nlayers))
         remain_active,remain_inactive=self.fill_atmosphere(mixratio_remainder)
         active_profile.extend(remain_active)
         inactive_profile.extend(remain_inactive)
