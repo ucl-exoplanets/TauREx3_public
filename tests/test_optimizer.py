@@ -40,3 +40,16 @@ class OptimizerTest(unittest.TestCase):
         names = opt.fit_names
         self.assertIn('log_T',names)
         self.assertIn('H2O',names)  
+
+        opt.set_mode('T','linear')
+        opt.set_mode('H2O','log')
+        opt.set_factor_boundary('H2O',(0.5,1.5))
+        opt.set_factor_boundary('T',(0.5,1.5))
+        opt.compile_params()  
+        h2o_index = opt.fit_names.index('log_H2O')
+        t_index = opt.fit_names.index('T')
+        
+    
+
+        self.assertEqual(opt.fit_boundaries[t_index][0],1000.0)
+        self.assertEqual(opt.fit_boundaries[t_index][1],3000.0)

@@ -5,12 +5,11 @@ xsec_interpolation = exp
 #cia_path = C:/Users/Ahmed/Documents/TaurexData/cia/hitran
 cia_path = "/Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/cia/hitran"
 
-taregt_file
 
 [Chemistry]
 chemistry_type = taurex
-n2_mix_ratio=0
-he_h2_ratio=0.17647
+fill_gases = H2,He
+ratio=0.17647
 
     [[H2O]]
     gas_type=constant
@@ -35,12 +34,12 @@ atm_max_pressure = 1e6
 nlayers = 100
 
 [Planet]
-planet_type = target
+planet_type = Simple
 planet_mass = 1.0 
 planet_radius = 1.20
 
 [Star]
-star_type = target
+star_type = blackbody
 radius = 1.155
 
 [Model]

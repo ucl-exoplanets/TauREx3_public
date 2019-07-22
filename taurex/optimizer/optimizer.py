@@ -250,6 +250,37 @@ class Optimizer(Logger):
         self._model.fittingParameters[parameter]= (name,latex,fget,fset,mode,to_fit,bounds)
 
 
+    def set_factor_boundary(self,parameter,factors):
+        """
+        Sets the boundary of the parameter based on a factor
+
+        Parameters
+        ----------
+        parameter : str
+            Name of the parameter we want to change
+        
+        factor : tuple of float
+            To be written
+
+
+          
+        """
+
+        name,latex,fget,fset,mode,to_fit,bounds = self._model.fittingParameters[parameter]
+
+        value = fget()
+
+        # if mode == 'log':
+        #     log_value = math.log10(value)
+
+        #     new_boundaries = 10**(log_value/factors[0]),10**(log_value*factors[1])
+        # else:
+        #     
+        new_boundaries = factors[0]*value,factors[1]*value
+        
+        bounds = new_boundaries
+        self._model.fittingParameters[parameter]= (name,latex,fget,fset,mode,to_fit,bounds)
+
     def set_mode(self,parameter,new_mode):
         """
         Sets the fitting mode of a parameter
