@@ -91,6 +91,7 @@ def main():
             fit = value['fit']
             bounds = value['bounds']
             mode = value['mode']
+            factor = value['factor']
 
             if fit:
                 logging.info('Fitting: {}'.format(key))
@@ -98,6 +99,9 @@ def main():
             else:
                 optimizer.disable_fit(key)
             
+            if factor:
+                optimizer.set_factor_boundary(key,factor)
+
             if bounds:
                 optimizer.set_boundary(key,bounds)
             

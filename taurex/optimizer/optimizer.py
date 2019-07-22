@@ -270,12 +270,13 @@ class Optimizer(Logger):
 
         value = fget()
 
-        if mode == 'log':
-            log_value = math.log10(value)
+        # if mode == 'log':
+        #     log_value = math.log10(value)
 
-            new_boundaries = 10**(log_value*factors[0]),10**(log_value*factors[1])
-        else:
-            new_boundaries = factors[0]*value,factor[1]*value
+        #     new_boundaries = 10**(log_value/factors[0]),10**(log_value*factors[1])
+        # else:
+        #     
+        new_boundaries = factors[0]*value,factors[1]*value
         
         bounds = new_boundaries
         self._model.fittingParameters[parameter]= (name,latex,fget,fset,mode,to_fit,bounds)
