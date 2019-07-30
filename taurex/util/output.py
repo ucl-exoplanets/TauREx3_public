@@ -26,7 +26,10 @@ def store_taurex_results(output,model,observed=None,optimizer=None):
 
 
 def store_forward(output,model):
-    pass
+    output.write_array('density_profile',model.densityProfile)
+    output.write_array('scaleheight_profile',model.scaleheight_profile)
+    output.write_array('altitude_profile',model.altitudeProfile)
+    output.write_array('gravity_profile',model.gravity_profile)
 
 
 def store_retrieval(output,model,opt):

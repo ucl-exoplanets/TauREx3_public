@@ -137,8 +137,7 @@ class BaseSpectrum(Logger,Writeable):
         output.write_array('wlgrid',self.wavelengthGrid)
         output.write_array('spectrum',self.spectrum)
         output.write_array('binedges',self.binEdges)
-        if self.binWidths:
-            output.write_array('binwidths',self.binWidths)
+        output.write_array('binwidths',self.binWidths)
 
         return output
 

@@ -282,9 +282,6 @@ class SimpleForwardModel(ForwardModel):
         self.pressure.write(model)
         self._star.write(model)
         
-        model.write_array('density_profile',self.densityProfile)
-        model.write_array('scaleheight_profile',self.scaleheight_profile)
-        model.write_array('altitude_profile',self.altitudeProfile)
-        model.write_array('gravity_profile',self.gravity_profile)
+
     
         return model
