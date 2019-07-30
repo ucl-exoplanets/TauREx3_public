@@ -2,14 +2,14 @@ from .interpolateopacity import InterpolatingOpacity
 import pickle
 import numpy as np
 import pathlib
-class PickleOpacity(InterpolatingOpacity):
+class HDF5Opacity(InterpolatingOpacity):
     """
     This is the base class for computing opactities
 
     """
     
-    def __init__(self,filename,interpolation_mode='linear'):
-        super().__init__('PickleOpacity:{}'.format(pathlib.Path(filename).stem[0:10]),
+    def __init__(self,filename,interpolation_mode='exp'):
+        super().__init__('HDF5Opacity:{}'.format(pathlib.Path(filename).stem[0:10]),
                         interpolation_mode=interpolation_mode)
 
         self._filename = filename
@@ -28,17 +28,21 @@ class PickleOpacity(InterpolatingOpacity):
         return self._xsec_grid
 
 
-    def _load_pickle_file(self,filename):
-
+    def _load_hdf_file(self,filename):
+        import h5py
+        import astropy.units as u
         #Load the pickle file
         self.info('Loading opacity from {}'.format(filename))
-        with open(filename,'rb') as f:
-            self._spec_dict = pickle.load(f)
+        
+        self._spec_dict = h5py.File(filename)
         
         self._wavenumber_grid = self._spec_dict['wno']
 
         self._temperature_grid = self._spec_dict['t']
-        self._pressure_grid = self._spec_dict['p']*1e5
+        
+
+
+        self._pressure_grid = self._spec_dict['p']
         self._xsec_grid = self._spec_dict['xsecarr']
         self._resolution = np.average(np.diff(self._wavenumber_grid))
         self._molecule_name = self._spec_dict['name']
