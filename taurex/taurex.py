@@ -120,10 +120,13 @@ def main():
     #new_absp = bindown(native_grid,absp,bindown_wngrid)
 
     if args.output_file and get_rank()==0:
+        from taurex.util.output import store_taurex_results
         #Output taurex data
         with HDF5Output(args.output_file) as o:
             model.write(o)
-            write_spectrum(o,native_grid,absp,tau,contrib,bindown_wngrid,new_absp,observed)
+
+            store_taurex_results(o,model,observed=observed,optimizer=optimizer)
+            #write_spectrum(o,native_grid,absp,tau,contrib,bindown_wngrid,new_absp,observed)
             if optimizer:
                 optimizer.write(o)
 
