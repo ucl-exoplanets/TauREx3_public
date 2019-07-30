@@ -224,6 +224,14 @@ class SimpleForwardModel(ForwardModel):
     def temperature(self):
         return self._temperature_profile
 
+    @property
+    def star(self):
+        return self._star
+    
+    @property
+    def planet(self):
+        return self._planet
+
 
     @property
     def nativeWavenumberGrid(self):
