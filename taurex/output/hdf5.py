@@ -10,7 +10,7 @@ class HDF5OutputGroup(OutputGroup):
         self._entry = entry
 
     def write_array(self,array_name,array,metadata=None):
-        ds = self._entry.create_dataset(str(array_name), data=array)
+        ds = self._entry.create_dataset(str(array_name), data=array,shape=array.shape,dtype=array.dtype)
         if metadata:
             for k,v in metadata.items():
                 ds.attrs[k] = v    
