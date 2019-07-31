@@ -68,6 +68,7 @@ class Contribution(Fittable,Logger,Writeable):
         Fittable.__init__(self)
         self._name = name
         self._total_contribution = None
+        self._enabled = True
     @property
     def name(self):
         return self._name

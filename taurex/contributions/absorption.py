@@ -42,7 +42,7 @@ class AbsorptionContribution(Contribution):
                 temperature,pressure = tp
                 sigma_xsec[idx_layer] += self._opacity_cache[gas].opacity(temperature,pressure,wngrid)*gas_mix[idx_layer]
                 self.debug('Sigma for T %s, P:%s is %s',temperature,pressure,sigma_xsec[idx_layer,idx_gas])
-
+    
         
         
 
@@ -65,6 +65,7 @@ class AbsorptionContribution(Contribution):
 
     def do_single_contrib(self,model,wngrid):
         sigma_xsec = np.zeros(shape=(model.nLayers,wngrid.shape[0]))
+        for idx_gas,gas in enumerate(model.chemistry.activeGases):
 
     def finalize(self,model):
         raise NotImplementedError
