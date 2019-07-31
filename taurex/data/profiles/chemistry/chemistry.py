@@ -149,7 +149,7 @@ class Chemistry(Fittable,Logger,Writeable):
         gas_entry.write_string('chemistry_type',self.__class__.__name__)
         gas_entry.write_string_array('active_gases',self.activeGases)
         gas_entry.write_string_array('inactive_gases',self.inactiveGases)
-        gas_entry.write_array('active_gas_mix_profile',self.activeGasMixProfile)
-        gas_entry.write_array('inactive_gas_mix_profile',self.inactiveGasMixProfile)
-        gas_entry.write_array('mu_profile',self.muProfile)
+        #gas_entry.write_array('active_gas_mix_profile',self.activeGasMixProfile)
+        #gas_entry.write_array('inactive_gas_mix_profile',self.inactiveGasMixProfile)
+        #gas_entry.write_array('mu_profile',self.muProfile)
         return gas_entry

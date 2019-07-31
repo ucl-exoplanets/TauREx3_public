@@ -282,13 +282,14 @@ class SimpleForwardModel(ForwardModel):
 
         model = super().write(output)
 
+
         #Write Gas
 
-        self._chemistry.write(model)
-        self._temperature_profile.write(model)
-        self._planet.write(model)
-        self.pressure.write(model)
-        self._star.write(model)
+        #self._chemistry.write(model)
+        #self._temperature_profile.write(model)
+        # self.pressure.write(model)
+        #self._planet.write(model)
+        #self._star.write(model)
         
 
     

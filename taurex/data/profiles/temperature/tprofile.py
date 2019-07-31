@@ -51,7 +51,9 @@ class TemperatureProfile(Fittable,Logger,Writeable):
     def write(self,output):
         temperature = output.create_group('Temperature')
         temperature.write_string('temperature_type',self.__class__.__name__)
-        temperature.write_array('profile',self.profile)
+
+        ### not needed now with the new output structure
+        #temperature.write_array('profile',self.profile)
         return temperature
 
     

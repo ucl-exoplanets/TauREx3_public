@@ -69,11 +69,14 @@ def main():
     #Get the native grid
     native_grid = model.nativeWavenumberGrid
 
+
+
     #If we bin down then get the appropriate grid
     if bindown_wngrid is None:
         bindown_wngrid = native_grid
     else:
         native_grid = native_grid[(native_grid >= bindown_wngrid.min()*0.9) & (native_grid<= bindown_wngrid.max()*1.1) ]
+
     optimizer = None
 
     if args.retrieval is True:
@@ -115,6 +118,7 @@ def main():
         logging.getLogger('taurex').setLevel(logging.INFO)
 
     #Run the model
+
     new_absp,absp,tau,contrib=model.model(bindown_wngrid,return_contrib=True)
     #Get out new binned down model
     #new_absp = bindown(native_grid,absp,bindown_wngrid)
@@ -123,9 +127,12 @@ def main():
         from taurex.util.output import store_taurex_results
         #Output taurex data
         with HDF5Output(args.output_file) as o:
-            model.write(o)
 
+            model.write(o)
             store_taurex_results(o,model,observed=observed,optimizer=optimizer)
+
+            ## old writing calls
+
             #write_spectrum(o,native_grid,absp,tau,contrib,bindown_wngrid,new_absp,observed)
             if optimizer:
                 optimizer.write(o)
