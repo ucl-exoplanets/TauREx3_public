@@ -129,7 +129,7 @@ def main():
         with HDF5Output(args.output_file) as o:
 
             model.write(o)
-            store_taurex_results(o,model,observed=observed,optimizer=optimizer)
+            store_taurex_results(o,model,native_grid,absp,tau,contrib,observed=observed,optimizer=optimizer)
 
             ## old writing calls
 
