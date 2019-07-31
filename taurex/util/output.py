@@ -5,23 +5,6 @@ def store_taurex_results(output,model,native_grid,absp,tau,contributions,observe
 
 
     o = output.create_group('Output')
-    fm = o.create_group('Forward')
-    sp = fm.create_group('Spectrum')
-    co = fm.create_group('Contributions')
-    pr = fm.create_group('Profiles')
-
-    p = output.create_group('Parameters')
-
-    
-    store_profiles(pr,model)
-    store_planet(p, model)
-    store_star(p, model)
-    store_temperature(p, model)
-    store_pressure(p, model)
-    store_chemistry(p,model)
-
-    store_fwspectrum(sp, native_grid, absp, tau)
-    store_fwcontrib(co, contributions)
 
 
     if observed:
@@ -32,9 +15,32 @@ def store_taurex_results(output,model,native_grid,absp,tau,contributions,observe
     
 
     if optimizer:
+        opt = output.create_group('Optimizer')
+        store_optimizer(opt, model, optimizer)
 
-        opt = o.create_group('Retrieval')
-        store_retrieval(opt,model,optimizer)
+        #pr = o.create_group('Profiles')
+        #store_profiles(pr, model)
+
+        store_fit(o, model, optimizer)
+
+
+    else:
+        fm = o.create_group('Forward')
+        sp = fm.create_group('Spectrum')
+        co = fm.create_group('Contributions')
+        pr = fm.create_group('Profiles')
+
+        p = output.create_group('Parameters')
+
+        store_profiles(pr, model)
+        store_planet(p, model)
+        store_star(p, model)
+        store_temperature(p, model)
+        store_pressure(p, model)
+        store_chemistry(p, model)
+
+        store_fwspectrum(sp, native_grid, absp, tau)
+        store_fwcontrib(co, contributions)
 
 
 
@@ -61,9 +67,11 @@ def store_fwcontrib(output,contributions):
         output.write_array(name, value)
 
 
-def store_retrieval(output,model,opt):
-    pass
+def store_optimizer(output,model,opt):
+    opt.write_optimizer(output)
 
+def store_fit(output, model, opt):
+    opt.write_fit(output)
 
 
 def store_planet(output,model):

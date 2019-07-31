@@ -134,8 +134,8 @@ def main():
             ## old writing calls
 
             #write_spectrum(o,native_grid,absp,tau,contrib,bindown_wngrid,new_absp,observed)
-            if optimizer:
-                optimizer.write(o)
+            #if optimizer:
+            #    optimizer.write(o)
 
 
     

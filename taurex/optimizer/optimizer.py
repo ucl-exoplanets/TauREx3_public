@@ -429,11 +429,12 @@ class Optimizer(Logger):
             Group (or root) in output file written to
 
         """
-        output.write_string('fit_format',self.__class__.__name__)
-        output.write_string_array('fit_parameter_names',self.fit_names)
-        output.write_string_array('fit_parameter_latex',self.fit_latex)
-        output.write_list('fit_parameter_values',self.fit_values)
-        output.write_list('fit_parameter_values_nomode',self.fit_values_nomode)
+        fit = output.create_group('Fit_params')
+        fit.write_string('fit_format',self.__class__.__name__)
+        fit.write_string_array('fit_parameter_names',self.fit_names)
+        fit.write_string_array('fit_parameter_latex',self.fit_latex)
+        fit.write_list('fit_parameter_values',self.fit_values)
+        fit.write_list('fit_parameter_values_nomode',self.fit_values_nomode)
         return output
 
 
