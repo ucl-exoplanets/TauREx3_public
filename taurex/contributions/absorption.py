@@ -31,6 +31,7 @@ class AbsorptionContribution(Contribution):
 
         sigma_xsec = np.zeros(shape=(model.nLayers,wngrid.shape[0]))
         
+        
 
 
         for idx_gas,gas in enumerate(model.chemistry.activeGases):
@@ -60,6 +61,10 @@ class AbsorptionContribution(Contribution):
         self.info('Done')
         self._total_contrib = np.zeros(shape=(model.nLayers,wngrid.shape[0],))
         return self.sigma_xsec
+
+
+    def do_single_contrib(self,model,wngrid):
+        sigma_xsec = np.zeros(shape=(model.nLayers,wngrid.shape[0]))
 
     def finalize(self,model):
         raise NotImplementedError
