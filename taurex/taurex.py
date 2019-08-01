@@ -30,7 +30,7 @@ def main():
     import logging
     import numpy as np
     from taurex.mpi import get_rank,nprocs
-    from taurex.log import Logger
+    from taurex.log import Logger,setLogLevel
     from taurex.parameter import ParameterParser
     from taurex.util import bindown
     from taurex.output.hdf5 import HDF5Output
@@ -45,10 +45,9 @@ def main():
 
     args=parser.parse_args()
 
-    # if args.debug:
-    #     logging.basicConfig(level=logging.DEBUG,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    # else:
-    #     logging.basicConfig(level=logging.INFO,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    if args.debug:
+        setLogLevel(logging.DEBUG)
+        #logging.basicConfig(level=logging.DEBUG,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     #Parse the input file
     pp = ParameterParser()
     pp.read(args.input_file)

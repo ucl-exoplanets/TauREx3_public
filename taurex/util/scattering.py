@@ -47,14 +47,14 @@ def compute_h2(wngrid):
 def compute_he(wngrid):
     wave = 1e8/wngrid
 
-    return ((5.484E-14)*(wave**(-4.))*(1+(2.44E5)*(wave**(-2.))))
+    return ((5.484E-14)*(wave**(-4.))*(1+(2.44E5)*(wave**(-2.))))*1E-4
 
 
-def compute_ray_sigma(wngrid,n=0,n_air = 2.6867805e25,king=1.0):
-    wlgrid = (10000/wngrid)*1e-6
+def compute_ray_sigma(wngrid,n=0.0,n_air = 2.6867805e25,king=1.0):
+    wlgrid = (10000.0/wngrid)*1e-6
 
     
-    n_factor = (n**2 - 1)/(n_air*(n**2 + 2))
-    sigma = 24.0*(np.pi**3)*king*(n_factor**2)/(wlgrid**4)
+    n_factor = (n**2 - 1)/(n_air*(n**2.0 + 2.0))
+    sigma = 24.0*(np.pi**3.0)*king*(n_factor**2.0)/(wlgrid**4)
 
-    return (24.*np.pi**3)/(n_air**2) *(((n**2-1.)/(n**2+2.))**2) * king/(wlgrid**4)
+    return sigma
