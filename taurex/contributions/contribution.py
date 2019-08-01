@@ -76,7 +76,7 @@ class Contribution(Fittable,Logger,Writeable):
 
   
 
-    def contribute(self,model,layer,density,start_horz_layer,end_horz_layer,density_offset,path_length=None):
+    def contribute(self,model,start_horz_layer,end_horz_layer,density_offset,layer,density,path_length=None):
         raise NotImplementedError
 
     def build(self,model):
@@ -86,6 +86,10 @@ class Contribution(Fittable,Logger,Writeable):
         raise NotImplementedError
 
     def finalize(self,model):
+        raise NotImplementedError
+
+
+    def prepare_single(self,model,wngrid):
         raise NotImplementedError
 
 
