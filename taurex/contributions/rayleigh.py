@@ -16,6 +16,9 @@ class RayleighContribution(Contribution):
 
         contrib = contribute_tau(start_horz_layer,end_horz_layer,
             density_offset,self.sigma_rayleigh,density,path_length,self._nlayers,self._ngrid,layer)
+        
+        self._total_contrib[layer] += contrib
+        
         return contrib
 
     def build(self,model):
@@ -68,9 +71,6 @@ class RayleighContribution(Contribution):
         self.sigma_rayleigh = sum(sigma_rayleigh_dict.values())
 
         self.debug('Final sigma %s',self.sigma_rayleigh)
-
-
-        quit()
         self.info('Computing Ray interpolation ')
         
         self.info('DONE!!!')
