@@ -4,6 +4,9 @@ import numpy as np
 import os
 
 from taurex.util.util import read_table,read_error_line,read_error_into_dict,quantile_corner,recursively_save_dict_contents_to_output
+import random
+from taurex.util.util import weighted_avg_and_std
+
 
 class MultiNestOptimizer(Optimizer):
 
@@ -165,8 +168,7 @@ class MultiNestOptimizer(Optimizer):
         NEST_out = {'solutions': {}}
         data = np.loadtxt(os.path.join(self.dir_multinest, '1-.txt'))
 
-        NEST_analyzer = pymultinest.Analyzer(n_params=len(self.fitting_parameters),
-                                             outputfiles_basename=os.path.join(self.dir_multinest, '1-'))
+        NEST_analyzer = pymultinest.Analyzer(n_params=len(self.fitting_parameters), outputfiles_basename=os.path.join(self.dir_multinest, '1-'))
         NEST_stats = NEST_analyzer.get_stats()
         NEST_out['NEST_stats'] = NEST_stats
         NEST_out['global_logE'] = (NEST_out['NEST_stats']['global evidence'], NEST_out['NEST_stats']['global evidence error'])
@@ -256,6 +258,7 @@ class MultiNestOptimizer(Optimizer):
 
             for idx, param_name in enumerate(self.fit_names):
 
+
                 trace = modes_array[nmode][:,idx]
                 q_16, q_50, q_84 = quantile_corner(trace, [0.16, 0.5, 0.84],
                             weights=np.asarray(modes_weights[nmode]))
@@ -289,11 +292,13 @@ class MultiNestOptimizer(Optimizer):
             #param_name = solution['fit_params'].keys()
             param_name = file['Output']['Fit_params']['fit_parameter_names'][:].astype('str')
             print(param_name)
-            fit_params = [solution['fit_params'][p[0]]['nest_map'][()] for p in param_name]
+            fit_params = [solution['fit_params'][p[0]]['value'][()] for p in param_name]
             # print(fit_params[0])
             self.update_model(fit_params)
 
             self.get_spectra( fitting_out, s)
+
+            self.get_profiles(fitting_out,solution, s)
 
 
     def get_spectra(self, fitting_out, s):
@@ -313,10 +318,80 @@ class MultiNestOptimizer(Optimizer):
         spec.write_array('bin_spectrum', new_obs_model)
         spec.write_array('bin_tau', obs_tau)
 
-        from taurex.util.output import store_profiles
-        prof = fitting_out.create_group('Output/solutions/{}/Profiles'.format(s))
-        store_profiles(prof, self._model)
 
+
+    def get_profiles(self, fitting_out, solution, s):
+
+        native_grid = self._model.nativeWavenumberGrid
+        new_native_model, native_model, native_tau, native_contrib = self._model.model(native_grid, return_contrib=True)
+
+        prof = fitting_out.create_group('Output/solutions/{}/Profiles'.format(s))
+
+        prof.write_array('density_profile', self._model.densityProfile)
+        prof.write_array('scaleheight_profile', self._model.scaleheight_profile)
+        prof.write_array('altitude_profile', self._model.altitudeProfile)
+        prof.write_array('gravity_profile', self._model.gravity_profile)
+        prof.write_array('pressure_profile', self._model.pressure.profile)
+
+        prof.write_array('temp_profile', self._model.temperatureProfile)
+        prof.write_array('active_mix_profile', self._model.chemistry.activeGasMixProfile)
+        prof.write_array('inactive_mix_profile', self._model.chemistry.inactiveGasMixProfile)
+
+        temperature_array, activeGasMixProfile_array, inactiveGasMixProfile_array = self.get_one_sigma_profiles(fitting_out, solution, s)
+        prof.write_array('temp_profile_std', temperature_array)
+        prof.write_array('active_mix_profile_std', activeGasMixProfile_array)
+        prof.write_array('inactive_mix_profile_std', inactiveGasMixProfile_array)
+
+
+
+    def get_one_sigma_profiles(self, fitting_out, solution, s):
+        sigma_spectrum_frac = 0.1 #### This needs to be accessible as a parameter (fraction of the trace we use for the 1sigma profiles# )
+
+        native_grid = self._model.nativeWavenumberGrid
+
+        sol_tracedata = solution['tracedata']
+        sol_weights = solution['weights']
+        nprofiles = int(sigma_spectrum_frac * np.shape(solution['tracedata'])[0])
+        nlayers = len(self._model.pressure.profile)
+        nactivegases = len(self._model.chemistry.activeGasMixProfile[:,0])
+        ninactivegases = len(self._model.chemistry.inactiveGasMixProfile[:,0])
+
+
+        tpprofiles = np.zeros((nprofiles, nlayers))
+        molprofiles_active = np.zeros((nprofiles, nactivegases, nlayers))
+        molprofiles_inactive = np.zeros((nprofiles, ninactivegases, nlayers))
+
+        weights = np.zeros((nprofiles))
+
+
+        for i in range(nprofiles):
+            rand_idx = random.randint(0, np.shape(solution['tracedata'])[0])
+            fit_params_iter = sol_tracedata[rand_idx]
+            weights[i] = solution['weights'][rand_idx]
+            self.update_model(fit_params_iter)
+
+            #new_native_model, native_model, native_tau, native_contrib = self._model.model(native_grid, return_contrib=True)
+            tpprofiles[i, :] = self._model.temperatureProfile
+            for j in range(nactivegases):
+                # molprofiles_active[i,j,:] = self.atmosphere.active_mixratio_profile[j,:]
+                molprofiles_active[i, j, :] = self._model.chemistry.activeGasMixProfile[j,:]
+            for j in range(ninactivegases):
+                molprofiles_inactive[i, j, :] = self._model.chemistry.inactiveGasMixProfile[j,:]
+            std_tpprofiles = np.zeros((nlayers))
+
+        std_molprofiles_active = np.zeros((nactivegases, nlayers))
+        std_molprofiles_inactive = np.zeros((ninactivegases, nlayers))
+
+        for i in range(nlayers):
+            std_tpprofiles[i] = weighted_avg_and_std(tpprofiles[:, i], weights=weights, axis=0)[1]
+            for j in range(nactivegases):
+                std_molprofiles_active[j, i] = \
+                weighted_avg_and_std(molprofiles_active[:, j, i], weights=weights, axis=0)[1]
+            for j in range(ninactivegases):
+                std_molprofiles_inactive[j, i] = \
+                weighted_avg_and_std(molprofiles_inactive[:, j, i], weights=weights, axis=0)[1]
+
+        return std_tpprofiles, std_molprofiles_active, std_molprofiles_inactive
 
 
 
