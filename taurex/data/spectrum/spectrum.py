@@ -138,6 +138,7 @@ class BaseSpectrum(Logger,Writeable):
         output.write_array('spectrum',self.spectrum)
         output.write_array('binedges',self.binEdges)
         output.write_array('binwidths',self.binWidths)
+        output.write_array('errorbars', self.errorBar)
 
         return output
 

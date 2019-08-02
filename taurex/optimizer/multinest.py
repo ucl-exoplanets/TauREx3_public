@@ -272,7 +272,7 @@ class MultiNestOptimizer(Optimizer):
                     'trace': trace,
                 }
 
-            NEST_out['solutions']['solution{}'.format(idx)] = mydict
+            NEST_out['solutions']['solution{}'.format(nmode)] = mydict
         
         return NEST_out
 
@@ -348,6 +348,9 @@ class MultiNestOptimizer(Optimizer):
         sigma_spectrum_frac = 0.1 #### This needs to be accessible as a parameter (fraction of the trace we use for the 1sigma profiles# )
 
         native_grid = self._model.nativeWavenumberGrid
+
+
+
 
         sol_tracedata = solution['tracedata']
         sol_weights = solution['weights']

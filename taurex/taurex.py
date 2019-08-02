@@ -131,19 +131,24 @@ def main():
             model.write(o)
             store_taurex_results(o,model,native_grid,absp,tau,contrib,observed=observed,optimizer=optimizer)
 
-
-
-
             ## old writing calls
 
-            #write_spectrum(o,native_grid,absp,tau,contrib,bindown_wngrid,new_absp,observed)
-            #if optimizer:
+            # write_spectrum(o,native_grid,absp,tau,contrib,bindown_wngrid,new_absp,observed)
+            # if optimizer:
             #    optimizer.write(o)
+
+
+            if args.plot:
+                from taurex.util.output import plot_taurex_results_from_hdf5
+                plot_taurex_results_from_hdf5(args.output_file)
+
+
 
 
     
     wlgrid = np.log10(10000/bindown_wngrid)
-    if args.plot:
+    plot_test = False
+    if args.plot and plot_test:
         if get_rank()==0  and nprocs()<=1:
             import matplotlib.pyplot as plt
             is_lightcurve = False

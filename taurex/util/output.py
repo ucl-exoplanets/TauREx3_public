@@ -1,5 +1,9 @@
 
-
+import os
+import matplotlib.pyplot as plt
+from matplotlib import cm
+import numpy as np
+import h5py
 
 def store_taurex_results(output,model,native_grid,absp,tau,contributions,observed=None,optimizer=None):
 
@@ -98,3 +102,45 @@ def store_pressure(output,model):
 def store_chemistry(output,model):
     model._chemistry.write(output)
 
+
+
+def plot_taurex_results_from_hdf5(arg_output):
+
+    file = h5py.File(arg_output,'r')
+
+    arg_output = os.path.splitext(arg_output)[0]
+
+    solution_name = file['Output']['solutions']
+    spectrum = np.zeros((len(file['Output']['Observed']['spectrum']),len(solution_name)*2))
+
+    for s in range(len(solution_name)):
+        spectrum[:,2 * s] = np.log10(10000/solution_name['solution{}'.format(s)]['Spectra']['bin_wngrid'][:])
+        spectrum[:,2 * s + 1] = solution_name['solution{}'.format(s)]['Spectra']['bin_spectrum'][:]
+    observed = [file['Output']['Observed']['wlgrid'], file['Output']['Observed']['spectrum'], file['Output']['Observed']['errorbars'], file['Output']['Observed']['binwidths']]
+
+
+def plot_spectrum(wl, spectrum, arg_output, observed = None):
+    cmap = cm.get_cmap('Set1')
+
+
+    plt.figure()
+    for i in range(len(spectrum[0,:])):
+        plt.plot(spectrum[:, 2*i], spectrum[:, 2*i+1], label="Fit", color=cmap(float(i / 12.)))
+
+    plt.plot(observed[:, 0], observed[:, 1], '.', color='blue', alpha=0.6, label="Observed")
+    plt.plot([observed[:, 0], observed[:, 0]],
+             [observed[:, 1] - observed[:, 2], observed[:, 1] + observed[:, 2]], '-',
+             color='blue', alpha=0.6)
+    plt.plot([observed[:, 0] - observed[:, 3] / 2, observed[:, 0] + observed[:, 3] / 2],
+             [observed[:, 1], observed[:, 1]], '-', color='blue', alpha=0.6)
+
+    plt.gca().set_xscale('log')
+    plt.xlabel('Wavelength ($\mu$m)')
+    plt.ylabel('$(R_p / R_s)^2$')
+    plt.xticks([0.5, 1, 2, 5, 10], [0.5, 1, 2, 5, 10])
+    plt.legend(loc='upper left')
+    plt.savefig(os.path.join(arg_output), dpi=1000)
+
+
+def keys(f):
+    return [key for key in f.keys()]
