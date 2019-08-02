@@ -36,17 +36,22 @@ class RayleighContribution(Contribution):
     def prepare_each(self,model,wngrid):
         from taurex.util.scattering import rayleigh_sigma_from_name
 
+        self._total_contrib = np.zeros(shape=(model.nLayers,wngrid.shape[0],))
         self._ngrid = wngrid.shape[0]
         self._nmols = 1
         self._nlayers = model.nLayers
         molecules = model.chemistry.activeGases + model.chemistry.inactiveGases
-
+        
         for gasname in molecules:
+            self._total_contrib[...] =0.0
             if np.sum(model.chemistry.get_gas_mix_profile(gasname)) == 0.0:
                 continue
             sigma = rayleigh_sigma_from_name(gasname,wngrid)
+            
             if sigma is not None:
-                yield gasname,sigma[None,:]*model.chemistry.get_gas_mix_profile(gasname)[:,None]
+                final_sigma = sigma[None,:]*model.chemistry.get_gas_mix_profile(gasname)[:,None]
+                self.sigma_rayleigh = final_sigma
+                yield gasname,final_sigma
     
     def prepare(self,model,wngrid):
         
@@ -63,13 +68,20 @@ class RayleighContribution(Contribution):
 
         self._nlayers = model.nLayers
         
-        self.sigma_rayleigh = sum([x[1] for x in sigma_rayleigh])
+        sigma_rayleigh = np.zeros(shape=(self._nlayers,self._ngrid))
+
+        for gas,sigma in self.prepare_each(model,wngrid):
+            self.debug('Gas %s',gas)
+            self.debug('Sigma %s',sigma)
+            sigma_rayleigh += sigma
+
+        self.sigma_rayleigh = sigma_rayleigh
 
         self.debug('Final sigma %s',self.sigma_rayleigh)
         self.info('Computing Ray interpolation ')
         
         self.info('DONE!!!')
-        self._total_contrib = np.zeros(shape=(model.nLayers,wngrid.shape[0],))
+        
 
 
 

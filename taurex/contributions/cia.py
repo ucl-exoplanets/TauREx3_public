@@ -60,12 +60,13 @@ class CIAContribution(Contribution):
 
         sigma_cia = np.zeros(shape=(model.nLayers,wngrid.shape[0]))
 
-
+        self._total_contrib = np.zeros(shape=(model.nLayers,wngrid.shape[0],))
 
 
         for pairName in self.ciaPairs:
             cia = self._cia_cache[pairName]
             sigma_cia[...]=0.0
+            self._total_contrib[...] =0.0
             cia_factor = model.chemistry.get_gas_mix_profile(cia.pairOne)*model.chemistry.get_gas_mix_profile(cia.pairTwo)
             for idx_layer,temperature in enumerate(model.temperatureProfile):
 
@@ -77,7 +78,6 @@ class CIAContribution(Contribution):
 
     def prepare(self,model,wngrid):
         
-        self._total_contrib = np.zeros(shape=(model.nLayers,wngrid.shape[0],))
 
         self._nlayers = model.nLayers
         self._ngrid = wngrid.shape[0]
@@ -88,7 +88,14 @@ class CIAContribution(Contribution):
 
         if len(sigma_cia) ==0:
             return 
-        self.sigma_cia = sum([x[1] for x in sigma_cia])
+        sigma_cia = np.zeros(shape=(self._nlayers,self._ngrid))
+
+        for gas,sigma in self.prepare_each(model,wngrid):
+            self.debug('Gas %s',gas)
+            self.debug('Sigma %s',sigma)
+            sigma_cia += sigma
+
+        self.sigma_cia = sigma_cia
 
         
 
