@@ -22,7 +22,29 @@ class AbsorptionContribution(Contribution):
 
     def build(self,model):
         pass
+
+    def prepare_each(self,model,wngrid):
+        from taurex.util.scattering import rayleigh_sigma_from_name
+
+        self._ngrid = wngrid.shape[0]
+        self._nlayers = model.nLayers
+
+        sigma_xsec = np.zeros(shape=(model.nLayers,wngrid.shape[0]))
+
+
+        for gas in model.chemistry.activeGases:
+            sigma_xsec[...]=0.0
+            gas_mix = model.chemistry.get_gas_mix_profile(gas)
+            self.info('Recomputing active gas %s opacity',gas)
+            for idx_layer,tp in enumerate(zip(model.temperatureProfile,model.pressureProfile)):
+                self.debug('Got index,tp %s %s',idx_layer,tp)
+                temperature,pressure = tp
+                sigma_xsec[idx_layer] += self._opacity_cache[gas].opacity(temperature,pressure,wngrid)*gas_mix[idx_layer]
+            self.sigma_xsec= sigma_xsec
+            yield gas,sigma_xsec
         
+
+
     
     def prepare(self,model,wngrid):
         import numexpr as ne
@@ -30,21 +52,6 @@ class AbsorptionContribution(Contribution):
         self.debug('Creating crossection for wngrid %s with ngases %s and nlayers %s',wngrid,ngases,model.nLayers)
 
         sigma_xsec = np.zeros(shape=(model.nLayers,wngrid.shape[0]))
-        
-        
-
-
-        for idx_gas,gas in enumerate(model.chemistry.activeGases):
-            gas_mix = model.chemistry.get_gas_mix_profile(gas)
-            self.info('Recomputing active gas %s opacity',gas)
-            for idx_layer,tp in enumerate(zip(model.temperatureProfile,model.pressureProfile)):
-                self.debug('Got index,tp %s %s',idx_layer,tp)
-                temperature,pressure = tp
-                sigma_xsec[idx_layer] += self._opacity_cache[gas].opacity(temperature,pressure,wngrid)*gas_mix[idx_layer]
-                self.debug('Sigma for T %s, P:%s is %s',temperature,pressure,sigma_xsec[idx_layer,idx_gas])
-    
-        
-        
 
         self.debug('Sigma is %s',sigma_xsec)
 
@@ -53,7 +60,7 @@ class AbsorptionContribution(Contribution):
         self._nlayers = model.nLayers
         self._nmols = ngases
 
-        self.sigma_xsec= sigma_xsec
+        self.sigma_xsec= sum([x[1] for x in self.prepare_each(model,wngrid)])
 
 
         self.debug('Final sigma is %s',self.sigma_xsec)
@@ -61,12 +68,6 @@ class AbsorptionContribution(Contribution):
         self.info('Done')
         self._total_contrib = np.zeros(shape=(model.nLayers,wngrid.shape[0],))
         return self.sigma_xsec
-
-
-    def do_single_contrib(self,model,wngrid):
-        sigma_xsec = np.zeros(shape=(model.nLayers,wngrid.shape[0]))
-        for idx_gas,gas in enumerate(model.chemistry.activeGases):
-            pass
 
     def finalize(self,model):
         raise NotImplementedError

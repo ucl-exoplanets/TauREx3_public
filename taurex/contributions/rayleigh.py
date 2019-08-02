@@ -54,21 +54,16 @@ class RayleighContribution(Contribution):
 
         self.info('Compute Rayleigh scattering cross sections')
 
-        sigma_rayleigh_dict = {}
-        
-        for gas,sigma in self.prepare_each(model,wngrid):
-            self.debug('Gas is %s',gas)
-            self.debug('Sigma is %s',sigma)
-            self.debug('Sigma shape is %s',sigma.shape)
-            sigma_rayleigh_dict[gas] = sigma
+
+        sigma_rayleigh = [x for x in self.prepare_each(model,wngrid)]
 
 
-        self._nmols = len(sigma_rayleigh_dict.keys())
+        self._nmols = len(sigma_rayleigh)
 
 
         self._nlayers = model.nLayers
         
-        self.sigma_rayleigh = sum(sigma_rayleigh_dict.values())
+        self.sigma_rayleigh = sum([x[1] for x in sigma_rayleigh])
 
         self.debug('Final sigma %s',self.sigma_rayleigh)
         self.info('Computing Ray interpolation ')
