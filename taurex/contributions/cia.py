@@ -50,27 +50,45 @@ class CIAContribution(Contribution):
     def build(self,model):
         pass
     
-    def prepare(self,model,wngrid):
-        self._total_cia = len(self.ciaPairs)
-        total_cia = self._total_cia
-        self._total_contrib = np.zeros(shape=(model.nLayers,wngrid.shape[0],))
-        if self._total_cia == 0:
-            return
-        self.sigma_cia = np.zeros(shape=(model.nLayers,wngrid.shape[0]))
 
-        self._total_cia = total_cia
+    def prepare_each(self,model,wngrid):
+
+        self._total_cia = len(self.ciaPairs)
         self._nlayers = model.nLayers
         self._ngrid = wngrid.shape[0]
         self.info('Computing CIA ')
-        for cia_idx,pairName in enumerate(self.ciaPairs):
-            cia = self._cia_cache[pairName]
 
+        sigma_cia = np.zeros(shape=(model.nLayers,wngrid.shape[0]))
+
+
+
+
+        for pairName in self.ciaPairs:
+            cia = self._cia_cache[pairName]
+            sigma_cia[...]=0.0
             cia_factor = model.chemistry.get_gas_mix_profile(cia.pairOne)*model.chemistry.get_gas_mix_profile(cia.pairTwo)
             for idx_layer,temperature in enumerate(model.temperatureProfile):
 
                 
                 _cia_xsec = cia.cia(temperature,wngrid)
-                self.sigma_cia[idx_layer] += _cia_xsec*cia_factor[idx_layer]
+                sigma_cia[idx_layer] += _cia_xsec*cia_factor[idx_layer]
+            self.sigma_cia = sigma_cia
+            yield pairName,sigma_cia
+
+    def prepare(self,model,wngrid):
+        
+        self._total_contrib = np.zeros(shape=(model.nLayers,wngrid.shape[0],))
+
+        self._nlayers = model.nLayers
+        self._ngrid = wngrid.shape[0]
+        self.info('Computing CIA ')
+
+        sigma_cia = [x for x in self.prepare_each(model,wngrid)]
+
+
+        if len(sigma_cia) ==0:
+            return 
+        self.sigma_cia = sum([x[1] for x in sigma_cia])
 
         
 
