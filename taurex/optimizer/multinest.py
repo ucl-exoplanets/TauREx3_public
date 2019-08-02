@@ -272,3 +272,52 @@ class MultiNestOptimizer(Optimizer):
             NEST_out['solutions']['solution{}'.format(idx)] = mydict
         
         return NEST_out
+
+    #def write(self,output):
+    #    model = output.read('Model')
+    #    return model
+
+
+    def add_data_from_solutions(self, fitting_out):
+        file = fitting_out.read()
+        #solution_name = [s for s in file['Output']['solutions'].keys()]
+
+        solution_name = file['Output']['solutions'].keys()
+        for s in solution_name:
+            solution = file['Output']['solutions'][s]
+
+            #param_name = solution['fit_params'].keys()
+            param_name = file['Output']['Fit_params']['fit_parameter_names'][:].astype('str')
+            print(param_name)
+            fit_params = [solution['fit_params'][p[0]]['nest_map'][()] for p in param_name]
+            # print(fit_params[0])
+            self.update_model(fit_params)
+
+            self.get_spectra( fitting_out, s)
+
+
+    def get_spectra(self, fitting_out, s):
+
+
+        native_grid = self._model.nativeWavenumberGrid
+        new_native_model, native_model ,native_tau, native_contrib = self._model.model(native_grid,return_contrib=True)
+
+        obs_grid = self._observed.wavenumberGrid
+        new_obs_model, obs_model, obs_tau, obs_contrib = self._model.model(obs_grid,return_contrib=True)
+
+        spec = fitting_out.create_group('Output/solutions/{}/Spectra'.format(s))
+        spec.write_array('native_wngrid', native_grid)
+        spec.write_array('native_spectrum', new_native_model)
+        spec.write_array('native_tau', native_tau)
+        spec.write_array('bin_wngrid', obs_grid)
+        spec.write_array('bin_spectrum', new_obs_model)
+        spec.write_array('bin_tau', obs_tau)
+
+        from taurex.util.output import store_profiles
+        prof = fitting_out.create_group('Output/solutions/{}/Profiles'.format(s))
+        store_profiles(prof, self._model)
+
+
+
+
+

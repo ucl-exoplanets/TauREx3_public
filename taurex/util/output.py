@@ -15,6 +15,14 @@ def store_taurex_results(output,model,native_grid,absp,tau,contributions,observe
     
 
     if optimizer:
+
+        p = output.create_group('Parameters')
+        store_planet(p, model)
+        store_star(p, model)
+        store_temperature(p, model)
+        store_pressure(p, model)
+        store_chemistry(p, model)
+
         opt = output.create_group('Optimizer')
         store_optimizer(opt, model, optimizer)
 
@@ -42,6 +50,7 @@ def store_taurex_results(output,model,native_grid,absp,tau,contributions,observe
         store_fwspectrum(sp, native_grid, absp, tau)
         store_fwcontrib(co, contributions)
 
+    optimizer.add_data_from_solutions(output)
 
 
 def store_profiles(output,model):
@@ -70,6 +79,7 @@ def store_fwcontrib(output,contributions):
 def store_optimizer(output,model,opt):
     opt.write_optimizer(output)
 
+
 def store_fit(output, model, opt):
     opt.write_fit(output)
 
@@ -87,3 +97,4 @@ def store_pressure(output,model):
 
 def store_chemistry(output,model):
     model._chemistry.write(output)
+

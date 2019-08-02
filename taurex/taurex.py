@@ -131,6 +131,9 @@ def main():
             model.write(o)
             store_taurex_results(o,model,native_grid,absp,tau,contrib,observed=observed,optimizer=optimizer)
 
+
+
+
             ## old writing calls
 
             #write_spectrum(o,native_grid,absp,tau,contrib,bindown_wngrid,new_absp,observed)
