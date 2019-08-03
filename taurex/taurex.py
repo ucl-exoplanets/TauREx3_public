@@ -78,7 +78,7 @@ def main():
         native_grid = native_grid[(native_grid >= bindown_wngrid.min()*0.9) & (native_grid<= bindown_wngrid.max()*1.1) ]
 
     optimizer = None
-
+    solution = None
     if args.retrieval is True:
         if observed is None:
             logging.critical('No spectrum is defined!!')
@@ -113,24 +113,36 @@ def main():
 
         logging.getLogger('taurex').setLevel(logging.WARNING)
 
-        optimizer.fit()
+        solution = optimizer.fit()
 
         logging.getLogger('taurex').setLevel(logging.INFO)
 
     #Run the model
-
-    new_absp,absp,tau,contrib=model.model(bindown_wngrid,return_contrib=True)
+    result=model.model(bindown_wngrid,return_contrib=True)
+    new_absp,absp,tau,contrib = result
     #Get out new binned down model
-    #new_absp = bindown(native_grid,absp,bindown_wngrid)
+    contrib_res = None
+
+    if args.full_contrib or args.output_file:
+        contrib_res = model.model_full_contrib(wngrid=bindown_wngrid)
+
 
     if args.output_file and get_rank()==0:
-        from taurex.util.output import store_taurex_results
+        from taurex.util.output import store_taurex_results,store_profiles,generate_profile_dict,generate_spectra_dict
         #Output taurex data
         with HDF5Output(args.output_file) as o:
 
             model.write(o)
+            out = o.create_group('Output')
+            if observed is not None:
+                observed.write(out)
 
-            store_taurex_results(o,model,native_grid,absp,tau,contrib,observed=observed,optimizer=optimizer)
+            if solution is not None:
+                out.store_dictionary(solution)
+            else:
+                profiles=
+
+            #store_taurex_results(o,model,native_grid,absp,tau,contrib,observed=observed,optimizer=optimizer)
 
 
             if optimizer:
@@ -139,10 +151,7 @@ def main():
 
 
 
-    contrib_res = None
 
-    if args.full_contrib:
-        contrib_res = model.model_full_contrib(wngrid=bindown_wngrid)
 
     
     wlgrid = 10000/bindown_wngrid
@@ -179,7 +188,7 @@ def main():
                 for name,value in contrib:
                     new_value = bindown(native_grid,value,bindown_wngrid)
                     ax.plot(wlgrid,new_value,label='All {}'.format(name),alpha=0.8)
-            if contrib_res is not None:
+            if args.full_contrib:
                 for k,v in contrib_res.items():
                     first_name = k
                     for out in v:

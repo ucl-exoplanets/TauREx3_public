@@ -110,7 +110,9 @@ class NestleOptimizer(Optimizer):
         weights = self._nestle_output['solution']['weights']
 
         for x in random_int_iter(samples.shape[0],self._sigma_fraction):
-            yield samples[x,:],weights[x]
+            w = weights[x]+1e-300
+            
+            yield samples[x,:],w
 
 
 

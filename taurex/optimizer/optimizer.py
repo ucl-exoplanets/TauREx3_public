@@ -444,7 +444,7 @@ class Optimizer(Logger):
         #fit.write_list('fit_parameter_values_nomode',self.fit_values_nomode)
         return output
 
-    def generate_profiles(self,solution):
+    def generate_profiles(self,solution,binning):
         """Generates sigma plots for profiles"""
         from taurex.util.util import weighted_avg_and_std
         weights = []
@@ -452,24 +452,33 @@ class Optimizer(Logger):
         active_gases = []
         inactive_gases = []
         tau_profile = []
+        binned_spectrum = []
+        native_spectrum = []
+
         for parameters,weight in self.sample_parameters(solution): #sample likelihood space and get their parameters
             self.update_model(parameters)
+
             weights.append(weight)
-            _,_,tau,_ = self._model.model()
+            binned,native,tau,_ = self._model.model(wngrid=binning,cutoff_grid=False)
             tau_profile.append(tau)
             tp_profiles.append(self._model.temperatureProfile)
             active_gases.append(self._model.chemistry.activeGasMixProfile)
             inactive_gases.append(self._model.chemistry.inactiveGasMixProfile)
-
+            binned_spectrum.append(binned)
+            native_spectrum.append(native)
 
         weights = np.array(weights)
 
         tp_std = weighted_avg_and_std(tp_profiles,weights=weights,axis=0)
         active_std = weighted_avg_and_std(active_gases,weights=weights,axis=0)
         inactive_std = weighted_avg_and_std(inactive_gases,weights=weights,axis=0)
+
         tau_std = weighted_avg_and_std(tau_profile,weights=weights,axis=0)
 
-        return tp_std,active_std,inactive_std,tau_std
+        binned_std = weighted_avg_and_std(binned_spectrum,weights=weights,axis=0)
+        native_std = weighted_avg_and_std(native_spectrum,weights=weights,axis=0)
+
+        return tp_std,active_std,inactive_std,tau_std,binned_std,native_std
 
     def generate_solution(self):
         from taurex.util.output import generate_profile_dict,generate_spectra_dict
@@ -487,6 +496,7 @@ class Optimizer(Logger):
                 sol_values[k] = v
 
             self.update_model(optimized) #Update the model with optimized values
+
             opt_result = self._model.model(wngrid=self._observed.wavenumberGrid,return_contrib=False,cutoff_grid=False) #Run the model
 
             sol_values['Profiles']=generate_profile_dict(self._model)
@@ -495,14 +505,18 @@ class Optimizer(Logger):
 
             sol_values['Spectra'] = generate_spectra_dict(opt_result,opt_contributions,self._model.nativeWavenumberGrid,bin_grid=self._observed.wavenumberGrid)
 
+
+
             #Store profiles here
-            tp_std,active_std,inactive_std,tau_std = self.generate_profiles(solution)
+            tp_std,active_std,inactive_std,tau_std,binned_std,native_std= self.generate_profiles(solution,self._observed.wavenumberGrid)
             
 
-
+            sol_values['Spectra']['native_std'] = native_std
+            sol_values['Spectra']['binned_std'] = binned_std
             sol_values['Profiles']['temp_profile_std']=tp_std
             sol_values['Profiles']['active_mix_profile_std']=active_std
             sol_values['Profiles']['inactive_mix_profile_std']=inactive_std
+
 
 
 
