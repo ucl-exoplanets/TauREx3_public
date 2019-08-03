@@ -111,10 +111,6 @@ class Contribution(Fittable,Logger,Writeable):
         raise NotImplementedError
 
 
-    def prepare_single(self,model,wngrid):
-        raise NotImplementedError
-
-
     @property
     def sigma(self):
         raise NotImplementedError
