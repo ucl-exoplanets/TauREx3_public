@@ -15,4 +15,4 @@ Welcome to taurex's documentation!
 Taurex Documentation
 =====================
 
-Taurex 3 aint shit cept hos n tricks
+HAHAHA YOU FOOL YOU'VE FELL RIGHT INTO MY TRAP.

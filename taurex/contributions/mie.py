@@ -140,12 +140,16 @@ class MieContribution(Contribution):
     @property
     def totalContribution(self):
         return self._total_contrib
- 
-    def prepare(self,model,wngrid):
+    
+
+    def prepare_each(self,model,wngrid):
         self._nlayers = model.nLayers
         self._ngrid = wngrid.shape[0]
+
         self.sigma_mie = np.interp(wngrid,self.wavenumberGrid,self._sig_out_aver)*self._mix_cloud_mix
-        self._total_contrib = np.zeros(shape=(model.nLayers,wngrid.shape[0],))
+        self._total_contrib[...]=0.0
+        yield 'Mie',self.sigma_mie
+
 
     def write(self,output):
         contrib = super().write(output)
