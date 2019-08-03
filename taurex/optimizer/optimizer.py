@@ -392,8 +392,8 @@ class Optimizer(Logger):
         print()
 
 
-
         self.compute_fit()
+        return  self.generate_solution()
 
 
 
@@ -444,34 +444,73 @@ class Optimizer(Logger):
         #fit.write_list('fit_parameter_values_nomode',self.fit_values_nomode)
         return output
 
+    def generate_profiles(self,solution):
+        """Generates sigma plots for profiles"""
+        from taurex.util.util import weighted_avg_and_std
+        weights = []
+        tp_profiles = []
+        active_gases = []
+        inactive_gases = []
+        tau_profile = []
+        for parameters,weight in self.sample_parameters(solution): #sample likelihood space and get their parameters
+            self.update_model(parameters)
+            weights.append(weight)
+            _,_,tau,_ = self._model.model()
+            tau_profile.append(tau)
+            tp_profiles.append(self._model.temperatureProfile)
+            active_gases.append(self._model.chemistry.activeGasMixProfile)
+            inactive_gases.append(self._model.chemistry.inactiveGasMixProfile)
 
-    def generate_profiles_spectra(self):
-        
+
+        weights = np.array(weights)
+
+        tp_std = weighted_avg_and_std(tp_profiles,weights=weights,axis=0)
+        active_std = weighted_avg_and_std(active_gases,weights=weights,axis=0)
+        inactive_std = weighted_avg_and_std(inactive_gases,weights=weights,axis=0)
+        tau_std = weighted_avg_and_std(tau_profile,weights=weights,axis=0)
+
+        return tp_std,active_std,inactive_std,tau_std
+
+    def generate_solution(self):
+        from taurex.util.output import generate_profile_dict,generate_spectra_dict
+        """Generates a dictionar with all solutions and other useful parameters"""
         solution_dict = {}
         self.info('Generating spectra and profiles')
         #Loop through each solution, grab optimized parameters and anything else we want to store 
-        for solution,optimized,values in range(self.num_solutions()): 
+        for solution,optimized,values in self.get_solution(): 
             
             self.info('Computing solution %s',solution)
             sol_values = {}
+            #print(values)
+            #Include extra stuff we might want to store (provided by the child)
+            for k,v in values:
+                sol_values[k] = v
 
+            self.update_model(optimized) #Update the model with optimized values
+            opt_result = self._model.model(wngrid=self._observed.wavenumberGrid,return_contrib=False,cutoff_grid=False) #Run the model
 
-            self.update_model(optimized)
-            opt_result = self._model.model(wngrid=self._observed.wavenumberGrid)
-                                                              
+            sol_values['Profiles']=generate_profile_dict(self._model)
 
+            opt_contributions = self._model.model_full_contrib(wngrid=self._observed.wavenumberGrid,cutoff_grid=False) #Get contributions
+
+            sol_values['Spectra'] = generate_spectra_dict(opt_result,opt_contributions,tm.nativeWavenumberGrid,bin_grid=self._observed.wavenumberGrid)
+
+            #Store profiles here
+            tp_std,active_std,inactive_std,tau_std = self.generate_profiles(solution)
             
 
-            
-            
-            for parameters in self.sample_parameters(solution): #sample likelihood space and get their parameters
-                self.update_model(parameters)
-                result,_,_,_ = self._model.model()
 
-                
+            sol_values['Profiles']['temp_profile_std']=tp_std
+            sol_values['Profiles']['active_mix_profile_std']=active_std
+            sol_values['Profiles']['inactive_mix_profile_std']=inactive_std
 
-    def optimized_parameters(self,solution):
-        raise NotImplementedError
+
+
+
+
+            solution_dict['solution{}'.format(solution)] = sol_values
+        
+        return solution_dict
 
 
     def sample_parameters(self,solution):
@@ -479,7 +518,7 @@ class Optimizer(Logger):
 
 
 
-    def num_solutions(self):
+    def get_solution(self):
         raise NotImplementedError
 
 

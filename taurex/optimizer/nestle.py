@@ -104,6 +104,33 @@ class NestleOptimizer(Optimizer):
 
         self._nestle_output = self.store_nestle_output(res)
 
+    def sample_parameters(self,solution):
+        from taurex.util.util import random_int_iter
+        samples = self._nestle_output['solution']['samples']
+        weights = self._nestle_output['solution']['weights']
+
+        for x in random_int_iter(samples.shape[0],self._sigma_fraction):
+            yield samples[x,:],weights[x]
+
+
+
+
+
+
+    def get_solution(self):
+        names = self.fit_names
+        opt_values = self.fit_values
+
+        for k,v in self._nestle_output['solution']['fitparams'].items():
+            idx = names.index(k)
+            opt_values[idx] = v['value']
+        
+        yield 0,opt_values,[ ('Statistics', self._nestle_output['Stats']),
+                            ('Fitparams',self._nestle_output['solution']['fitparams']),
+                            ('traces',self._nestle_output['solution']['samples']),
+                            ('weights',self._nestle_output['solution']['weights'])]
+
+
     def write_optimizer(self,output):
         opt = super().write_optimizer(output)
 

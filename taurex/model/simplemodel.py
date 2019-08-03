@@ -273,12 +273,12 @@ class SimpleForwardModel(ForwardModel):
             return new_absp,absorp,tau,contrib
 
 
-    def model_full_contrib(self,wngrid=None,return_contrib=True):
+    def model_full_contrib(self,wngrid=None,cutoff_grid=True):
         """Computes the forward model for a wngrid for each contribution"""
         self.initialize_profiles()
 
         native_grid = self.nativeWavenumberGrid
-        if wngrid is not None:
+        if wngrid is not None and cutoff_grid:
             wn_min = wngrid.min()*0.9
             wn_max = wngrid.max()*1.1
             native_filter = (native_grid >= wn_min) & (native_grid <= wn_max)

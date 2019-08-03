@@ -48,7 +48,7 @@ class ForwardModel(Logger,Fittable,Writeable):
         raise NotImplementedError
 
 
-    def model_full_contrib(self,wngrid=None,return_contrib=True):
+    def model_full_contrib(self,wngrid=None,return_contrib=True,cutoff_grid=True):
         """Computes the forward model for a wngrid for each contribution"""
         raise NotImplementedError
     

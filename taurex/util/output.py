@@ -105,6 +105,58 @@ def store_chemistry(output,model):
 
 
 
+def generate_profile_dict(model):
+    out = {}
+    out['temp_profile']=model.temperatureProfile
+    out['active_mix_profile']=model.chemistry.activeGasMixProfile
+    out['inactive_mix_profile']=model.chemistry.inactiveGasMixProfile
+    out['density_profile']=model.densityProfile
+    out['scaleheight_profile']=model.scaleheight_profile
+    out['altitude_profile']=model.altitudeProfile
+    out['gravity_profile']=model.gravity_profile
+    out['pressure_profile']=model.pressure.profile
+    return out
+
+def generate_spectra_dict(result,contrib_result,native_grid,bin_grid=None):
+    from taurex.util import bindown
+    out = {}
+    #Store model output
+    #out['binned_model'] = result[0] 
+    out['native_spectrum'] = result[1]
+    out['native_tau'] = result[2]
+    out['native_wngrid']= native_grid
+    out['native_wlgrid']= 10000/native_grid
+
+    if bin_grid is not None:
+        out['bin_wngrid']= bin_grid
+        out['bin_wlgrid']= 10000 / bin_grid
+        out['bin_spectrum']= result[0]
+        out['bin_tau']= bindown(native_grid,result[2],bin_grid)
+
+
+
+
+    contributions = {}
+
+    for contrib_name,contrib_list in contrib_result.items(): #Loop through each contribtuion
+        
+        contributions[contrib_name] = {}
+
+        for c in contrib_list: #Loop through its components
+            name = c[0]
+            binned = c[1]
+            native = c[2]
+            tau = c[3] # necessary?
+            contrib_comp = {}
+            contrib_comp['binned'] = binned
+            contrib_comp['native'] = native
+            contrib_comp['tau'] = tau
+            contributions[contrib_name][name] = contrib_comp
+
+    out['Contributions'] = contributions
+    return out
+
+
 def plot_taurex_results_from_hdf5(arg_output):
 
     file = h5py.File(arg_output,'r')
