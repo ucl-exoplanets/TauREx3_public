@@ -239,7 +239,10 @@ def bindown(original_bin,original_data,new_bin,last_point=None):
     digitized = np.digitize(original_bin, new_bin,right=True)-1
     axis = len(original_data.shape)-1
     bin_means = [original_data[...,digitized == i].mean(axis=axis) for i in range(0, len(new_bin))]
-    return np.column_stack(bin_means)
+    if axis:
+        return np.column_stack(bin_means).flatten()
+    else:
+        return np.array(bin_means)
 
 def movingaverage(a, n=3) :
     """
