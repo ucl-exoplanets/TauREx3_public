@@ -43,7 +43,7 @@ class ForwardModel(Logger,Fittable,Writeable):
     def build(self):
         raise NotImplementedError
 
-    def model(self,wngrid=None,return_contrib=True):
+    def model(self,wngrid=None,return_contrib=False,cutoff_grid=True):
         """Computes the forward model for a wngrid"""
         raise NotImplementedError
 

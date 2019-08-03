@@ -251,11 +251,11 @@ class SimpleForwardModel(ForwardModel):
                 
 
 
-    def model(self,wngrid=None,return_contrib=False):
+    def model(self,wngrid=None,return_contrib=False,cutoff_grid=True):
         self.initialize_profiles()
 
         native_grid = self.nativeWavenumberGrid
-        if wngrid is not None:
+        if wngrid is not None and cutoff_grid:
             wn_min = wngrid.min()*0.9
             wn_max = wngrid.max()*1.1
             native_filter = (native_grid >= wn_min) & (native_grid <= wn_max)
