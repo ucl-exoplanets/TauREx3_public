@@ -413,3 +413,11 @@ def weighted_avg_and_std(values, weights, axis=None):
     average = np.average(values, weights=weights,axis=axis)
     variance = np.average((values-average)**2, weights=weights, axis=axis)  # Fast and numerically precise
     return (average, np.sqrt(variance))
+
+
+def random_int_iter(total,fraction):
+    from random import randint
+    n_points = int(total*fraction)
+
+    for x in range(n_points):
+        yield randint(0,n_points-1)
