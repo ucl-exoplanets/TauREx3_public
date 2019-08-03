@@ -493,7 +493,7 @@ class Optimizer(Logger):
 
             opt_contributions = self._model.model_full_contrib(wngrid=self._observed.wavenumberGrid,cutoff_grid=False) #Get contributions
 
-            sol_values['Spectra'] = generate_spectra_dict(opt_result,opt_contributions,tm.nativeWavenumberGrid,bin_grid=self._observed.wavenumberGrid)
+            sol_values['Spectra'] = generate_spectra_dict(opt_result,opt_contributions,self._model.nativeWavenumberGrid,bin_grid=self._observed.wavenumberGrid)
 
             #Store profiles here
             tp_std,active_std,inactive_std,tau_std = self.generate_profiles(solution)
