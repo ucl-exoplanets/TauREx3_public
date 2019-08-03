@@ -29,8 +29,9 @@ class NestleOptimizer(Optimizer):
 
     """
 
-    def __init__(self,observed=None,model=None,num_live_points=1500,method='multi',tol=0.5):
-        super().__init__('Nestle',observed,model)
+    def __init__(self,observed=None,model=None,num_live_points=1500,method='multi',tol=0.5
+    ,sigma_fraction=0.1):
+        super().__init__('Nestle',observed,model,sigma_fraction)
         self._nlive = int(num_live_points)    # number of live points
         self._method = method # use MutliNest algorithm
         

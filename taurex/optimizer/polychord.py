@@ -18,8 +18,8 @@ class PolyChordOptimizer(Optimizer):
                 evidence_tolerance=0.5,
                 mode_tolerance=-1e90,
                 resume=False,
-                verbosity=1):
-        super().__init__('Multinest',observed,model)
+                verbosity=1,sigma_fraction=0.1):
+        super().__init__('Multinest',observed,model,sigma_fraction)
 
         # number of live points
         self.n_live_points = int(num_live_points)

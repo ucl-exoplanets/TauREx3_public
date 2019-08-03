@@ -23,8 +23,8 @@ class MultiNestOptimizer(Optimizer):
                 mode_tolerance=-1e90,
                 importance_sampling=True,
                 resume=False,
-                verbose_output=True):
-        super().__init__('Multinest',observed,model)
+                verbose_output=True,sigma_fraction=0.1):
+        super().__init__('Multinest',observed,model,sigma_fraction)
 
         # sampling chains directory
         self.nest_path = 'chains/'
@@ -114,7 +114,7 @@ class MultiNestOptimizer(Optimizer):
         self.info('Fit complete.....')
 
         self._multinest_output = self.store_nest_solutions()
-
+        self.get_one_sigma_profiles(self._multinest_output,)
         self.debug('Multinest output {}'.format(self._multinest_output))
 
 
@@ -346,6 +346,9 @@ class MultiNestOptimizer(Optimizer):
 
 
 
+
+
+
     def get_one_sigma_profiles(self, fitting_out, solution, s):
         sigma_spectrum_frac = 0.1 #### This needs to be accessible as a parameter (fraction of the trace we use for the 1sigma profiles# )
 
@@ -371,11 +374,10 @@ class MultiNestOptimizer(Optimizer):
 
         for i in range(nprofiles):
             rand_idx = random.randint(0, np.shape(solution['tracedata'])[0])
-            fit_params_iter = sol_tracedata[rand_idx]
+            fit_params_iter = sol_tracedata[rand_idx
             weights[i] = solution['weights'][rand_idx]
             self.update_model(fit_params_iter)
-            self._model.build()
-            #new_native_model, _, _, _= self._model.model(native_grid)
+            new_model = self._model.model()
             tpprofiles[i, :] = self._model.temperatureProfile
             for j in range(nactivegases):
                 # molprofiles_active[i,j,:] = self.atmosphere.active_mixratio_profile[j,:]

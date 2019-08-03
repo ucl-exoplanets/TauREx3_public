@@ -23,12 +23,13 @@ class Optimizer(Logger):
 
     """
 
-    def __init__(self,name,observed=None,model=None):
+    def __init__(self,name,observed=None,model=None,sigma_fraction=0.1):
         super().__init__(name)
 
         self._model = model
         self._observed = observed
         self._model_callback = None
+        self._sigma_fraction = 0.1
 
     def set_model(self,model):
         """
@@ -394,6 +395,8 @@ class Optimizer(Logger):
 
         self.compute_fit()
 
+
+
     def write_optimizer(self,output):
         """
 
@@ -429,10 +432,12 @@ class Optimizer(Logger):
             Group (or root) in output file written to
 
         """
-        fit = output.create_group('Fit_params')
+        fit = output.create_group('FitParams')
         fit.write_string('fit_format',self.__class__.__name__)
         fit.write_string_array('fit_parameter_names',self.fit_names)
         fit.write_string_array('fit_parameter_latex',self.fit_latex)
+        fit.write_array('fit_boundary_low',np.array([x[0] for x in self.fit_boundaries]))
+        fit.write_array('fit_boundary_high',np.array([x[1] for x in self.fit_boundaries]))
 
         ### This is the last sampled value ... should not be recorded to avoid confusion.
         #fit.write_list('fit_parameter_values',self.fit_values)
@@ -440,9 +445,48 @@ class Optimizer(Logger):
         return output
 
 
+    def generate_profiles_spectra(self):
+        
+        solution_dict = {}
+        self.info('Generating spectra and profiles')
+        #Loop through each solution, grab optimized parameters and anything else we want to store 
+        for solution,optimized,values in range(self.num_solutions()): 
+            
+            self.info('Computing solution %s',solution)
+            sol_values = {}
+
+
+            self.update_model(optimized)
+            opt_result = self._model.model(wngrid=self._observed.wavenumberGrid)
+                                                              
+
+            
+
+            
+            
+            for parameters in self.sample_parameters(solution): #sample likelihood space and get their parameters
+                self.update_model(parameters)
+                result,_,_,_ = self._model.model()
+
+                
+
+    def optimized_parameters(self,solution):
+        raise NotImplementedError
+
+
+    def sample_parameters(self,solution):
+        raise NotImplementedError
+
+
+
+    def num_solutions(self):
+        raise NotImplementedError
+
+
+
     def write(self,output):
         """
-        Creates 'Optimizer' and 'Fitting' groups and writes
+        Creates 'Optimizer'
         them respectively
 
         
@@ -456,10 +500,7 @@ class Optimizer(Logger):
 
         """
         opt = output.create_group('Optimizer')
-        fit = output.create_group('Fit')
-
         self.write_optimizer(opt)
-        self.write_fit(fit)
         
 
 

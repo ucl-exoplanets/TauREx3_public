@@ -17,7 +17,7 @@ class dyPolyChordOptimizer(PolyChordOptimizer):
                 evidence_tolerance=0.5,
                 mode_tolerance=-1e90,
                 resume=False,
-                verbosity=1):
+                verbosity=1,sigma_fraction=0.1):
         super().__init__(
             polychord_path=polychord_path,observed=observed,model=model,
                 num_live_points=num_live_points,
@@ -27,7 +27,7 @@ class dyPolyChordOptimizer(PolyChordOptimizer):
                 evidence_tolerance=evidence_tolerance,
                 mode_tolerance=mode_tolerance,
                 resume=resume,
-                verbosity=verbosity)
+                verbosity=verbosity,sigma_fraction=sigma_fraction)
 
 
 
