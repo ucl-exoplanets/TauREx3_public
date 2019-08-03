@@ -72,6 +72,7 @@ def store_profiles(output,model):
 def store_fwspectrum(output,native_grid,absp,tau):
 
     output.write_array('native_wngrid', native_grid)
+    output.write_array('native_wlgrid', 10000/native_grid)
     output.write_array('native_spectrum', absp)
     output.write_array('native_tau', tau)
 
@@ -108,23 +109,29 @@ def plot_taurex_results_from_hdf5(arg_output):
 
     file = h5py.File(arg_output,'r')
 
-    arg_output = os.path.splitext(arg_output)[0]
+
 
     solution_name = file['Output']['solutions']
-    spectrum = np.zeros((len(file['Output']['Observed']['spectrum']),len(solution_name)*2))
+    spectrum = np.zeros((len(solution_name['solution0']['Spectra']['bin_wngrid']),len(solution_name)*2))
 
     for s in range(len(solution_name)):
-        spectrum[:,2 * s] = np.log10(10000/solution_name['solution{}'.format(s)]['Spectra']['bin_wngrid'][:])
+        spectrum[:,2 * s] = 10000/solution_name['solution{}'.format(s)]['Spectra']['bin_wngrid'][:]
         spectrum[:,2 * s + 1] = solution_name['solution{}'.format(s)]['Spectra']['bin_spectrum'][:]
-    observed = [file['Output']['Observed']['wlgrid'], file['Output']['Observed']['spectrum'], file['Output']['Observed']['errorbars'], file['Output']['Observed']['binwidths']]
 
+    observed = np.zeros((len(file['Output']['Observed']['spectrum']), 4))
+    observed[:,0] = file['Output']['Observed']['wlgrid'][:]
+    observed[:, 1]= file['Output']['Observed']['spectrum'][:]
+    observed[:, 2]= file['Output']['Observed']['errorbars'][:]
+    observed[:, 3]= file['Output']['Observed']['binwidths'][:]
 
-def plot_spectrum(wl, spectrum, arg_output, observed = None):
+    plot_spectrum(spectrum, os.path.splitext(arg_output)[0] +'_spectrum.pdf', observed=observed)
+
+def plot_spectrum(spectrum, arg_output, observed = None):
     cmap = cm.get_cmap('Set1')
 
 
     plt.figure()
-    for i in range(len(spectrum[0,:])):
+    for i in range(int(len(spectrum[0,:])/2)):
         plt.plot(spectrum[:, 2*i], spectrum[:, 2*i+1], label="Fit", color=cmap(float(i / 12.)))
 
     plt.plot(observed[:, 0], observed[:, 1], '.', color='blue', alpha=0.6, label="Observed")
@@ -140,7 +147,3 @@ def plot_spectrum(wl, spectrum, arg_output, observed = None):
     plt.xticks([0.5, 1, 2, 5, 10], [0.5, 1, 2, 5, 10])
     plt.legend(loc='upper left')
     plt.savefig(os.path.join(arg_output), dpi=1000)
-
-
-def keys(f):
-    return [key for key in f.keys()]

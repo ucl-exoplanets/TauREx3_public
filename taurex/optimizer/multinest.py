@@ -312,9 +312,11 @@ class MultiNestOptimizer(Optimizer):
 
         spec = fitting_out.create_group('Output/solutions/{}/Spectra'.format(s))
         spec.write_array('native_wngrid', native_grid)
+        spec.write_array('native_wlgrid', 10000/native_grid)
         spec.write_array('native_spectrum', new_native_model)
         spec.write_array('native_tau', native_tau)
         spec.write_array('bin_wngrid', obs_grid)
+        spec.write_array('bin_wlgrid', 10000 / obs_grid)
         spec.write_array('bin_spectrum', new_obs_model)
         spec.write_array('bin_tau', obs_tau)
 
@@ -372,8 +374,8 @@ class MultiNestOptimizer(Optimizer):
             fit_params_iter = sol_tracedata[rand_idx]
             weights[i] = solution['weights'][rand_idx]
             self.update_model(fit_params_iter)
-
-            #new_native_model, native_model, native_tau, native_contrib = self._model.model(native_grid, return_contrib=True)
+            self._model.build()
+            #new_native_model, _, _, _= self._model.model(native_grid)
             tpprofiles[i, :] = self._model.temperatureProfile
             for j in range(nactivegases):
                 # molprofiles_active[i,j,:] = self.atmosphere.active_mixratio_profile[j,:]
