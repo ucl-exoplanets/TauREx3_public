@@ -4,6 +4,7 @@ __all__ = ['Logger']
 
 
 root_logger = logging.getLogger('taurex')
+root_logger.propagate = False
 """Root logger for taurex"""
 
 class TauRexHandler(logging.StreamHandler):

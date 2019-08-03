@@ -37,7 +37,7 @@ class CIAContribution(Contribution):
 
     def contribute(self,model,start_horz_layer,end_horz_layer,density_offset,layer,density,path_length=None):
         if self._total_cia > 0:
-            contrib =contribute_cia(start_horz_layer,end_horz_layer,density_offset,self.sigma_cia,density,path_length,self._nlayers,self._ngrid,layer)
+            contrib =contribute_cia(start_horz_layer,end_horz_layer,density_offset,self.sigma_xsec,density,path_length,self._nlayers,self._ngrid,layer)
             self._total_contrib[layer] += contrib
             return contrib
         else:
@@ -50,27 +50,31 @@ class CIAContribution(Contribution):
     def build(self,model):
         pass
     
-    def prepare(self,model,wngrid):
-        self._total_cia = len(self.ciaPairs)
-        total_cia = self._total_cia
-        self._total_contrib = np.zeros(shape=(model.nLayers,wngrid.shape[0],))
-        if self._total_cia == 0:
-            return
-        self.sigma_cia = np.zeros(shape=(model.nLayers,wngrid.shape[0]))
 
-        self._total_cia = total_cia
+    def prepare_each(self,model,wngrid):
+
+        self._total_cia = len(self.ciaPairs)
         self._nlayers = model.nLayers
         self._ngrid = wngrid.shape[0]
         self.info('Computing CIA ')
-        for cia_idx,pairName in enumerate(self.ciaPairs):
-            cia = self._cia_cache[pairName]
 
+        sigma_cia = np.zeros(shape=(model.nLayers,wngrid.shape[0]))
+
+        self._total_contrib = np.zeros(shape=(model.nLayers,wngrid.shape[0],))
+
+
+        for pairName in self.ciaPairs:
+            cia = self._cia_cache[pairName]
+            sigma_cia[...]=0.0
+            self._total_contrib[...] =0.0
             cia_factor = model.chemistry.get_gas_mix_profile(cia.pairOne)*model.chemistry.get_gas_mix_profile(cia.pairTwo)
             for idx_layer,temperature in enumerate(model.temperatureProfile):
 
                 
                 _cia_xsec = cia.cia(temperature,wngrid)
-                self.sigma_cia[idx_layer] += _cia_xsec*cia_factor[idx_layer]
+                sigma_cia[idx_layer] += _cia_xsec*cia_factor[idx_layer]
+            self.sigma_xsec = sigma_cia
+            yield pairName,sigma_cia
 
         
 
