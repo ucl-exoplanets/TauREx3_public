@@ -286,10 +286,8 @@ class SimpleForwardModel(ForwardModel):
         for contrib in full_contrib_list:
             self.contribution_list = [contrib]
             contrib_name = contrib.name
-            print('CONTRIB',contrib_name)
             contrib_res_list = []
             for name,sig in contrib.prepare_each(self,native_grid):
-                print(name)
                 absorp,tau,contrib = self.path_integral(native_grid,False)
                 if wngrid is None:
                     contrib_res_list.append((name,absorp,tau))

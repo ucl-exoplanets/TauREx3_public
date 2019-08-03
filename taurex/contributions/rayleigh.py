@@ -10,16 +10,6 @@ class RayleighContribution(Contribution):
 
     def __init__(self):
         super().__init__('Rayleigh')
- 
-
-    def contribute(self,model,start_horz_layer,end_horz_layer,density_offset,layer,density,path_length=None):
-
-        contrib = contribute_tau(start_horz_layer,end_horz_layer,
-            density_offset,self.sigma_rayleigh,density,path_length,self._nlayers,self._ngrid,layer)
-        
-        self._total_contrib[layer] += contrib
-        
-        return contrib
 
     def build(self,model):
         pass
@@ -50,41 +40,6 @@ class RayleighContribution(Contribution):
             
             if sigma is not None:
                 final_sigma = sigma[None,:]*model.chemistry.get_gas_mix_profile(gasname)[:,None]
-                self.sigma_rayleigh = final_sigma
+                self.sigma_xsec = final_sigma
                 yield gasname,final_sigma
     
-    def prepare(self,model,wngrid):
-        
-        # precalculate rayleigh scattering cross sections
-
-        self.info('Compute Rayleigh scattering cross sections')
-
-
-        sigma_rayleigh = [x for x in self.prepare_each(model,wngrid)]
-
-
-        self._nmols = len(sigma_rayleigh)
-
-
-        self._nlayers = model.nLayers
-        
-        sigma_rayleigh = np.zeros(shape=(self._nlayers,self._ngrid))
-
-        for gas,sigma in self.prepare_each(model,wngrid):
-            self.debug('Gas %s',gas)
-            self.debug('Sigma %s',sigma)
-            sigma_rayleigh += sigma
-
-        self.sigma_rayleigh = sigma_rayleigh
-
-        self.debug('Final sigma %s',self.sigma_rayleigh)
-        self.info('Computing Ray interpolation ')
-        
-        self.info('DONE!!!')
-        
-
-
-
-    @property
-    def sigma(self):
-        return self.sigma_rayleigh

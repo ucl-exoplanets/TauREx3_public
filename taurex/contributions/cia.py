@@ -37,7 +37,7 @@ class CIAContribution(Contribution):
 
     def contribute(self,model,start_horz_layer,end_horz_layer,density_offset,layer,density,path_length=None):
         if self._total_cia > 0:
-            contrib =contribute_cia(start_horz_layer,end_horz_layer,density_offset,self.sigma_cia,density,path_length,self._nlayers,self._ngrid,layer)
+            contrib =contribute_cia(start_horz_layer,end_horz_layer,density_offset,self.sigma_xsec,density,path_length,self._nlayers,self._ngrid,layer)
             self._total_contrib[layer] += contrib
             return contrib
         else:
@@ -73,29 +73,8 @@ class CIAContribution(Contribution):
                 
                 _cia_xsec = cia.cia(temperature,wngrid)
                 sigma_cia[idx_layer] += _cia_xsec*cia_factor[idx_layer]
-            self.sigma_cia = sigma_cia
+            self.sigma_xsec = sigma_cia
             yield pairName,sigma_cia
-
-    def prepare(self,model,wngrid):
-        
-
-        self._nlayers = model.nLayers
-        self._ngrid = wngrid.shape[0]
-        self.info('Computing CIA ')
-
-        sigma_cia = [x for x in self.prepare_each(model,wngrid)]
-
-
-        if len(sigma_cia) ==0:
-            return 
-        sigma_cia = np.zeros(shape=(self._nlayers,self._ngrid))
-
-        for gas,sigma in self.prepare_each(model,wngrid):
-            self.debug('Gas %s',gas)
-            self.debug('Sigma %s',sigma)
-            sigma_cia += sigma
-
-        self.sigma_cia = sigma_cia
 
         
 

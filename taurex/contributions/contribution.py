@@ -69,6 +69,7 @@ class Contribution(Fittable,Logger,Writeable):
         self._name = name
         self._total_contribution = None
         self._enabled = True
+        self.sigma_xsec = None
     @property
     def name(self):
         return self._name
@@ -77,13 +78,34 @@ class Contribution(Fittable,Logger,Writeable):
   
 
     def contribute(self,model,start_horz_layer,end_horz_layer,density_offset,layer,density,path_length=None):
-        raise NotImplementedError
+        #print(self.sigma_xsec.max())
+        contrib =contribute_tau(start_horz_layer,end_horz_layer,density_offset,self.sigma_xsec,density,path_length,self._nlayers,self._ngrid,layer)
+        self._total_contrib[layer] += contrib
+        return contrib
 
     def build(self,model):
         raise NotImplementedError
     
-    def prepare(self,model,wngrid):
+    def prepare_each(self,model,wngrid):
         raise NotImplementedError
+
+
+    def prepare(self,model,wngrid):
+        self._total_contrib = np.zeros(shape=(model.nLayers,wngrid.shape[0],))
+        self._ngrid = wngrid.shape[0]
+        self._nlayers = model.nLayers
+        
+        sigma_xsec = np.zeros(shape=(self._nlayers,self._ngrid))
+
+        for gas,sigma in self.prepare_each(model,wngrid):
+            self.debug('Gas %s',gas)
+            self.debug('Sigma %s',sigma)
+            sigma_xsec += sigma
+
+        self.sigma_xsec = sigma_xsec
+        self.debug('Final sigma is %s',self.sigma_xsec)
+        #quit()
+        self.info('Done')
 
     def finalize(self,model):
         raise NotImplementedError
