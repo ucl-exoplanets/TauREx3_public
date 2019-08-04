@@ -29,9 +29,12 @@ class Guillot2010(TemperatureProfile):
         super().__init__('Guillot')
 
         self.T_irr = T_irr
-        self.kappa_ir = np.power(10, kappa_irr)
-        self.kappa_v1 = np.power(10, kappa_v1)
-        self.kappa_v2 = np.power(10, kappa_v2)
+        #self.kappa_ir = np.power(10, kappa_irr)
+        #self.kappa_v1 = np.power(10, kappa_v1)
+        #self.kappa_v2 = np.power(10, kappa_v2)
+        self.kappa_ir = kappa_irr
+        self.kappa_v1 = kappa_v1
+        self.kappa_v2 = kappa_v2
         self.alpha = alpha
     
     @fitparam(param_name='T_irr',param_latex='$T_\\mathrm{irr}$',default_fit=True,default_bounds=[1300, 2500])
@@ -43,7 +46,7 @@ class Guillot2010(TemperatureProfile):
     def equilTemperature(self,value):
         self.T_irr=value
 
-    @fitparam(param_name='kappa_ir',param_latex='$k_\\mathrm{ir}$',default_fit=False,default_bounds=[-10,1])
+    @fitparam(param_name='kappa_ir',param_latex='$k_\\mathrm{ir}$',default_fit=False,default_bounds=[1e-10,1])
     def meanInfraOpacity(self):
         """mean infra-red opacity"""
         return self.kappa_ir
@@ -52,7 +55,7 @@ class Guillot2010(TemperatureProfile):
     def meanInfraOpacity(self,value):
         self.kappa_ir = np.power(10,value)
 
-    @fitparam(param_name='kappa_v1',param_latex='$k_\\mathrm{1}$',default_fit=False,default_bounds=[-10,1])
+    @fitparam(param_name='kappa_v1',param_latex='$k_\\mathrm{1}$',default_fit=False,default_bounds=[1e-10,1])
     def meanOpticalOpacity1(self):
         """mean optical opacity one"""
         return self.kappa_v1
@@ -61,7 +64,7 @@ class Guillot2010(TemperatureProfile):
     def meanOpticalOpacity1(self,value):
         self.kappa_v1 = np.power(10,value)
 
-    @fitparam(param_name='kappa_v2',param_latex='$k_\\mathrm{2}$',default_fit=False,default_bounds=[-10,1])
+    @fitparam(param_name='kappa_v2',param_latex='$k_\\mathrm{2}$',default_fit=False,default_bounds=[1e-10,1])
     def meanOpticalOpacity2(self):
         """mean optical opacity two"""
         return self.kappa_v2
