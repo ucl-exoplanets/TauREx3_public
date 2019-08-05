@@ -58,7 +58,7 @@ class ForwardModel(Logger,Fittable,Writeable):
     
 
     def write(self,output):
-        model = output.create_group('Model')
+        model = output.create_group('ModelParameters')
         model.write_string('model_type',self.__class__.__name__)
         #contrib = model.create_group('Contributions')
         #for c in self.contribution_list:
