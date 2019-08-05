@@ -114,8 +114,7 @@ class MultiNestOptimizer(Optimizer):
         self.info('Fit complete.....')
 
         self._multinest_output = self.store_nest_solutions()
-        self.get_one_sigma_profiles(self._multinest_output,)
-        self.debug('Multinest output {}'.format(self._multinest_output))
+        self.debug('Multinest output %s',self._multinest_output)
 
 
 
@@ -276,130 +275,37 @@ class MultiNestOptimizer(Optimizer):
         
         return NEST_out
 
-    #def write(self,output):
-    #    model = output.read('Model')
-    #    return model
 
+    def sample_parameters(self,solution):
+        from taurex.util.util import random_int_iter
+        solution_id ='solution{}'.format(solution)
+        samples = self._multinest_output['solutions'][solution_id]['tracedata']
+        weights = self._multinest_output['solutions'][solution_id]['weights']
 
-    def add_data_from_solutions(self, fitting_out):
-        file = fitting_out.read()
-        #solution_name = [s for s in file['Output']['solutions'].keys()]
-
-        solution_name = file['Output']['solutions'].keys()
-        for s in solution_name:
-            solution = file['Output']['solutions'][s]
-
-            #param_name = solution['fit_params'].keys()
-            param_name = file['Output']['Fit_params']['fit_parameter_names'][:].astype('str')
-            print(param_name)
-            fit_params = [solution['fit_params'][p[0]]['value'][()] for p in param_name]
-            # print(fit_params[0])
-            self.update_model(fit_params)
-
-            self.get_spectra( fitting_out, s)
-
-            self.get_profiles(fitting_out,solution, s)
-
-
-    def get_spectra(self, fitting_out, s):
-
-
-        native_grid = self._model.nativeWavenumberGrid
-        new_native_model, native_model ,native_tau, native_contrib = self._model.model(native_grid,return_contrib=True)
-
-        obs_grid = self._observed.wavenumberGrid
-        new_obs_model, obs_model, obs_tau, obs_contrib = self._model.model(obs_grid,return_contrib=True)
-
-        spec = fitting_out.create_group('Output/solutions/{}/Spectra'.format(s))
-        spec.write_array('native_wngrid', native_grid)
-        spec.write_array('native_wlgrid', 10000/native_grid)
-        spec.write_array('native_spectrum', new_native_model)
-        spec.write_array('native_tau', native_tau)
-        spec.write_array('bin_wngrid', obs_grid)
-        spec.write_array('bin_wlgrid', 10000 / obs_grid)
-        spec.write_array('bin_spectrum', new_obs_model)
-        spec.write_array('bin_tau', obs_tau)
-
-
-
-    def get_profiles(self, fitting_out, solution, s):
-
-        native_grid = self._model.nativeWavenumberGrid
-        new_native_model, native_model, native_tau, native_contrib = self._model.model(native_grid, return_contrib=True)
-
-        prof = fitting_out.create_group('Output/solutions/{}/Profiles'.format(s))
-
-        prof.write_array('density_profile', self._model.densityProfile)
-        prof.write_array('scaleheight_profile', self._model.scaleheight_profile)
-        prof.write_array('altitude_profile', self._model.altitudeProfile)
-        prof.write_array('gravity_profile', self._model.gravity_profile)
-        prof.write_array('pressure_profile', self._model.pressure.profile)
-
-        prof.write_array('temp_profile', self._model.temperatureProfile)
-        prof.write_array('active_mix_profile', self._model.chemistry.activeGasMixProfile)
-        prof.write_array('inactive_mix_profile', self._model.chemistry.inactiveGasMixProfile)
-
-        temperature_array, activeGasMixProfile_array, inactiveGasMixProfile_array = self.get_one_sigma_profiles(fitting_out, solution, s)
-        prof.write_array('temp_profile_std', temperature_array)
-        prof.write_array('active_mix_profile_std', activeGasMixProfile_array)
-        prof.write_array('inactive_mix_profile_std', inactiveGasMixProfile_array)
+        for x in random_int_iter(samples.shape[0],self._sigma_fraction):
+            w = weights[x]+1e-300
+            
+            yield samples[x,:],w
 
 
 
 
 
 
-    def get_one_sigma_profiles(self, fitting_out, solution, s):
-        sigma_spectrum_frac = 0.1 #### This needs to be accessible as a parameter (fraction of the trace we use for the 1sigma profiles# )
+    def get_solution(self):
+        names = self.fit_names
+        opt_values = self.fit_values
+        for k,v in self._multinest_output['solutions'].items():
+            solution_idx = int(k[8:])
 
-        native_grid = self._model.nativeWavenumberGrid
-
-
-
-
-        sol_tracedata = solution['tracedata']
-        sol_weights = solution['weights']
-        nprofiles = int(sigma_spectrum_frac * np.shape(solution['tracedata'])[0])
-        nlayers = len(self._model.pressure.profile)
-        nactivegases = len(self._model.chemistry.activeGasMixProfile[:,0])
-        ninactivegases = len(self._model.chemistry.inactiveGasMixProfile[:,0])
-
-
-        tpprofiles = np.zeros((nprofiles, nlayers))
-        molprofiles_active = np.zeros((nprofiles, nactivegases, nlayers))
-        molprofiles_inactive = np.zeros((nprofiles, ninactivegases, nlayers))
-
-        weights = np.zeros((nprofiles))
-
-
-        for i in range(nprofiles):
-            rand_idx = random.randint(0, np.shape(solution['tracedata'])[0])
-            fit_params_iter = sol_tracedata[rand_idx
-            weights[i] = solution['weights'][rand_idx]
-            self.update_model(fit_params_iter)
-            new_model = self._model.model()
-            tpprofiles[i, :] = self._model.temperatureProfile
-            for j in range(nactivegases):
-                # molprofiles_active[i,j,:] = self.atmosphere.active_mixratio_profile[j,:]
-                molprofiles_active[i, j, :] = self._model.chemistry.activeGasMixProfile[j,:]
-            for j in range(ninactivegases):
-                molprofiles_inactive[i, j, :] = self._model.chemistry.inactiveGasMixProfile[j,:]
-            std_tpprofiles = np.zeros((nlayers))
-
-        std_molprofiles_active = np.zeros((nactivegases, nlayers))
-        std_molprofiles_inactive = np.zeros((ninactivegases, nlayers))
-
-        for i in range(nlayers):
-            std_tpprofiles[i] = weighted_avg_and_std(tpprofiles[:, i], weights=weights, axis=0)[1]
-            for j in range(nactivegases):
-                std_molprofiles_active[j, i] = \
-                weighted_avg_and_std(molprofiles_active[:, j, i], weights=weights, axis=0)[1]
-            for j in range(ninactivegases):
-                std_molprofiles_inactive[j, i] = \
-                weighted_avg_and_std(molprofiles_inactive[:, j, i], weights=weights, axis=0)[1]
-
-        return std_tpprofiles, std_molprofiles_active, std_molprofiles_inactive
-
+            for p_name,p_value in v['fit_params'].items():
+                idx = names.index(p_name)
+                opt_values[idx] = p_value['value']
+            
+                yield solution_idx,opt_values,[
+                                    ('fit_params',v['fit_params']),
+                                    ('traces',v['tracedata']),
+                                    ('weights',v['weights'])]
 
 
 
