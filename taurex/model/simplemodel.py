@@ -256,8 +256,8 @@ class SimpleForwardModel(ForwardModel):
 
         native_grid = self.nativeWavenumberGrid
         if wngrid is not None and cutoff_grid:
-            wn_min = wngrid.min()*0.9
-            wn_max = wngrid.max()*1.1
+            wn_min = wngrid.min()
+            wn_max = wngrid.max()
             native_filter = (native_grid >= wn_min) & (native_grid <= wn_max)
             native_grid = native_grid[native_filter]
 
@@ -279,8 +279,8 @@ class SimpleForwardModel(ForwardModel):
 
         native_grid = self.nativeWavenumberGrid
         if wngrid is not None and cutoff_grid:
-            wn_min = wngrid.min()*0.9
-            wn_max = wngrid.max()*1.1
+            wn_min = wngrid.min()
+            wn_max = wngrid.max()
             native_filter = (native_grid >= wn_min) & (native_grid <= wn_max)
             native_grid = native_grid[native_filter]
 
@@ -327,11 +327,11 @@ class SimpleForwardModel(ForwardModel):
 
         #Write Gas
 
-        #self._chemistry.write(model)
-        #self._temperature_profile.write(model)
-        # self.pressure.write(model)
-        #self._planet.write(model)
-        #self._star.write(model)
+        self._chemistry.write(model)
+        self._temperature_profile.write(model)
+        self.pressure.write(model)
+        self._planet.write(model)
+        self._star.write(model)
         
 
     
