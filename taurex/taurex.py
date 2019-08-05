@@ -1,26 +1,6 @@
 """The main taurex program"""
 
 
-def write_spectrum(output,native_wngrid,model,tau,contributions,wngrid=None,binned_model=None,observed=None):
-    spectrum = output.create_group('Spectrum')
-    spectrum.write_array('native_wngrid',native_wngrid)
-    spectrum.write_array('native_spectrum',model)
-    spectrum.write_array('native_tau',tau)
-
-    contrib = spectrum.create_group('native_contributions')
-    for name,value in contributions:
-        contrib.write_array(name,value)
-
-    if wngrid is not None:
-        spectrum.write_array('wngrid',wngrid)
-    if binned_model is not None:
-        spectrum.write_array('binned_spectrum',binned_model)
-    if observed is not None:
-        spectrum.write_array('observed_spectrum',observed.spectrum)
-        spectrum.write_array('observed_wngrid',observed.wavenumberGrid)
-        spectrum.write_array('observed_error',observed.errorBar)
-
-
 
 
 def main():
