@@ -469,14 +469,14 @@ class Optimizer(Logger):
 
         weights = np.array(weights)
 
-        tp_std = weighted_avg_and_std(tp_profiles,weights=weights,axis=0)
-        active_std = weighted_avg_and_std(active_gases,weights=weights,axis=0)
-        inactive_std = weighted_avg_and_std(inactive_gases,weights=weights,axis=0)
+        tp_std = weighted_avg_and_std(tp_profiles,weights=weights,axis=0)[1]
+        active_std = weighted_avg_and_std(active_gases,weights=weights,axis=0)[1]
+        inactive_std = weighted_avg_and_std(inactive_gases,weights=weights,axis=0)[1]
 
-        tau_std = weighted_avg_and_std(tau_profile,weights=weights,axis=0)
+        tau_std = weighted_avg_and_std(tau_profile,weights=weights,axis=0)[1]
 
-        binned_std = weighted_avg_and_std(binned_spectrum,weights=weights,axis=0)
-        native_std = weighted_avg_and_std(native_spectrum,weights=weights,axis=0)
+        binned_std = weighted_avg_and_std(binned_spectrum,weights=weights,axis=0)[1]
+        native_std = weighted_avg_and_std(native_spectrum,weights=weights,axis=0)[1]
 
         return tp_std,active_std,inactive_std,tau_std,binned_std,native_std
 
