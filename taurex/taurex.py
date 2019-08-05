@@ -77,6 +77,15 @@ def main():
     else:
         native_grid = native_grid[(native_grid >= bindown_wngrid.min()*0.9) & (native_grid<= bindown_wngrid.max()*1.1) ]
 
+    model.model()
+
+    if args.output_file and get_rank()==0:
+        from taurex.util.output import store_taurex_results,store_profiles,generate_profile_dict,generate_spectra_dict
+        #Output taurex data
+        with HDF5Output(args.output_file) as o:
+
+            model.write(o)
+
     optimizer = None
     solution = None
     if args.retrieval is True:
@@ -118,29 +127,40 @@ def main():
         logging.getLogger('taurex').setLevel(logging.INFO)
 
     #Run the model
-    result=model.model(bindown_wngrid,return_contrib=True)
+    result=model.model(bindown_wngrid,return_contrib=True,cutoff_grid=False)
     new_absp,absp,tau,contrib = result
     #Get out new binned down model
     contrib_res = None
 
     if args.full_contrib or args.output_file:
-        contrib_res = model.model_full_contrib(wngrid=bindown_wngrid)
+        contrib_res = model.model_full_contrib(wngrid=bindown_wngrid,cutoff_grid=False)
 
 
     if args.output_file and get_rank()==0:
         from taurex.util.output import store_taurex_results,store_profiles,generate_profile_dict,generate_spectra_dict
         #Output taurex data
-        with HDF5Output(args.output_file) as o:
+        with HDF5Output(args.output_file,append=True) as o:
 
-            model.write(o)
             out = o.create_group('Output')
             if observed is not None:
-                observed.write(out)
+                obs = o.create_group('Observed')
+                observed.write(obs)
+
+            profiles=generate_profile_dict(model)
+            if observed is not None:
+                spectrum= generate_spectra_dict(result,contrib_res,model.nativeWavenumberGrid,observed.wavenumberGrid)
+            else:
+                spectrum= generate_spectra_dict(result,contrib_res,model.nativeWavenumberGrid)
 
             if solution is not None:
-                out.store_dictionary(solution)
+                out.store_dictionary(solution,group_name='Solutions')
+                priors = {}
+                priors['Profiles'] = profiles
+                priors['Spectra'] = spectrum
+                out.store_dictionary(solution,group_name='Priors')
             else:
-                profiles=
+                out.store_dictionary(profiles,group_name='Profiles')
+                out.store_dictionary(spectrum,group_name='Spectra')
 
             #store_taurex_results(o,model,native_grid,absp,tau,contrib,observed=observed,optimizer=optimizer)
 
