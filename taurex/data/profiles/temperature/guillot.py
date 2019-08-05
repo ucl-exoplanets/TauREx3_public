@@ -46,32 +46,35 @@ class Guillot2010(TemperatureProfile):
     def equilTemperature(self,value):
         self.T_irr=value
 
-    @fitparam(param_name='kappa_ir',param_latex='$k_\\mathrm{ir}$',default_fit=False,default_bounds=[1e-10,1])
+    @fitparam(param_name='kappa_ir',param_latex='$k_\\mathrm{ir}$',default_fit=False,default_bounds=[1e-10,1], default_mode='log')
     def meanInfraOpacity(self):
         """mean infra-red opacity"""
         return self.kappa_ir
 
     @meanInfraOpacity.setter
     def meanInfraOpacity(self,value):
-        self.kappa_ir = np.power(10,value)
+        #self.kappa_ir = np.power(10,value)
+        self.kappa_ir = value
 
-    @fitparam(param_name='kappa_v1',param_latex='$k_\\mathrm{1}$',default_fit=False,default_bounds=[1e-10,1])
+    @fitparam(param_name='kappa_v1',param_latex='$k_\\mathrm{1}$',default_fit=False,default_bounds=[1e-10,1], default_mode='log')
     def meanOpticalOpacity1(self):
         """mean optical opacity one"""
         return self.kappa_v1
 
     @meanOpticalOpacity1.setter
     def meanOpticalOpacity1(self,value):
-        self.kappa_v1 = np.power(10,value)
+        #self.kappa_v1 = np.power(10,value)
+        self.kappa_v1 = value
 
-    @fitparam(param_name='kappa_v2',param_latex='$k_\\mathrm{2}$',default_fit=False,default_bounds=[1e-10,1])
+    @fitparam(param_name='kappa_v2',param_latex='$k_\\mathrm{2}$',default_fit=False,default_bounds=[1e-10,1], default_mode='log')
     def meanOpticalOpacity2(self):
         """mean optical opacity two"""
         return self.kappa_v2
 
     @meanOpticalOpacity2.setter
     def meanOpticalOpacity2(self,value):
-        self.kappa_v2 = np.power(10,value)
+        #self.kappa_v2 = np.power(10,value)
+        self.kappa_v2 = value
 
     @fitparam(param_name='alpha',param_latex='$\\alpha$',default_fit=False,default_bounds=[0.0,1.0])
     def opticalRatio(self):
