@@ -236,9 +236,16 @@ def bindown(original_bin,original_data,new_bin,last_point=None):
     #          np.histogram(original_bin,calc_bin)[0])
 
 
-    digitized = np.digitize(original_bin, new_bin,right=True)-1
+    
+    filter_lhs = np.zeros(new_bin.shape[0]+1)
+    filter_lhs[0] = new_bin[0]
+    filter_lhs[0] -= (new_bin[1] - new_bin[0])/2
+    filter_lhs[-1] = new_bin[-1]
+    filter_lhs[-1] += (new_bin[-1] - new_bin[-2])/2
+    filter_lhs[1:-1] = (new_bin[1:] + new_bin[:-1])/2
+    digitized = np.digitize(original_bin,filter_lhs,right=True)
     axis = len(original_data.shape)-1
-    bin_means = [original_data[...,digitized == i].mean(axis=axis) for i in range(0, len(new_bin))]
+    bin_means = [original_data[...,digitized == i].mean(axis=axis) for i in range(1, len(filter_lhs))]
     if axis:
         return np.column_stack(bin_means)
     else:
