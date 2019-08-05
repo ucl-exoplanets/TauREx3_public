@@ -57,8 +57,6 @@ def main():
     else:
         native_grid = native_grid[(native_grid >= bindown_wngrid.min()*0.9) & (native_grid<= bindown_wngrid.max()*1.1) ]
 
-    model.model()
-
     if args.output_file and get_rank()==0:
         from taurex.util.output import store_taurex_results,store_profiles,generate_profile_dict,generate_spectra_dict
         #Output taurex data
