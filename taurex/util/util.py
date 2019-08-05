@@ -240,7 +240,7 @@ def bindown(original_bin,original_data,new_bin,last_point=None):
     axis = len(original_data.shape)-1
     bin_means = [original_data[...,digitized == i].mean(axis=axis) for i in range(0, len(new_bin))]
     if axis:
-        return np.column_stack(bin_means).flatten()
+        return np.column_stack(bin_means)
     else:
         return np.array(bin_means)
 
@@ -420,8 +420,9 @@ def weighted_avg_and_std(values, weights, axis=None):
 
 
 def random_int_iter(total,fraction):
-    from random import randint
+    import random
     n_points = int(total*fraction)
 
-    for x in range(n_points):
-        yield randint(0,n_points-1)
+    samples = random.sample(range(total),n_points)
+    for x in samples:
+        yield x
