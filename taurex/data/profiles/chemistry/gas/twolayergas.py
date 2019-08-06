@@ -41,10 +41,14 @@ class TwoLayerGas(Gas):
         self._mix_top = mix_ratio_top
         self._mix_ratio_pressure = mix_ratio_P
         self._mix_ratio_smoothing = mix_ratio_smoothing
-
+        self._mix_profile = None
         self.add_surface_param()
         self.add_top_param()
         self.add_P_param()
+
+    @property
+    def mixProfile(self):
+        return self._mix_profile
 
     @property
     def mixRatioSurface(self):
