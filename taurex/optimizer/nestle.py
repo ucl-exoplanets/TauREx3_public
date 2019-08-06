@@ -129,7 +129,7 @@ class NestleOptimizer(Optimizer):
         
         yield 0,opt_values,[ ('Statistics', self._nestle_output['Stats']),
                             ('Fitparams',self._nestle_output['solution']['fitparams']),
-                            ('traces',self._nestle_output['solution']['samples']),
+                            ('tracedata',self._nestle_output['solution']['samples']),
                             ('weights',self._nestle_output['solution']['weights'])]
 
 
