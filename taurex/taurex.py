@@ -30,7 +30,7 @@ def main():
     import logging
     import numpy as np
     from taurex.mpi import get_rank,nprocs
-    from taurex.log import Logger
+    from taurex.log import Logger,setLogLevel
     from taurex.parameter import ParameterParser
     from taurex.util import bindown
     from taurex.output.hdf5 import HDF5Output
@@ -39,16 +39,16 @@ def main():
     parser.add_argument("-R", "--retrieval",dest='retrieval',default=False, help="When set, runs retrieval",action='store_true')
     parser.add_argument("-p", "--plot",dest='plot',default=False,help="Whether to plot after the run",action='store_true')
     parser.add_argument("-g", "--debug-log",dest='debug',default=False,help="Debug log output",action='store_true')
-    parser.add_argument("-c", "--show-contrib",dest='contrib',default=False,help="Show contributions",action='store_true')
+    parser.add_argument("-c", "--show-contrib",dest='contrib',default=False,help="Show basic contributions",action='store_true')
+    parser.add_argument("-C","--full-contrib",dest='full_contrib',default=False,help="Show ALL contributions",action='store_true')
     parser.add_argument("-o","--output_file",dest='output_file',type=str)
 
 
     args=parser.parse_args()
 
-    # if args.debug:
-    #     logging.basicConfig(level=logging.DEBUG,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    # else:
-    #     logging.basicConfig(level=logging.INFO,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    if args.debug:
+        setLogLevel(logging.DEBUG)
+        #logging.basicConfig(level=logging.DEBUG,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     #Parse the input file
     pp = ParameterParser()
     pp.read(args.input_file)
@@ -128,11 +128,24 @@ def main():
                 optimizer.write(o)
 
 
+    contrib_res = None
+
+    if args.full_contrib:
+        contrib_res = model.model_full_contrib(wngrid=bindown_wngrid)
+
     
-    wlgrid = np.log10(10000/bindown_wngrid)
+    wlgrid = 10000/bindown_wngrid
     if args.plot:
+
+
+
         if get_rank()==0  and nprocs()<=1:
             import matplotlib.pyplot as plt
+            fig= plt.figure()
+            ax = fig.add_subplot(1,1,1)
+            ax.set_xscale('log')
+            ax.set_xlabel(r'Wavelength $(\mu m)$')
+            ax.set_ylabel(r'$(R_p/R_s)^2$')
             is_lightcurve = False
             try:
                 from taurex.model.lightcurve.lightcurve import LightCurveModel
@@ -140,25 +153,35 @@ def main():
             except ImportError:
                 pass
 
+            if observed is not None:
+                if is_lightcurve:
+                    ax.plot(observed.spectrum.flatten(),label='observed')
+                else:
+                    ax.errorbar(observed.wavelengthGrid,observed.spectrum,observed.errorBar,label='observed')
+
+            if is_lightcurve:
+                ax.plot(new_absp,label='forward model')
+            else:
+            #Plot the absorption
+                ax.plot(wlgrid,new_absp,label='forward model')
+
+
             if args.contrib and not is_lightcurve:
                 for name,value in contrib:
                     new_value = bindown(native_grid,value,bindown_wngrid)
-                    plt.plot(wlgrid,new_value,label=name)
-
+                    ax.plot(wlgrid,new_value,label='All {}'.format(name),alpha=0.8)
+            if contrib_res is not None:
+                for k,v in contrib_res.items():
+                    first_name = k
+                    for out in v:
+                        second_name = out[0]
+                        binned = out[1]
+                        label='{}-{}'.format(first_name,second_name)
+                        ax.plot(wlgrid,binned,label=label,alpha=0.6)
 
             
             #If we have an observation then plot it
-            if observed is not None:
-                if is_lightcurve:
-                    plt.plot(observed.spectrum.flatten(),label='observed')
-                else:
-                    plt.errorbar(np.log10(observed.wavelengthGrid),observed.spectrum,observed.errorBar,label='observed')
 
-            if is_lightcurve:
-                plt.plot(new_absp,label='forward model')
-            else:
-            #Plot the absorption
-                plt.plot(wlgrid,new_absp,label='forward model')
 
 
 

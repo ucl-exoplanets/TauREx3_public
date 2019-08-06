@@ -264,6 +264,48 @@ class SimpleForwardModel(ForwardModel):
             new_absp = bindown(native_grid,absorp,wngrid)
             return new_absp,absorp,tau,contrib
 
+
+    def model_full_contrib(self,wngrid=None,return_contrib=True):
+        """Computes the forward model for a wngrid for each contribution"""
+        self.initialize_profiles()
+
+        native_grid = self.nativeWavenumberGrid
+        if wngrid is not None:
+            wn_min = wngrid.min()*0.9
+            wn_max = wngrid.max()*1.1
+            native_filter = (native_grid >= wn_min) & (native_grid <= wn_max)
+            native_grid = native_grid[native_filter]
+
+
+        self._star.initialize(native_grid)
+
+        result_dict = {}
+
+        full_contrib_list = self.contribution_list
+        self.info('Modelling each contribution.....')
+        for contrib in full_contrib_list:
+            self.contribution_list = [contrib]
+            contrib_name = contrib.name
+            contrib_res_list = []
+            
+            for name,sig in contrib.prepare_each(self,native_grid):
+                self.info('\t%s---%s contribtuion',contrib_name,name)
+                absorp,tau,contrib = self.path_integral(native_grid,False)
+                if wngrid is None:
+                    contrib_res_list.append((name,absorp,tau))
+                else:
+                    new_absp = bindown(native_grid,absorp,wngrid)
+                    contrib_res_list.append((name,new_absp,absorp,tau))
+            
+            result_dict[contrib_name] = contrib_res_list
+        
+        self.contribution_list = full_contrib_list
+        return result_dict
+            
+            
+
+
+
     def path_integral(self,wngrid,return_contrib):
         raise NotImplementedError
 

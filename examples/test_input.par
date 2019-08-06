@@ -12,11 +12,11 @@ ratio=0.17647
     gas_type=constant
     mix_ratio=1e-5
 
-    #[[CH4]]
-    #gas_type=twolayer
-    #mix_ratio_surface=1e-4
-    #mix_ratio_top=1e-10
-    #mix_ratio_P=1e2
+    [[CH4]]
+    gas_type=twolayer
+    mix_ratio_surface=1e-4
+    mix_ratio_top=1e-10
+    mix_ratio_P=1e2
     
 
 
@@ -47,7 +47,6 @@ model_type = transmission
     cia_pairs = H2-He,H2-H2
     
     [[Rayleigh]]
-
 
 [Spectrum]
 observed_spectrum = /Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_transmission/SPECTRUM_fit.dat
