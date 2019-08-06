@@ -48,6 +48,8 @@ class MultiNestOptimizer(Optimizer):
         self.imp_sampling = importance_sampling
 
         self.dir_multinest = multi_nest_path
+        if not os.path.exists(self.dir_multinest):
+            os.makedirs(self.dir_multinest)
 
         self.resume = resume
         self.verbose = verbose_output
