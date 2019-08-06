@@ -299,21 +299,20 @@ class MultiNestOptimizer(Optimizer):
 
 
 
-
     def get_solution(self):
         names = self.fit_names
         opt_values = self.fit_values
-        for k,v in self._multinest_output['solutions'].items():
+        solutions = [ (k,v) for k,v in self._multinest_output['solutions'].items() if 'solution' in k]
+        for k,v in solutions:
             solution_idx = int(k[8:])
-
             for p_name,p_value in v['fit_params'].items():
                 idx = names.index(p_name)
                 opt_values[idx] = p_value['value']
             
-                yield solution_idx,opt_values,[
-                                    ('fit_params',v['fit_params']),
-                                    ('traces',v['tracedata']),
-                                    ('weights',v['weights'])]
+            yield solution_idx,opt_values,[
+                                ('fit_params',v['fit_params']),
+                                ('tracedata',v['tracedata']),
+                                ('weights',v['weights'])]
 
 
 
