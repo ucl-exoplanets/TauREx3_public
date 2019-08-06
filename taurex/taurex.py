@@ -135,7 +135,7 @@ def main():
                 priors = {}
                 priors['Profiles'] = profiles
                 priors['Spectra'] = spectrum
-                out.store_dictionary(solution,group_name='Priors')
+                out.store_dictionary(priors,group_name='Priors')
             else:
                 out.store_dictionary(profiles,group_name='Profiles')
                 out.store_dictionary(spectrum,group_name='Spectra')

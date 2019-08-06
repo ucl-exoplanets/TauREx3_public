@@ -276,6 +276,14 @@ class MultiNestOptimizer(Optimizer):
         return NEST_out
 
 
+    def generate_solution(self):
+
+        solution = super().generate_solution()
+
+        solution['GlobalStats'] = self._multinest_output['NEST_stats']
+        return solution
+
+
     def sample_parameters(self,solution):
         from taurex.util.util import random_int_iter
         solution_id ='solution{}'.format(solution)
