@@ -310,6 +310,8 @@ class MultiNestOptimizer(Optimizer):
                 opt_values[idx] = p_value['value']
             
             yield solution_idx,opt_values,[
+                                ('Statistics',{'local log-evidence': self._multinest_output['NEST_stats']['modes'][solution_idx]['local log-evidence'],
+                                              'local log-evidence error': self._multinest_output['NEST_stats']['modes'][solution_idx]['local log-evidence error']}),
                                 ('fit_params',v['fit_params']),
                                 ('tracedata',v['tracedata']),
                                 ('weights',v['weights'])]
