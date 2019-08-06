@@ -414,7 +414,10 @@ class Optimizer(Logger):
 
         """
         output.write_string('optimizer',self.__class__.__name__)
-        
+        output.write_string_array('fit_parameter_names',self.fit_names)
+        output.write_string_array('fit_parameter_latex',self.fit_latex)
+        output.write_array('fit_boundary_low',np.array([x[0] for x in self.fit_boundaries]))
+        output.write_array('fit_boundary_high',np.array([x[1] for x in self.fit_boundaries]))
         return output
     
     def write_fit(self,output):
@@ -468,15 +471,25 @@ class Optimizer(Logger):
             native_spectrum.append(native)
 
         weights = np.array(weights)
+        if np.any(weights):
+            tp_std = weighted_avg_and_std(tp_profiles,weights=weights,axis=0)[1]
+            active_std = weighted_avg_and_std(active_gases,weights=weights,axis=0)[1]
+            inactive_std = weighted_avg_and_std(inactive_gases,weights=weights,axis=0)[1]
 
-        tp_std = weighted_avg_and_std(tp_profiles,weights=weights,axis=0)[1]
-        active_std = weighted_avg_and_std(active_gases,weights=weights,axis=0)[1]
-        inactive_std = weighted_avg_and_std(inactive_gases,weights=weights,axis=0)[1]
+            tau_std = weighted_avg_and_std(tau_profile,weights=weights,axis=0)[1]
 
-        tau_std = weighted_avg_and_std(tau_profile,weights=weights,axis=0)[1]
+            binned_std = weighted_avg_and_std(binned_spectrum,weights=weights,axis=0)[1]
+            native_std = weighted_avg_and_std(native_spectrum,weights=weights,axis=0)[1]
+        else:
+            self.warning('WEIGHTS ARE ALL ZERO, SETTING PROFILES STD TO ZERO')
+            tp_std = np.zeros_like(tp_profiles)
+            active_std = np.zeros_like(active_gases)
+            inactive_std = np.zeros_like(inactive_gases)
 
-        binned_std = weighted_avg_and_std(binned_spectrum,weights=weights,axis=0)[1]
-        native_std = weighted_avg_and_std(native_spectrum,weights=weights,axis=0)[1]
+            tau_std = np.zeros_like(tau_profile)
+
+            binned_std = np.zeros_like(binned_spectrum)
+            native_std = np.zeros_like(native_spectrum)
 
         return tp_std,active_std,inactive_std,tau_std,binned_std,native_std
 
