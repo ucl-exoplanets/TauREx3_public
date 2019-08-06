@@ -140,7 +140,6 @@ def main():
                 out.store_dictionary(profiles,group_name='Profiles')
                 out.store_dictionary(spectrum,group_name='Spectra')
 
-            #store_taurex_results(o,model,native_grid,absp,tau,contrib,observed=observed,optimizer=optimizer)
 
 
             if optimizer:
