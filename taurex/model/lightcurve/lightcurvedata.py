@@ -81,7 +81,7 @@ class LightCurveData(Logger,Writeable):
         lc_grp.write_array('min_n_factors',self.minNFactors)
         lc_grp.write_array('max_n_factors',self.maxNFactors)
         lc_grp.write_array('time_series',self.timeSeries)
-        lc_grp.write_array('min_wavelength',self.wavelengthRegion[0])
-        lc_grp.write_array('max_wavelength',self.wavelengthRegion[1])
+        lc_grp.write_scalar('min_wavelength',self.wavelengthRegion[0])
+        lc_grp.write_scalar('max_wavelength',self.wavelengthRegion[1])
 
         return lc_grp

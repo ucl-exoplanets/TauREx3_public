@@ -43,12 +43,12 @@ class ForwardModel(Logger,Fittable,Writeable):
     def build(self):
         raise NotImplementedError
 
-    def model(self,wngrid=None,return_contrib=True):
+    def model(self,wngrid=None,return_contrib=False,cutoff_grid=True):
         """Computes the forward model for a wngrid"""
         raise NotImplementedError
 
 
-    def model_full_contrib(self,wngrid=None,return_contrib=True):
+    def model_full_contrib(self,wngrid=None,return_contrib=True,cutoff_grid=True):
         """Computes the forward model for a wngrid for each contribution"""
         raise NotImplementedError
     
@@ -58,11 +58,11 @@ class ForwardModel(Logger,Fittable,Writeable):
     
 
     def write(self,output):
-        model = output.create_group('ForwardModel')
+        model = output.create_group('ModelParameters')
         model.write_string('model_type',self.__class__.__name__)
-        contrib = model.create_group('Contributions')
-        for c in self.contribution_list:
-            c.write(contrib)
+        #contrib = model.create_group('Contributions')
+        #for c in self.contribution_list:
+        #    c.write(contrib)
 
 
     

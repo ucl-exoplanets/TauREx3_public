@@ -1,26 +1,6 @@
 """The main taurex program"""
 
 
-def write_spectrum(output,native_wngrid,model,tau,contributions,wngrid=None,binned_model=None,observed=None):
-    spectrum = output.create_group('Spectrum')
-    spectrum.write_array('native_wngrid',native_wngrid)
-    spectrum.write_array('native_spectrum',model)
-    spectrum.write_array('native_tau',tau)
-
-    contrib = spectrum.create_group('native_contributions')
-    for name,value in contributions:
-        contrib.write_array(name,value)
-
-    if wngrid is not None:
-        spectrum.write_array('wngrid',wngrid)
-    if binned_model is not None:
-        spectrum.write_array('binned_spectrum',binned_model)
-    if observed is not None:
-        spectrum.write_array('observed_spectrum',observed.spectrum)
-        spectrum.write_array('observed_wngrid',observed.wavenumberGrid)
-        spectrum.write_array('observed_error',observed.errorBar)
-
-
 
 
 def main():
@@ -69,13 +49,23 @@ def main():
     #Get the native grid
     native_grid = model.nativeWavenumberGrid
 
+
+
     #If we bin down then get the appropriate grid
     if bindown_wngrid is None:
         bindown_wngrid = native_grid
     else:
         native_grid = native_grid[(native_grid >= bindown_wngrid.min()*0.9) & (native_grid<= bindown_wngrid.max()*1.1) ]
-    optimizer = None
 
+    if args.output_file and get_rank()==0:
+        from taurex.util.output import store_taurex_results,store_profiles,generate_profile_dict,generate_spectra_dict
+        #Output taurex data
+        with HDF5Output(args.output_file) as o:
+
+            model.write(o)
+
+    optimizer = None
+    solution = None
     if args.retrieval is True:
         if observed is None:
             logging.critical('No spectrum is defined!!')
@@ -110,34 +100,59 @@ def main():
 
         logging.getLogger('taurex').setLevel(logging.WARNING)
 
-        optimizer.fit()
+        solution = optimizer.fit()
 
         logging.getLogger('taurex').setLevel(logging.INFO)
 
     #Run the model
-    new_absp,absp,tau,contrib=model.model(bindown_wngrid,return_contrib=True)
+    result=model.model(bindown_wngrid,return_contrib=True,cutoff_grid=False)
+    new_absp,absp,tau,contrib = result
     #Get out new binned down model
-    #new_absp = bindown(native_grid,absp,bindown_wngrid)
+    contrib_res = None
+
+    if args.full_contrib or args.output_file:
+        contrib_res = model.model_full_contrib(wngrid=bindown_wngrid,cutoff_grid=False)
+
 
     if args.output_file and get_rank()==0:
+        from taurex.util.output import store_taurex_results,store_profiles,generate_profile_dict,generate_spectra_dict
         #Output taurex data
-        with HDF5Output(args.output_file) as o:
-            model.write(o)
-            write_spectrum(o,native_grid,absp,tau,contrib,bindown_wngrid,new_absp,observed)
+        with HDF5Output(args.output_file,append=True) as o:
+
+            out = o.create_group('Output')
+            if observed is not None:
+                obs = o.create_group('Observed')
+                observed.write(obs)
+
+            profiles=generate_profile_dict(model)
+            if observed is not None:
+                spectrum= generate_spectra_dict(result,contrib_res,model.nativeWavenumberGrid,observed.wavenumberGrid)
+            else:
+                spectrum= generate_spectra_dict(result,contrib_res,model.nativeWavenumberGrid)
+
+            if solution is not None:
+                out.store_dictionary(solution,group_name='Solutions')
+                priors = {}
+                priors['Profiles'] = profiles
+                priors['Spectra'] = spectrum
+                out.store_dictionary(priors,group_name='Priors')
+            else:
+                out.store_dictionary(profiles,group_name='Profiles')
+                out.store_dictionary(spectrum,group_name='Spectra')
+
+
+
             if optimizer:
                 optimizer.write(o)
 
 
-    contrib_res = None
 
-    if args.full_contrib:
-        contrib_res = model.model_full_contrib(wngrid=bindown_wngrid)
+
+
 
     
     wlgrid = 10000/bindown_wngrid
     if args.plot:
-
-
 
         if get_rank()==0  and nprocs()<=1:
             import matplotlib.pyplot as plt
@@ -170,7 +185,7 @@ def main():
                 for name,value in contrib:
                     new_value = bindown(native_grid,value,bindown_wngrid)
                     ax.plot(wlgrid,new_value,label='All {}'.format(name),alpha=0.8)
-            if contrib_res is not None:
+            if args.full_contrib:
                 for k,v in contrib_res.items():
                     first_name = k
                     for out in v:

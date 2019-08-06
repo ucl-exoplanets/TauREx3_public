@@ -23,6 +23,16 @@ class Output(Logger):
     def __exit__(self, type, value, tb):
         self.close()
 
+
+    def store_dictionary(self,dictionary,group_name=None):
+        from taurex.util.util import recursively_save_dict_contents_to_output
+
+        out = self
+        if group_name is not None:
+            out = self.create_group(group_name)
+        
+        recursively_save_dict_contents_to_output(out,dictionary)
+
     
 class OutputGroup(Output):
 

@@ -195,7 +195,7 @@ class NPoint(TemperatureProfile):
 
         temperature.write_scalar('temp_surface',self._T_surface)
         temperature.write_scalar('temp_top',self._T_top)
-        temperature.write_array('temp_points',self._t_points)
+        temperature.write_array('temp_points',np.array(self._t_points))
 
         P_surface = self._P_surface
         P_top = self._P_top
@@ -206,7 +206,7 @@ class NPoint(TemperatureProfile):
 
         temperature.write_scalar('pressure_surface',P_surface)
         temperature.write_scalar('pressure_top',P_top)
-        temperature.write_array('pressure_points',self._p_points)
+        temperature.write_array('pressure_points',np.array(self._p_points))
 
         temperature.write_scalar('smoothin_window',self._smooth_window)
 
