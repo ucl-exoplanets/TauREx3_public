@@ -494,7 +494,7 @@ class Optimizer(Logger):
             #Include extra stuff we might want to store (provided by the child)
             for k,v in values:
                 sol_values[k] = v
-
+            
             self.update_model(optimized) #Update the model with optimized values
 
             opt_result = self._model.model(wngrid=self._observed.wavenumberGrid,return_contrib=False,cutoff_grid=False) #Run the model
