@@ -87,7 +87,7 @@ class NPoint(TemperatureProfile):
     def temperatureTop(self,value):
         self._T_top = value
 
-    @fitparam(param_name='P_surface',param_latex='$P_\\mathrm{surf}$',default_fit=False,default_bounds=[ 1e3,1e2])
+    @fitparam(param_name='P_surface',param_latex='$P_\\mathrm{surf}$',default_fit=False,default_bounds=[ 1e3,1e2], default_mode='log')
     def pressureSurface(self):
         return self._P_surface
     
@@ -95,7 +95,7 @@ class NPoint(TemperatureProfile):
     def pressureSurface(self,value):
         self._P_surface = value
 
-    @fitparam(param_name='P_top',param_latex='$P_\\mathrm{top}$',default_fit=False,default_bounds=[ 1e-5,1e-4])
+    @fitparam(param_name='P_top',param_latex='$P_\\mathrm{top}$',default_fit=False,default_bounds=[ 1e-5,1e-4], default_mode='log')
     def pressureTop(self):
         return self._P_top
     
