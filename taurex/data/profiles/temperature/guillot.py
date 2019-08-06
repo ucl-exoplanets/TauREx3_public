@@ -25,7 +25,7 @@ class Guillot2010(TemperatureProfile):
     """
 
 
-    def __init__(self,T_irr=1500,kappa_irr=0.05,kappa_v1=0.05,kappa_v2=0.05,alpha=0.005):
+    def __init__(self,T_irr=1500,kappa_irr=0.01,kappa_v1=0.005,kappa_v2=0.005,alpha=0.5):
         super().__init__('Guillot')
 
         self.T_irr = T_irr
