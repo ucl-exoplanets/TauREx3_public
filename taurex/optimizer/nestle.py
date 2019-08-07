@@ -128,7 +128,7 @@ class NestleOptimizer(Optimizer):
             opt_values[idx] = v['value']
         
         yield 0,opt_values,[ ('Statistics', self._nestle_output['Stats']),
-                            ('Fitparams',self._nestle_output['solution']['fitparams']),
+                            ('fit_params',self._nestle_output['solution']['fitparams']),
                             ('tracedata',self._nestle_output['solution']['samples']),
                             ('weights',self._nestle_output['solution']['weights'])]
 
