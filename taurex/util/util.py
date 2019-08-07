@@ -367,6 +367,11 @@ def read_table(txt, d=None, title=None):
         data = np.reshape(data, (1, -1))
     return data
 
+def decode_string_array(f):
+    """Helper to decode strings from hdf5"""
+    sl = list(f)
+    return [s[0].decode('utf-8') for s in sl] 
+
 
 def recursively_save_dict_contents_to_output(output, dic):
     """
