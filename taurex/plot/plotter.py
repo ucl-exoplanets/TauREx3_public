@@ -3,9 +3,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import taurex.plot.corner as corner
 import matplotlib as mpl
+from taurex.util.util import decode_string_array
 import os
 class Plotter(object):
-
+    phi = 1.618
 
     def __init__(self,filename,title=None,prefix='output',cmap='Paired',out_folder='.'):
         self.fd = h5py.File(filename,'r')
@@ -50,10 +51,79 @@ class Plotter(object):
         return list(zip(range_min,range_max)) 
             
 
+    @property
+    def activeGases(self):
+        return decode_string_array(self.fd['ModelParameters']['Chemistry']['active_gases'])
+
+    @property
+    def inactiveGases(self):
+        return decode_string_array(self.fd['ModelParameters']['Chemistry']['inactive_gases'])
 
 
+    def plot_fit_xprofile(self):
 
-    def plot_posteriors(self,):
+        for solution_idx, solution_val in self.solution_iter():
+
+            fig = plt.figure(figsize=(7,7/self.phi))
+            ax = fig.add_subplot(111)
+            num_moles = len(self.activeGases+self.inactiveGases)
+
+            profiles = solution_val['Profiles']
+            pressure_profile = profiles['pressure_profile'][:]/1e5
+            active_profile = profiles['active_mix_profile'][...]
+            active_profile_std = profiles['active_mix_profile_std'][...]
+
+            inactive_profile = profiles['inactive_mix_profile'][...]
+            inactive_profile_std = profiles['inactive_mix_profile_std'][...]
+
+            cols_mol = {}
+            for mol_idx,mol_name in enumerate(self.activeGases):
+                cols_mol[mol_name] = self.cmap(mol_idx/num_moles)
+
+                prof = active_profile[mol_idx]
+                prof_std = active_profile_std[mol_idx]
+
+                plt.plot(prof,pressure_profile,color=cols_mol[mol_name], label=mol_name)
+
+                plt.fill_betweenx(pressure_profile, prof + prof_std, prof,
+                                  color=self.cmap(mol_idx / num_moles), alpha=0.5)
+                plt.fill_betweenx(pressure_profile, prof,
+                                  np.power(10, (np.log10(prof) - (
+                                              np.log10(prof + prof_std) - np.log10(prof)))),
+                                  color=self.cmap(mol_idx / num_moles), alpha=0.5)
+
+            for mol_idx,mol_name in enumerate(self.inactiveGases):
+                inactive_idx = len(self.activeGases) + mol_idx
+                cols_mol[mol_name] = self.cmap(inactive_idx/num_moles)
+
+                
+                prof = inactive_profile[mol_idx]
+                prof_std = inactive_profile_std[mol_idx]
+
+                plt.plot(prof,pressure_profile,color=cols_mol[mol_name], label=mol_name)
+
+                plt.fill_betweenx(pressure_profile, prof + prof_std, prof,
+                                  color=self.cmap(inactive_idx / num_moles), alpha=0.5)
+                plt.fill_betweenx(pressure_profile, prof,
+                                  np.power(10, (np.log10(prof) - (
+                                              np.log10(prof + prof_std) - np.log10(prof)))),
+                                  color=self.cmap(inactive_idx / num_moles), alpha=0.5)
+        plt.gca().invert_yaxis()
+        plt.yscale('log')
+        plt.xscale('log')
+        plt.xlim(1e-12, 3)
+        plt.xlabel('Mixing ratio')
+        plt.ylabel('Pressure (bar)')
+        plt.tight_layout()
+        box = ax.get_position()
+        ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+        ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), ncol=1, prop={'size':11}, frameon=False)
+        if self.title:
+            plt.title(self.title, fontsize=14)
+        plt.savefig(os.path.join(self.out_folder, '%s_fit_mixratio.pdf' % (self.prefix)))
+
+
+    def plot_posteriors(self):
         if not self.is_retrieval:
             raise Exception('HDF5 was not generated from retrieval, no posteriors found')
         
