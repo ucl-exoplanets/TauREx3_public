@@ -135,6 +135,40 @@ class LightCurveModel(ForwardModel):
     def inclination(self,value):
         self._inclination = value
 
+    @property
+    def temperatureProfile(self):
+        return self._forward_model.temperatureProfile
+
+    @property
+    def pressureProfile(self):
+        return self._forward_model.pressureProfile
+    
+    @property
+    def densityProfile(self):
+        return self._forward_model.densityProfile
+    
+    @property
+    def scaleheight_profile(self):
+        return self._forward_model.scaleheight_profile
+    
+    @property
+    def chemistry(self):
+        return self._forward_model.chemistry
+    
+    @property
+    def gravity_profile(self):
+        return self._forward_model.gravity_profile
+    
+
+    @property
+    def pressure(self):
+        return self._forward_model.pressure
+
+    
+    @property
+    def altitudeProfile(self):
+        return self._forward_model.altitudeProfile
+
 
     def create_normalization_fitparams(self):
         import itertools
@@ -212,9 +246,9 @@ class LightCurveModel(ForwardModel):
         return self._forward_model.nativeWavenumberGrid
 
 
-    def model(self,wngrid=None,return_contrib=False):
+    def model(self,wngrid=None,return_contrib=False,cutoff_grid=True):
         """Computes the forward model for a wngrid"""
-        binned_model,model,tau,contrib = self._forward_model.model(wngrid,return_contrib)
+        binned_model,model,tau,contrib = self._forward_model.model(wngrid,return_contrib,cutoff_grid)
         if wngrid is None:
             wngrid = self.nativeWavenumberGrid
         
@@ -225,8 +259,39 @@ class LightCurveModel(ForwardModel):
 
         return result,model,tau,contrib
 
-    
-    
+    def model_full_contrib(self,wngrid=None,cutoff_grid=True):
+        """Computes the forward model for a wngrid for each contribution"""
+        contrib_res = self._forward_model.model_full_contrib(wngrid,cutoff_grid)
+
+        if wngrid is None:
+            wngrid = self.nativeWavenumberGrid
+        
+        wlgrid = 10000/wngrid
+
+        self.info('Computing lightcurve contribution')
+
+        lc_contrib_res = {}
+
+        for contrib_name,contrib_list in contrib_res.items(): #Loop through each contribtuion
+            
+            lc_contrib_list = []
+
+            for c in contrib_list:
+                name = c[0]
+                binned = c[1]
+                native = c[2]
+                tau = c[3] # necessary?
+                result = self.instrument_light_curve(binned,wlgrid)
+
+                new_packed = name,binned,native,tau,('lightcurve_bin',result)
+
+                lc_contrib_list.append(new_packed)
+            
+            lc_contrib_res[contrib_name] = lc_contrib_list
+        
+        return lc_contrib_res
+
+
 
     def write(self,output):
         lc = output.create_group('Lightcurve')
