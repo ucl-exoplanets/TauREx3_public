@@ -195,9 +195,9 @@ def main():
                             binned = out[-1][1]
                             ax.plot(binned,label=label,alpha=0.6)
                         else:
-                        binned = out[1]
-                            
-                        ax.plot(wlgrid,binned,label=label,alpha=0.6)
+                            binned = out[1]
+                                
+                            ax.plot(wlgrid,binned,label=label,alpha=0.6)
 
             
             
