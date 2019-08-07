@@ -1,8 +1,11 @@
 [Global]
-xsec_path = "/Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/xsec/TauRex_sampled_xsecs_R10000_0.3-15"
-xsec_interpolation = exp
-cia_path = "/Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/cia/hitran"
+#xsec_path = "/Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/xsec/TauRex_sampled_xsecs_R10000_0.3-15"
+#xsec_interpolation = exp
+#cia_path = "/Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/cia/hitran"
 
+xsec_path = "C:\Users\Ahmed\Documents\TaurexData\xsec\xsec_sampled_R15000_0.3-15"
+xsec_interpolation = exp
+cia_path = "C:\Users\Ahmed\Documents\TaurexData\cia\hitran"
 
 [Chemistry]
 chemistry_type = taurex
@@ -31,7 +34,7 @@ ratio=0.17647
 
 [Temperature]
 profile_type = isothermal
-iso_temp = 1000.0
+iso_temp = 1300.0
 
 [Pressure]
 profile_type = Simple
@@ -64,13 +67,13 @@ model_type = transmission
 
 
 [Lightcurve]
-lc_pickle = /Users/ahmed/Downloads/lc_data_p0-2.pickle
+lc_pickle = "C:\Users\Ahmed\Documents\TaurexData\lc\lc_input_correct_wfc3.pickle"
 
 
 
 
 [Spectrum]
-lightcurve = /Users/ahmed/Downloads/lc_data_p0-2.pickle
+lightcurve = "C:\Users\Ahmed\Documents\TaurexData\lc\lc_input_correct_wfc3.pickle"
 grid_type = observed
 
 
