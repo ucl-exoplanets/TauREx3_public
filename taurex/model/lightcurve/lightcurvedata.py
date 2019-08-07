@@ -4,7 +4,7 @@ import numpy as np
 from taurex.output.writeable import Writeable
 class LightCurveData(Logger,Writeable):
 
-    availableInstruments = ['wfc3','spitzer','stis']
+    availableInstruments = ['wfc3','spitzer','stis','twinkle']
 
     @classmethod
     def fromInstrumentName(cls, name,lc_data):
@@ -15,6 +15,8 @@ class LightCurveData(Logger,Writeable):
             return cls(lc_data,'spitzer',(3.4,8.2))
         elif name.lower() in ('stis',):
             return cls(lc_data,'stis',(0.3,1.0))
+        elif name.lower() in ('twinkle',):
+            return cls(lc_data,'twinkle',(0.4,4.5))
         else:
             log.error('LightCurve of instrument {} not recognized or implemented'.format(name))
             raise KeyError
@@ -35,10 +37,12 @@ class LightCurveData(Logger,Writeable):
 
     def _load_data(self,lc_data):
         self._time_series = lc_data['time_series'][self._instrument_name]
+        
         self._raw_data = lc_data['data'][self._instrument_name][:len(lc_data['data'][self._instrument_name]) //2]
         self._data_std = lc_data['data'][self._instrument_name][len(lc_data['data'][self._instrument_name]) //2:]
         self._max_nfactor = np.max(self._raw_data, axis=1)
         self._min_nfactor = np.min(self._raw_data, axis=1)
+        
 
         
     @property

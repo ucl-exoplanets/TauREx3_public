@@ -190,10 +190,16 @@ def main():
                     first_name = k
                     for out in v:
                         second_name = out[0]
-                        binned = out[1]
                         label='{}-{}'.format(first_name,second_name)
-                        ax.plot(wlgrid,binned,label=label,alpha=0.6)
+                        if is_lightcurve:
+                            binned = out[-1][1]
+                            ax.plot(binned,label=label,alpha=0.6)
+                        else:
+                            binned = out[1]
+                                
+                            ax.plot(wlgrid,binned,label=label,alpha=0.6)
 
+            
             
             #If we have an observation then plot it
 
@@ -202,7 +208,6 @@ def main():
 
             plt.legend()
             plt.show()
-        
         else:
             logging.getLogger('taurex').warning('Number of processes > 1 so not plotting')
     
