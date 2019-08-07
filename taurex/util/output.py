@@ -151,6 +151,10 @@ def generate_spectra_dict(result,contrib_result,native_grid,bin_grid=None):
             contrib_comp['binned'] = binned
             contrib_comp['native'] = native
             contrib_comp['tau'] = tau
+            
+            for k,v in c[4:]:
+                contrib_comp[k] = v
+
             contributions[contrib_name][name] = contrib_comp
 
     out['Contributions'] = contributions
