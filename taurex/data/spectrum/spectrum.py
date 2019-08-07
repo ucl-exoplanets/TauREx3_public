@@ -4,10 +4,11 @@ Contains the basic definition of an observed spectrum for TauRex 3
 """
 
 from taurex.log import Logger
+from taurex.output.writeable import Writeable
 
 
 
-class BaseSpectrum(Logger):
+class BaseSpectrum(Logger,Writeable):
     """A base class where spectrums are loaded (or later created). This
     is used to either plot against the forward model or passed into the optimizer to be used
     to fit the forward model
@@ -131,4 +132,14 @@ class BaseSpectrum(Logger):
 
         """
         raise NotImplementedError
+    
+    def write(self,output):
+        output.write_array('wlgrid',self.wavelengthGrid)
+        output.write_array('spectrum',self.spectrum)
+        output.write_array('binedges',self.binEdges)
+        output.write_array('binwidths',self.binWidths)
+        output.write_array('errorbars', self.errorBar)
+
+        return output
+
 

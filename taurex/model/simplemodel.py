@@ -224,6 +224,14 @@ class SimpleForwardModel(ForwardModel):
     def temperature(self):
         return self._temperature_profile
 
+    @property
+    def star(self):
+        return self._star
+    
+    @property
+    def planet(self):
+        return self._planet
+
 
     @property
     def nativeWavenumberGrid(self):
@@ -243,13 +251,13 @@ class SimpleForwardModel(ForwardModel):
                 
 
 
-    def model(self,wngrid=None,return_contrib=False):
+    def model(self,wngrid=None,return_contrib=False,cutoff_grid=True):
         self.initialize_profiles()
 
         native_grid = self.nativeWavenumberGrid
-        if wngrid is not None:
-            wn_min = wngrid.min()*0.9
-            wn_max = wngrid.max()*1.1
+        if wngrid is not None and cutoff_grid:
+            wn_min = wngrid.min()
+            wn_max = wngrid.max()
             native_filter = (native_grid >= wn_min) & (native_grid <= wn_max)
             native_grid = native_grid[native_filter]
 
@@ -264,6 +272,48 @@ class SimpleForwardModel(ForwardModel):
             new_absp = bindown(native_grid,absorp,wngrid)
             return new_absp,absorp,tau,contrib
 
+
+    def model_full_contrib(self,wngrid=None,cutoff_grid=True):
+        """Computes the forward model for a wngrid for each contribution"""
+        self.initialize_profiles()
+
+        native_grid = self.nativeWavenumberGrid
+        if wngrid is not None and cutoff_grid:
+            wn_min = wngrid.min()
+            wn_max = wngrid.max()
+            native_filter = (native_grid >= wn_min) & (native_grid <= wn_max)
+            native_grid = native_grid[native_filter]
+
+
+        self._star.initialize(native_grid)
+
+        result_dict = {}
+
+        full_contrib_list = self.contribution_list
+        self.info('Modelling each contribution.....')
+        for contrib in full_contrib_list:
+            self.contribution_list = [contrib]
+            contrib_name = contrib.name
+            contrib_res_list = []
+            
+            for name,sig in contrib.prepare_each(self,native_grid):
+                self.info('\t%s---%s contribtuion',contrib_name,name)
+                absorp,tau,contrib = self.path_integral(native_grid,False)
+                if wngrid is None:
+                    contrib_res_list.append((name,absorp,tau))
+                else:
+                    new_absp = bindown(native_grid,absorp,wngrid)
+                    contrib_res_list.append((name,new_absp,absorp,tau))
+            
+            result_dict[contrib_name] = contrib_res_list
+        
+        self.contribution_list = full_contrib_list
+        return result_dict
+            
+            
+
+
+
     def path_integral(self,wngrid,return_contrib):
         raise NotImplementedError
 
@@ -274,17 +324,15 @@ class SimpleForwardModel(ForwardModel):
 
         model = super().write(output)
 
+
         #Write Gas
 
         self._chemistry.write(model)
         self._temperature_profile.write(model)
-        self._planet.write(model)
         self.pressure.write(model)
+        self._planet.write(model)
         self._star.write(model)
         
-        model.write_array('density_profile',self.densityProfile)
-        model.write_array('scaleheight_profile',self.scaleheight_profile)
-        model.write_array('altitude_profile',self.altitudeProfile)
-        model.write_array('gravity_profile',self.gravity_profile)
+
     
         return model

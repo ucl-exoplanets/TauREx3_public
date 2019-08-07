@@ -192,9 +192,11 @@ class ParameterParser(Logger):
             for key,value in fitting_config.items():
                 fit_param,fit_type=key.split(':')
                 if not fit_param in fitting_params:
-                    fitting_params[fit_param] = {'fit':None,'bounds':None,'mode':None}
+                    fitting_params[fit_param] = {'fit':None,'bounds':None,'mode':None,'factor':None}
                 fitting_params[fit_param][fit_type]=value
         
         return fitting_params
+
+
 
 

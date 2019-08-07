@@ -1,8 +1,8 @@
-from .twopointgas import TwoPointGas
+from .gas import Gas
 from taurex.util import molecule_texlabel,movingaverage
 import math
 import numpy as np
-class TwoLayerGas(TwoPointGas):
+class TwoLayerGas(Gas):
     """
 
     Two layer gas profile.
@@ -35,15 +35,30 @@ class TwoLayerGas(TwoPointGas):
 
     def __init__(self,molecule_name='CH4',mix_ratio_surface=1e-4,mix_ratio_top=1e-8,
                     mix_ratio_P=1e3,mix_ratio_smoothing=10):
-        super().__init__(molecule_name=molecule_name,mix_ratio_surface=mix_ratio_surface,
-                        mix_ratio_top=mix_ratio_top)
-        
+        super().__init__('TwoLayerGas',molecule_name=molecule_name)
 
+        self._mix_surface = mix_ratio_surface
+        self._mix_top = mix_ratio_top
         self._mix_ratio_pressure = mix_ratio_P
         self._mix_ratio_smoothing = mix_ratio_smoothing
-
+        self._mix_profile = None
+        self.add_surface_param()
+        self.add_top_param()
         self.add_P_param()
 
+    @property
+    def mixProfile(self):
+        return self._mix_profile
+
+    @property
+    def mixRatioSurface(self):
+        """Abundance on the planets surface"""
+        return self._mix_surface
+
+    @property
+    def mixRatioTop(self):
+        """Abundance on the top of atmosphere"""
+        return self._mix_top
 
     @property
     def mixRatioPressure(self):
@@ -53,6 +68,13 @@ class TwoLayerGas(TwoPointGas):
     def mixRatioSmoothing(self):
         return self._mix_ratio_smoothing
 
+    @mixRatioSurface.setter
+    def mixRatioSurface(self, value):
+        self._mix_surface = value
+
+    @mixRatioTop.setter
+    def mixRatioTop(self, value):
+        self._mix_top = value
     
     @mixRatioPressure.setter
     def mixRatioPressure(self,value):
@@ -62,6 +84,49 @@ class TwoLayerGas(TwoPointGas):
     def mixRatioSmoothing(self,value):
         self._mix_smoothing = value
 
+    def add_surface_param(self):
+        mol_name = self.molecule
+        param_name = self.molecule
+        param_tex = molecule_texlabel(param_name)
+
+        param_surface = '{}_S'.format(param_name)
+        param_surf_tex = '{}_S'.format(param_tex)
+
+        def read_surf(self):
+            return self._mix_surface
+
+        def write_surf(self, value):
+            self._mix_surface = value
+
+        fget_surf = read_surf
+        fset_surf = write_surf
+
+        bounds = [1.0e-12, 0.1]
+
+        default_fit = False
+        self.add_fittable_param(param_surface, param_surf_tex, fget_surf, fset_surf, 'log', default_fit, bounds)
+
+    def add_top_param(self):
+        mol_name = self.molecule
+        param_name = self.molecule
+        param_tex = molecule_texlabel(param_name)
+
+        param_top = '{}_T'.format(param_name)
+        param_top_tex = '{}_T'.format(param_tex)
+
+        def read_top(self):
+            return self._mix_top
+
+        def write_top(self, value):
+            self._mix_top = value
+
+        fget_top = read_top
+        fset_top = write_top
+
+        bounds = [1.0e-12, 0.1]
+
+        default_fit = False
+        self.add_fittable_param(param_top, param_top_tex,fget_top,fset_top,'log',default_fit,bounds)
 
     def add_P_param(self):
         mol_name = self.molecule
@@ -89,7 +154,10 @@ class TwoLayerGas(TwoPointGas):
         smooth_window = self._mix_ratio_smoothing
         P_layer = np.abs(pressure_profile - self._mix_ratio_pressure).argmin()
 
-        Pnodes = [pressure_profile[0], pressure_profile[int(P_layer-smooth_window/2)], pressure_profile[int(P_layer+smooth_window/2)], pressure_profile[-1]]
+        start_layer = max(int(P_layer-smooth_window/2),0)
+        end_layer = min(int(P_layer+smooth_window/2),nlayers-1)
+
+        Pnodes = [pressure_profile[0], pressure_profile[start_layer], pressure_profile[end_layer], pressure_profile[-1]]
         Cnodes = [self.mixRatioSurface, self.mixRatioSurface, self.mixRatioTop,self.mixRatioTop]
 
         
@@ -106,6 +174,8 @@ class TwoLayerGas(TwoPointGas):
 
     def write(self,output):
         gas_entry = super().write(output)
+        gas_entry.write_scalar('mix_ratio_top', self.mixRatioTop)
+        gas_entry.write_scalar('mix_ratio_surface', self.mixRatioSurface)
         gas_entry.write_scalar('mix_ratio_P',self.mixRatioPressure)
         gas_entry.write_scalar('mix_ratio_smoothing',self.mixRatioSmoothing)
 

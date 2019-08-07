@@ -204,6 +204,7 @@ class TaurexChemistry(Chemistry):
 
 
         mixratio_remainder = 1. - total_mix
+        mixratio_remainder += np.zeros(shape=(nlayers))
         remain_active,remain_inactive=self.fill_atmosphere(mixratio_remainder)
         active_profile.extend(remain_active)
         inactive_profile.extend(remain_inactive)
@@ -224,12 +225,12 @@ class TaurexChemistry(Chemistry):
         inactive_profile = []
 
         if len(self._fill_gases) ==1:
-            if self.isActive(self._fill_gases):
+            if self.isActive(self._fill_gases[0]):
                 active_profile.append(mixratio_remainder)
-                self._active.append(self._fill_gases)
+                self._active.append(self._fill_gases[0])
             else:
                 inactive_profile.append(mixratio_remainder)
-                self._inactive.append(self._fill_gases)
+                self._inactive.append(self._fill_gases[0])
         else:
             main_molecule =  mixratio_remainder/(1. + sum(self._fill_ratio))
             if self.isActive(self._fill_gases[0]):
@@ -279,8 +280,9 @@ class TaurexChemistry(Chemistry):
 
     def write(self,output):
         gas_entry = super().write(output)
-        gas_entry.write_scalar('ratio',self._fill_ratio)
-        output.write_string_array('Fill-gases',self._fill_gases)
+        fill_entry = gas_entry.create_group('Fill_gases')
+        fill_entry.write_scalar('ratio',self._fill_ratio)
+        fill_entry.write_string_array('Fill-gases',self._fill_gases)
         for gas in self._gases:
             gas.write(gas_entry)
 

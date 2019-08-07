@@ -49,6 +49,15 @@ class TaurexChemistryTest(unittest.TestCase):
     
 
     def test_fill_gas(self):
-       tc = TaurexChemistry(fill_gases='CH4')
+        tc = TaurexChemistry(fill_gases='CH4')
+        test_layers = 100
 
+        self.assertTrue(isinstance(tc._fill_gases,list))
+        self.assertTrue(isinstance(tc._fill_gases[0],str))
+
+        pres_prof = np.arange(1,test_layers+1)*200
+
+        tc.initialize_chemistry(test_layers,pres_prof,pres_prof,pres_prof)       
+
+        self.assertEqual(tc.muProfile.shape[0],test_layers)
        

@@ -18,8 +18,8 @@ class PolyChordOptimizer(Optimizer):
                 evidence_tolerance=0.5,
                 mode_tolerance=-1e90,
                 resume=False,
-                verbosity=1):
-        super().__init__('Multinest',observed,model)
+                verbosity=1,sigma_fraction=0.1):
+        super().__init__('Multinest',observed,model,sigma_fraction)
 
         # number of live points
         self.n_live_points = int(num_live_points)
@@ -118,12 +118,16 @@ class PolyChordOptimizer(Optimizer):
     def write_fit(self,output):
         fit = super().write_fit(output)
 
-        if self._polychord_output:
-            recursively_save_dict_contents_to_output(output,self._polychord_output)
+        # if self._polychord_output:
+        #     recursively_save_dict_contents_to_output(output,self._polychord_output)
 
 
 
         return fit
+
+
+
+
 
 
     def store_polychord_solutions(self):
@@ -145,6 +149,7 @@ class PolyChordOptimizer(Optimizer):
         if self.do_clustering:
             #if clustering is switched on, checking how many clusters exist
             num_clusters = self.get_poly_cluster_number(self.dir_polychord)
+            print('NUM_CLUSTERS: ',num_clusters)
             if num_clusters == 1:
                 # Get chains directly from file 1-.txt
                 modes_array = [data[:,2:num_fit_params+2]]
@@ -188,7 +193,7 @@ class PolyChordOptimizer(Optimizer):
                 }
 
 
-            NEST_out['solutions']['solution{}'.format(idx)] = mydict
+            NEST_out['solutions']['solution{}'.format(nmode)] = mydict
         
         return NEST_out
 
@@ -257,3 +262,37 @@ class PolyChordOptimizer(Optimizer):
                     stats['modes'][midx]['sigma'][idx] = sig
 
         return stats
+
+
+    def sample_parameters(self,solution):
+        from taurex.util.util import random_int_iter
+        solution_id ='solution{}'.format(solution)
+        samples = self._polychord_output['solutions'][solution_id]['tracedata']
+        weights = self._polychord_output['solutions'][solution_id]['weights']
+
+        for x in random_int_iter(samples.shape[0],self._sigma_fraction):
+            w = weights[x]+1e-300
+            
+            yield samples[x,:],w
+
+
+
+
+
+
+    def get_solution(self):
+        names = self.fit_names
+        opt_values = self.fit_values
+        solutions = [ (k,v) for k,v in self._polychord_output['solutions'].items() if 'solution' in k]
+
+        for k,v in solutions:
+            solution_idx = int(k[8:])
+            print('SOlution ID',solution_idx)
+            for p_name,p_value in v['fit_params'].items():
+                idx = names.index(p_name)
+                opt_values[idx] = p_value['value']
+            
+            yield solution_idx,opt_values,[
+                                ('fit_params',v['fit_params']),
+                                ('tracedata',v['tracedata']),
+                                ('weights',v['weights'])]
