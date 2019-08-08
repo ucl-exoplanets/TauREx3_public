@@ -21,7 +21,7 @@ class MultiNestOptimizer(Optimizer):
                 constant_efficiency_mode=False,
                 evidence_tolerance=0.5,
                 mode_tolerance=-1e90,
-                importance_sampling=True,
+                importance_sampling=False,
                 resume=False,
                 verbose_output=True,sigma_fraction=0.1):
         super().__init__('Multinest',observed,model,sigma_fraction)
@@ -36,7 +36,7 @@ class MultiNestOptimizer(Optimizer):
         # maximum no. of iterations (0=inf)
         self.max_iter = int(max_iterations)
         # search for multiple modes
-        self.multimodes = int(search_multi_modes)
+        self.multimodes = search_multi_modes
         #parameters on which to cluster, e.g. if nclust_par = 3, it will cluster on the first 3 parameters only.
         #if ncluster_par = -1 it clusters on all parameters
         self.nclust_par = int(num_params_cluster)
@@ -49,6 +49,9 @@ class MultiNestOptimizer(Optimizer):
         self.mode_tolerance = mode_tolerance
         # importance nested sampling
         self.imp_sampling = importance_sampling
+        if self.imp_sampling:
+            self.multimodes = False
+
 
         self.dir_multinest = multi_nest_path
         if not os.path.exists(self.dir_multinest):
@@ -93,12 +96,13 @@ class MultiNestOptimizer(Optimizer):
         ndim = len(self.fitting_parameters)
         self.warning('Number of dimensions {}'.format(ndim))
         self.warning('Fitting parameters {}'.format(self.fitting_parameters))
+        
 
         self.info('Beginning fit......')
         pymultinest.run(LogLikelihood=multinest_loglike,
                         Prior=multinest_uniform_prior,
                         n_dims=ndim,
-                        multimodal=self.multimodes,
+                        multimodal=True,
                         n_clustering_params=self.nclust_par,
                         max_modes=self.max_modes,
                         outputfiles_basename=os.path.join(self.dir_multinest, '1-'),
