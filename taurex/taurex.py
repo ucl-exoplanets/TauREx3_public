@@ -98,11 +98,8 @@ def main():
             if mode:
                 optimizer.set_mode(key,mode.lower())
 
-        logging.getLogger('taurex').setLevel(logging.WARNING)
 
         solution = optimizer.fit()
-
-        logging.getLogger('taurex').setLevel(logging.INFO)
 
     #Run the model
     result=model.model(bindown_wngrid,return_contrib=True,cutoff_grid=False)
