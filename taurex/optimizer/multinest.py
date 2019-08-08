@@ -75,6 +75,7 @@ class MultiNestOptimizer(Optimizer):
             #print('chi_t',chi_t)
             #print('LOG',loglike)
             loglike = -np.sum(np.log(datastd*sqrtpi)) - 0.5 * chi_t
+            #print(loglike)
             return loglike
 
         def multinest_uniform_prior(cube, ndim, nparams):
@@ -92,18 +93,22 @@ class MultiNestOptimizer(Optimizer):
             status = (nSamples,nlive,nPar,physLive,posterior,paramConstr,maxloglike,logZ,INSlogZ,logZerr,context)
 
 
-        datastd_mean = np.mean(datastd)
+
         ndim = len(self.fitting_parameters)
         self.warning('Number of dimensions {}'.format(ndim))
         self.warning('Fitting parameters {}'.format(self.fitting_parameters))
 
 
+        ncluster = self.nclust_par
+        if ncluster <=0:
+            ncluster = ndim
+        
         self.info('Beginning fit......')
         pymultinest.run(LogLikelihood=multinest_loglike,
                         Prior=multinest_uniform_prior,
                         n_dims=ndim,
                         multimodal=self.multimodes,
-                        n_clustering_params=self.nclust_par,
+                        n_clustering_params=ncluster,
                         max_modes=self.max_modes,
                         outputfiles_basename=os.path.join(self.dir_multinest, '1-'),
                         const_efficiency_mode = self.const_eff,
