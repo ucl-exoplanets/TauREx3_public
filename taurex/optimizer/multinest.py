@@ -15,7 +15,7 @@ class MultiNestOptimizer(Optimizer):
                 sampling_efficiency='parameter',
                 num_live_points=1500,
                 max_iterations=0,
-                search_multi_modes = False,
+                search_multi_modes = True,
                 num_params_cluster=None,
                 maximum_modes=100,
                 constant_efficiency_mode=False,
