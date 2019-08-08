@@ -16,7 +16,7 @@ class MultiNestOptimizer(Optimizer):
                 num_live_points=1500,
                 max_iterations=0,
                 search_multi_modes = False,
-                num_params_cluster=-1,
+                num_params_cluster=None,
                 maximum_modes=100,
                 constant_efficiency_mode=False,
                 evidence_tolerance=0.5,
@@ -39,7 +39,7 @@ class MultiNestOptimizer(Optimizer):
         self.multimodes = search_multi_modes
         #parameters on which to cluster, e.g. if nclust_par = 3, it will cluster on the first 3 parameters only.
         #if ncluster_par = -1 it clusters on all parameters
-        self.nclust_par = int(num_params_cluster)
+        self.nclust_par = num_params_cluster
         # maximum number of modes
         self.max_modes = int(maximum_modes)
         # run in constant efficiency mode
@@ -100,8 +100,13 @@ class MultiNestOptimizer(Optimizer):
 
 
         ncluster = self.nclust_par
-        if ncluster <=0:
-            ncluster = ndim
+        if isinstance(ncluster,float):
+            ncluster = int(ncluster)
+
+        if ncluster is not None and ncluster <=0:
+                ncluster = None
+        if ncluster is None:
+            self.nclust_par = ndim #For writing to output later on
         
         self.info('Beginning fit......')
         pymultinest.run(LogLikelihood=multinest_loglike,
