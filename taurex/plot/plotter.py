@@ -32,7 +32,8 @@ class Plotter(object):
 
             fit_params = sol['fit_params']
             param_list = []
-            for param_values in fit_params.values():
+            for fit_names in self.fittingNames:
+                param_values = fit_params[fit_names]
                 sigma_m = param_values['sigma_m'][()]
                 sigma_p = param_values['sigma_p'][()]
                 val = param_values['value'][()]
