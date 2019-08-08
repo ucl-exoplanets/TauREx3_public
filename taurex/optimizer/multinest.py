@@ -96,13 +96,13 @@ class MultiNestOptimizer(Optimizer):
         ndim = len(self.fitting_parameters)
         self.warning('Number of dimensions {}'.format(ndim))
         self.warning('Fitting parameters {}'.format(self.fitting_parameters))
-        
+
 
         self.info('Beginning fit......')
         pymultinest.run(LogLikelihood=multinest_loglike,
                         Prior=multinest_uniform_prior,
                         n_dims=ndim,
-                        multimodal=True,
+                        multimodal=self.multimodes,
                         n_clustering_params=self.nclust_par,
                         max_modes=self.max_modes,
                         outputfiles_basename=os.path.join(self.dir_multinest, '1-'),
