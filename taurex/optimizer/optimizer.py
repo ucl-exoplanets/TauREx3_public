@@ -365,6 +365,8 @@ class Optimizer(Logger):
 
 
     def fit(self):
+        from taurex.log import setLogLevel
+        import logging
         """
 
         Performs fit.
@@ -391,8 +393,9 @@ class Optimizer(Logger):
         print(output)
         print()
 
-
+        setLogLevel(logging.ERROR)
         self.compute_fit()
+        setLogLevel(logging.INFO)
         return  self.generate_solution()
 
 
