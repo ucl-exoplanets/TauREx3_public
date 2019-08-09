@@ -420,11 +420,14 @@ def weighted_avg_and_std(values, weights, axis=None):
     
     weights : :obj:`array`
         Must be same shape as ``values``
+        
     
     axis : int , optional
         axis to perform weighting
     
     """
+
+
     import numpy as np
     average = np.average(values, weights=weights,axis=axis)
     variance = np.average((values-average)**2, weights=weights, axis=axis)  # Fast and numerically precise
