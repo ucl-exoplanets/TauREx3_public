@@ -123,6 +123,38 @@ class Plotter(object):
             plt.title(self.title, fontsize=14)
         plt.savefig(os.path.join(self.out_folder, '%s_fit_mixratio.pdf' % (self.prefix)))
 
+    def plot_fitted_tp(self):
+
+        # fitted model
+        fig = plt.figure(figsize=(5,3.5))
+        ax = fig.add_subplot(111)
+        
+        for solution_idx, solution_val in self.solution_iter():
+            if self.num_solutions > 1:
+                label = 'Fitted profile (%i)' % (solution_idx)
+            else:
+                label = 'Fitted profile'
+            temp_prof = solution_val['Profiles']['temp_profile'][:]
+            temp_prof_std = solution_val['Profiles']['temp_profile_std'][:]
+            pres_prof = solution_val['Profiles']['pressure_profile'][:]/1e-5
+            plt.plot(temp_prof, pres_prof, color=self.cmap(float(solution_idx)/self.num_solutions), label=label)
+            plt.fill_betweenx(pres_prof,  temp_prof-temp_prof_std,  temp_prof+temp_prof_std, color=self.cmap(float(solution_idx)/self.num_solutions), alpha=0.5)
+
+
+        plt.gca().invert_yaxis()
+        plt.yscale('log')
+        plt.xlabel('Temperature (K)')
+        plt.ylabel('Pressure (bar)')
+        plt.tight_layout()
+        legend = plt.legend(loc='upper left', ncol=1, prop={'size':11})
+        legend.get_frame().set_facecolor('white')
+        legend.get_frame().set_edgecolor('white')
+
+        legend.get_frame().set_alpha(0.8)
+        if self.title:
+            plt.title(self.title, fontsize=14)
+        plt.savefig(os.path.join(self.out_folder, '%s_tp_profile.pdf' % (self.prefix)))
+
 
     def plot_posteriors(self):
         if not self.is_retrieval:
