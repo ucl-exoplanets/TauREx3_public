@@ -8,6 +8,13 @@ import os
 class Plotter(object):
     phi = 1.618
 
+    modelAxis = {
+        'TransmissionModel' : '$(R_p/R_*)^2$',
+        'EmissionModel' : '$F_p/F_*$',
+        'DirectImage' : '$F_p$'
+
+    }
+
     def __init__(self,filename,title=None,prefix='output',cmap='Paired',out_folder='.'):
         self.fd = h5py.File(filename,'r')
         self.title = title
@@ -122,6 +129,8 @@ class Plotter(object):
         if self.title:
             plt.title(self.title, fontsize=14)
         plt.savefig(os.path.join(self.out_folder, '%s_fit_mixratio.pdf' % (self.prefix)))
+        plt.close('all')
+
 
     def plot_fitted_tp(self):
 
@@ -154,7 +163,7 @@ class Plotter(object):
         if self.title:
             plt.title(self.title, fontsize=14)
         plt.savefig(os.path.join(self.out_folder, '%s_tp_profile.pdf' % (self.prefix)))
-
+        plt.close()
 
     def plot_posteriors(self):
         if not self.is_retrieval:
@@ -213,9 +222,155 @@ class Plotter(object):
 
             figs.append(fig)
 
-            plt.savefig(os.path.join(self.out_folder, '%s_posteriors.pdf' % (self.prefix)))
-            self.posterior_figure_handles = figs
-            self.posterior_figure_ranges  = ranges
+        plt.savefig(os.path.join(self.out_folder, '%s_posteriors.pdf' % (self.prefix)))
+        self.posterior_figure_handles = figs
+        self.posterior_figure_ranges  = ranges
+        plt.close()
+
+    @property
+    def modelType(self):
+        return self.fd['ModelParameters']['model_type'][()]
+
+    def plot_fitted_spectrum(self, plot_contrib=True):
+
+        # fitted model
+        fig = plt.figure(figsize=(5.3, 3.5))
+        #ax = fig.add_subplot(111)
+
+        
+
+        obs_spectrum = self.fd['Observed']['spectrum'][:]
+        error = self.fd['Observed']['errorbars']
+        wlgrid = self.fd['Observed']['wlgrid']
+        bin_widths = self.fd['Observed']['binwidths'][:]        
+        
+        plt.errorbar(wlgrid,obs_spectrum, error, lw=1, color='black', alpha=0.4, ls='none', zorder=0, label='Observed')
+
+        N = self.num_solutions
+        for solution_idx, solution_val in self.solution_iter():
+            if N > 1:
+                label = 'Fitted model (%i)' % (solution_idx)
+            else:
+                label = 'Fitted model'
+
+            binned_grid = solution_val['Spectra']['bin_wlgrid'][:]
+            binned_spectrum = solution_val['Spectra']['bin_spectrum'][:]
+            binned_std = solution_val['Spectra']['binned_std'][:]
+
+            plt.plot(binned_grid, binned_spectrum, zorder=2,color=self.cmap(float(solution_idx)/N), label=label,alpha=0.8)
+            plt.scatter(wlgrid, obs_spectrum, marker='d',zorder=1,**{'s': 10, 'edgecolors': 'grey','c' : self.cmap(float(solution_idx)/N) })
+
+            plt.fill_between(binned_grid, binned_spectrum-binned_std,
+                                binned_spectrum+binned_std,
+                                alpha=0.5, zorder=-2, color=self.cmap(float(solution_idx)/N), edgecolor='none')
+
+            # 2 sigma
+            plt.fill_between(binned_grid, binned_spectrum-2*binned_std,
+                                binned_spectrum+2*binned_std,
+                                alpha=0.2, zorder=-3, color=self.cmap(float(solution_idx)/N), edgecolor='none')
+
+            
+        plt.xlim(np.min(wlgrid)-0.05*np.min(wlgrid), np.max(wlgrid)+0.05*np.max(wlgrid))
+        # plt.ylim(0.0,0.006)
+        plt.xlabel('Wavelength ($\mu$m)')
+        plt.ylabel(self.modelAxis[self.modelType])
+
+        if np.max(wlgrid) - np.min(wlgrid) > 5:
+            plt.xscale('log')
+            plt.tick_params(axis='x', which='minor')
+            #ax.xaxis.set_minor_formatter(mpl.ticker.FormatStrFormatter("%i"))
+            #ax.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter("%i"))
+        plt.legend(loc='best', ncol=2, frameon=False, prop={'size':11})
+        if self.title:
+            plt.title(self.title, fontsize=14)
+        plt.tight_layout()
+        plt.savefig(os.path.join(self.out_folder, '%s_spectrum.pdf'  % (self.prefix)))
+        plt.close()
+
+    def plot_fitted_contrib(self,full=False):
+        # fitted model
+
+
+        N = self.num_solutions
+        for solution_idx, solution_val in self.solution_iter():
+
+            fig=plt.figure(figsize=(5.3*2, 3.5*2))
+            ax = fig.add_subplot(111)
+
+            
+
+            obs_spectrum = self.fd['Observed']['spectrum'][:]
+            error = self.fd['Observed']['errorbars']
+            wlgrid = self.fd['Observed']['wlgrid']
+            bin_widths = self.fd['Observed']['binwidths'][:]        
+            
+            plt.errorbar(wlgrid,obs_spectrum, error, lw=1, color='black', alpha=0.4, ls='none', zorder=0, label='Observed')
+            if full:
+                self.full_contrib_plot(solution_val,wlgrid)
+            else:
+                self.simple_contrib_plot(solution_val,wlgrid)
+
+            plt.xlim(np.min(wlgrid)-0.05*np.min(wlgrid), np.max(wlgrid)+0.05*np.max(wlgrid))
+            # plt.ylim(0.0,0.006)
+            plt.xlabel('Wavelength ($\mu$m)')
+            plt.ylabel(self.modelAxis[self.modelType])
+
+            if np.max(wlgrid) - np.min(wlgrid) > 5:
+                plt.xscale('log')
+                plt.tick_params(axis='x', which='minor')
+                #ax.xaxis.set_minor_formatter(mpl.ticker.FormatStrFormatter("%i"))
+                #ax.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter("%i"))
+            #plt.legend(loc='best', ncol=2, frameon=False, prop={'size':11})
+            box = ax.get_position()
+            ax.set_position([box.x0, box.y0 + box.height * 0.1,
+                            box.width, box.height * 0.9])
+
+            # Put a legend below current axis
+            ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.08),
+                    fancybox=True, shadow=True, ncol=5)
+            if self.title:
+                plt.title(self.title, fontsize=14)
+            #plt.tight_layout()
+            plt.savefig(os.path.join(self.out_folder, '%s_spectrum_contrib_sol%i.pdf'  % (self.prefix,solution_idx)))
+            plt.close()
+
+        plt.close('all')
+
+    def full_contrib_plot(self,solution_val,wlgrid):
+        for contrib_name,contrib_dict in solution_val['Spectra']['Contributions'].items():
+
+            first_name = contrib_dict
+
+            for component_name,component_value in contrib_dict.items():
+                total_label = '{}-{}'.format(contrib_name,component_name)
+
+                binned_contrib = component_value['binned']
+                plt.plot(wlgrid, binned_contrib, label=total_label)
+
+    def simple_contrib_plot(self,solution_val,wlgrid):
+        
+        for contrib_name,contrib_dict in solution_val['Spectra']['Contributions'].items():
+
+            first_name = contrib_dict
+            if first_name == 'Absorption':
+                for component_name,component_value in contrib_dict.items():
+                    total_label = '{}-{}'.format(contrib_name,component_name)
+
+                    binned_contrib = component_value['binned']
+                    plt.plot(wlgrid, binned_contrib, label=total_label)
+            else:
+                binned_total = None
+                count=0
+                for component_name,component_value in contrib_dict.items():
+                    total_label = '{}'.format(contrib_name)
+                    if binned_total is None:
+                        binned_total = component_value['binned'][:]
+                    else:
+                        binned_total += component_value['binned'][:]
+                    count+=1
+                plt.plot(wlgrid, binned_total/count, label=total_label)                
+
+
     @property
     def fittingNames(self):
         from taurex.util.util import decode_string_array
