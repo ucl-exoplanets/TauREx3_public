@@ -15,11 +15,13 @@ class Plotter(object):
 
     }
 
-    def __init__(self,filename,title=None,prefix='output',cmap='Paired',out_folder='.'):
+    def __init__(self,filename,title=None,prefix=None,cmap='Paired',out_folder='.'):
         self.fd = h5py.File(filename,'r')
         self.title = title
         self.cmap = mpl.cm.get_cmap(cmap)
         self.prefix=prefix
+        if self.prefix is None:
+            self.prefix = "output" 
         self.out_folder=out_folder
 
     @property
@@ -339,7 +341,7 @@ class Plotter(object):
     def full_contrib_plot(self,solution_val,wlgrid):
         for contrib_name,contrib_dict in solution_val['Spectra']['Contributions'].items():
 
-            first_name = contrib_dict
+            first_name = contrib_name
 
             for component_name,component_value in contrib_dict.items():
                 total_label = '{}-{}'.format(contrib_name,component_name)
@@ -351,7 +353,7 @@ class Plotter(object):
         
         for contrib_name,contrib_dict in solution_val['Spectra']['Contributions'].items():
 
-            first_name = contrib_dict
+            first_name = contrib_name
             if first_name == 'Absorption':
                 for component_name,component_value in contrib_dict.items():
                     total_label = '{}-{}'.format(contrib_name,component_name)
@@ -415,6 +417,52 @@ class Plotter(object):
             return True
         except KeyError:
             return False
+
+
+
+def main():
+    import argparse
+    parser = argparse.ArgumentParser(description='Taurex-Plotter')
+    parser.add_argument("-i", "--input",dest='input_file',type=str,required=True,help="Input hdf5 file from taurex")
+    parser.add_argument("-p","--plot-posteriors",dest="posterior",default=False,help="Plot fitting posteriors",action='store_true')
+    parser.add_argument("-x","--plot-xprofile",dest="xprofile",default=False,help="Plot molecular profiles",action='store_true')
+    parser.add_argument("-t","--plot-tpprofile",dest="tpprofile",default=False,help="Plot Temperature profiles",action='store_true')
+    parser.add_argument("-s","--plot-spectrum",dest="spectrum",default=False,help="Plot spectrum",action='store_true')
+    parser.add_argument("-c","--plot-contrib",dest="contrib",default=False,help="Plot contrib",action='store_true')
+    parser.add_argument("-C","--full-contrib",dest="full_contrib",default=False,help="Plot detailed contribs",action="store_true")
+    parser.add_argument("-a","--all",dest="all",default=False,help="Plot everythiong",action='store_true')
+    parser.add_argument("-T","--title",dest="title",type=str,help="Title of plots")
+    parser.add_argument("-o","--output-dir",dest="output_dir",type=str,required=True,help="output directory to store plots")
+    parser.add_argument("-p","--prefix",dest="prefix",type=str,help="File prefix for outputs")
+    args=parser.parse_args()
+
+    plot_xprofile = args.xprofile or args.all
+    plot_tp_profile = args.tpprofile or args.all
+    plot_spectrum = args.spectrum or args.all
+    plot_contrib = args.contrib or args.all
+    plot_fullcontrib = args.full_contrib or args.all
+    plot_posteriors = args.posterior or args.all
+
+    plot=Plotter('/Users/ahmed/Documents/test_outputs/superearth.hdf5',
+                    title=args.title,prefix=args.prefix,out_folder=args.output_dir)
+    
+    if plot_posteriors:
+        if plot.is_retrieval:
+            plot.plot_posteriors()
+
+    if plot_xprofile:
+        if plot.is_retrieval:
+            plot.plot_fit_xprofile()
+    
+    if plot_spectrum:
+        if plot.is_retrieval:
+            plot.plot_fitted_spectrum()
+    
+    if plot_tp_profile:
+        if plot.is_retrieval:
+            plot.plot_fitted_tp()
+
+
 
 
 
