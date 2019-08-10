@@ -4,15 +4,13 @@ import numba
 from taurex.cache import CIACache
 
 @numba.jit(nopython=True, nogil=True)
-def contribute_cia(startK,endK,density_offset,sigma,density,path,nlayers,ngrid,layer):
-    tau = np.zeros(shape=(ngrid,))
+def contribute_cia(startK,endK,density_offset,sigma,density,path,nlayers,ngrid,layer,tau):
     for k in range(startK,endK):
         _path = path[k]
         _density = density[k+density_offset]
         # for mol in range(nmols):
         for wn in range(ngrid):
-            tau[wn] += sigma[k+layer,wn]*_path*_density*_density
-    return tau
+            tau[layer,wn] += sigma[k+layer,wn]*_path*_density*_density
 
 class CIAContribution(Contribution):
 
@@ -35,13 +33,10 @@ class CIAContribution(Contribution):
         self._cia_pairs = value
 
 
-    def contribute(self,model,start_horz_layer,end_horz_layer,density_offset,layer,density,path_length=None):
+    def contribute(self,model,start_horz_layer,end_horz_layer,density_offset,layer,density,tau,path_length=None):
         if self._total_cia > 0:
-            contrib =contribute_cia(start_horz_layer,end_horz_layer,density_offset,self.sigma_xsec,density,path_length,self._nlayers,self._ngrid,layer)
-            self._total_contrib[layer] += contrib
-            return contrib
-        else:
-            return 0.0
+            contribute_cia(start_horz_layer,end_horz_layer,density_offset,self.sigma_xsec,density,path_length,self._nlayers,self._ngrid,layer,tau)
+            #self._total_contrib[layer] += contrib
         #if self._total_cia > 0:
             #self._total_contrib[layer,:]+=cia_numba(self.sigma_cia,density,path_length,self._nlayers,self._ngrid,self._total_cia,layer)
 
@@ -60,13 +55,13 @@ class CIAContribution(Contribution):
 
         sigma_cia = np.zeros(shape=(model.nLayers,wngrid.shape[0]))
 
-        self._total_contrib = np.zeros(shape=(model.nLayers,wngrid.shape[0],))
+        #self._total_contrib = np.zeros(shape=(model.nLayers,wngrid.shape[0],))
 
 
         for pairName in self.ciaPairs:
             cia = self._cia_cache[pairName]
             sigma_cia[...]=0.0
-            self._total_contrib[...] =0.0
+            #self._total_contrib[...] =0.0
             cia_factor = model.chemistry.get_gas_mix_profile(cia.pairOne)*model.chemistry.get_gas_mix_profile(cia.pairTwo)
             for idx_layer,temperature in enumerate(model.temperatureProfile):
 
@@ -87,9 +82,3 @@ class CIAContribution(Contribution):
         contrib = super().write(output)
         contrib.write_string_array('cia-pairs',self.ciaPairs)
         return contrib
-
-
-
-    @property
-    def sigma(self):
-        return self.sigma_cia

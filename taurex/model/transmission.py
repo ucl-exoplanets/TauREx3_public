@@ -80,7 +80,7 @@ class TransmissionModel(SimpleForwardModel):
         path_length = self.compute_path_length(dz)
         self.path_length = path_length
         
-
+        tau = np.zeros(shape=(total_layers,wngrid_size),dtype=np.float64)
 
         for layer in range(total_layers):
 
@@ -91,24 +91,24 @@ class TransmissionModel(SimpleForwardModel):
 
             for contrib in self.contribution_list:
                 self.debug('Adding contribution from %s',contrib.name)
-                contrib.contribute(self,0,endK,layer,layer,density_profile,path_length=dl)
+                contrib.contribute(self,0,endK,layer,layer,density_profile,tau,path_length=dl)
 
-        all_contrib = [c.totalContribution for c in self.contribution_list]
+        #all_contrib = [c.totalContribution for c in self.contribution_list]
 
-        self.debug('Contributionlist %s',all_contrib)
-        tau = np.sum(all_contrib,axis=0)
+        #self.debug('Contributionlist %s',all_contrib)
+        #tau = np.sum(all_contrib,axis=0)
         self.debug('tau %s %s',tau,tau.shape)
 
         absorption,tau = self.compute_absorption(tau,dz)
 
-        contrib_absorption = []
-        if return_contrib:
-            contrib_absorption = []
-            for contrib in self.contribution_list:
-                c_tau = contrib.totalContribution
-                contrib_absorption.append((contrib.name,self.compute_absorption(c_tau,dz)[0]))
+        # contrib_absorption = []
+        # if return_contrib:
+        #     contrib_absorption = []
+        #     for contrib in self.contribution_list:
+        #         c_tau = contrib.totalContribution
+        #         contrib_absorption.append((contrib.name,self.compute_absorption(c_tau,dz)[0]))
         
-        return absorption,tau,contrib_absorption
+        return absorption,tau
         
 
     def compute_absorption(self,tau,dz):
