@@ -195,10 +195,7 @@ class Plotter(object):
             plt.rc('xtick', labelsize=10) #size of individual labels
             plt.rc('ytick', labelsize=10)
             plt.rc('axes.formatter', limits=( -4, 5 )) #scientific notation..
-            if self.title:
-                fig.gca().annotate(self.title, xy=(0.5, 1.0), xycoords="figure fraction",
-                    xytext=(0, -5), textcoords="offset points",
-                    ha="center", va="top", fontsize=14)
+
 
             fig =  corner.corner(tracedata,
                                     weights=weights,
@@ -232,6 +229,11 @@ class Plotter(object):
     @property
     def modelType(self):
         return self.fd['ModelParameters']['model_type'][()]
+
+    def count_contributions(self,spectra):
+        pass
+
+
 
     def plot_fitted_spectrum(self, plot_contrib=True):
 
@@ -274,7 +276,7 @@ class Plotter(object):
             
         plt.xlim(np.min(wlgrid)-0.05*np.min(wlgrid), np.max(wlgrid)+0.05*np.max(wlgrid))
         # plt.ylim(0.0,0.006)
-        plt.xlabel('Wavelength ($\mu$m)')
+        plt.xlabel(r'Wavelength ($\mu$m)')
         plt.ylabel(self.modelAxis[self.modelType])
 
         if np.max(wlgrid) - np.min(wlgrid) > 5:
@@ -424,7 +426,7 @@ def main():
     import argparse
     parser = argparse.ArgumentParser(description='Taurex-Plotter')
     parser.add_argument("-i", "--input",dest='input_file',type=str,required=True,help="Input hdf5 file from taurex")
-    parser.add_argument("-p","--plot-posteriors",dest="posterior",default=False,help="Plot fitting posteriors",action='store_true')
+    parser.add_argument("-P","--plot-posteriors",dest="posterior",default=False,help="Plot fitting posteriors",action='store_true')
     parser.add_argument("-x","--plot-xprofile",dest="xprofile",default=False,help="Plot molecular profiles",action='store_true')
     parser.add_argument("-t","--plot-tpprofile",dest="tpprofile",default=False,help="Plot Temperature profiles",action='store_true')
     parser.add_argument("-s","--plot-spectrum",dest="spectrum",default=False,help="Plot spectrum",action='store_true')
@@ -434,6 +436,7 @@ def main():
     parser.add_argument("-T","--title",dest="title",type=str,help="Title of plots")
     parser.add_argument("-o","--output-dir",dest="output_dir",type=str,required=True,help="output directory to store plots")
     parser.add_argument("-p","--prefix",dest="prefix",type=str,help="File prefix for outputs")
+    parser.add_argument("-m","--color-map",dest="cmap",type=str,default="Paired",help="Matplotlib colormap to use")
     args=parser.parse_args()
 
     plot_xprofile = args.xprofile or args.all
@@ -443,7 +446,7 @@ def main():
     plot_fullcontrib = args.full_contrib or args.all
     plot_posteriors = args.posterior or args.all
 
-    plot=Plotter('/Users/ahmed/Documents/test_outputs/superearth.hdf5',
+    plot=Plotter('/Users/ahmed/Documents/test_outputs/superearth.hdf5',cmap=args.cmap,
                     title=args.title,prefix=args.prefix,out_folder=args.output_dir)
     
     if plot_posteriors:
@@ -462,6 +465,12 @@ def main():
         if plot.is_retrieval:
             plot.plot_fitted_tp()
 
+    if plot_contrib:
+        if plot.is_retrieval:
+            plot.plot_fitted_contrib(full=plot_fullcontrib)
+    
+if __name__ == "__main__":
+    main()
 
 
 
