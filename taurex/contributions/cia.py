@@ -63,10 +63,18 @@ class CIAContribution(Contribution):
             sigma_cia[...]=0.0
             #self._total_contrib[...] =0.0
             cia_factor = model.chemistry.get_gas_mix_profile(cia.pairOne)*model.chemistry.get_gas_mix_profile(cia.pairTwo)
-            for idx_layer,temperature in enumerate(model.temperatureProfile):
 
-                
-                _cia_xsec = cia.cia(temperature,wngrid)
+            last_temp = -1.0
+            last_sigma = None
+
+            for idx_layer,temperature in enumerate(model.temperatureProfile):
+                _cia_xsec = None
+                if last_temp == temperature:
+                    _cia_xsec = last_sigma
+                else:
+                    _cia_xsec = cia.cia(temperature,wngrid)
+                    last_temp = temperature
+                    last_sigma = _cia_xsec
                 sigma_cia[idx_layer] += _cia_xsec*cia_factor[idx_layer]
             self.sigma_xsec = sigma_cia
             yield pairName,sigma_cia
