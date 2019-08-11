@@ -76,32 +76,38 @@ class OnlineVariance(object):
         self.reset()
 
     def reset(self):
-        self.count = 0
+        self.count = 0.0
+        self.wcount = 0.0
+        self.wcount2=0.0
         self.mean = None
         self.M2 = None
        
     
-    def update(self,value):
+    def update(self,value,weight=1.0):
         self.count+=1
+        self.wcount+=weight
+        self.wcount2+=weight*weight
+
+
         if self.mean is None:
-            self.mean = value
-            self.M2 = self.mean-value
-        else:
-            delta = value - self.mean
-            self.mean += delta / self.count
-            delta2 = value - self.mean
-            self.M2 += delta * delta2
+            self.mean = value*0.0
+            self.M2 = value*0.0
+        
+
+        mean_old = self.mean[:]
+        self.mean = mean_old + (weight / self.wcount) * (value - mean_old)
+        self.M2 += weight * (value - mean_old) * (value - self.mean)
 
     @property
     def variance(self):
         if self.count < 2:
             return float('nan')
         else:
-            return self.M2/self.count
+            return self.M2/self.wcount
     
     @property
     def sampleVariance(self):
         if self.count < 2:
             return float('nan')
         else:
-            return self.M2/(self.count-1)
+            return self.M2/(self.wcount-1)

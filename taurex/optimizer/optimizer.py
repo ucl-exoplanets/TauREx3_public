@@ -451,38 +451,40 @@ class Optimizer(Logger):
         return output
 
     def generate_profiles(self,solution,binning):
+        from taurex.util.math import OnlineVariance
+
         """Generates sigma plots for profiles"""
         from taurex.util.util import weighted_avg_and_std
         weights = []
-        tp_profiles = []
-        active_gases = []
-        inactive_gases = []
-        tau_profile = []
-        binned_spectrum = []
-        native_spectrum = []
+        tp_profiles = OnlineVariance()
+        active_gases = OnlineVariance()
+        inactive_gases = OnlineVariance()
+        tau_profile = OnlineVariance()
+        binned_spectrum = OnlineVariance()
+        native_spectrum = OnlineVariance()
 
         for parameters,weight in self.sample_parameters(solution): #sample likelihood space and get their parameters
             self.update_model(parameters)
 
             weights.append(weight)
             binned,native,tau,_ = self._model.model(wngrid=binning,cutoff_grid=False)
-            tau_profile.append(tau)
-            tp_profiles.append(self._model.temperatureProfile)
-            active_gases.append(self._model.chemistry.activeGasMixProfile)
-            inactive_gases.append(self._model.chemistry.inactiveGasMixProfile)
-            binned_spectrum.append(binned)
-            native_spectrum.append(native)
+            tau_profile.update(tau,weight=weight)
+            tp_profiles.update(self._model.temperatureProfile,weight=weight)
+            active_gases.update(self._model.chemistry.activeGasMixProfile,weight=weight)
+            inactive_gases.update(self._model.chemistry.inactiveGasMixProfile,weight=weight)
+            binned_spectrum.update(binned,weight=weight)
+            native_spectrum.update(native,weight=weight)
 
         weights = np.array(weights)
         if np.any(weights):
-            tp_std = weighted_avg_and_std(tp_profiles,weights=weights,axis=0)[1]
-            active_std = weighted_avg_and_std(active_gases,weights=weights,axis=0)[1]
-            inactive_std = weighted_avg_and_std(inactive_gases,weights=weights,axis=0)[1]
+            tp_std = np.sqrt(tp_profiles.variance)
+            active_std = np.sqrt(active_gases.variance)
+            inactive_std = np.sqrt(inactive_gases.variance)
 
-            tau_std = weighted_avg_and_std(tau_profile,weights=weights,axis=0)[1]
+            tau_std = np.sqrt(tau_profile.variance)
 
-            binned_std = weighted_avg_and_std(binned_spectrum,weights=weights,axis=0)[1]
-            native_std = weighted_avg_and_std(native_spectrum,weights=weights,axis=0)[1]
+            binned_std = np.sqrt(binned_spectrum.variance)
+            native_std = np.sqrt(native_spectrum.variance)
         else:
             self.warning('WEIGHTS ARE ALL ZERO, SETTING PROFILES STD TO ZERO')
             tp_std = np.zeros_like(tp_profiles)
