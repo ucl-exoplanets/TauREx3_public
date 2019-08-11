@@ -244,8 +244,8 @@ class Plotter(object):
         
 
         obs_spectrum = self.fd['Observed']['spectrum'][:]
-        error = self.fd['Observed']['errorbars']
-        wlgrid = self.fd['Observed']['wlgrid']
+        error = self.fd['Observed']['errorbars'][:]
+        wlgrid = self.fd['Observed']['wlgrid'][:]
         bin_widths = self.fd['Observed']['binwidths'][:]        
         
         plt.errorbar(wlgrid,obs_spectrum, error, lw=1, color='black', alpha=0.4, ls='none', zorder=0, label='Observed')
@@ -346,6 +346,8 @@ class Plotter(object):
             first_name = contrib_name
 
             for component_name,component_value in contrib_dict.items():
+                if isinstance(component_value,h5py.Dataset):
+                        continue
                 total_label = '{}-{}'.format(contrib_name,component_name)
 
                 binned_contrib = component_value['binned']
@@ -358,21 +360,14 @@ class Plotter(object):
             first_name = contrib_name
             if first_name == 'Absorption':
                 for component_name,component_value in contrib_dict.items():
+                    if isinstance(component_value,h5py.Dataset):
+                        continue
                     total_label = '{}-{}'.format(contrib_name,component_name)
-
                     binned_contrib = component_value['binned']
                     plt.plot(wlgrid, binned_contrib, label=total_label)
             else:
-                binned_total = None
-                count=0
-                for component_name,component_value in contrib_dict.items():
-                    total_label = '{}'.format(contrib_name)
-                    if binned_total is None:
-                        binned_total = component_value['binned'][:]
-                    else:
-                        binned_total += component_value['binned'][:]
-                    count+=1
-                plt.plot(wlgrid, binned_total/count, label=total_label)                
+                
+                plt.plot(wlgrid, contrib_dict['binned'], label=first_name)                
 
 
     @property
