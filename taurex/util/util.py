@@ -243,13 +243,13 @@ def bindown(original_bin,original_data,new_bin,last_point=None):
     filter_lhs[-1] = new_bin[-1]
     filter_lhs[-1] += (new_bin[-1] - new_bin[-2])/2
     filter_lhs[1:-1] = (new_bin[1:] + new_bin[:-1])/2
-    digitized = np.digitize(original_bin,filter_lhs,right=True)
     axis = len(original_data.shape)-1
-    bin_means = [original_data[...,digitized == i].mean(axis=axis) for i in range(1, len(filter_lhs))]
     if axis:
+        digitized = np.digitize(original_bin,filter_lhs,right=True)
+        axis = len(original_data.shape)-1
+        bin_means = [original_data[...,digitized == i].mean(axis=axis) for i in range(1, len(filter_lhs))]
         return np.column_stack(bin_means)
-    else:
-        return np.array(bin_means)
+    return np.histogram(original_bin, filter_lhs, weights=original_data)[0]/np.histogram(original_bin,filter_lhs)[0]
 
 def movingaverage(a, n=3) :
     """

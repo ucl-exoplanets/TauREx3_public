@@ -27,7 +27,7 @@ class AbsorptionContribution(Contribution):
         self._opacity_cache = OpacityCache()
         for gas in model.chemistry.activeGases:
             sigma_xsec[...]=0.0
-            self._total_contrib[...] =0.0
+            #self._total_contrib[...] =0.0
             gas_mix = model.chemistry.get_gas_mix_profile(gas)
             self.info('Recomputing active gas %s opacity',gas)
 
@@ -49,9 +49,6 @@ class AbsorptionContribution(Contribution):
     def finalize(self,model):
         raise NotImplementedError
 
-    @property
-    def totalContribution(self):
-        return self._total_contrib
 
 
     @property

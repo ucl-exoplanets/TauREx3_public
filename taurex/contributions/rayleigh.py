@@ -18,23 +18,20 @@ class RayleighContribution(Contribution):
     def finalize(self,model):
         raise NotImplementedError
 
-    @property
-    def totalContribution(self):
-        return self._total_contrib
  
 
     def prepare_each(self,model,wngrid):
         from taurex.util.scattering import rayleigh_sigma_from_name
 
-        self._total_contrib = np.zeros(shape=(model.nLayers,wngrid.shape[0],))
+        #self._total_contrib = np.zeros(shape=(model.nLayers,wngrid.shape[0],))
         self._ngrid = wngrid.shape[0]
         self._nmols = 1
         self._nlayers = model.nLayers
         molecules = model.chemistry.activeGases + model.chemistry.inactiveGases
         
         for gasname in molecules:
-            self._total_contrib[...] =0.0
-            if np.sum(model.chemistry.get_gas_mix_profile(gasname)) == 0.0:
+            #self._total_contrib[...] =0.0
+            if np.max(model.chemistry.get_gas_mix_profile(gasname)) == 0.0:
                 continue
             sigma = rayleigh_sigma_from_name(gasname,wngrid)
             

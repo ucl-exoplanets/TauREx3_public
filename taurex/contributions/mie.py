@@ -95,11 +95,11 @@ class MieContribution(Contribution):
         self._mix_cloud_mix = 10**value
 
 
-    def contribute(self,model,start_horz_layer,end_horz_layer,density_offset,layer,density,path_length=None):
+    def contribute(self,model,start_horz_layer,end_horz_layer,density_offset,layer,density,tau,path_length=None):
         if model.pressureProfile[layer] <= self._cloud_bottom_pressure and model.pressureProfile[layer] >= self._cloud_top_pressure :
             contrib = contribute_tau(start_horz_layer,end_horz_layer,
-                density_offset,self.sigma_mie,density,path_length,self._nlayers,self._ngrid,layer)
-            self._total_contrib[layer,:]+=contrib
+                density_offset,self.sigma_mie,density,path_length,self._nlayers,self._ngrid,layer,tau)
+            #self._total_contrib[layer,:]+=contrib
             return contrib
         else:
             return 0.0
@@ -137,9 +137,6 @@ class MieContribution(Contribution):
     def finalize(self,model):
         raise NotImplementedError
 
-    @property
-    def totalContribution(self):
-        return self._total_contrib
     
 
     def prepare_each(self,model,wngrid):
@@ -147,7 +144,7 @@ class MieContribution(Contribution):
         self._ngrid = wngrid.shape[0]
 
         self.sigma_mie = np.interp(wngrid,self.wavenumberGrid,self._sig_out_aver)*self._mix_cloud_mix
-        self._total_contrib[...]=0.0
+        #self._total_contrib[...]=0.0
         yield 'Mie',self.sigma_mie
 
 
