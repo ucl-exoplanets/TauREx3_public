@@ -236,9 +236,20 @@ def bindown(original_bin,original_data,new_bin,last_point=None):
     #          np.histogram(original_bin,calc_bin)[0])
 
 
-    digitized = np.digitize(original_bin, new_bin,right=True)-1
-    bin_means = [original_data[digitized == i].mean() for i in range(0, len(new_bin))]
-    return np.array(bin_means)
+    
+    filter_lhs = np.zeros(new_bin.shape[0]+1)
+    filter_lhs[0] = new_bin[0]
+    filter_lhs[0] -= (new_bin[1] - new_bin[0])/2
+    filter_lhs[-1] = new_bin[-1]
+    filter_lhs[-1] += (new_bin[-1] - new_bin[-2])/2
+    filter_lhs[1:-1] = (new_bin[1:] + new_bin[:-1])/2
+    axis = len(original_data.shape)-1
+    if axis:
+        digitized = np.digitize(original_bin,filter_lhs,right=True)
+        axis = len(original_data.shape)-1
+        bin_means = [original_data[...,digitized == i].mean(axis=axis) for i in range(1, len(filter_lhs))]
+        return np.column_stack(bin_means)
+    return np.histogram(original_bin, filter_lhs, weights=original_data)[0]/np.histogram(original_bin,filter_lhs)[0]
 
 def movingaverage(a, n=3) :
     """
@@ -410,6 +421,15 @@ def weighted_avg_and_std(values, weights, axis=None):
     
     """
     import numpy as np
-    average = np.average(values, weights=weights)
+    average = np.average(values, weights=weights,axis=axis)
     variance = np.average((values-average)**2, weights=weights, axis=axis)  # Fast and numerically precise
-    return (average, math.sqrt(variance))
+    return (average, np.sqrt(variance))
+
+
+def random_int_iter(total,fraction):
+    import random
+    n_points = int(total*fraction)
+
+    samples = random.sample(range(total),n_points)
+    for x in samples:
+        yield x

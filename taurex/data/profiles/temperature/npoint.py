@@ -87,7 +87,7 @@ class NPoint(TemperatureProfile):
     def temperatureTop(self,value):
         self._T_top = value
 
-    @fitparam(param_name='P_surface',param_latex='$P_\\mathrm{surf}$',default_fit=False,default_bounds=[ 1e3,1e2])
+    @fitparam(param_name='P_surface',param_latex='$P_\\mathrm{surf}$',default_fit=False,default_bounds=[ 1e3,1e2], default_mode='log')
     def pressureSurface(self):
         return self._P_surface
     
@@ -95,7 +95,7 @@ class NPoint(TemperatureProfile):
     def pressureSurface(self,value):
         self._P_surface = value
 
-    @fitparam(param_name='P_top',param_latex='$P_\\mathrm{top}$',default_fit=False,default_bounds=[ 1e-5,1e-4])
+    @fitparam(param_name='P_top',param_latex='$P_\\mathrm{top}$',default_fit=False,default_bounds=[ 1e-5,1e-4], default_mode='log')
     def pressureTop(self):
         return self._P_top
     
@@ -195,7 +195,7 @@ class NPoint(TemperatureProfile):
 
         temperature.write_scalar('temp_surface',self._T_surface)
         temperature.write_scalar('temp_top',self._T_top)
-        temperature.write_array('temp_points',self._t_points)
+        temperature.write_array('temp_points',np.array(self._t_points))
 
         P_surface = self._P_surface
         P_top = self._P_top
@@ -206,7 +206,7 @@ class NPoint(TemperatureProfile):
 
         temperature.write_scalar('pressure_surface',P_surface)
         temperature.write_scalar('pressure_top',P_top)
-        temperature.write_array('pressure_points',self._p_points)
+        temperature.write_array('pressure_points',np.array(self._p_points))
 
         temperature.write_scalar('smoothin_window',self._smooth_window)
 

@@ -26,7 +26,7 @@ class LightCurveModel(ForwardModel):
             instruments = 'all'
         
         if instruments == 'all' or 'all' in instruments:
-            instruments = ['wfc3','spitzer','stis']
+            instruments = LightCurveData.availableInstruments
 
         self._load_instruments(instruments)
 
@@ -60,7 +60,6 @@ class LightCurveModel(ForwardModel):
         self._instruments = []
 
         ins_keys = self.lc_data['data'].keys()
-
         for ins in instruments:
             if ins in ins_keys:
                 self.info('Loading {} light curves'.format(ins))
@@ -80,20 +79,31 @@ class LightCurveModel(ForwardModel):
     #         data_std.append(self.lc_data['data'][i][len(self.lc_data['data'][i])//2:])
     
     def _initialize_lightcurves(self):
-
-        min_n_factors = np.concatenate([ins.minNFactors for ins in self._instruments])
-        max_n_factors = np.concatenate([ins.maxNFactors for ins in self._instruments]) 
         
-        self._nfactor = np.ones_like(min_n_factors)
+        nFactor = [ins.minNFactors for ins in self._instruments]
+        
+        min_n_factors = None
 
-        self.create_normalization_fitparams()
+        max_n_factors = None
+        if len(nFactor) > 0:
+            min_n_factors = np.concatenate(nFactor)
+        
+        nFactor = [ins.maxNFactors for ins in self._instruments]
+        if len(nFactor) > 0:
+            max_n_factors = np.concatenate(nFactor) 
+    
 
-        for idx,value in enumerate(zip(min_n_factors,max_n_factors)):
-            min_n,max_n = value
-            self.modify_bounds('Nfactor_{}'.format(idx),[min_n,max_n])
+        if max_n_factors is not None and min_n_factors is not None:
+            self.create_normalization_fitparams()
+
+            for idx,value in enumerate(zip(min_n_factors,max_n_factors)):
+                min_n,max_n = value
+                self.modify_bounds('Nfactor_{}'.format(idx),[min_n,max_n])
+
 
 
         min_time = min([ins.timeSeries.min() for ins in self._instruments])
+        
         max_time = max([ins.timeSeries.max() for ins in self._instruments])
 
         self.modify_bounds('mid_transit_time',[min_time,max_time])
@@ -125,6 +135,40 @@ class LightCurveModel(ForwardModel):
     def inclination(self,value):
         self._inclination = value
 
+    @property
+    def temperatureProfile(self):
+        return self._forward_model.temperatureProfile
+
+    @property
+    def pressureProfile(self):
+        return self._forward_model.pressureProfile
+    
+    @property
+    def densityProfile(self):
+        return self._forward_model.densityProfile
+    
+    @property
+    def scaleheight_profile(self):
+        return self._forward_model.scaleheight_profile
+    
+    @property
+    def chemistry(self):
+        return self._forward_model.chemistry
+    
+    @property
+    def gravity_profile(self):
+        return self._forward_model.gravity_profile
+    
+
+    @property
+    def pressure(self):
+        return self._forward_model.pressure
+
+    
+    @property
+    def altitudeProfile(self):
+        return self._forward_model.altitudeProfile
+
 
     def create_normalization_fitparams(self):
         import itertools
@@ -154,7 +198,10 @@ class LightCurveModel(ForwardModel):
         sma_over_rs_value = self.sma_over_rs
         inclination_value = self.inclination
         mid_time_value = self.mid_time
-        Nfactor = self._nfactor
+        try:
+            Nfactor = self._nfactor
+        except AttributeError:
+            Nfactor = np.ones_like(wlgrid)
 
         result = []
         for ins in self._instruments:
@@ -199,9 +246,9 @@ class LightCurveModel(ForwardModel):
         return self._forward_model.nativeWavenumberGrid
 
 
-    def model(self,wngrid=None,return_contrib=False):
+    def model(self,wngrid=None,return_contrib=False,cutoff_grid=True):
         """Computes the forward model for a wngrid"""
-        binned_model,model,tau,contrib = self._forward_model.model(wngrid,return_contrib)
+        binned_model,model,tau,contrib = self._forward_model.model(wngrid,return_contrib,cutoff_grid)
         if wngrid is None:
             wngrid = self.nativeWavenumberGrid
         
@@ -212,8 +259,39 @@ class LightCurveModel(ForwardModel):
 
         return result,model,tau,contrib
 
-    
-    
+    def model_full_contrib(self,wngrid=None,cutoff_grid=True):
+        """Computes the forward model for a wngrid for each contribution"""
+        contrib_res = self._forward_model.model_full_contrib(wngrid,cutoff_grid)
+
+        if wngrid is None:
+            wngrid = self.nativeWavenumberGrid
+        
+        wlgrid = 10000/wngrid
+
+        self.info('Computing lightcurve contribution')
+
+        lc_contrib_res = {}
+
+        for contrib_name,contrib_list in contrib_res.items(): #Loop through each contribtuion
+            
+            lc_contrib_list = []
+
+            for c in contrib_list:
+                name = c[0]
+                binned = c[1]
+                native = c[2]
+                tau = c[3] # necessary?
+                result = self.instrument_light_curve(binned,wlgrid)
+
+                new_packed = name,binned,native,tau,('lightcurve_bin',result)
+
+                lc_contrib_list.append(new_packed)
+            
+            lc_contrib_res[contrib_name] = lc_contrib_list
+        
+        return lc_contrib_res
+
+
 
     def write(self,output):
         lc = output.create_group('Lightcurve')

@@ -6,23 +6,22 @@ cia_path = /Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/cia/hitran
 [Chemistry]
 chemistry_type = taurex
 fill_gases = H2,He
-ratio=0.17647
+ratio = 4.8962e-2
 
     [[H2O]]
-    gas_type=constant
-    mix_ratio=1e-5
+    gas_type = constant
+    mix_ratio=1.1185e-4
 
-    #[[CH4]]
-    #gas_type=twolayer
-    #mix_ratio_surface=1e-4
-    #mix_ratio_top=1e-10
-    #mix_ratio_P=1e2
+    [[N2]]
+    gas_type = constant
+    mix_ratio = 3.00739e-9
+
     
 
 
 [Temperature]
 profile_type = isothermal
-iso_temp = 1500.0
+iso_temp = 1340.0
 
 [Pressure]
 profile_type = Simple
@@ -48,10 +47,10 @@ model_type = transmission
     
     [[Rayleigh]]
 
-
 [Spectrum]
 observed_spectrum = /Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_transmission/SPECTRUM_fit.dat
 grid_type = observed
+#grid_type=native
 #wavenumber_grid = 0.0,10000.0,10000
 #wavelength_grid = 0.01,10.0,10000
 
@@ -59,9 +58,10 @@ grid_type = observed
 
 
 [Optimizer]
-optimizer = nestle
+optimizer = multinest
 num_live_points = 50
-method = single
+multi_nest_path=./multinest
+search_multi_modes=True
 
 
 
@@ -69,7 +69,7 @@ method = single
 T:fit = True
 T:bounds = 1200.0,1600.0
 planet_radius:fit = False
-H2O:fit = True
+H2O:fit = False
 H2O:bounds = 1e-2,1e-5
 H2O:mode = log
 

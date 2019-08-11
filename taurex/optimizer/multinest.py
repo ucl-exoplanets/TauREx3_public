@@ -4,6 +4,9 @@ import numpy as np
 import os
 
 from taurex.util.util import read_table,read_error_line,read_error_into_dict,quantile_corner,recursively_save_dict_contents_to_output
+import random
+from taurex.util.util import weighted_avg_and_std
+
 
 class MultiNestOptimizer(Optimizer):
 
@@ -13,15 +16,15 @@ class MultiNestOptimizer(Optimizer):
                 num_live_points=1500,
                 max_iterations=0,
                 search_multi_modes = False,
-                num_params_cluster=-1,
+                num_params_cluster=None,
                 maximum_modes=100,
                 constant_efficiency_mode=False,
                 evidence_tolerance=0.5,
                 mode_tolerance=-1e90,
-                importance_sampling=True,
+                importance_sampling=False,
                 resume=False,
-                verbose_output=True):
-        super().__init__('Multinest',observed,model)
+                verbose_output=True,sigma_fraction=0.1):
+        super().__init__('Multinest',observed,model,sigma_fraction)
 
         # sampling chains directory
         self.nest_path = 'chains/'
@@ -33,10 +36,10 @@ class MultiNestOptimizer(Optimizer):
         # maximum no. of iterations (0=inf)
         self.max_iter = int(max_iterations)
         # search for multiple modes
-        self.multimodes = int(search_multi_modes)
+        self.multimodes = search_multi_modes
         #parameters on which to cluster, e.g. if nclust_par = 3, it will cluster on the first 3 parameters only.
         #if ncluster_par = -1 it clusters on all parameters
-        self.nclust_par = int(num_params_cluster)
+        self.nclust_par = num_params_cluster
         # maximum number of modes
         self.max_modes = int(maximum_modes)
         # run in constant efficiency mode
@@ -46,8 +49,13 @@ class MultiNestOptimizer(Optimizer):
         self.mode_tolerance = mode_tolerance
         # importance nested sampling
         self.imp_sampling = importance_sampling
+        if self.imp_sampling:
+            self.multimodes = False
+
 
         self.dir_multinest = multi_nest_path
+        if not os.path.exists(self.dir_multinest):
+            os.makedirs(self.dir_multinest)
 
         self.resume = resume
         self.verbose = verbose_output
@@ -67,6 +75,7 @@ class MultiNestOptimizer(Optimizer):
             #print('chi_t',chi_t)
             #print('LOG',loglike)
             loglike = -np.sum(np.log(datastd*sqrtpi)) - 0.5 * chi_t
+            #print(loglike)
             return loglike
 
         def multinest_uniform_prior(cube, ndim, nparams):
@@ -84,17 +93,27 @@ class MultiNestOptimizer(Optimizer):
             status = (nSamples,nlive,nPar,physLive,posterior,paramConstr,maxloglike,logZ,INSlogZ,logZerr,context)
 
 
-        datastd_mean = np.mean(datastd)
+
         ndim = len(self.fitting_parameters)
         self.warning('Number of dimensions {}'.format(ndim))
         self.warning('Fitting parameters {}'.format(self.fitting_parameters))
 
+
+        ncluster = self.nclust_par
+        if isinstance(ncluster,float):
+            ncluster = int(ncluster)
+
+        if ncluster is not None and ncluster <=0:
+                ncluster = None
+        if ncluster is None:
+            self.nclust_par = ndim #For writing to output later on
+        
         self.info('Beginning fit......')
         pymultinest.run(LogLikelihood=multinest_loglike,
                         Prior=multinest_uniform_prior,
                         n_dims=ndim,
                         multimodal=self.multimodes,
-                        n_clustering_params=self.nclust_par,
+                        n_clustering_params=ncluster,
                         max_modes=self.max_modes,
                         outputfiles_basename=os.path.join(self.dir_multinest, '1-'),
                         const_efficiency_mode = self.const_eff,
@@ -111,8 +130,7 @@ class MultiNestOptimizer(Optimizer):
         self.info('Fit complete.....')
 
         self._multinest_output = self.store_nest_solutions()
-
-        self.debug('Multinest output {}'.format(self._multinest_output))
+        self.debug('Multinest output %s',self._multinest_output)
 
 
 
@@ -165,8 +183,7 @@ class MultiNestOptimizer(Optimizer):
         NEST_out = {'solutions': {}}
         data = np.loadtxt(os.path.join(self.dir_multinest, '1-.txt'))
 
-        NEST_analyzer = pymultinest.Analyzer(n_params=len(self.fitting_parameters),
-                                             outputfiles_basename=os.path.join(self.dir_multinest, '1-'))
+        NEST_analyzer = pymultinest.Analyzer(n_params=len(self.fitting_parameters), outputfiles_basename=os.path.join(self.dir_multinest, '1-'))
         NEST_stats = NEST_analyzer.get_stats()
         NEST_out['NEST_stats'] = NEST_stats
         NEST_out['global_logE'] = (NEST_out['NEST_stats']['global evidence'], NEST_out['NEST_stats']['global evidence error'])
@@ -256,6 +273,7 @@ class MultiNestOptimizer(Optimizer):
 
             for idx, param_name in enumerate(self.fit_names):
 
+
                 trace = modes_array[nmode][:,idx]
                 q_16, q_50, q_84 = quantile_corner(trace, [0.16, 0.5, 0.84],
                             weights=np.asarray(modes_weights[nmode]))
@@ -269,6 +287,50 @@ class MultiNestOptimizer(Optimizer):
                     'trace': trace,
                 }
 
-            NEST_out['solutions']['solution{}'.format(idx)] = mydict
+            NEST_out['solutions']['solution{}'.format(nmode)] = mydict
         
         return NEST_out
+
+
+    def generate_solution(self):
+
+        solution = super().generate_solution()
+
+        solution['GlobalStats'] = self._multinest_output['NEST_stats']
+        return solution
+
+
+    def sample_parameters(self,solution):
+        from taurex.util.util import random_int_iter
+        solution_id ='solution{}'.format(solution)
+        samples = self._multinest_output['solutions'][solution_id]['tracedata']
+        weights = self._multinest_output['solutions'][solution_id]['weights']
+
+        for x in random_int_iter(samples.shape[0],self._sigma_fraction):
+            w = weights[x]+1e-300
+            
+            yield samples[x,:],w
+
+
+
+
+
+    def get_solution(self):
+        names = self.fit_names
+        opt_values = self.fit_values
+        solutions = [ (k,v) for k,v in self._multinest_output['solutions'].items() if 'solution' in k]
+        for k,v in solutions:
+            solution_idx = int(k[8:])
+            for p_name,p_value in v['fit_params'].items():
+                idx = names.index(p_name)
+                opt_values[idx] = p_value['value']
+            
+            yield solution_idx,opt_values,[
+                                ('Statistics',{'local log-evidence': self._multinest_output['NEST_stats']['modes'][solution_idx]['local log-evidence'],
+                                              'local log-evidence error': self._multinest_output['NEST_stats']['modes'][solution_idx]['local log-evidence error']}),
+                                ('fit_params',v['fit_params']),
+                                ('tracedata',v['tracedata']),
+                                ('weights',v['weights'])]
+
+
+

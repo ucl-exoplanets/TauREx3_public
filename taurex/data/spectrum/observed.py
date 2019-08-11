@@ -1,8 +1,7 @@
 from .spectrum import BaseSpectrum
-from taurex.output.writeable import Writeable
 import numpy as np
 
-class ObservedSpectrum(BaseSpectrum,Writeable):
+class ObservedSpectrum(BaseSpectrum):
     """
     Loads an observed spectrum from a text file and computes bin
     edges and bin widths. Spectrum must be 3-4 columns with ordering:
@@ -112,6 +111,8 @@ class ObservedSpectrum(BaseSpectrum,Writeable):
         bin_edges.append((wl_grid[-1]-wl_grid[-2])/2.0 + wl_grid[-1])
         self._bin_edges = np.array(bin_edges)
         self._bin_widths = np.abs(np.diff(self._bin_edges))
+
+        
 
 
         

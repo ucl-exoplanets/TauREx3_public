@@ -142,11 +142,18 @@ Lets add in some ``[[CIA]]`` from ``H2-H2`` and ``H2-He`` and ``[[Rayleigh]]`` s
 .. image::  _static/ray_and_cia.png
 
 Hey not bad!! It might be worth seeing how each of these processes effect the spectrum. Easy, we can run
-``taurex`` with the ``-c`` argument which plots the contributions::
+``taurex`` with the ``-c`` argument which plots the basic contributions::
 
     taurex -i quickstart.par --plot -c
 
 .. image::  _static/contrib.png
+
+
+If you want a more detailed look of the each contribution you can use the ``-C`` option instead::
+
+    taurex -i quickstart.par --plot -C
+
+.. image::  _static/full_contrib.png
 
 Pretty cool. We're almost there. Lets save what we have now to file.
 

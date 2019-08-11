@@ -29,8 +29,9 @@ class NestleOptimizer(Optimizer):
 
     """
 
-    def __init__(self,observed=None,model=None,num_live_points=1500,method='multi',tol=0.5):
-        super().__init__('Nestle',observed,model)
+    def __init__(self,observed=None,model=None,num_live_points=1500,method='multi',tol=0.5
+    ,sigma_fraction=0.1):
+        super().__init__('Nestle',observed,model,sigma_fraction)
         self._nlive = int(num_live_points)    # number of live points
         self._method = method # use MutliNest algorithm
         
@@ -102,6 +103,35 @@ class NestleOptimizer(Optimizer):
         self.warning('Fit complete.....')
 
         self._nestle_output = self.store_nestle_output(res)
+
+    def sample_parameters(self,solution):
+        from taurex.util.util import random_int_iter
+        samples = self._nestle_output['solution']['samples']
+        weights = self._nestle_output['solution']['weights']
+
+        for x in random_int_iter(samples.shape[0],self._sigma_fraction):
+            w = weights[x]+1e-300
+            
+            yield samples[x,:],w
+
+
+
+
+
+
+    def get_solution(self):
+        names = self.fit_names
+        opt_values = self.fit_values
+
+        for k,v in self._nestle_output['solution']['fitparams'].items():
+            idx = names.index(k)
+            opt_values[idx] = v['value']
+        
+        yield 0,opt_values,[ ('Statistics', self._nestle_output['Stats']),
+                            ('Fitparams',self._nestle_output['solution']['fitparams']),
+                            ('tracedata',self._nestle_output['solution']['samples']),
+                            ('weights',self._nestle_output['solution']['weights'])]
+
 
     def write_optimizer(self,output):
         opt = super().write_optimizer(output)

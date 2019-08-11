@@ -113,7 +113,7 @@ class ObservedLightCurve(BaseSpectrum):
         out : :obj:`array`
         
         """
-        return None
+        return np.zeros(2)
 
 
     @property
