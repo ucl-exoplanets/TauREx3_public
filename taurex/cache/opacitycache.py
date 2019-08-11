@@ -179,7 +179,7 @@ class OpacityCache(Singleton):
         """
         self.log.info('Reading opacity %s',opacity.moleculeName)
         if opacity.moleculeName in self.opacity_dict:
-            self.log.warning('Opacity with name %s already in opactiy dictionary %s',opacity.moleculeName,self.opacity_dict.keys())
+            self.log.warning('Opacity with name %s already in opactiy dictionary %s skipping',opacity.moleculeName,self.opacity_dict.keys())
             return
         if molecule_filter is not None:
             if opacity.moleculeName in molecule_filter:
@@ -190,21 +190,35 @@ class OpacityCache(Singleton):
             self.opacity_dict[opacity.moleculeName] = opacity   
 
 
+    def search_hdf5_molecules(self):
+        from glob import glob
+        import os    
+        from taurex.opacity.hdf5opacity import HDF5Opacity
+        glob_path = [os.path.join(self._opacity_path,'*.h5'),os.path.join(self._opacity_path,'*.hdf5')]
+        file_list = [f for glist in glob_path for f in glob(glist)]
+        
+        return [HDF5Opacity(f,interpolation_mode=self._default_interpolation,in_memory=False).moleculeName for f in file_list ]
+
+    def search_pickle_molecules(self):
+        from glob import glob
+        import os    
+        glob_path = os.path.join(self._opacity_path,'*.pickle')
+        file_list = [f for f in glob(glob_path)]
+        
+        return [pathlib.Path(f).stem.split('.')[0] for f in file_list ]
+
+
+
     def find_list_of_molecules(self):
         from glob import glob
         import os
         from taurex.opacity import PickleOpacity
         if self._opacity_path is None:
             return []
-        glob_path = [os.path.join(self._opacity_path,'*.h5'),os.path.join(self._opacity_path,'*.pickle')]
-
-        file_list = glob(glob_path)
-        self.log.debug('File list %s',file_list)
-        molecules = []
-        for files in file_list:
-            splits = pathlib.Path(files).stem.split('.')       
-            molecules.append(splits[0])
-        return molecules
+        
+        pickles = self.search_pickle_molecules()
+        hedef = self.search_hdf5_molecules()
+        return list(set(pickles+hedef))
     def load_opacity_from_path(self,path,molecule_filter=None):
         """
         Searches path for molecular cross-section files, creates and loads them into the cache
@@ -240,9 +254,12 @@ class OpacityCache(Singleton):
                             continue
                 del op
                 op = HDF5Opacity(files,interpolation_mode=self._default_interpolation,in_memory=self._memory_mode)
+
             elif files.endswith('pickle'):
                 splits = pathlib.Path(files).stem.split('.')
-
+                if molecule_filter is not None:
+                        if not splits[0] in molecule_filter:
+                            continue
 
                 op = PickleOpacity(files,interpolation_mode=self._default_interpolation)
                 op._molecule_name = splits[0]
