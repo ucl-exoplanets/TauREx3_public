@@ -513,7 +513,7 @@ class Optimizer(Logger):
             
             self.update_model(optimized) #Update the model with optimized values
 
-            opt_result = self._model.model(wngrid=self._observed.wavenumberGrid,return_contrib=False,cutoff_grid=False) #Run the model
+            opt_result = self._model.model(wngrid=self._observed.wavenumberGrid,return_contrib=True,cutoff_grid=False) #Run the model
 
             sol_values['Profiles']=generate_profile_dict(self._model)
 

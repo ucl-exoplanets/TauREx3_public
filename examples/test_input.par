@@ -21,7 +21,7 @@ ratio = 4.8962e-2
 
 [Temperature]
 profile_type = isothermal
-iso_temp = 1500.0
+iso_temp = 1340.0
 
 [Pressure]
 profile_type = Simple
@@ -50,6 +50,7 @@ model_type = transmission
 [Spectrum]
 observed_spectrum = /Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_transmission/SPECTRUM_fit.dat
 grid_type = observed
+#grid_type=native
 #wavenumber_grid = 0.0,10000.0,10000
 #wavelength_grid = 0.01,10.0,10000
 

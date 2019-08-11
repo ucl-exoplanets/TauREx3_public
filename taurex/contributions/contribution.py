@@ -9,7 +9,7 @@ from taurex.output.writeable import Writeable
 import numba
 
 @numba.jit(nopython=True, nogil=True)
-def contribute_tau(startK,endK,density_offset,sigma,density,path,nlayers,ngrid,layer):
+def contribute_tau(startK,endK,density_offset,sigma,density,path,nlayers,ngrid,layer,tau):
     """
     Generic contribution function for tau, numba-fied for performance.
 
@@ -49,14 +49,12 @@ def contribute_tau(startK,endK,density_offset,sigma,density,path,nlayers,ngrid,l
         optical depth (well almost you still need to do ``exp(-tau)`` yourself )
 
     """
-    tau = np.zeros(shape=(ngrid,))
     for k in range(startK,endK):
         _path = path[k]
         _density = density[k+density_offset]
         # for mol in range(nmols):
         for wn in range(ngrid):
-            tau[wn] += sigma[k+layer,wn]*_path*_density
-    return tau
+            tau[layer,wn] += sigma[k+layer,wn]*_path*_density
 
 
 class Contribution(Fittable,Logger,Writeable):
@@ -77,11 +75,10 @@ class Contribution(Fittable,Logger,Writeable):
 
   
 
-    def contribute(self,model,start_horz_layer,end_horz_layer,density_offset,layer,density,path_length=None):
+    def contribute(self,model,start_horz_layer,end_horz_layer,density_offset,layer,density,tau,path_length=None):
         #print(self.sigma_xsec.max())
-        contrib =contribute_tau(start_horz_layer,end_horz_layer,density_offset,self.sigma_xsec,density,path_length,self._nlayers,self._ngrid,layer)
-        self._total_contrib[layer] += contrib
-        return contrib
+        contribute_tau(start_horz_layer,end_horz_layer,density_offset,self.sigma_xsec,density,path_length,self._nlayers,self._ngrid,layer,tau)
+        #self._total_contrib[layer] += contrib
 
     def build(self,model):
         raise NotImplementedError
@@ -91,7 +88,7 @@ class Contribution(Fittable,Logger,Writeable):
 
 
     def prepare(self,model,wngrid):
-        self._total_contrib = np.zeros(shape=(model.nLayers,wngrid.shape[0],))
+        #self._total_contrib = np.zeros(shape=(model.nLayers,wngrid.shape[0],))
         self._ngrid = wngrid.shape[0]
         self._nlayers = model.nLayers
         
@@ -113,11 +110,8 @@ class Contribution(Fittable,Logger,Writeable):
 
     @property
     def sigma(self):
-        raise NotImplementedError
+        return self.sigma_xsec
 
-    @property
-    def totalContribution(self):
-        raise NotImplementedError
 
     
 

@@ -10,9 +10,9 @@ class SimpleCloudsContribution(Contribution):
         super().__init__('SimpleClouds')
         self._cloud_pressure = clouds_pressure
 
-    def contribute(self,model,start_horz_layer,end_horz_layer,density_offset,layer,density,path_length=None):
+    def contribute(self,model,start_horz_layer,end_horz_layer,density_offset,layer,density,tau,path_length=None):
 
-        self._total_contrib[layer,:] = self._contrib[layer,:]
+        #self._total_contrib[layer,:] = self._contrib[layer,:]
 
         return self._contrib[layer,:]
 
@@ -21,7 +21,7 @@ class SimpleCloudsContribution(Contribution):
         pass
     
     def prepare_each(self,model,wngrid):
-        self._total_contrib[...] =0.0
+        #self._total_contrib[...] =0.0
         contrib = np.zeros(shape=(model.nLayers,wngrid.shape[0],))
         cloud_filtr = model.pressureProfile >= self._cloud_pressure
         contrib[cloud_filtr,:] = np.inf

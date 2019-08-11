@@ -75,16 +75,16 @@ class EmissionModel(SimpleForwardModel):
 
         temperature = self.temperatureProfile
         tau = np.zeros(shape=(self.nLayers,wngrid_size))
-        surface_tau = np.zeros(wngrid_size)
+        surface_tau = np.zeros(shape=(1,wngrid_size))
 
-        layer_tau = np.zeros(wngrid_size)
+        layer_tau = np.zeros(shape=(1,wngrid_size))
 
-        dtau = np.zeros(wngrid_size)
+        dtau = np.zeros(shape=(1,wngrid_size))
 
         #Do surface first
         #for layer in range(total_layers):
         for contrib in self.contribution_list:
-            surface_tau += contrib.contribute(self,0,total_layers,0,0,density,path_length=dz)
+            contrib.contribute(self,0,total_layers,0,0,density,surface_tau,path_length=dz)
         self.debug('density = %s',density[0])
         self.debug('surface_tau = %s',surface_tau)
 
@@ -100,12 +100,12 @@ class EmissionModel(SimpleForwardModel):
             layer_tau[...] = 0.0
             dtau[...] = 0.0
             for contrib in self.contribution_list:
-                layer_tau += contrib.contribute(self,layer+1,total_layers,0,0,density,dz)  
-                dtau += contrib.contribute(self,layer,layer+1,0,0,density,dz)           
+                contrib.contribute(self,layer+1,total_layers,0,0,density,layer_tau,path_length=dz)  
+                contrib.contribute(self,layer,layer+1,0,0,density,dtau,path_length=dz)           
 
             _tau = ne.evaluate('exp(-layer_tau) - exp(-dtau)')
 
-            tau[layer] += _tau
+            tau[layer] += _tau[0]
             #for contrib in self.contribution_list:
 
             self.debug('Layer_tau[%s]=%s',layer,layer_tau)
@@ -124,4 +124,4 @@ class EmissionModel(SimpleForwardModel):
         flux_total = ne.evaluate('2.0*PI*(I1*mu1*w1 + I2*mu2*w2 + I3*mu3*w3 + I4*mu4*w4)')
         self.debug('flux_total %s',flux_total)
         
-        return self.compute_final_flux(flux_total),tau,[]
+        return self.compute_final_flux(flux_total).flatten(),tau

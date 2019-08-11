@@ -137,23 +137,47 @@ def generate_spectra_dict(result,contrib_result,native_grid,bin_grid=None):
 
 
     contributions = {}
+    
+    main_contrib = result[-1]
 
     for contrib_name,contrib_list in contrib_result.items(): #Loop through each contribtuion
         
         contributions[contrib_name] = {}
 
+        for k,v in main_contrib[contrib_name].items():
+            contributions[contrib_name][k] = v
+        
         for c in contrib_list: #Loop through its components
             name = c[0]
-            binned = c[1]
-            native = c[2]
-            tau = c[3] # necessary?
-            contrib_comp = {}
-            contrib_comp['binned'] = binned
-            contrib_comp['native'] = native
-            contrib_comp['tau'] = tau
+            native = None
+            binned = None
+            tau = None
+            extra = None
+            #Cause I had no forsight
+            if len(c) == 3:
+
+                native = c[1]
+                tau = c[2]
+            elif len(c)>3:
+                if isinstance(c[3],tuple):
+                    native = c[1]
+                    tau=c[2]
+                    extra = c[3:]
+                else:
+                    binned = c[1]
+                    native=c[2]
+                    tau=c[3]
+                    extra=c[4:]
             
-            for k,v in c[4:]:
-                contrib_comp[k] = v
+            #tau = c[3] # necessary?
+            contrib_comp = {}
+            if binned is not None:
+                contrib_comp['binned'] = binned
+            contrib_comp['native'] = native
+            #contrib_comp['tau'] = tau
+            if extra is not None:
+                for k,v in extra:
+                    contrib_comp[k] = v
 
             contributions[contrib_name][name] = contrib_comp
 

@@ -265,16 +265,51 @@ class SimpleForwardModel(ForwardModel):
         self._star.initialize(native_grid)
         for contrib in self.contribution_list:
             contrib.prepare(self,native_grid)
-        absorp,tau,contrib = self.path_integral(native_grid,return_contrib)
+        absorp,tau = self.path_integral(native_grid,False)
+        
+        contributions={}
+        if return_contrib:
+            contributions = self.model_contributions(native_grid,wngrid=wngrid)
+
+
+        self.info('Modelling each contribution.....')
+        
         if wngrid is None:
-            return absorp,absorp,tau,contrib
+            return absorp,absorp,tau,contributions
         else:
             new_absp = bindown(native_grid,absorp,wngrid)
-            return new_absp,absorp,tau,contrib
+            return new_absp,absorp,tau,contributions
 
+
+    def model_contributions(self,native_grid=None,wngrid=None,prepare=False):
+        """
+        Models each contribution seperately
+        """
+        full_contrib_list = self.contribution_list
+        if native_grid is None:
+            native_grid = self.nativeWavenumberGrid
+
+        all_contrib_dict = {}
+
+        for contrib in full_contrib_list:
+            self.contribution_list = [contrib]
+            if prepare:
+                contrib.prepare(self,native_grid)
+            absorp,tau = self.path_integral(native_grid,False)
+            contrib_dict = {}
+            contrib_dict['native'] = absorp
+            contrib_dict['tau'] = tau
+            if wngrid is not None:
+                contrib_dict['binned'] = bindown(native_grid,absorp,wngrid)
+
+            all_contrib_dict[contrib.name] = contrib_dict
+            
+
+        self.contribution_list = full_contrib_list
+        return all_contrib_dict
 
     def model_full_contrib(self,wngrid=None,cutoff_grid=True):
-        """Computes the forward model for a wngrid for each contribution"""
+        """Like model_contributions except all components for each contribution are modelled"""
         self.initialize_profiles()
 
         native_grid = self.nativeWavenumberGrid
@@ -298,7 +333,7 @@ class SimpleForwardModel(ForwardModel):
             
             for name,sig in contrib.prepare_each(self,native_grid):
                 self.info('\t%s---%s contribtuion',contrib_name,name)
-                absorp,tau,contrib = self.path_integral(native_grid,False)
+                absorp,tau = self.path_integral(native_grid,False)
                 if wngrid is None:
                     contrib_res_list.append((name,absorp,tau))
                 else:
