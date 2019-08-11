@@ -29,7 +29,7 @@ class Optimizer(Logger):
         self._model = model
         self._observed = observed
         self._model_callback = None
-        self._sigma_fraction = 0.1
+        self._sigma_fraction = sigma_fraction
 
     def set_model(self,model):
         """
