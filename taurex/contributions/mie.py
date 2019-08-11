@@ -98,7 +98,7 @@ class MieContribution(Contribution):
     def contribute(self,model,start_horz_layer,end_horz_layer,density_offset,layer,density,tau,path_length=None):
         if model.pressureProfile[layer] <= self._cloud_bottom_pressure and model.pressureProfile[layer] >= self._cloud_top_pressure :
             contrib = contribute_tau(start_horz_layer,end_horz_layer,
-                density_offset,self.sigma_mie,density,path_length,self._nlayers,self._ngrid,layer)
+                density_offset,self.sigma_mie,density,path_length,self._nlayers,self._ngrid,layer,tau)
             #self._total_contrib[layer,:]+=contrib
             return contrib
         else:
