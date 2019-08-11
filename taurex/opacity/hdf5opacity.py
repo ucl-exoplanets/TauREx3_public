@@ -8,15 +8,15 @@ class HDF5Opacity(InterpolatingOpacity):
 
     """
     
-    def __init__(self,filename,interpolation_mode='exp'):
+    def __init__(self,filename,interpolation_mode='exp',in_memory=False):
         super().__init__('HDF5Opacity:{}'.format(pathlib.Path(filename).stem[0:10]),
                         interpolation_mode=interpolation_mode)
 
         self._filename = filename
         self._molecule_name = None
         self._spec_dict = None
-        self._resolution = None
-        self._load_pickle_file(filename)
+        self.in_memory = in_memory
+        self._load_hdf_file(filename)
         
         
     @property
@@ -34,27 +34,33 @@ class HDF5Opacity(InterpolatingOpacity):
         #Load the pickle file
         self.info('Loading opacity from {}'.format(filename))
         
-        self._spec_dict = h5py.File(filename)
+        self._spec_dict = h5py.File(filename,'r')
         
-        self._wavenumber_grid = self._spec_dict['wno']
+        self._wavenumber_grid = self._spec_dict['bin_edges'][:]
 
-        self._temperature_grid = self._spec_dict['t']
+        #temperature_units = self._spec_dict['t'].attrs['units']
+        #t_conversion = u.Unit(temperature_units).to(u.K).value
+
+        self._temperature_grid = self._spec_dict['t'][:]#*t_conversion
         
 
+        pressure_units = self._spec_dict['p'].attrs['units']
+        p_conversion = u.Unit(pressure_units).to(u.Pa)
 
-        self._pressure_grid = self._spec_dict['p']
-        self._xsec_grid = self._spec_dict['xsecarr']
+        self._pressure_grid = self._spec_dict['p'][:]*p_conversion
+
+        if self.in_memory:
+            self._xsec_grid = self._spec_dict['xsecarr'][...]
+        else:
+            self._xsec_grid = self._spec_dict['xsecarr']
+
         self._resolution = np.average(np.diff(self._wavenumber_grid))
-        self._molecule_name = self._spec_dict['name']
+        self._molecule_name = self._spec_dict['mol_name'][:][0]
 
         self._min_pressure = self._pressure_grid.min()
         self._max_pressure = self._pressure_grid.max()
         self._min_temperature = self._temperature_grid.min()
         self._max_temperature = self._temperature_grid.max()
-        self.clean_molecule_name()
-    def clean_molecule_name(self):
-        splits = self.moleculeName.split('_')
-        self._molecule_name = splits[0]
 
     @property
     def wavenumberGrid(self):
