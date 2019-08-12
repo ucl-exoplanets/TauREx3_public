@@ -33,7 +33,7 @@ cd TauREx3
 Then install
 
 ```
-pip install -e .
+pip install .
 ```
 
 To build documentation do
