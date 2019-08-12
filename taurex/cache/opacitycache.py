@@ -154,7 +154,7 @@ class OpacityCache(Singleton):
                 return self.opacity_dict[key]
             else:
                 try:
-                    self.create_radis_opacity(key,molecule_filter=[key])
+                    return self.create_radis_opacity(key,molecule_filter=[key])
                 except Exception as e:
                     self.error('EXception thrown %s')
                     #Otherwise throw an error
@@ -171,6 +171,7 @@ class OpacityCache(Singleton):
 
             radis = RadisHITRANOpacity(molecule_name=molecule)
             self.add_opacity(radis,molecule_filter=molecule_filter)
+            return radis
         else:
             self.log.info('Opacity %s already exsits',molecule)
 
