@@ -26,7 +26,8 @@ class EmissionModel(SimpleForwardModel):
                             chemistry=None,
                             nlayers=100,
                             atm_min_pressure=1e-4,
-                            atm_max_pressure=1e6
+                            atm_max_pressure=1e6,
+                            ngauss = 4
                             ):
         super().__init__('emission_model',planet,
                             star,
@@ -37,6 +38,15 @@ class EmissionModel(SimpleForwardModel):
                             atm_min_pressure,
                             atm_max_pressure)
 
+        self.set_num_gauss(ngauss)
+
+    
+    def set_num_gauss(self,value):
+        self._ngauss = int(value)
+
+        mu,weight =np.polynomial.legendre.leggauss(self._ngauss*2)
+        self._mu_quads =mu[self._ngauss:] 
+        self._wi_quads =weight[self._ngauss:] 
 
 
     def compute_final_flux(self,f_total):
@@ -63,15 +73,6 @@ class EmissionModel(SimpleForwardModel):
         
         total_layers = self.nLayers
 
-        mu1 = 0.1834346
-        mu2 = 0.5255324
-        mu3 = 0.7966665
-        mu4 = 0.9602899
-
-        w1 = 0.3626838
-        w2 = 0.3137066
-        w3 = 0.2223810
-        w4 = 0.1012885
 
         temperature = self.temperatureProfile
         tau = np.zeros(shape=(self.nLayers,wngrid_size))
@@ -89,12 +90,14 @@ class EmissionModel(SimpleForwardModel):
         self.debug('surface_tau = %s',surface_tau)
 
         BB = black_body(wngrid,temperature[0])/PI
+        
+        _temp_surf = surface_tau
+        
+        _mu = self._mu_quads[:,None]
+        _w = self._wi_quads[:,None]
+        I =ne.evaluate('BB * ( exp(-surface_tau/_mu))')
 
-        I1 = ne.evaluate('BB * ( exp(-surface_tau/mu1))')
-        I2 = ne.evaluate('BB * ( exp(-surface_tau/mu2))')
-        I3 = ne.evaluate('BB * ( exp(-surface_tau/mu3))')
-        I4 = ne.evaluate('BB * ( exp(-surface_tau/mu4))')
-        self.debug('I1_pre %s',I1)
+        self.debug('I1_pre %s',I)
         #Loop upwards
         for layer in range(total_layers):
             layer_tau[...] = 0.0
@@ -114,14 +117,11 @@ class EmissionModel(SimpleForwardModel):
             self.debug('dtau[%s]=%s',layer,dtau)
             BB = black_body(wngrid,temperature[layer])/PI
             self.debug('BB[%s]=%s,%s',layer,temperature[layer],BB)
-            I1 += ne.evaluate('BB * ( exp(-layer_tau/mu1) - exp(-dtau/mu1))')
-            I2 += ne.evaluate('BB * ( exp(-layer_tau/mu2) - exp(-dtau/mu2))')
-            I3 += ne.evaluate('BB * ( exp(-layer_tau/mu3) - exp(-dtau/mu3))')
-            I4 += ne.evaluate('BB * ( exp(-layer_tau/mu4) - exp(-dtau/mu4))')            
+            I += ne.evaluate('BB * ( exp(-layer_tau/_mu) - exp(-dtau/_mu))')
 
-        
-        self.debug('I1: %s',I1)
-        flux_total = ne.evaluate('2.0*PI*(I1*mu1*w1 + I2*mu2*w2 + I3*mu3*w3 + I4*mu4*w4)')
+        self.debug('I: %s',I)
+
+        flux_total = 2.0*np.pi*ne.evaluate('sum(I*_mu*_w,axis=0)')
         self.debug('flux_total %s',flux_total)
         
         return self.compute_final_flux(flux_total).flatten(),tau
