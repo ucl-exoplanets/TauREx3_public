@@ -5,19 +5,23 @@ cia_path = /Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/cia/hitran
 
 [Chemistry]
 chemistry_type = taurex
-n2_mix_ratio=0
-he_h2_ratio=0.17647
+fill_gases = H2,He
+ratio = 4.8962e-2
 
     [[H2O]]
+    gas_type=twolayer
+
+    [[CH4]]
+    gas_type=twolayer
+
+    [[N2]]
     gas_type=constant
-    mix_ratio = 1e-5
-
-
+    mix_ratio=1e-7
 
 
 [Temperature]
-profile_type = Isothermal
-T = 1500.0
+profile_type = Guillot
+T_irr = 1500.0
 
 
 [Pressure]
@@ -31,12 +35,14 @@ planet_mass = 1.0
 planet_radius = 1.0
 
 [Star]
-star_type = phoenix
-phoenix_path = /Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/star_spectra/
-temperature = 5800
+star_type = blackbody
+#star_type = phoenix
+#phoenix_path = /Users/ahmed/Downloads/BT-Settl_M-0.0a+0.0
+#temperature = 5800
 
 [Model]
 model_type = Emission
+ngauss = 2
 
     [[Absorption]]
     [[CIA]]
@@ -44,10 +50,10 @@ model_type = Emission
     [[Rayleigh]]
 
 [Spectrum]
-observed_spectrum = /Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_emission/SPECTRUM_out.dat
+#observed_spectrum = /Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_emission/SPECTRUM_out.dat
 grid_type = native
-wavenumber_grid = 0.0,10000.0,10000
-wavelength_grid = 0.01,10.0,10000
+#wavenumber_grid = 0.0,10000.0,10000
+#wavelength_grid = 0.01,10.0,10000
 
 
 
