@@ -367,6 +367,11 @@ def read_table(txt, d=None, title=None):
         data = np.reshape(data, (1, -1))
     return data
 
+def decode_string_array(f):
+    """Helper to decode strings from hdf5"""
+    sl = list(f)
+    return [s[0].decode('utf-8') for s in sl] 
+
 
 def recursively_save_dict_contents_to_output(output, dic):
     """
@@ -415,11 +420,14 @@ def weighted_avg_and_std(values, weights, axis=None):
     
     weights : :obj:`array`
         Must be same shape as ``values``
+        
     
     axis : int , optional
         axis to perform weighting
     
     """
+
+
     import numpy as np
     average = np.average(values, weights=weights,axis=axis)
     variance = np.average((values-average)**2, weights=weights, axis=axis)  # Fast and numerically precise

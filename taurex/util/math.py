@@ -69,5 +69,45 @@ def compute_rayleigh_cross_section(wngrid,n,n_air = 2.6867805e25,king=1.0):
 
     return sigma
 
+class OnlineVariance(object):
+    """USes the M2 algorithm to compute the variance in a streaming fashion"""
+
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        self.count = 0.0
+        self.wcount = 0.0
+        self.wcount2=0.0
+        self.mean = None
+        self.M2 = None
+       
+    
+    def update(self,value,weight=1.0):
+        self.count+=1
+        self.wcount+=weight
+        self.wcount2+=weight*weight
 
 
+        if self.mean is None:
+            self.mean = value*0.0
+            self.M2 = value*0.0
+        
+
+        mean_old = self.mean[:]
+        self.mean = mean_old + (weight / self.wcount) * (value - mean_old)
+        self.M2 += weight * (value - mean_old) * (value - self.mean)
+
+    @property
+    def variance(self):
+        if self.count < 2:
+            return float('nan')
+        else:
+            return self.M2/self.wcount
+    
+    @property
+    def sampleVariance(self):
+        if self.count < 2:
+            return float('nan')
+        else:
+            return self.M2/(self.wcount-1)

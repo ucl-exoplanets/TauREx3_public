@@ -13,8 +13,7 @@ class SimpleCloudsContribution(Contribution):
     def contribute(self,model,start_horz_layer,end_horz_layer,density_offset,layer,density,tau,path_length=None):
 
         #self._total_contrib[layer,:] = self._contrib[layer,:]
-
-        return self._contrib[layer,:]
+        tau[layer]+=self._contrib[layer,:]
 
 
     def build(self,model):
