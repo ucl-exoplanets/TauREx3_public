@@ -34,7 +34,13 @@ class OutputDictTest(unittest.TestCase):
 
         #Test a normal spectra
 
-        normal_result = (np.linspace(1,10,50),np.linspace(1,10,50),np.linspace(1,10,50),{})
+        normal_result = (np.linspace(1,10,50),np.linspace(1,10,50),np.linspace(1,10,50),
+                {'Absorption':{'binned':np.linspace(1,10,50),'native':np.linspace(1,10,50),'tau':np.linspace(1,10,50)},
+                'CIA':{'binned':np.linspace(1,10,50),'native':np.linspace(1,10,50),'tau':np.linspace(1,10,50)},
+                'Rayleigh':
+                    {'binned':np.linspace(1,10,50),'native':np.linspace(1,10,50),'tau':np.linspace(1,10,50)}
+
+                })
 
 
         spec_grid = generate_spectra_dict(normal_result,self.gen_contrib(),np.linspace(1,10,50))
