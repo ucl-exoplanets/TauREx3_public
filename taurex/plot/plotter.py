@@ -441,7 +441,7 @@ def main():
     plot_fullcontrib = args.full_contrib or args.all
     plot_posteriors = args.posterior or args.all
 
-    plot=Plotter('/Users/ahmed/Documents/test_outputs/superearth.hdf5',cmap=args.cmap,
+    plot=Plotter(args.input_file,cmap=args.cmap,
                     title=args.title,prefix=args.prefix,out_folder=args.output_dir)
     
     if plot_posteriors:
