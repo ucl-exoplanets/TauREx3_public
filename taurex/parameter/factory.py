@@ -257,6 +257,8 @@ def create_model(config,gas,temperature,pressure,planet,star):
     kwargs['pressure_profile'] = pressure
     log.debug('New Model kwargs {}'.format(kwargs))
     log.debug('Creating model---------------')
+    
+    kwargs.update(dict([(k,v) for k,v in config.items() if not isinstance(v,dict)]))
     obj = klass(**kwargs)
     
     contribs = generate_contributions(config)
