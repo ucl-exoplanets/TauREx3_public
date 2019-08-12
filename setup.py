@@ -34,7 +34,7 @@ install_requires = ['numpy','cython',
 
 
 
-console_scripts = ['taurex=taurex.taurex:main']
+console_scripts = ['taurex=taurex.taurex:main','taurex-plot=taurex.plot.plotter:main [Plot]']
 
 
 def return_major_minor_python():
@@ -121,6 +121,8 @@ setup(name='taurex',
       provides=provides,
       requires=requires,
       install_requires=install_requires,
+      extras_require={
+        'Plot':  ["matplotlib"],},
       data_files=data_files,
       ext_modules=extensions
       )
