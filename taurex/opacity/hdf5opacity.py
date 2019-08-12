@@ -45,7 +45,10 @@ class HDF5Opacity(InterpolatingOpacity):
         
 
         pressure_units = self._spec_dict['p'].attrs['units']
-        p_conversion = u.Unit(pressure_units).to(u.Pa)
+        try:
+            p_conversion = u.Unit(pressure_units).to(u.Pa)
+        except:
+            p_conversion = u.Unit(pressure_units,format="cds").to(u.Pa)
 
         self._pressure_grid = self._spec_dict['p'][:]*p_conversion
 
@@ -55,7 +58,7 @@ class HDF5Opacity(InterpolatingOpacity):
             self._xsec_grid = self._spec_dict['xsecarr']
 
         self._resolution = np.average(np.diff(self._wavenumber_grid))
-        self._molecule_name = self._spec_dict['mol_name'][:][0]
+        self._molecule_name = self._spec_dict['mol_name'][()]
 
         self._min_pressure = self._pressure_grid.min()
         self._max_pressure = self._pressure_grid.max()
