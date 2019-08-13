@@ -27,7 +27,7 @@ iso_temp = 1340.0
 profile_type = Simple
 atm_min_pressure = 1e-4
 atm_max_pressure = 1e6
-nlayers = 100
+nlayers = 10
 
 [Planet]
 planet_type = Simple

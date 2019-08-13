@@ -60,6 +60,8 @@ class OpacityCache(Singleton):
         self.log = Logger('OpacityCache')
         self._default_interpolation = 'exp'
         self._memory_mode = True
+        self._radis = False
+        self._radis_props = (600,30000,100000)
     def set_opacity_path(self,opacity_path):
         """
         Set the path(s) that will be searched for cross-sections. Cross-section in this path
@@ -91,6 +93,17 @@ class OpacityCache(Singleton):
             raise NotADirectoryError
         self._opacity_path  = opacity_path
     
+
+    def enable_radis(self,enable):
+        self._radis = enable
+    
+    def set_radis_wavenumber(self,wn_start,wn_end,wn_points):
+        self._radis_props = (wn_start,wn_end,wn_points)
+
+        
+
+        self.clear_cache()
+    
     def set_memory_mode(self,in_memory):
         self._memory_mode = in_memory
         self.clear_cache()
@@ -120,6 +133,8 @@ class OpacityCache(Singleton):
         self._default_interpolation = interpolation_mode
         for values in self.opacity_dict.values():
             values.set_interpolation_mode(self._default_interpolation)
+    
+    
 
     def __getitem__(self,key):
         """
@@ -151,13 +166,33 @@ class OpacityCache(Singleton):
             if key in self.opacity_dict:
                 return self.opacity_dict[key]
             else:
-                #Otherwise throw an error
-                self.log.error('Opacity for molecule %s could not be loaded',key)
-                self.log.error('It could not be found in the local dictionary %s',list(self.opacity_dict.keys()))
-                self.log.error('Or paths %s',self._opacity_path)
-                self.log.error('Try loading it manually/ putting it in a path')
-                raise Exception('Opacity could notn be loaded')
+                try:
+                    if self._radis:
+                        return self.create_radis_opacity(key,molecule_filter=[key])
+                    else:
+                        raise Exception
+                except Exception as e:
+                    self.log.error('EXception thrown %s',e)
+                    #Otherwise throw an error
+                    self.log.error('Opacity for molecule %s could not be loaded',key)
+                    self.log.error('It could not be found in the local dictionary %s',list(self.opacity_dict.keys()))
+                    self.log.error('Or paths %s',self._opacity_path)
+                    self.log.error('Try loading it manually/ putting it in a path')
+                    raise Exception('Opacity could notn be loaded')
 
+    def create_radis_opacity(self,molecule,molecule_filter=None):
+        from taurex.opacity.radisopacity import RadisHITRANOpacity
+        if molecule not in self.opacity_dict:
+            self.log.info('Creating Opacity from RADIS+HITRAN')
+            wn_start,wn_end,wn_points = self._radis_props
+            radis = RadisHITRANOpacity(molecule_name=molecule, wn_start=wn_start,wn_end=wn_end,wn_points=wn_points)
+            
+            
+
+            self.add_opacity(radis,molecule_filter=molecule_filter)
+            return radis
+        else:
+            self.log.info('Opacity %s already exsits',molecule)
 
 
     def add_opacity(self,opacity,molecule_filter=None):
@@ -207,18 +242,28 @@ class OpacityCache(Singleton):
         
         return [pathlib.Path(f).stem.split('.')[0] for f in file_list ]
 
-
-
+    def search_radis_molecules(self):
+        trans = { '1':'H2O',    '2':'CO2',   '3':'O3',      '4':'N2O',   '5':'CO',    '6':'CH4',   '7':'O2',     
+            '9':'SO2',   '10':'NO2',  '11':'NH3',    '12':'HNO3', '13':'OH',   '14':'HF',   '15':'HCl',   '16':'HBr',
+            '17':'HI',    '18':'ClO',  '19':'OCS',    '20':'H2CO', '21':'HOCl',    '23':'HCN',   '24':'CH3Cl',
+            '25':'H2O2',  '26':'C2H2', '27':'C2H6',   '28':'PH3',  '29':'COF2', '30':'SF6',  '31':'H2S',   '32':'HCOOH',
+            '33':'HO2',   '34':'O',    '35':'ClONO2', '36':'NO+',  '37':'HOBr', '38':'C2H4',  '40':'CH3Br',
+            '41':'CH3CN', '42':'CF4',  '43':'C4H2',   '44':'HC3N',   '46':'CS',   '47':'SO3'}
+        if self._radis:
+            return list(trans.values())
+        else:
+            return []
     def find_list_of_molecules(self):
         from glob import glob
         import os
         from taurex.opacity import PickleOpacity
-        if self._opacity_path is None:
-            return []
+        pickles = []
+        hedef = []
+        if self._opacity_path is not None:
         
-        pickles = self.search_pickle_molecules()
-        hedef = self.search_hdf5_molecules()
-        return list(set(pickles+hedef))
+            pickles = self.search_pickle_molecules()
+            hedef = self.search_hdf5_molecules()
+        return list(set(pickles+hedef+self.search_radis_molecules()))
     def load_opacity_from_path(self,path,molecule_filter=None):
         """
         Searches path for molecular cross-section files, creates and loads them into the cache

@@ -41,7 +41,7 @@ star_type = blackbody
 #temperature = 5800
 
 [Model]
-model_type = Emission
+model_type = transmission
 ngauss = 2
 
     [[Absorption]]
