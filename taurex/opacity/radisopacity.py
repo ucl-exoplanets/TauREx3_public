@@ -9,19 +9,25 @@ class RadisHITRANOpacity(Logger):
 
     """
     
-    def __init__(self,molecule_name):
+    def __init__(self,molecule_name,wn_start=600,wn_end=30000,wn_points=10000):
         super().__init__(self.__class__.__name__)
         import radis
-        self.rad_xsec = radis.SpectrumFactory(wavenum_min=600,
-                             wavenum_max=30000,
+
+        step = (wn_end-wn_start)/wn_points
+
+        self.info('RADIS Grid set to %s %s %s',wn_start,wn_end,step)
+
+        self.rad_xsec = radis.SpectrumFactory(wavenum_min=wn_start,
+                             wavenum_max=wn_end,
                              isotope='1',  #'all',
-                             wstep=0.1,     # depends on HAPI benchmark.
+                             wstep=step,     # depends on HAPI benchmark.
                              verbose=0,
                              cutoff=1e-27,
                                         mole_fraction=1.0,
                              broadening_max_width=10.0,  # Corresponds to WavenumberWingHW/HWHM=50 in HAPI
                              molecule=molecule_name,
                              )
+        
         self.rad_xsec.fetch_databank('astroquery',load_energies=False)
 
         self._molecule_name = molecule_name

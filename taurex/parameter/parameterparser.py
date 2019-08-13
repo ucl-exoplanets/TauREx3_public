@@ -51,7 +51,23 @@ class ParameterParser(Logger):
                 CIACache().set_cia_path(config['Global']['cia_path'])
             except KeyError:
                 self.warning('No cia path set, cia cannot be used in model')
+            
+            try:
+                OpacityCache().set_memory_mode(config['Global']['xsec_in_memory'])
+            except KeyError:
+                self.warning('Xsecs will be loaded in memory')
+            
+            try:
+                OpacityCache().enable_radis(config['Global']['use_radis'])
+            except KeyError:
+                self.warning('Radis is disabled')
 
+            try:
+                wn_start,wn_end,wn_points = config['Global']['radis_grid']
+
+                OpacityCache().set_radis_wavenumber(wn_start,wn_end,wn_points)
+            except KeyError:
+                self.warning('Radis default grid will be used')
 
 
     def read(self,filename):

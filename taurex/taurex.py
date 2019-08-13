@@ -44,6 +44,8 @@ def main():
     #Get the spectrum
     observed,bindown_wngrid = pp.generate_spectrum()
     
+    
+
     #logging.info('Using grid {}'.format(bindown_wngrid))
     #logging.info('Observed grid is {}'.format(observed.wavenumberGrid))
     #Get the native grid
@@ -155,7 +157,7 @@ def main():
             import matplotlib.pyplot as plt
             fig= plt.figure()
             ax = fig.add_subplot(1,1,1)
-            ax.set_xscale('log')
+            #ax.set_xscale('log')
             ax.set_xlabel(r'Wavelength $(\mu m)$')
             ax.set_ylabel(r'$(R_p/R_s)^2$')
             is_lightcurve = False
