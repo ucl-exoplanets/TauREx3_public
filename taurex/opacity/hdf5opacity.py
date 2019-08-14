@@ -59,6 +59,9 @@ class HDF5Opacity(InterpolatingOpacity):
 
         self._resolution = np.average(np.diff(self._wavenumber_grid))
         self._molecule_name = self._spec_dict['mol_name'][()]
+        
+        if isinstance(self._molecule_name,np.ndarray):
+            self._molecule_name = self._molecule_name[0]
 
         self._min_pressure = self._pressure_grid.min()
         self._max_pressure = self._pressure_grid.max()
