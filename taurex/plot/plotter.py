@@ -11,7 +11,7 @@ class Plotter(object):
     modelAxis = {
         'TransmissionModel' : '$(R_p/R_*)^2$',
         'EmissionModel' : '$F_p/F_*$',
-        'DirectImage' : '$F_p$'
+        'DirectImageModel' : '$F_p$'
 
     }
 
