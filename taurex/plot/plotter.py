@@ -25,7 +25,7 @@ class Plotter(object):
         self.out_folder=out_folder
 
     @property
-    def num_solutions(self,fd_position='Output')):
+    def num_solutions(self,fd_position='Output'):
         return len([(int(k[8:]),v) for k,v in self.fd[fd_position]['Solutions'].items() if 'solution' in k])
 
     def solution_iter(self,fd_position='Output'):
