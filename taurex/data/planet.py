@@ -120,3 +120,14 @@ class Earth(Planet):
     """An implementation for earth"""
     def __init__(self):
         Planet.__init__(self,5.972e24,6371000)
+
+
+class Mars(Planet):
+
+    def __init__(self):
+        import astropy.units as u
+
+        radius = (0.532*u.R_earth).to(u.jupiterRad)
+        mass = (0.107*u.M_earth).to(u.jupiterMass)
+        distance=1.524
+        Planet.__init__(mass=mass.value,radius=radis.value,distance=distance)
