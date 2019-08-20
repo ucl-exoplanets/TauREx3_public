@@ -118,8 +118,9 @@ class Plotter(object):
                                   np.power(10, (np.log10(prof) - (
                                               np.log10(prof + prof_std) - np.log10(prof)))),
                                   color=self.cmap(inactive_idx / num_moles), alpha=0.5)
-        plt.gca().invert_yaxis()
+
         plt.yscale('log')
+        plt.gca().invert_yaxis()
         plt.xscale('log')
         plt.xlim(1e-12, 3)
         plt.xlabel('Mixing ratio')
@@ -147,13 +148,14 @@ class Plotter(object):
                 label = 'Fitted profile'
             temp_prof = solution_val['Profiles']['temp_profile'][:]
             temp_prof_std = solution_val['Profiles']['temp_profile_std'][:]
-            pres_prof = solution_val['Profiles']['pressure_profile'][:]/1e-5
+            pres_prof = solution_val['Profiles']['pressure_profile'][:]/1e5
             plt.plot(temp_prof, pres_prof, color=self.cmap(float(solution_idx)/self.num_solutions), label=label)
             plt.fill_betweenx(pres_prof,  temp_prof-temp_prof_std,  temp_prof+temp_prof_std, color=self.cmap(float(solution_idx)/self.num_solutions), alpha=0.5)
 
 
-        plt.gca().invert_yaxis()
+
         plt.yscale('log')
+        plt.gca().invert_yaxis()
         plt.xlabel('Temperature (K)')
         plt.ylabel('Pressure (bar)')
         plt.tight_layout()
