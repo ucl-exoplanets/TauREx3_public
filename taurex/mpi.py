@@ -56,3 +56,22 @@ def get_rank():
     rank = comm.Get_rank()
 
     return rank
+
+
+def barrier():
+    """Gets rank or returns 0 if mpi is not installed
+    
+    Returns
+    -------
+    int:
+        Rank of process or 0 if MPI is not installed
+    
+    """
+
+    try:
+        from mpi4py import MPI
+    except ImportError:
+        return
+
+    comm = MPI.COMM_WORLD
+    comm.Barrier()
