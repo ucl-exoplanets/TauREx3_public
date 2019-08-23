@@ -2,7 +2,7 @@ from .optimizer import Optimizer
 import pymultinest
 import numpy as np
 import os
-    from taurex.mpi import get_rank,barrier
+from taurex.mpi import get_rank,barrier
 from taurex.util.util import read_table,read_error_line,read_error_into_dict,quantile_corner,recursively_save_dict_contents_to_output
 import random
 from taurex.util.util import weighted_avg_and_std
