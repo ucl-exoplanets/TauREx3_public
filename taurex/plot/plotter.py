@@ -24,6 +24,9 @@ class Plotter(object):
             self.prefix = "output" 
         self.out_folder=out_folder
 
+        if not os.path.exists(self.out_folder):
+            os.makedirs(self.out_folder)
+
     @property
     def num_solutions(self,fd_position='Output'):
         return len([(int(k[8:]),v) for k,v in self.fd[fd_position]['Solutions'].items() if 'solution' in k])
