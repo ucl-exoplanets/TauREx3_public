@@ -342,6 +342,10 @@ class Plotter(object):
 
         plt.close('all')
 
+
+
+
+
     def full_contrib_plot(self,solution_val,wlgrid):
         for contrib_name,contrib_dict in solution_val['Spectra']['Contributions'].items():
 
@@ -370,6 +374,71 @@ class Plotter(object):
             else:
                 
                 plt.plot(wlgrid, contrib_dict['binned'], label=first_name)                
+
+
+
+    def plot_tau(self):
+        N = self.num_solutions
+        for solution_idx, solution_val in self.solution_iter():
+
+            contribution = solution_val['Spectra']['native_tau']
+            #contribution = self.pickle_file['solutions'][solution_idx]['contrib_func']
+
+            pressure = solution_val['Profiles']['pressure_profile'][:]
+            wavelength = solution_val['Spectra']['native_wlgrid'][:]
+
+
+            grid = plt.GridSpec(1, 4, wspace=0.4, hspace=0.3)
+            fig = plt.figure('Contribution function')
+            ax1 = plt.subplot(grid[0, :3])
+            plt.imshow(contribution, aspect='auto')
+
+            ### mapping of the pressure array onto the ticks:
+            y_labels = np.array([pow(10, 6), pow(10, 4), pow(10, 2), pow(10, 0), pow(10, -2), pow(10, -4)])
+            y_ticks = np.zeros(len(y_labels))
+            for i in range(len(y_ticks)):
+                y_ticks[i] = (np.abs(pressure - y_labels[i])).argmin()  ## To find the corresponding index
+            plt.yticks(y_ticks, ['$10^{%.f}$' % y for y in np.log10(y_labels) - 5])
+
+            ### mapping of the wavelength array onto the ticks:
+            x_label0 = np.ceil(np.min(wavelength) * 10) / 10.
+            x_label5 = np.round(np.max(wavelength) * 10) / 10.
+            x_label1 = np.round(
+                pow(10, (np.log10(x_label5) - np.log10(x_label0)) * 1 / 5. + np.log10(x_label0)) * 10) / 10.0
+            x_label2 = np.round(
+                pow(10, (np.log10(x_label5) - np.log10(x_label0)) * 2 / 5. + np.log10(x_label0)) * 10) / 10.0
+            x_label3 = np.round(
+                pow(10, (np.log10(x_label5) - np.log10(x_label0)) * 3 / 5. + np.log10(x_label0)) * 10) / 10.
+            x_label4 = np.round(
+                pow(10, (np.log10(x_label5) - np.log10(x_label0)) * 4 / 5. + np.log10(x_label0)) * 10) / 10.
+
+            x_labels = np.array([x_label0, x_label1, x_label2, x_label3, x_label4, x_label5])
+            x_ticks = np.zeros(len(x_labels))
+            for i in range(len(x_ticks)):
+                x_ticks[i] = (np.abs(wavelength - x_labels[i])).argmin()  ## To find the corresponding index
+            plt.xticks(x_ticks, x_labels)
+            plt.gca().invert_yaxis()
+            plt.gca().invert_xaxis()
+            plt.xlabel("Wavelength ($\mu m$)")
+            plt.ylabel("Pressure (Bar)")
+
+            ax2 = plt.subplot(grid[0, 3])
+
+            contribution_collapsed = np.average(contribution, axis=1)
+            # contribution_collapsed = np.amax(contribution_hr, axis=1) ## good for emission
+            contribution_sum = np.zeros(len(contribution_collapsed))
+            for i in range(len(contribution_collapsed) - 1):
+                contribution_sum[i + 1] = contribution_sum[i] + contribution_collapsed[i + 1]
+            plt.plot(contribution_collapsed, pressure * pow(10, -5))
+
+            plt.yscale('log')
+            plt.gca().invert_yaxis()
+            plt.gca().yaxis.tick_right()
+            plt.xlabel("Contribution")
+
+            plt.savefig(os.path.join(self.out_folder, '%s_tau_sol%i.pdf' % (self.prefix,solution_idx)))
+
+            plt.close()
 
 
     @property
@@ -442,6 +511,7 @@ def main():
     plot_contrib = args.contrib or args.all
     plot_fullcontrib = args.full_contrib or args.all
     plot_posteriors = args.posterior or args.all
+    plot_tau = args.all
 
     plot=Plotter(args.input_file,cmap=args.cmap,
                     title=args.title,prefix=args.prefix,out_folder=args.output_dir)
@@ -465,6 +535,10 @@ def main():
     if plot_contrib:
         if plot.is_retrieval:
             plot.plot_fitted_contrib(full=plot_fullcontrib)
+
+    if plot_tau:
+        if plot.is_retrieval:
+            plot.plot_tau()
     
 if __name__ == "__main__":
     main()
