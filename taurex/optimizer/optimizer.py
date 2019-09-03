@@ -469,7 +469,7 @@ class Optimizer(Logger):
         if mpi.get_rank() == 0:
             sample_list = list(self.sample_parameters(solution))
         
-        mpi.broadcast(sample_list)
+        sample_list = mpi.broadcast(sample_list)
 
         self.info('We are sampling %s points',len(sample_list))
 
