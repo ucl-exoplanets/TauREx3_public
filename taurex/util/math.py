@@ -101,14 +101,14 @@ class OnlineVariance(object):
     @property
     def variance(self):
         if self.count < 2:
-            return float('nan')
+            return np.nan
         else:
             return self.M2/self.wcount
     
     @property
     def sampleVariance(self):
         if self.count < 2:
-            return float('nan')
+            return np.nan
         else:
             return self.M2/(self.wcount-1)
 
@@ -126,7 +126,7 @@ class OnlineVariance(object):
         from taurex import mpi
 
         variance = self.variance
-        if variance == float('nan'):
+        if np.isnan(variance):
             variance = 0
         
 
