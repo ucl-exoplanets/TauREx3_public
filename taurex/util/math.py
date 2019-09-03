@@ -119,6 +119,9 @@ class OnlineVariance(object):
 
         counts = np.array(counts) * size/np.sum(counts)
 
+        if hasattr(average,'__len__'):
+            average = average[:,None]
+
         squares = counts*variances + counts*(average - averages)**2
 
         return average,np.sum(squares,axis=0)/size
