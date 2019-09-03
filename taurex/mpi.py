@@ -20,7 +20,19 @@ def nprocs():
     
     return comm.Get_size()   
 
+def allgather(value):
+    import numpy as np
+    try:
+        from mpi4py import MPI
+    except ImportError:
+        return value 
 
+    comm = MPI.COMM_WORLD
+    data = value
+    data = comm.allgather(data)
+
+    return data
+    
 def broadcast(array,rank=0):
     import numpy as np
     try:
