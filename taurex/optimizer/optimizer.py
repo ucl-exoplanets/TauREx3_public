@@ -471,6 +471,8 @@ class Optimizer(Logger):
         
         sample_list = mpi.broadcast(sample_list)
 
+        self.error('We all got %s',sample_list)
+
         self.info('We are sampling %s points',len(sample_list))
 
         rank = mpi.get_rank()
