@@ -114,14 +114,14 @@ class OnlineVariance(object):
 
 
     def combine_variance(self,averages, variances, counts):
-        average = np.average(averages, weights=counts)
+        average = np.average(averages, weights=counts,axis=0)
         size = np.sum(counts)
 
         counts = np.array(counts) * size/np.sum(counts)
 
         squares = counts*variances + counts*(average - averages)**2
 
-        return average,np.sum(squares)/size
+        return average,np.sum(squares,axis=0)/size
     def parallelVariance(self):
         from taurex import mpi
 
