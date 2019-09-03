@@ -94,7 +94,7 @@ class OnlineVariance(object):
             self.M2 = value*0.0
         
 
-        mean_old = self.mean[:]
+        mean_old = self.mean
         self.mean = mean_old + (weight / self.wcount) * (value - mean_old)
         self.M2 += weight * (value - mean_old) * (value - self.mean)
 
@@ -111,3 +111,26 @@ class OnlineVariance(object):
             return float('nan')
         else:
             return self.M2/(self.wcount-1)
+
+
+    def combine_variance(self,averages, variances, counts):
+        average = np.average(averages, weights=counts)
+        size = np.sum(counts)
+
+        counts = np.array(counts) * size/np.sum(counts)
+
+        squares = counts*variances + counts*(average - averages)**2
+
+        return average,np.sum(squares)/size
+    def parallelVariance(self):
+        from taurex import mpi
+
+        variances = mpi.allgather(self.variance)
+        averages = mpi.allgather(self.mean)
+        counts = mpi.allgather(self.wcount)
+
+        finalvariance = self.combine_variance(averages,variances,counts)
+        return finalvariance[-1]
+
+        
+        
