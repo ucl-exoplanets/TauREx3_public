@@ -459,7 +459,7 @@ class Optimizer(Logger):
         tp_profiles = OnlineVariance()
         active_gases = OnlineVariance()
         inactive_gases = OnlineVariance()
-        tau_profile = OnlineVariance()
+        #tau_profile = OnlineVariance()
         binned_spectrum = OnlineVariance()
         native_spectrum = OnlineVariance()
 
@@ -494,7 +494,7 @@ class Optimizer(Logger):
             count +=1
             weights.append(weight)
             binned,native,tau,_ = self._model.model(wngrid=binning,cutoff_grid=False)
-            tau_profile.update(tau,weight=weight)
+            #tau_profile.update(tau,weight=weight)
             tp_profiles.update(self._model.temperatureProfile,weight=weight)
             active_gases.update(self._model.chemistry.activeGasMixProfile,weight=weight)
             inactive_gases.update(self._model.chemistry.inactiveGasMixProfile,weight=weight)
@@ -507,7 +507,7 @@ class Optimizer(Logger):
             active_std = np.sqrt(active_gases.parallelVariance())
             inactive_std = np.sqrt(inactive_gases.parallelVariance())
 
-            tau_std = np.sqrt(tau_profile.parallelVariance())
+            #tau_std = np.sqrt(tau_profile.parallelVariance())
 
             binned_std = np.sqrt(binned_spectrum.parallelVariance())
             native_std = np.sqrt(native_spectrum.parallelVariance())
@@ -517,11 +517,11 @@ class Optimizer(Logger):
             active_std = np.zeros_like(active_gases)
             inactive_std = np.zeros_like(inactive_gases)
 
-            tau_std = np.zeros_like(tau_profile)
+           # tau_std = np.zeros_like(tau_profile)
 
             binned_std = np.zeros_like(binned_spectrum)
             native_std = np.zeros_like(native_spectrum)
-
+        tau_std = None
         return tp_std,active_std,inactive_std,tau_std,binned_std,native_std
 
     def generate_solution(self):
