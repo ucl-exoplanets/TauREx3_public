@@ -487,7 +487,7 @@ class Optimizer(Logger):
             self.update_model(parameters)
 
             if rank ==0 and count % 10 ==0 and count >0:
-                self.error('Progress {}%'.format(count/(len(sample_list)/size)))
+                self.error('Progress {}%'.format(count*100.0/(len(sample_list)/size)))
 
             count +=1
             weights.append(weight)
