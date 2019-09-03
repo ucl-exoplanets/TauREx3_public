@@ -130,7 +130,10 @@ class OnlineVariance(object):
 
         averages = mpi.allgather(self.mean)
         counts = mpi.allgather(self.wcount)
+        
+        filtered_list = [(v,a,c) for v,a,c in zip(variances,averages,counts) if v != float('nan')]
 
+        variances,averages,counts = zip(*filtered_list)
 
         finalvariance = self.combine_variance(averages,variances,counts)
         return finalvariance[-1]
