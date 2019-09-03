@@ -473,7 +473,9 @@ class Optimizer(Logger):
 
         self.debug('We all got %s',sample_list)
 
-        self.info('We are sampling %s points',len(sample_list))
+        self.info('------------Profile generation step------------------')
+
+        self.info('We are sampling %s points for the profiles',len(sample_list))
 
         rank = mpi.get_rank()
         size = mpi.nprocs()
@@ -487,7 +489,7 @@ class Optimizer(Logger):
             self.update_model(parameters)
 
             if rank ==0 and count % 10 ==0 and count >0:
-                self.error('Progress {}%'.format(count*100.0/(len(sample_list)/size)))
+                self.error('Progress {}%'.format(count*100.0        /(len(sample_list)/size)))
 
             count +=1
             weights.append(weight)
