@@ -115,14 +115,16 @@ class OnlineVariance(object):
 
     def combine_variance(self,averages, variances, counts):
         average = np.average(averages, weights=counts,axis=0)
-        size = np.sum(counts)
 
+        size = np.sum(counts)
+        
         counts = np.array(counts) * size/np.sum(counts)
 
         if hasattr(average,'__len__'):
-            average = average[:,None]
-
-        squares = counts*variances + counts*(average - averages)**2
+            average = average[None,:]
+            counts = counts[:,None]
+        squares = counts*variances
+        squares += counts*(average - averages)**2
 
         return average,np.sum(squares,axis=0)/size
     def parallelVariance(self):
@@ -136,13 +138,15 @@ class OnlineVariance(object):
         mean = self.mean
         if mean is None:
             mean = 0.0
-
+	
 
         variances = mpi.allgather(variance)
 
 
         averages = mpi.allgather(mean)
         counts = mpi.allgather(self.wcount)
+        #all_data = [(v,m,c) for v,m,c in zip(variances,averages,counts) if not v is 0 and not averages is 0.0 and not counts is 0.0]        
+        
 
         finalvariance = self.combine_variance(averages,variances,counts)
         return finalvariance[-1]
