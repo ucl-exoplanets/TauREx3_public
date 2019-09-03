@@ -125,15 +125,21 @@ class OnlineVariance(object):
     def parallelVariance(self):
         from taurex import mpi
 
-        variances = mpi.allgather(self.variance)
-
-
-        averages = mpi.allgather(self.mean)
-        counts = mpi.allgather(self.wcount)
+        variance = self.variance
+        if variance == float('nan'):
+            variance = 0
         
-        filtered_list = [(v,a,c) for v,a,c in zip(variances,averages,counts) if v != float('nan')]
 
-        variances,averages,counts = zip(*filtered_list)
+        mean = self.mean
+        if mean is None:
+            mean = 0.0
+
+
+        variances = mpi.allgather(variance)
+
+
+        averages = mpi.allgather(mean)
+        counts = mpi.allgather(self.wcount)
 
         finalvariance = self.combine_variance(averages,variances,counts)
         return finalvariance[-1]
