@@ -50,7 +50,8 @@ def broadcast(array,rank=0):
             data = np.zeros_like(array)
         comm.Bcast(data, root=rank)
     else:
-        data = comm.bcast(data,root=rank)
+
+        data = comm.bcast(array,root=rank)
     
     return data
 
