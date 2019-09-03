@@ -7,6 +7,8 @@ root_logger = logging.getLogger('taurex')
 root_logger.propagate = False
 """Root logger for taurex"""
 
+
+
 class TauRexHandler(logging.StreamHandler):
     """
     Logging Handler for Taurex 3. Prevents other

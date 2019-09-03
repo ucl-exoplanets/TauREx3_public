@@ -1,4 +1,4 @@
-from taurex.log import Logger
+from taurex.log import Logger,disableLogging,enableLogging
 import numpy as np
 from taurex.output.writeable import Writeable
 import math
@@ -471,11 +471,17 @@ class Optimizer(Logger):
         
         mpi.broadcast(sample_list)
 
+        self.info('We are sampling %s points',len(sample_list))
+
         rank = mpi.get_rank()
         size = mpi.nprocs()
 
+
+        self.info('I will only iterate through partitioned %s points (the rest is in parallel)',len(sample_list)//size)
+        disableLogging()
         for parameters,weight in sample_list[rank::size]: #sample likelihood space and get their parameters
             self.update_model(parameters)
+
 
             weights.append(weight)
             binned,native,tau,_ = self._model.model(wngrid=binning,cutoff_grid=False)
@@ -485,7 +491,7 @@ class Optimizer(Logger):
             inactive_gases.update(self._model.chemistry.inactiveGasMixProfile,weight=weight)
             binned_spectrum.update(binned,weight=weight)
             native_spectrum.update(native,weight=weight)
-
+        enableLogging()
         weights = np.array(weights)
         if np.any(weights):
             tp_std = np.sqrt(tp_profiles.parallelVariance())

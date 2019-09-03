@@ -126,7 +126,7 @@ class OnlineVariance(object):
         from taurex import mpi
 
         variance = self.variance
-        if np.isnan(variance):
+        if variance is np.nan:
             variance = 0
         
 
