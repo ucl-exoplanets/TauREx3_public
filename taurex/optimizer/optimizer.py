@@ -452,7 +452,7 @@ class Optimizer(Logger):
 
     def generate_profiles(self,solution,binning):
         from taurex.util.math import OnlineVariance
-
+        from taurex import mpi
         """Generates sigma plots for profiles"""
         from taurex.util.util import weighted_avg_and_std
         weights = []
@@ -463,7 +463,18 @@ class Optimizer(Logger):
         binned_spectrum = OnlineVariance()
         native_spectrum = OnlineVariance()
 
-        for parameters,weight in self.sample_parameters(solution): #sample likelihood space and get their parameters
+
+
+        sample_list = None
+        if mpi.get_rank() == 0:
+            sample_list = list(self.sample_parameters(solution))
+        
+        mpi.broadcast(sample_list)
+
+        rank = mpi.get_rank()
+        size = mpi.nprocs()
+
+        for parameters,weight in sample_list[rank::size]: #sample likelihood space and get their parameters
             self.update_model(parameters)
 
             weights.append(weight)
@@ -477,14 +488,14 @@ class Optimizer(Logger):
 
         weights = np.array(weights)
         if np.any(weights):
-            tp_std = np.sqrt(tp_profiles.variance)
-            active_std = np.sqrt(active_gases.variance)
-            inactive_std = np.sqrt(inactive_gases.variance)
+            tp_std = np.sqrt(tp_profiles.parallelVariance())
+            active_std = np.sqrt(active_gases.parallelVariance())
+            inactive_std = np.sqrt(inactive_gases.parallelVariance())
 
-            tau_std = np.sqrt(tau_profile.variance)
+            tau_std = np.sqrt(tau_profile.parallelVariance())
 
-            binned_std = np.sqrt(binned_spectrum.variance)
-            native_std = np.sqrt(native_spectrum.variance)
+            binned_std = np.sqrt(binned_spectrum.parallelVariance())
+            native_std = np.sqrt(native_spectrum.parallelVariance())
         else:
             self.warning('WEIGHTS ARE ALL ZERO, SETTING PROFILES STD TO ZERO')
             tp_std = np.zeros_like(tp_profiles)

@@ -39,14 +39,19 @@ def broadcast(array,rank=0):
         from mpi4py import MPI
     except ImportError:
         return array
-
-    data = None
-    if get_rank() == rank:
-        data = np.copy(array)
-    else:
-        data = np.zeros_like(array)
     comm = MPI.COMM_WORLD
-    comm.Bcast(data, root=rank)
+    if isinstance(array,np.ndarray):
+            
+
+        data = None
+        if get_rank() == rank:
+            data = np.copy(array)
+        else:
+            data = np.zeros_like(array)
+        comm.Bcast(data, root=rank)
+    else:
+        data = comm.bcast(data,root=rank)
+    
     return data
 
 def get_rank():
