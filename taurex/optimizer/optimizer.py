@@ -481,10 +481,15 @@ class Optimizer(Logger):
 
         self.info('I will only iterate through partitioned %s points (the rest is in parallel)',len(sample_list)//size)
         disableLogging()
+        count= 0
+
         for parameters,weight in sample_list[rank::size]: #sample likelihood space and get their parameters
             self.update_model(parameters)
 
+            if rank ==0 and count % 10 ==0 and count >0:
+                print('Progress {}%'.format(count/(len(sample_list)/size)))
 
+            count +=1
             weights.append(weight)
             binned,native,tau,_ = self._model.model(wngrid=binning,cutoff_grid=False)
             tau_profile.update(tau,weight=weight)
