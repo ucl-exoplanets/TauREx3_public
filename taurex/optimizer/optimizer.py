@@ -1,4 +1,4 @@
-from taurex.log import Logger
+from taurex.log import Logger,disableLogging,enableLogging
 import numpy as np
 from taurex.output.writeable import Writeable
 import math
@@ -452,50 +452,76 @@ class Optimizer(Logger):
 
     def generate_profiles(self,solution,binning):
         from taurex.util.math import OnlineVariance
-
+        from taurex import mpi
         """Generates sigma plots for profiles"""
         from taurex.util.util import weighted_avg_and_std
         weights = []
         tp_profiles = OnlineVariance()
         active_gases = OnlineVariance()
         inactive_gases = OnlineVariance()
-        tau_profile = OnlineVariance()
+        #tau_profile = OnlineVariance()
         binned_spectrum = OnlineVariance()
         native_spectrum = OnlineVariance()
 
-        for parameters,weight in self.sample_parameters(solution): #sample likelihood space and get their parameters
+
+
+        sample_list = None
+        if mpi.get_rank() == 0:
+            sample_list = list(self.sample_parameters(solution))
+        
+        sample_list = mpi.broadcast(sample_list)
+
+        self.debug('We all got %s',sample_list)
+
+        self.info('------------Profile generation step------------------')
+
+        self.info('We are sampling %s points for the profiles',len(sample_list))
+
+        rank = mpi.get_rank()
+        size = mpi.nprocs()
+
+
+        self.info('I will only iterate through partitioned %s points (the rest is in parallel)',len(sample_list)//size)
+        disableLogging()
+        count= 0
+
+        for parameters,weight in sample_list[rank::size]: #sample likelihood space and get their parameters
             self.update_model(parameters)
 
+            if rank ==0 and count % 10 ==0 and count >0:
+                self.error('Progress {}%'.format(count*100.0        /(len(sample_list)/size)))
+
+            count +=1
             weights.append(weight)
             binned,native,tau,_ = self._model.model(wngrid=binning,cutoff_grid=False)
-            tau_profile.update(tau,weight=weight)
+            #tau_profile.update(tau,weight=weight)
             tp_profiles.update(self._model.temperatureProfile,weight=weight)
             active_gases.update(self._model.chemistry.activeGasMixProfile,weight=weight)
             inactive_gases.update(self._model.chemistry.inactiveGasMixProfile,weight=weight)
             binned_spectrum.update(binned,weight=weight)
             native_spectrum.update(native,weight=weight)
-
+        enableLogging()
         weights = np.array(weights)
         if np.any(weights):
-            tp_std = np.sqrt(tp_profiles.variance)
-            active_std = np.sqrt(active_gases.variance)
-            inactive_std = np.sqrt(inactive_gases.variance)
+            tp_std = np.sqrt(tp_profiles.parallelVariance())
+            active_std = np.sqrt(active_gases.parallelVariance())
+            inactive_std = np.sqrt(inactive_gases.parallelVariance())
 
-            tau_std = np.sqrt(tau_profile.variance)
+            #tau_std = np.sqrt(tau_profile.parallelVariance())
 
-            binned_std = np.sqrt(binned_spectrum.variance)
-            native_std = np.sqrt(native_spectrum.variance)
+            binned_std = np.sqrt(binned_spectrum.parallelVariance())
+            native_std = np.sqrt(native_spectrum.parallelVariance())
         else:
             self.warning('WEIGHTS ARE ALL ZERO, SETTING PROFILES STD TO ZERO')
             tp_std = np.zeros_like(tp_profiles)
             active_std = np.zeros_like(active_gases)
             inactive_std = np.zeros_like(inactive_gases)
 
-            tau_std = np.zeros_like(tau_profile)
+           # tau_std = np.zeros_like(tau_profile)
 
             binned_std = np.zeros_like(binned_spectrum)
             native_std = np.zeros_like(native_spectrum)
-
+        tau_std = None
         return tp_std,active_std,inactive_std,tau_std,binned_std,native_std
 
     def generate_solution(self):

@@ -94,20 +94,64 @@ class OnlineVariance(object):
             self.M2 = value*0.0
         
 
-        mean_old = self.mean[:]
+        mean_old = self.mean
         self.mean = mean_old + (weight / self.wcount) * (value - mean_old)
         self.M2 += weight * (value - mean_old) * (value - self.mean)
 
     @property
     def variance(self):
         if self.count < 2:
-            return float('nan')
+            return np.nan
         else:
             return self.M2/self.wcount
     
     @property
     def sampleVariance(self):
         if self.count < 2:
-            return float('nan')
+            return np.nan
         else:
             return self.M2/(self.wcount-1)
+
+
+    def combine_variance(self,averages, variances, counts):
+        average = np.average(averages, weights=counts,axis=0)
+
+        size = np.sum(counts)
+        
+        counts = np.array(counts) * size/np.sum(counts)
+        if hasattr(average,'__len__'):
+            average = average[None,...]
+	    #for x in range(1,len(variances.shape
+            for x in range(1,len(average.shape)):
+                counts = counts[:,None]
+        
+        squares = counts*variances
+        squares += counts*(average - averages)**2
+
+        return average,np.sum(squares,axis=0)/size
+    def parallelVariance(self):
+        from taurex import mpi
+
+        variance = self.variance
+        if variance is np.nan:
+            variance = 0
+        
+
+        mean = self.mean
+        if mean is None:
+            mean = 0.0
+	
+
+        variances = mpi.allgather(variance)
+
+
+        averages = mpi.allgather(mean)
+        counts = mpi.allgather(self.wcount)
+        #all_data = [(v,m,c) for v,m,c in zip(variances,averages,counts) if not v is 0 and not averages is 0.0 and not counts is 0.0]        
+        
+
+        finalvariance = self.combine_variance(averages,variances,counts)
+        return finalvariance[-1]
+
+        
+        
