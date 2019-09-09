@@ -43,3 +43,4 @@ class SimpleBinnerTest(unittest.TestCase):
         result = sb.bindown(wngrid, data)
 
         self.assertEqual(bingrid.shape[-1], result.shape[-1])
+        self.assertEqual(data.shape[0], result.shape[0])
