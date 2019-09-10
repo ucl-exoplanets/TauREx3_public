@@ -434,10 +434,25 @@ def weighted_avg_and_std(values, weights, axis=None):
     return (average, np.sqrt(variance))
 
 
-def random_int_iter(total,fraction):
+def random_int_iter(total, fraction):
     import random
     n_points = int(total*fraction)
 
-    samples = random.sample(range(total),n_points)
+    samples = random.sample(range(total), n_points)
     for x in samples:
         yield x
+
+
+def compute_bin_edges(wngrid):
+    import numpy as np
+    bin_edges = []
+    wl_grid = wngrid
+
+    bin_edges.append(wl_grid[0]-(wl_grid[1]-wl_grid[0])/2)
+    for i in range(wl_grid.shape[0]-1):
+        bin_edges.append(wl_grid[i]+(wl_grid[i+1]-wl_grid[i])/2.0)
+    bin_edges.append((wl_grid[-1]-wl_grid[-2])/2.0 + wl_grid[-1])
+    out_bin_edges = np.array(bin_edges)
+    out_bin_widths = np.abs(np.diff(out_bin_edges))
+
+    return out_bin_edges,out_bin_widths

@@ -296,7 +296,7 @@ class SimpleForwardModel(ForwardModel):
             
 
         self.contribution_list = full_contrib_list
-        return all_contrib_dict
+        return native_grid,all_contrib_dict
 
     def model_full_contrib(self,wngrid=None,cutoff_grid=True):
         """Like model_contributions except all components for each contribution are modelled"""
@@ -304,8 +304,8 @@ class SimpleForwardModel(ForwardModel):
 
         native_grid = self.nativeWavenumberGrid
         if wngrid is not None and cutoff_grid:
-            wn_min = wngrid.min()
-            wn_max = wngrid.max()
+            wn_min = wngrid.min()*0.8
+            wn_max = wngrid.max()*1.2
             native_filter = (native_grid >= wn_min) & (native_grid <= wn_max)
             native_grid = native_grid[native_filter]
 

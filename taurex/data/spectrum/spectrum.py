@@ -133,6 +133,10 @@ class BaseSpectrum(Logger,Writeable):
         """
         raise NotImplementedError
     
+    
+
+
+
     def write(self,output):
         output.write_array('wlgrid',self.wavelengthGrid)
         output.write_array('spectrum',self.spectrum)

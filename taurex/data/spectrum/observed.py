@@ -103,7 +103,7 @@ class ObservedSpectrum(BaseSpectrum):
         Performs the calculation of bin edges when none are present
         """
         bin_edges = []
-        wl_grid = self.wavelengthGrid
+        wl_grid = self.wavenumberGrid
 
         bin_edges.append(wl_grid[0]-(wl_grid[1]-wl_grid[0])/2)
         for i in range(wl_grid.shape[0]-1):
