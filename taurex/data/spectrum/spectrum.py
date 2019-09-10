@@ -134,6 +134,9 @@ class BaseSpectrum(Logger,Writeable):
         raise NotImplementedError
     
     
+    @property
+    def wnBinEdges(self):
+        return 1.0/self.binEdges
 
 
 

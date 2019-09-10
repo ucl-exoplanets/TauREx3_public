@@ -7,32 +7,33 @@ class FluxBinner(Binner):
 
     def __init__(self, wngrid, wngrid_width=None):
         super().__init__()
+        print('WHATS UP')
         self._wngrid = wngrid
         self._wngrid_width = wngrid_width
 
         if self._wngrid_width is None:
             self._wngrid_width = compute_bin_edges(self._wngrid)[-1]
 
-        if not hasattr(self._wngrid_width,'__len__'):
+        if not hasattr(self._wngrid_width, '__len__'):
             self._wngrid_width = np.ones_like(self._wngrid)*self._wngrid_width
 
         if self._wngrid_width.shape != self._wngrid.shape:
-            raise ValueError('Wavenumber width should be signel value or same shape as wavenumber grid')
-
+            raise ValueError('Wavenumber width should be signel value or '
+                             'same shape as wavenumber grid')
 
         self._wngrid = self._wngrid[self._wngrid.argsort()]
         self._wngrid_width = self._wngrid_width[self._wngrid.argsort()]
 
     def bindown(self, wngrid, spectrum, grid_width=None, error=None):
         sorted_input = wngrid.argsort()
-        spectrum = spectrum[...,sorted_input]
+        spectrum = spectrum[..., sorted_input]
         if error is not None:
-            error = error[...,sorted_input]
+            error = error[..., sorted_input]
 
-        bin_spectrum = np.zeros(spectrum[...,0].shape + self._wngrid.shape)
+        bin_spectrum = np.zeros(spectrum[..., 0].shape + self._wngrid.shape)
 
         if error is not None:
-            bin_error = np.zeros(spectrum[...,0].shape + self._wngrid.shape)
+            bin_error = np.zeros(spectrum[..., 0].shape + self._wngrid.shape)
         else:
             bin_error = None
 
@@ -68,68 +69,32 @@ class FluxBinner(Binner):
             sum_noise = 0
             sum_weight = 0
 
-            try:
-                while old_spect_max[save_start] <= wn_min:
-                    save_start += 1
-            except IndexError:
-                save_start = old_spect_max.shape[-1]-1
-            try:
-
-                while old_spect_min[save_stop+1] <= wn_max:
-                    save_stop += 1
-
-            except IndexError:
-                save_stop = old_spect_max.shape[-1]-1
+            save_start = np.searchsorted(old_spect_max, wn_min, side='right')
+            save_stop = np.searchsorted(old_spect_min[1:], wn_max, side='right')
+     
+            save_stop = min(save_stop, old_spect_min.shape[0]-1)
+            save_start = min(save_start, old_spect_min.shape[0]-1)
 
             if not wn_min <= old_spect_max[save_start] or not old_spect_min[save_stop] <= wn_max:
                 continue
-
+ 
             spect_min = old_spect_min[save_start:save_stop+1]
-            spect_max = old_spect_max[save_start:save_stop+1]
+            spect_max = old_spect_max[save_start:save_stop+1]           
 
-            weight = np.zeros_like(old_spect_min[save_start:save_stop+1])
 
-            weight[...] = 0.0
+            weight = (np.minimum(wn_max, spect_max) - np.maximum(spect_min, wn_min))/(wn_max-wn_min)
 
-            hw_min_lt_min = spect_min <= wn_min
-            hw_max_gt_min = spect_max >= wn_min
-
-            hw_max_gt_max = spect_max >= wn_max
-
-            hw_min_lt_max = spect_min <= wn_max
-
-            hw_not_min = ~hw_min_lt_min
-
-            branch_filt = hw_min_lt_min & hw_max_gt_min & hw_max_gt_max
-
-            weight[branch_filt] = wn_max - wn_min
-
-            branch_filt = hw_min_lt_min & hw_max_gt_min & ~hw_max_gt_max
-
-            weight[branch_filt] = spect_max[branch_filt] - wn_min
-
-            branch_filt = hw_not_min & hw_min_lt_max & hw_max_gt_max
-
-            weight[branch_filt] = wn_max - spect_min[branch_filt]
-
-            branch_filt = hw_not_min & hw_min_lt_max & ~hw_max_gt_max
-
-            weight[branch_filt] = spect_max[branch_filt] - spect_min[branch_filt]
-
-            weight /= (wn_max-wn_min)
-
-            #weight /= weight.sum()
             sum_weight = np.sum(weight)
 
-            sum_spectrum = np.sum(weight*old_spect_flux[...,save_start:save_stop+1],
-                                axis=-1)
+            sum_spectrum = np.sum(weight*old_spect_flux[..., save_start:save_stop+1],
+                                  axis=-1)
 
 
             if error is not None:
                 sum_noise = np.sum(weight * weight *
                                 old_spect_err[..., save_start:save_stop+1]**2,
                                 axis=0)
-                
+
 
                 sum_noise = np.sqrt(sum_noise / sum_weight/sum_weight)
 

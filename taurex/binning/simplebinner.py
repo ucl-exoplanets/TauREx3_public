@@ -15,4 +15,3 @@ class SimpleBinner(Binner):
 
             return self._wngrid, bindown(wngrid, spectrum, self._wngrid), None, self._wn_wdith
 
-    

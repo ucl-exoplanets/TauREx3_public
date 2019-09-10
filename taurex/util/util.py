@@ -445,14 +445,8 @@ def random_int_iter(total, fraction):
 
 def compute_bin_edges(wngrid):
     import numpy as np
-    bin_edges = []
-    wl_grid = wngrid
-
-    bin_edges.append(wl_grid[0]-(wl_grid[1]-wl_grid[0])/2)
-    for i in range(wl_grid.shape[0]-1):
-        bin_edges.append(wl_grid[i]+(wl_grid[i+1]-wl_grid[i])/2.0)
-    bin_edges.append((wl_grid[-1]-wl_grid[-2])/2.0 + wl_grid[-1])
-    out_bin_edges = np.array(bin_edges)
-    out_bin_widths = np.abs(np.diff(out_bin_edges))
-
-    return out_bin_edges,out_bin_widths
+    diff = np.diff(wngrid)/2
+    edges = np.concatenate([[wngrid[0]-(wngrid[1]-wngrid[0])/2], 
+                           wngrid[:-1]+diff, [(wngrid[-1]-wngrid[-2])/2 +
+                           wngrid[-1]]])
+    return edges, np.abs(np.diff(edges))

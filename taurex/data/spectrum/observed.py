@@ -87,11 +87,12 @@ class ObservedSpectrum(BaseSpectrum):
     @property
     def binEdges(self):
         """ Bin edges"""
-        return self._bin_edges
+        return 10000/self._bin_edges
     @property
     def binWidths(self):
         """bin widths"""
-        return self._bin_widths
+        return 10000/(self.wavelengthGrid-self._bin_widths/2) - 10000/(self.wavelengthGrid+self._bin_widths/2)
+
 
     @property
     def errorBar(self):
@@ -103,7 +104,7 @@ class ObservedSpectrum(BaseSpectrum):
         Performs the calculation of bin edges when none are present
         """
         bin_edges = []
-        wl_grid = self.wavenumberGrid
+        wl_grid = self.wavelengthGrid
 
         bin_edges.append(wl_grid[0]-(wl_grid[1]-wl_grid[0])/2)
         for i in range(wl_grid.shape[0]-1):
