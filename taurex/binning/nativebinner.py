@@ -1,8 +1,9 @@
-from taurex.log import Logger
+from taurex.binning import Binner
 from taurex import OutputSize
 
 
-class NativeBinner(Logger):
+class NativeBinner(Binner):
+
 
     def bindown(self, wngrid, spectrum, grid_width=None, error=None):
         return wngrid, spectrum, error, grid_width

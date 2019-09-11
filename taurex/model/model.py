@@ -8,13 +8,10 @@ class ForwardModel(Logger,Fittable,Writeable):
     """A base class for producing forward models"""
 
 
-    @property
-    def defaultBinner(self):
-        from taurex.binning import NativeBinner
-        return NativeBinner
 
 
-    def __init__(self,name):
+
+    def __init__(self, name):
         Logger.__init__(self,name)
         Fittable.__init__(self)
         self.opacity_dict = {}
@@ -32,6 +29,10 @@ class ForwardModel(Logger,Fittable,Writeable):
     def __setitem__(self,key,value):
         return self._fitting_parameters[key][3](value) 
 
+
+    def defaultBinner(self):
+        from taurex.binning import NativeBinner
+        return NativeBinner()
 
 
     def add_contribution(self,contrib):

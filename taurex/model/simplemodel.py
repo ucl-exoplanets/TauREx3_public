@@ -290,18 +290,21 @@ class SimpleForwardModel(ForwardModel):
 
     def model_full_contrib(self,wngrid=None,cutoff_grid=True):
         """Like model_contributions except all components for each contribution are modelled"""
-        self.initialize_profiles()
+
 
         native_grid = self.nativeWavenumberGrid
         if wngrid is not None and cutoff_grid:
             native_grid = clip_native_to_wngrid(native_grid,wngrid)
 
-
+        self.initialize_profiles()
         self._star.initialize(native_grid)
 
         result_dict = {}
 
         full_contrib_list = self.contribution_list
+        
+        self.debug('NATIVE GRID %s',native_grid.shape)
+
         self.info('Modelling each contribution.....')
         for contrib in full_contrib_list:
             self.contribution_list = [contrib]

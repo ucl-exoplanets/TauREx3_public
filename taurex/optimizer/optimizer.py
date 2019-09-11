@@ -389,10 +389,10 @@ class Optimizer(Logger):
         self.info('------Retrieval Parameters-----------')
         self.info('-------------------------------------')
         self.info('')
-        self.info('Dimensionality of fit:',len(fit_names))
+        self.info('Dimensionality of fit: %s',len(fit_names))
         self.info('')
         output = tabulate(zip(fit_names,fit_values,fit_min,fit_max), headers=['Param', 'Value','Bound-min', 'Bound-max'])
-        self.info(output)
+        self.info('\n%s\n\n',output)
         self.info('')
 
         disableLogging()
@@ -528,7 +528,7 @@ class Optimizer(Logger):
         return tp_std,active_std,inactive_std,tau_std,binned_std,native_std
 
     def generate_solution(self,output_size=OutputSize.heavy):
-        from taurex.util.output import generate_profile_dict,generate_spectra_dict
+        from taurex.util.output import generate_profile_dict,generate_spectra_dict,store_contributions
         """Generates a dictionar with all solutions and other useful parameters"""
         solution_dict = {}
         self.info('Generating spectra and profiles')
@@ -552,7 +552,7 @@ class Optimizer(Logger):
             sol_values['Spectra'] = self._binner.generate_spectrum_output(opt_result,output_size=output_size)
 
 
-            sol_values['Spectra']['Contributions'] = self.store_contributions(self._model,output_size=output_size-3)
+            sol_values['Spectra']['Contributions'] = store_contributions(self._binner,self._model,output_size=output_size-3)
 
 
             #Store profiles here
@@ -573,78 +573,6 @@ class Optimizer(Logger):
             solution_dict['solution{}'.format(solution)] = sol_values
         
         return solution_dict
-
-    def store_contributions(self,model,output_size=OutputSize.heavy):
-
-        native_grid,contribs = self._model.model_contrib(wngrid=self._observed.wavenumberGrid,cutoff_grid=False)
-        native_grid,contribs_component = self._model.model_full_contrib(wngrid=self._observed.wavenumberGrid,cutoff_grid=False)
-
-        contribution_dict = {}
-
-        for contrib_name,main_contribution in contribs.items():
-            
-            flux,tau,extras = main_contribution
-            
-            this_contrib_dict = self._binner.generate_spectrum_output((native_grid,flux,tau,extras),output_size=output_size)
-
-            try:
-                del this_contrib_dict['native_wngrid']
-                del this_contrib_dict['native_wnwidth']
-            except KeyError:
-                pass
-            
-            try:
-                del this_contrib_dict['native_wlgrid']
-                del this_contrib_dict['native_wlwidth']
-            except KeyError:
-                pass
-
-            try:
-                del this_contrib_dict['binned_wngrid']
-                del this_contrib_dict['binned_wnwidth']
-            except KeyError:
-                pass
-
-            try:
-                del this_contrib_dict['binned_wlgrid']
-                del this_contrib_dict['binned_wlwidth']
-            except KeyError:
-                pass
-
-            for name,flux,tau,extras in contribs_component[contrib_name]:
-                
-
-                component_contrib_dict = self._binner.generate_spectrum_output((native_grid,flux,tau,extras),output_size=output_size)
-
-                try:
-                    del component_contrib_dict['native_wngrid']
-                    del component_contrib_dict['native_wnwidth']
-                except KeyError:
-                    pass
-                
-                try:
-                    del component_contrib_dict['native_wlgrid']
-                    del component_contrib_dict['native_wlwidth']
-                except KeyError:
-                    pass
-
-                try:
-                    del component_contrib_dict['binned_wngrid']
-                    del component_contrib_dict['binned_wnwidth']
-                except KeyError:
-                    pass
-
-                try:
-                    del component_contrib_dict['binned_wlgrid']
-                    del component_contrib_dict['binned_wlwidth']
-                except KeyError:
-                    pass
-
-                this_contrib_dict[name] = component_contrib_dict
-
-            contribution_dict[contrib_name] = this_contrib_dict
-        
-        return contribution_dict
 
 
 

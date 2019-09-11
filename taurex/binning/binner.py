@@ -2,11 +2,12 @@ from taurex.log import Logger
 from taurex import OutputSize
 from taurex.util.util import compute_bin_edges
 
+
 class Binner(Logger):
 
     def __init__(self):
         Logger.__init__(self, self.__class__.__name__)
-
+    
     def bindown(self, wngrid, spectrum, grid_width=None, error=None):
         raise NotImplementedError
 

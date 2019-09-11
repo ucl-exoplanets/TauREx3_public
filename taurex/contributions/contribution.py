@@ -72,22 +72,28 @@ class Contribution(Fittable,Logger,Writeable):
     def name(self):
         return self._name
 
+    def contribute(self, model, start_horz_layer, end_horz_layer,
+                   density_offset, layer, density, tau, path_length=None):
 
-  
+        self.debug('SIGMA %s', self.sigma_xsec.shape)
+        self.debug(' %s %s %s %s %s %s %s', start_horz_layer, end_horz_layer,
+                   density_offset, layer, density, tau,self._ngrid)
+        # print(self.sigma_xsec.max())
+        contribute_tau(start_horz_layer, end_horz_layer, density_offset,
+                       self.sigma_xsec, density, path_length, self._nlayers,
+                       self._ngrid, layer, tau)
+        # self._total_contrib[layer] += contrib
+        self.debug('DONE')
 
-    def contribute(self,model,start_horz_layer,end_horz_layer,density_offset,layer,density,tau,path_length=None):
-        #print(self.sigma_xsec.max())
-        contribute_tau(start_horz_layer,end_horz_layer,density_offset,self.sigma_xsec,density,path_length,self._nlayers,self._ngrid,layer,tau)
-        #self._total_contrib[layer] += contrib
 
-    def build(self,model):
+    def build(self, model):
         raise NotImplementedError
     
-    def prepare_each(self,model,wngrid):
+    def prepare_each(self, model, wngrid):
         raise NotImplementedError
 
 
-    def prepare(self,model,wngrid):
+    def prepare(self ,model, wngrid):
         #self._total_contrib = np.zeros(shape=(model.nLayers,wngrid.shape[0],))
         self._ngrid = wngrid.shape[0]
         self._nlayers = model.nLayers
