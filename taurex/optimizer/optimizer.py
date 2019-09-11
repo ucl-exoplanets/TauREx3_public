@@ -26,8 +26,8 @@ class Optimizer(Logger):
     def __init__(self,name,observed=None,model=None,sigma_fraction=0.1):
         super().__init__(name)
 
-        self._model = model
-        self._observed = observed
+        self.set_model(model)
+        self.set_observed(observed)
         self._model_callback = None
         self._sigma_fraction = sigma_fraction
 
@@ -54,7 +54,7 @@ class Optimizer(Logger):
         
         """
         self._observed = observed
-
+        self._binner = observed.create_binner()
 
     def compile_params(self):
         """ 
@@ -342,7 +342,7 @@ class Optimizer(Logger):
         obs_bins= self._observed.wavenumberGrid
 
 
-        final_model,_,_,_ = self._model.model(obs_bins)
+        _,final_model,_,_ = self._binner.bin_model(self._model.model(obs_bins))
         res = (data.flatten() - final_model.flatten()) / datastd.flatten()
         res = np.nansum(res*res)
         if res == 0:
@@ -382,20 +382,20 @@ class Optimizer(Logger):
         fit_max = [x[1] for x in fit_boundaries]
 
         fit_values = self.fit_values
-        print()
-        print('-------------------------------------')
-        print('------Retrieval Parameters-----------')
-        print('-------------------------------------')
-        print()
-        print('Dimensionality of fit:',len(fit_names))
-        print()
+        self.info('')
+        self.info('-------------------------------------')
+        self.info('------Retrieval Parameters-----------')
+        self.info('-------------------------------------')
+        self.info('')
+        self.info('Dimensionality of fit:',len(fit_names))
+        self.info('')
         output = tabulate(zip(fit_names,fit_values,fit_min,fit_max), headers=['Param', 'Value','Bound-min', 'Bound-max'])
-        print(output)
-        print()
+        self.info(output)
+        self.info('')
 
-        setLogLevel(logging.ERROR)
+        disableLogging()
         self.compute_fit()
-        setLogLevel(logging.INFO)
+        enableLogging()
         return  self.generate_solution()
 
 
