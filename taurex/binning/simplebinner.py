@@ -6,14 +6,14 @@ from taurex import OutputSize
 
 class SimpleBinner(Binner):
 
-    def __init__(self, wavenumber_grid, wngrid_width=None):
+    def __init__(self, wngrid, wngrid_width=None):
 
-        self._wngrid = wavenumber_grid
-        self._wn_wdith = wngrid_width or compute_bin_edges(self._wngrid)
+        self._wngrid = wngrid
+        self._wn_width = wngrid_width or compute_bin_edges(self._wngrid)
 
     def bindown(self, wngrid, spectrum, grid_width=None, error=None):
 
-        return self._wngrid, bindown(wngrid, spectrum, self._wngrid), None, self._wn_wdith
+        return self._wngrid, bindown(wngrid, spectrum, self._wngrid), None, self._wn_width
 
     def generate_spectrum_output(self, model_output,
                                  output_size=OutputSize.heavy):
