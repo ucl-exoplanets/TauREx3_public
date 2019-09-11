@@ -24,7 +24,8 @@ class SimpleCloudsContribution(Contribution):
         contrib = np.zeros(shape=(model.nLayers,wngrid.shape[0],))
         cloud_filtr = model.pressureProfile >= self._cloud_pressure
         contrib[cloud_filtr,:] = np.inf
-        yield 'Clouds',contrib
+        self._contrib = contrib
+        yield 'Clouds',self._contrib
 
     def prepare(self,model,wngrid):
         self._total_contrib = np.zeros(shape=(model.nLayers,wngrid.shape[0],))
