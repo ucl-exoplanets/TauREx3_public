@@ -10,7 +10,7 @@ cia_path = "C:\Users\Ahmed\Documents\TaurexData\cia\hitran"
 [Chemistry]
 chemistry_type = taurex
 fill_gases = H2,He
-ratio=0.17647
+ratio=1
 
     [[H2O]]
     gas_type = constant

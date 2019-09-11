@@ -552,7 +552,7 @@ class Optimizer(Logger):
             sol_values['Spectra'] = self._binner.generate_spectrum_output(opt_result,output_size=output_size)
 
 
-            sol_values['Spectra']['Contributions'] = self.store_contributions(self._model,output_size=output_size)
+            sol_values['Spectra']['Contributions'] = self.store_contributions(self._model,output_size=output_size-3)
 
 
             #Store profiles here

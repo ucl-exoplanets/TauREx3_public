@@ -7,7 +7,7 @@ class OutputSize(IntEnum):
     This enum describes how heavy the final output will be
     """
 
-    heavy = 5
+    heavy = 6
     """Output everything native and binned (large file size)"""
     light = 3
     """Output everything but only keep binned optical depths"""

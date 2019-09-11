@@ -249,48 +249,52 @@ class LightCurveModel(ForwardModel):
 
     def model(self,wngrid=None,cutoff_grid=True):
         """Computes the forward model for a wngrid"""
-        native_grid,model,tau,extra = self._forward_model.model(wngrid,cutoff_grid)
         if wngrid is None:
-            wngrid = 10000/self.ld_coeff_file[:,0]
+            wngrid = 10000/self.lc_data['lc_info'][:,0]
+        native_grid,model,tau,extra = self._forward_model.model(wngrid,cutoff_grid)
         binner = SimpleBinner(wngrid)
         
-        binned_model = binner.bindown(wngrid,model)
+        binned_model = binner.bindown(native_grid,model)[1]
 
         wlgrid = 10000/wngrid
 
         result = self.instrument_light_curve(binned_model,wlgrid)
 
 
-        return wngrid,model,tau,[model,binned_model,extra]
+        return wngrid,result,tau,[model,binned_model,extra]
 
     def model_contrib(self,wngrid=None,cutoff_grid=True):
-        native_grid,contrib_res = self._forward_model.model_contrib(wngrid,cutoff_grid)
+        
         if wngrid is None:
-            wngrid = 10000/self.ld_coeff_file[:,0]
+            wngrid = 10000/self.lc_data['lc_info'][:,0]
+        native_grid,contribs = self._forward_model.model_contrib(wngrid,cutoff_grid)
         binner = SimpleBinner(wngrid)
         all_contrib_dict = {}
+
+        wlgrid = 10000/wngrid
 
         for contrib_name,main_contribution in contribs.items():
             
 
             model,tau,extras = main_contribution
-            binned = binner.bindown(native_grid,model)
+            binned = binner.bindown(native_grid,model)[1]
 
             result = self.instrument_light_curve(binned,wlgrid)
-            all_contrib_dict[contrib.name] = (result,tau,[model,binned,extras])
+            all_contrib_dict[contrib_name] = (result,tau,[model,binned,extras])
 
         return native_grid,all_contrib_dict
 
     def model_full_contrib(self,wngrid=None,cutoff_grid=True):
         """Computes the forward model for a wngrid for each contribution"""
         
-        native_grid,contrib_res = self._forward_model.model_contrib(wngrid,cutoff_grid)
+        
         if wngrid is None:
-            wngrid = 10000/self.ld_coeff_file[:,0]
+            wngrid = 10000/self.lc_data['lc_info'][:,0]
+        native_grid,contrib_res = self._forward_model.model_full_contrib(wngrid,cutoff_grid)
         binner = SimpleBinner(wngrid)
 
         self.info('Computing lightcurve contribution')
-
+        wlgrid = 10000/wngrid
         lc_contrib_res = {}
 
         for contrib_name,contrib_list in contrib_res.items(): #Loop through each contribtuion
@@ -302,7 +306,8 @@ class LightCurveModel(ForwardModel):
                 native = c[1]
                 tau =c[2]
                 extra = c[3]
-                binned = binner.bindown(native_grid,native)
+
+                binned = binner.bindown(native_grid,native)[1]
                 result = self.instrument_light_curve(binned,wlgrid)
 
                 new_packed = name,result,tau,(native,binned,extra)

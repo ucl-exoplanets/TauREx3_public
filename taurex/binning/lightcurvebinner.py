@@ -8,7 +8,7 @@ class LightcurveBinner(Binner):
     """
 
     def bindown(self, wngrid, spectrum, grid_width=None, error=None):
-        return wngrid,spectrum,error,grid_width
+        return wngrid, spectrum, error, grid_width
 
     def generate_spectrum_output(self, model_output,
                                  output_size=OutputSize.heavy):
@@ -25,5 +25,5 @@ class LightcurveBinner(Binner):
             output['binned_tau'] = self.bindown(wngrid, tau)[1]
             if output_size > OutputSize.light:
                 output['native_tau'] = tau
-        
+
         return output
