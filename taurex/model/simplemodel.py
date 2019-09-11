@@ -2,7 +2,7 @@ from taurex.log import Logger
 import numpy as np
 import math
 from .model import ForwardModel
-from taurex.util import bindown
+from taurex.util.util import clip_native_to_wngrid
 
 class SimpleForwardModel(ForwardModel):
     """ A 'simple' base model in the sense that its just
@@ -254,10 +254,7 @@ class SimpleForwardModel(ForwardModel):
 
         native_grid = self.nativeWavenumberGrid
         if wngrid is not None and cutoff_grid:
-            wn_min =max(wngrid[0]-(wngrid[1]-wngrid[0])/2,1)
-            wn_max = (wngrid[-1]-wngrid[-2])/2.0 + wngrid[-1]
-            native_filter = (native_grid >= wn_min) & (native_grid <= wn_max)
-            native_grid = native_grid[native_filter]
+            native_grid = clip_native_to_wngrid(native_grid,wngrid)
 
 
         self._star.initialize(native_grid)
@@ -302,10 +299,7 @@ class SimpleForwardModel(ForwardModel):
 
         native_grid = self.nativeWavenumberGrid
         if wngrid is not None and cutoff_grid:
-            wn_min = wngrid.min()*0.8
-            wn_max = wngrid.max()*1.2
-            native_filter = (native_grid >= wn_min) & (native_grid <= wn_max)
-            native_grid = native_grid[native_filter]
+            native_grid = clip_native_to_wngrid(native_grid,wngrid)
 
 
         self._star.initialize(native_grid)
