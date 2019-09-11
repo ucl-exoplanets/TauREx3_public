@@ -265,7 +265,7 @@ class SimpleForwardModel(ForwardModel):
         return native_grid,absorp,tau,None
 
 
-    def model_contributions(self,wngrid=None,cutoff_grid=True):
+    def model_contribs(self,wngrid=None,cutoff_grid=True):
         """
         Models each contribution seperately
         """
