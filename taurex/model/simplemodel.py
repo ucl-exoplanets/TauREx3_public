@@ -265,7 +265,7 @@ class SimpleForwardModel(ForwardModel):
         return native_grid,absorp,tau,None
 
 
-    def model_contribs(self,wngrid=None,cutoff_grid=True):
+    def model_contrib(self,wngrid=None,cutoff_grid=True):
         """
         Models each contribution seperately
         """
@@ -276,15 +276,13 @@ class SimpleForwardModel(ForwardModel):
         if wngrid is not None and cutoff_grid:
             native_grid = clip_native_to_wngrid(native_grid,wngrid)
 
+        self._star.initialize(native_grid)
 
         for contrib in full_contrib_list:
             self.contribution_list = [contrib]
             contrib.prepare(self,native_grid)
             absorp,tau = self.path_integral(native_grid,False)
-            contrib_dict = {}
-            contrib_dict['native'] = absorp
-            contrib_dict['tau'] = tau
-            all_contrib_dict[contrib.name] = contrib_dict
+            all_contrib_dict[contrib.name] = (absorp,tau,None)
             
 
         self.contribution_list = full_contrib_list
@@ -313,7 +311,7 @@ class SimpleForwardModel(ForwardModel):
             for name,sig in contrib.prepare_each(self,native_grid):
                 self.info('\t%s---%s contribtuion',contrib_name,name)
                 absorp,tau = self.path_integral(native_grid,False)
-                contrib_res_list.append((name,absorp,tau))
+                contrib_res_list.append((name,absorp,tau,None))
             
             result_dict[contrib_name] = contrib_res_list
         

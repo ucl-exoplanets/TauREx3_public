@@ -112,5 +112,6 @@ class FluxBinner(Binner):
                                                   output_size=output_size)
         output['binned_wngrid'] = self._wngrid
         output['binned_wlgrid'] = 10000/self._wngrid
-
+        output['binned_wnwidth'] = self._wngrid_width
+        output['binned_wlwidth'] = 1.0/self._wngrid_width
         return output

@@ -52,13 +52,6 @@ def main():
     native_grid = model.nativeWavenumberGrid
 
 
-
-    #If we bin down then get the appropriate grid
-    if bindown_wngrid is None:
-        bindown_wngrid = native_grid
-    else:
-        native_grid = native_grid[(native_grid >= bindown_wngrid.min()*0.9) & (native_grid<= bindown_wngrid.max()*1.1) ]
-
     if args.output_file and get_rank()==0:
         from taurex.util.output import store_taurex_results,store_profiles,generate_profile_dict,generate_spectra_dict
         #Output taurex data
@@ -104,7 +97,7 @@ def main():
         solution = optimizer.fit()
 
     #Run the model
-    result=model.model(bindown_wngrid,return_contrib=True,cutoff_grid=False)
+    result=model.model()
     new_absp,absp,tau,contrib = result
     #Get out new binned down model
     contrib_res = None

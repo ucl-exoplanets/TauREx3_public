@@ -1,6 +1,6 @@
 from taurex.log import Logger
 from taurex import OutputSize
-
+from taurex.util.util import compute_bin_edges
 
 class Binner(Logger):
 
@@ -23,6 +23,8 @@ class Binner(Logger):
         output['native_wlgrid'] = 10000/wngrid
         output['native_spectrum'] = flux
         output['binned_spectrum'] = self.bindown(wngrid, flux)[1]
+        output['native_wnwidth'] = compute_bin_edges(wngrid)
+        output['native_wlwidth'] = compute_bin_edges(10000/wngrid)
         if output_size > OutputSize.lighter:
             output['binned_tau'] = self.bindown(wngrid, tau)[1]
             if output_size > OutputSize.light:

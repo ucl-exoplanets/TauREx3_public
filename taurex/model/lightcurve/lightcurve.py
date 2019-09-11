@@ -6,7 +6,7 @@ import pickle
 import pylightcurve as plc
 from .lightcurvedata import LightCurveData
 from taurex.data.fittable import fitparam
-
+from taurex.binning import SimpleBinner
 class LightCurveModel(ForwardModel):
     """A base class for producing forward models"""
 
@@ -31,8 +31,6 @@ class LightCurveModel(ForwardModel):
         self._load_instruments(instruments)
 
         self._initialize_lightcurves()
-
-
             
 
     def _load_file(self):
@@ -249,22 +247,25 @@ class LightCurveModel(ForwardModel):
     def model(self,wngrid=None,cutoff_grid=True):
         """Computes the forward model for a wngrid"""
         native_grid,model,tau,extra = self._forward_model.model(wngrid,cutoff_grid)
-        if wngrid is None:
-            wngrid = self.nativeWavenumberGrid
+        binner = SimpleBinner(wngrid)
         
+        binned_model = binner.bindown(wngrid,model)
+
         wlgrid = 10000/wngrid
 
         result = self.instrument_light_curve(binned_model,wlgrid)
 
 
-        return result,model,tau,[native_grid,model]
+        return wngrid,model,tau,[model,extra]
+
+    def model_contrib(self,wngrid=None,cutoff_grid=True):
+        native_grid,contrib_res = self._forward_model.model_contrib(wngrid,cutoff_grid)
+
 
     def model_full_contrib(self,wngrid=None,cutoff_grid=True):
         """Computes the forward model for a wngrid for each contribution"""
-        contrib_res = self._forward_model.model_full_contrib(wngrid,cutoff_grid)
-
-        if wngrid is None:
-            wngrid = self.nativeWavenumberGrid
+        native_grid,contrib_res = self._forward_model.model_full_contrib(wngrid,cutoff_grid)
+        binner = SimpleBinner(wngrid)
         
         wlgrid = 10000/wngrid
 
@@ -278,12 +279,13 @@ class LightCurveModel(ForwardModel):
 
             for c in contrib_list:
                 name = c[0]
-                binned = c[1]
-                native = c[2]
-                tau = c[3] # necessary?
+                native = c[1]
+                tau =c[2]
+                binned = binner.bindown(native_grid,native)
+                binned_tau = binned_tau = binner.bindown(native_grid,tau)
                 result = self.instrument_light_curve(binned,wlgrid)
 
-                new_packed = name,binned,native,tau,('lightcurve_bin',result)
+                new_packed = name,native_grid,tau,(native,binned,binned_tau)
 
                 lc_contrib_list.append(new_packed)
             

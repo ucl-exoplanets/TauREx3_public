@@ -22,5 +22,6 @@ class SimpleBinner(Binner):
                                                   output_size=output_size)
         output['binned_wngrid'] = self._wngrid
         output['binned_wlgrid'] = 10000/self._wngrid
-
+        output['binned_wnwidth'] = self._wn_width
+        output['binned_wlwidth'] = compute_bin_edges(10000/self._wngrid)
         return output

@@ -1,8 +1,8 @@
 """Includes some useful definitions and enums"""
-from enum import Enum
+from enum import IntEnum
 
 
-class OutputSize(Enum):
+class OutputSize(IntEnum):
     """
     This enum describes how heavy the final output will be
     """

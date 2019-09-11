@@ -496,7 +496,7 @@ class Optimizer(Logger):
             count +=1
             weights.append(weight)
             native_grid,native,tau,_ = self._model.model(wngrid=binning,cutoff_grid=False)
-            binned = self._binner(native_grid,native)
+            binned = self._binner.bindown(native_grid,native)[1]
             #tau_profile.update(tau,weight=weight)
             tp_profiles.update(self._model.temperatureProfile,weight=weight)
             active_gases.update(self._model.chemistry.activeGasMixProfile,weight=weight)
@@ -547,10 +547,12 @@ class Optimizer(Logger):
   
 
             sol_values['Profiles']=generate_profile_dict(self._model)
-            opt_result = self._model.model(wngrid=self._observed.wavenumberGrid) #Run the model
+            opt_result = self._model.model(wngrid=self._observed.wavenumberGrid,cutoff_grid=False) #Run the model
 
             sol_values['Spectra'] = self._binner.generate_spectrum_output(opt_result,output_size=output_size)
 
+
+            sol_values['Spectra']['Contributions'] = self.store_contributions(self._model,output_size=output_size)
 
 
             #Store profiles here
@@ -571,6 +573,80 @@ class Optimizer(Logger):
             solution_dict['solution{}'.format(solution)] = sol_values
         
         return solution_dict
+
+    def store_contributions(self,model,output_size=OutputSize.heavy):
+
+        native_grid,contribs = self._model.model_contrib(wngrid=self._observed.wavenumberGrid,cutoff_grid=False)
+        native_grid,contribs_component = self._model.model_full_contrib(wngrid=self._observed.wavenumberGrid,cutoff_grid=False)
+
+        contribution_dict = {}
+
+        for contrib_name,main_contribution in contribs.items():
+            
+            flux,tau,extras = main_contribution
+            
+            this_contrib_dict = self._binner.generate_spectrum_output((native_grid,flux,tau,extras),output_size=output_size)
+
+            try:
+                del this_contrib_dict['native_wngrid']
+                del this_contrib_dict['native_wnwidth']
+            except KeyError:
+                pass
+            
+            try:
+                del this_contrib_dict['native_wlgrid']
+                del this_contrib_dict['native_wlwidth']
+            except KeyError:
+                pass
+
+            try:
+                del this_contrib_dict['binned_wngrid']
+                del this_contrib_dict['binned_wnwidth']
+            except KeyError:
+                pass
+
+            try:
+                del this_contrib_dict['binned_wlgrid']
+                del this_contrib_dict['binned_wlwidth']
+            except KeyError:
+                pass
+
+            for name,flux,tau,extras in contribs_component[contrib_name]:
+                
+
+                component_contrib_dict = self._binner.generate_spectrum_output((native_grid,flux,tau,extras),output_size=output_size)
+
+                try:
+                    del component_contrib_dict['native_wngrid']
+                    del component_contrib_dict['native_wnwidth']
+                except KeyError:
+                    pass
+                
+                try:
+                    del component_contrib_dict['native_wlgrid']
+                    del component_contrib_dict['native_wlwidth']
+                except KeyError:
+                    pass
+
+                try:
+                    del component_contrib_dict['binned_wngrid']
+                    del component_contrib_dict['binned_wnwidth']
+                except KeyError:
+                    pass
+
+                try:
+                    del component_contrib_dict['binned_wlgrid']
+                    del component_contrib_dict['binned_wlwidth']
+                except KeyError:
+                    pass
+
+                this_contrib_dict[name] = component_contrib_dict
+
+            contribution_dict[contrib_name] = this_contrib_dict
+        
+        return contribution_dict
+
+
 
 
 
