@@ -19,9 +19,8 @@ class AbsorptionContribution(Contribution):
         pass
 
     def prepare_each(self,model,wngrid):
-        from taurex.util.scattering import rayleigh_sigma_from_name
-
-
+        self.debug('Preparing model with %s', wngrid.shape)
+        self._ngrid = wngrid.shape[0]
         sigma_xsec = np.zeros(shape=(model.nLayers,wngrid.shape[0]))
 
         self._opacity_cache = OpacityCache()
