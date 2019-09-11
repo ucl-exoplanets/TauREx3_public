@@ -1,17 +1,14 @@
-from taurex.log import Logger
+from .binner import Binner
 from taurex import OutputSize
 
 
-class Binner(Logger):
-
-    def __init__(self):
-        Logger.__init__(self, self.__class__.__name__)
+class LightcurveBinner(Binner):
+    """
+    A special class of binning used to generate the correct spectrum output
+    """
 
     def bindown(self, wngrid, spectrum, grid_width=None, error=None):
-        raise NotImplementedError
-
-    def bin_model(self, model_output):
-        return self.bindown(model_output[0], model_output[1])
+        return wngrid,spectrum,error,grid_width
 
     def generate_spectrum_output(self, model_output,
                                  output_size=OutputSize.heavy):
@@ -21,8 +18,9 @@ class Binner(Logger):
 
         output['native_wngrid'] = wngrid
         output['native_wlgrid'] = 10000/wngrid
-        output['native_spectrum'] = flux
-        output['binned_spectrum'] = self.bindown(wngrid, flux)[1]
+        output['lightcurve'] = flux
+        output['native_spectrum'] = extra
+        output['binned_spectrum'] = self.bindown(wngrid, extra)[1]
         if output_size > OutputSize.lighter:
             output['binned_tau'] = self.bindown(wngrid, tau)[1]
             if output_size > OutputSize.light:

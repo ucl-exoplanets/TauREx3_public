@@ -1,13 +1,14 @@
 from .binner import Binner
 from taurex.util.util import compute_bin_edges
 import numpy as np
+from taurex import OutputSize
 
 
 class FluxBinner(Binner):
 
     def __init__(self, wngrid, wngrid_width=None):
         super().__init__()
-        print('WHATS UP')
+
         self._wngrid = wngrid
         self._wngrid_width = wngrid_width
 
@@ -92,9 +93,8 @@ class FluxBinner(Binner):
 
             if error is not None:
                 sum_noise = np.sum(weight * weight *
-                                old_spect_err[..., save_start:save_stop+1]**2,
-                                axis=0)
-
+                                   old_spect_err[..., save_start:save_stop+1]**2,
+                                   axis=0)
 
                 sum_noise = np.sqrt(sum_noise / sum_weight/sum_weight)
 
@@ -104,3 +104,13 @@ class FluxBinner(Binner):
                 bin_error[idx] = sum_noise
 
         return self._wngrid, bin_spectrum, bin_error, self._wngrid_width
+
+    def generate_spectrum_output(self, model_output,
+                                 output_size=OutputSize.heavy):
+
+        output = super().generate_spectrum_output(model_output,
+                                                  output_size=output_size)
+        output['binned_wngrid'] = self._wngrid
+        output['binned_wlgrid'] = 10000/self._wngrid
+
+        return output

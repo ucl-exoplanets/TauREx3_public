@@ -249,7 +249,7 @@ class SimpleForwardModel(ForwardModel):
                 
 
 
-    def model(self,wngrid=None,return_contrib=False,cutoff_grid=True):
+    def model(self,wngrid=None,cutoff_grid=True):
         self.initialize_profiles()
 
         native_grid = self.nativeWavenumberGrid
@@ -262,27 +262,24 @@ class SimpleForwardModel(ForwardModel):
             contrib.prepare(self,native_grid)
         absorp,tau = self.path_integral(native_grid,False)
         
-        contributions={}
-        if return_contrib:
-            contributions = self.model_contributions(native_grid,wngrid=wngrid)
-        
-        return native_grid,absorp,tau,contributions
+        return native_grid,absorp,tau,None
 
 
-    def model_contributions(self,native_grid=None,wngrid=None,prepare=False):
+    def model_contributions(self,wngrid=None,cutoff_grid=True):
         """
         Models each contribution seperately
         """
         full_contrib_list = self.contribution_list
-        if native_grid is None:
-            native_grid = self.nativeWavenumberGrid
+        native_grid = self.nativeWavenumberGrid
 
         all_contrib_dict = {}
+        if wngrid is not None and cutoff_grid:
+            native_grid = clip_native_to_wngrid(native_grid,wngrid)
+
 
         for contrib in full_contrib_list:
             self.contribution_list = [contrib]
-            if prepare:
-                contrib.prepare(self,native_grid)
+            contrib.prepare(self,native_grid)
             absorp,tau = self.path_integral(native_grid,False)
             contrib_dict = {}
             contrib_dict['native'] = absorp
