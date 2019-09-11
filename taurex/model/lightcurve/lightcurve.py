@@ -246,9 +246,9 @@ class LightCurveModel(ForwardModel):
         return self._forward_model.nativeWavenumberGrid
 
 
-    def model(self,wngrid=None,return_contrib=False,cutoff_grid=True):
+    def model(self,wngrid=None,cutoff_grid=True):
         """Computes the forward model for a wngrid"""
-        binned_model,model,tau,contrib = self._forward_model.model(wngrid,return_contrib,cutoff_grid)
+        native_grid,model,tau,extra = self._forward_model.model(wngrid,cutoff_grid)
         if wngrid is None:
             wngrid = self.nativeWavenumberGrid
         
@@ -257,7 +257,7 @@ class LightCurveModel(ForwardModel):
         result = self.instrument_light_curve(binned_model,wlgrid)
 
 
-        return result,model,tau,contrib
+        return result,model,tau,[native_grid,model]
 
     def model_full_contrib(self,wngrid=None,cutoff_grid=True):
         """Computes the forward model for a wngrid for each contribution"""
