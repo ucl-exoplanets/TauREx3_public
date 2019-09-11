@@ -107,6 +107,39 @@ class ParameterParser(Logger):
         else:
             None
 
+    def generate_observation(self):
+
+        config = self._raw_config.dict()
+        if 'Observation' in config:
+            observation_config = config['Observation']
+            if 'lightcurve' in observation_config:
+                from taurex.data.spectrum.lightcurve import ObservedLightCurve
+                return ObservedLightCurve(observation_config['lightcurve'])
+
+            elif 'observed_spectrum' in observation_config:
+                from taurex.data.spectrum.observed import ObservedSpectrum
+                return ObservedSpectrum(observation_config['observed_spectrum'])
+            elif 'phasecurve_path' in observation_config:
+                self.info('Phase curves to be implemented soon...... :D ')
+            else:
+                self.warning('No observation specified........')
+                return None
+        return None
+    
+
+    def generate_binning(self):
+        import numpy as np
+        from taurex.
+
+        config = self._raw_config.dict()       
+        if 'Binning' in config:
+            binning_config = config['Binning']
+            if 'bin_type' in binning_config:
+                bin_type = binning_config['bin_type']
+            
+            else:
+                return 
+
     def generate_spectrum(self):
         import numpy as np
 

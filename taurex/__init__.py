@@ -1,1 +1,1 @@
-from .taurexdefs import taurexdefs
+from .taurexdefs import OutputSize
