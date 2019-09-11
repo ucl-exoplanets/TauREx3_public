@@ -7,6 +7,13 @@ from taurex.output.writeable import Writeable
 class ForwardModel(Logger,Fittable,Writeable):
     """A base class for producing forward models"""
 
+
+    @property
+    def defaultBinner(self):
+        from taurex.binning import NativeBinner
+        return NativeBinner
+
+
     def __init__(self,name):
         Logger.__init__(self,name)
         Fittable.__init__(self)

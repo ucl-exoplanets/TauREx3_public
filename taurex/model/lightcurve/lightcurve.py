@@ -11,7 +11,10 @@ class LightCurveModel(ForwardModel):
     """A base class for producing forward models"""
 
 
-
+    @property
+    def defaultBinner(self):
+        from taurex.binning.lightcurvebinner import LightcurveBinner
+        return LightcurveBinner
 
     def __init__(self,forward_model,file_loc,instruments=None):
         super().__init__('LightCurveModel')
@@ -247,6 +250,8 @@ class LightCurveModel(ForwardModel):
     def model(self,wngrid=None,cutoff_grid=True):
         """Computes the forward model for a wngrid"""
         native_grid,model,tau,extra = self._forward_model.model(wngrid,cutoff_grid)
+        if wngrid is None:
+            wngrid = 10000/self.ld_coeff_file[:,0]
         binner = SimpleBinner(wngrid)
         
         binned_model = binner.bindown(wngrid,model)
@@ -260,14 +265,29 @@ class LightCurveModel(ForwardModel):
 
     def model_contrib(self,wngrid=None,cutoff_grid=True):
         native_grid,contrib_res = self._forward_model.model_contrib(wngrid,cutoff_grid)
+        if wngrid is None:
+            wngrid = 10000/self.ld_coeff_file[:,0]
+        binner = SimpleBinner(wngrid)
+        all_contrib_dict = {}
 
+        for contrib_name,main_contribution in contribs.items():
+            
+
+            model,tau,extras = main_contribution
+            binned = binner.bindown(native_grid,model)
+
+            result = self.instrument_light_curve(binned,wlgrid)
+            all_contrib_dict[contrib.name] = (result,tau,[model,binned,extras])
+
+        return native_grid,all_contrib_dict
 
     def model_full_contrib(self,wngrid=None,cutoff_grid=True):
         """Computes the forward model for a wngrid for each contribution"""
-        binner = SimpleBinner(wngrid)
-        native_grid,contrib_res = self._forward_model.model_contrib(wngrid,cutoff_grid)
         
-        wlgrid = 10000/wngrid
+        native_grid,contrib_res = self._forward_model.model_contrib(wngrid,cutoff_grid)
+        if wngrid is None:
+            wngrid = 10000/self.ld_coeff_file[:,0]
+        binner = SimpleBinner(wngrid)
 
         self.info('Computing lightcurve contribution')
 
@@ -281,17 +301,17 @@ class LightCurveModel(ForwardModel):
                 name = c[0]
                 native = c[1]
                 tau =c[2]
+                extra = c[3]
                 binned = binner.bindown(native_grid,native)
-                binned_tau = binned_tau = binner.bindown(native_grid,tau)
                 result = self.instrument_light_curve(binned,wlgrid)
 
-                new_packed = name,native_grid,tau,(native,binned,binned_tau)
+                new_packed = name,result,tau,(native,binned,extra)
 
                 lc_contrib_list.append(new_packed)
             
             lc_contrib_res[contrib_name] = lc_contrib_list
         
-        return lc_contrib_res
+        return native_grid,lc_contrib_res
 
 
 

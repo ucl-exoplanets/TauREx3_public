@@ -14,16 +14,16 @@ class LightcurveBinner(Binner):
                                  output_size=OutputSize.heavy):
         output = {}
 
-        wngrid, flux, tau, extra = model_output
-
+        wngrid, lightcurve, tau, extra = model_output
+        native, binned, extra = extra
         output['native_wngrid'] = wngrid
         output['native_wlgrid'] = 10000/wngrid
-        output['lightcurve'] = flux
-        output['native_spectrum'] = extra
-        output['binned_spectrum'] = self.bindown(wngrid, extra)[1]
+        output['lightcurve'] = lightcurve
+        output['native_spectrum'] = native
+        output['binned_spectrum'] = binned
         if output_size > OutputSize.lighter:
             output['binned_tau'] = self.bindown(wngrid, tau)[1]
             if output_size > OutputSize.light:
                 output['native_tau'] = tau
-
+        
         return output
