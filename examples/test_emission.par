@@ -41,7 +41,7 @@ star_type = blackbody
 #temperature = 5800
 
 [Model]
-model_type = transmission
+model_type = emission
 ngauss = 2
 
     [[Absorption]]
@@ -49,12 +49,10 @@ ngauss = 2
     cia_pairs = H2-He,H2-H2
     [[Rayleigh]]
 
-[Spectrum]
-#observed_spectrum = /Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_emission/SPECTRUM_out.dat
-grid_type = native
-#wavenumber_grid = 0.0,10000.0,10000
-#wavelength_grid = 0.01,10.0,10000
 
+[Binning]
+bin_type = manual
+log_wavenumber_grid = 700,25000,1000
 
 
 

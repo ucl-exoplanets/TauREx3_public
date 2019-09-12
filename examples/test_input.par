@@ -47,7 +47,9 @@ model_type = transmission
     
     [[Rayleigh]]
 
-
+    [[SimpleClouds]]
+    clouds_pressure =1e4
+    
 [Binning]
 bin_type = manual
 log_wavelength_grid = 0.3,4.1,1000
