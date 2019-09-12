@@ -50,6 +50,7 @@ model_type = transmission
     
 [Binning]
 bin_type = manual
+accurate = True
 log_wavelength_grid = 0.3,4.1,1000
 
 
