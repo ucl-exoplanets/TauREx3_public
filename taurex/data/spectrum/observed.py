@@ -87,11 +87,12 @@ class ObservedSpectrum(BaseSpectrum):
     @property
     def binEdges(self):
         """ Bin edges"""
-        return self._bin_edges
+        return 10000/self._bin_edges
     @property
     def binWidths(self):
         """bin widths"""
-        return self._bin_widths
+        return 10000/(self.wavelengthGrid-self._bin_widths/2) - 10000/(self.wavelengthGrid+self._bin_widths/2)
+
 
     @property
     def errorBar(self):

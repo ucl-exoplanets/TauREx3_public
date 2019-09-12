@@ -34,6 +34,15 @@ class ObservedLightCurve(BaseSpectrum):
 
 
 
+    def create_binner(self):
+        from taurex.binning.lightcurvebinner import LightcurveBinner
+        """
+        Creates the appropriate binning object
+        """
+
+        return LightcurveBinner()
+
+
     def _load_data_file(self,lc_data):
         """load data from different instruments."""
 

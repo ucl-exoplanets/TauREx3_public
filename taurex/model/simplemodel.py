@@ -2,7 +2,7 @@ from taurex.log import Logger
 import numpy as np
 import math
 from .model import ForwardModel
-from taurex.util import bindown
+from taurex.util.util import clip_native_to_wngrid
 
 class SimpleForwardModel(ForwardModel):
     """ A 'simple' base model in the sense that its just
@@ -248,18 +248,13 @@ class SimpleForwardModel(ForwardModel):
         return current_grid
                 
 
-                
 
-
-    def model(self,wngrid=None,return_contrib=False,cutoff_grid=True):
+    def model(self,wngrid=None,cutoff_grid=True):
         self.initialize_profiles()
 
         native_grid = self.nativeWavenumberGrid
         if wngrid is not None and cutoff_grid:
-            wn_min = wngrid.min()
-            wn_max = wngrid.max()
-            native_filter = (native_grid >= wn_min) & (native_grid <= wn_max)
-            native_grid = native_grid[native_filter]
+            native_grid = clip_native_to_wngrid(native_grid,wngrid)
 
 
         self._star.initialize(native_grid)
@@ -267,64 +262,49 @@ class SimpleForwardModel(ForwardModel):
             contrib.prepare(self,native_grid)
         absorp,tau = self.path_integral(native_grid,False)
         
-        contributions={}
-        if return_contrib:
-            contributions = self.model_contributions(native_grid,wngrid=wngrid)
+        return native_grid,absorp,tau,None
 
 
-        self.info('Modelling each contribution.....')
-        
-        if wngrid is None:
-            return absorp,absorp,tau,contributions
-        else:
-            new_absp = bindown(native_grid,absorp,wngrid)
-            return new_absp,absorp,tau,contributions
-
-
-    def model_contributions(self,native_grid=None,wngrid=None,prepare=False):
+    def model_contrib(self,wngrid=None,cutoff_grid=True):
         """
         Models each contribution seperately
         """
         full_contrib_list = self.contribution_list
-        if native_grid is None:
-            native_grid = self.nativeWavenumberGrid
+        native_grid = self.nativeWavenumberGrid
 
         all_contrib_dict = {}
+        if wngrid is not None and cutoff_grid:
+            native_grid = clip_native_to_wngrid(native_grid,wngrid)
+
+        self._star.initialize(native_grid)
 
         for contrib in full_contrib_list:
             self.contribution_list = [contrib]
-            if prepare:
-                contrib.prepare(self,native_grid)
+            contrib.prepare(self,native_grid)
             absorp,tau = self.path_integral(native_grid,False)
-            contrib_dict = {}
-            contrib_dict['native'] = absorp
-            contrib_dict['tau'] = tau
-            if wngrid is not None:
-                contrib_dict['binned'] = bindown(native_grid,absorp,wngrid)
-
-            all_contrib_dict[contrib.name] = contrib_dict
+            all_contrib_dict[contrib.name] = (absorp,tau,None)
             
 
         self.contribution_list = full_contrib_list
-        return all_contrib_dict
+        return native_grid,all_contrib_dict
 
     def model_full_contrib(self,wngrid=None,cutoff_grid=True):
         """Like model_contributions except all components for each contribution are modelled"""
-        self.initialize_profiles()
+
 
         native_grid = self.nativeWavenumberGrid
         if wngrid is not None and cutoff_grid:
-            wn_min = wngrid.min()
-            wn_max = wngrid.max()
-            native_filter = (native_grid >= wn_min) & (native_grid <= wn_max)
-            native_grid = native_grid[native_filter]
+            native_grid = clip_native_to_wngrid(native_grid,wngrid)
 
-
+        self.initialize_profiles()
         self._star.initialize(native_grid)
 
         result_dict = {}
 
         full_contrib_list = self.contribution_list
+        
+        self.debug('NATIVE GRID %s',native_grid.shape)
+
         self.info('Modelling each contribution.....')
         for contrib in full_contrib_list:
             self.contribution_list = [contrib]
@@ -334,16 +314,12 @@ class SimpleForwardModel(ForwardModel):
             for name,sig in contrib.prepare_each(self,native_grid):
                 self.info('\t%s---%s contribtuion',contrib_name,name)
                 absorp,tau = self.path_integral(native_grid,False)
-                if wngrid is None:
-                    contrib_res_list.append((name,absorp,tau))
-                else:
-                    new_absp = bindown(native_grid,absorp,wngrid)
-                    contrib_res_list.append((name,new_absp,absorp,tau))
+                contrib_res_list.append((name,absorp,tau,None))
             
             result_dict[contrib_name] = contrib_res_list
         
         self.contribution_list = full_contrib_list
-        return result_dict
+        return native_grid,result_dict
             
             
 

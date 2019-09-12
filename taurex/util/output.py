@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 import numpy as np
 import h5py
-
+from taurex import OutputSize
 def store_taurex_results(output,model,native_grid,absp,tau,contributions,observed=None,optimizer=None):
 
 
@@ -237,3 +237,76 @@ def plot_spectrum(spectrum, arg_output, observed = None):
     plt.xticks([0.5, 1, 2, 5, 10], [0.5, 1, 2, 5, 10])
     plt.legend(loc='upper left')
     plt.savefig(os.path.join(arg_output), dpi=1000)
+
+
+def store_contributions(binner,model,output_size=OutputSize.heavy):
+
+    native_grid,contribs = model.model_contrib()
+    native_grid,contribs_component = model.model_full_contrib()
+
+    contribution_dict = {}
+
+    for contrib_name,main_contribution in contribs.items():
+        
+        flux,tau,extras = main_contribution
+        
+        this_contrib_dict = binner.generate_spectrum_output((native_grid,flux,tau,extras),output_size=output_size)
+
+        try:
+            del this_contrib_dict['native_wngrid']
+            del this_contrib_dict['native_wnwidth']
+        except KeyError:
+            pass
+        
+        try:
+            del this_contrib_dict['native_wlgrid']
+            del this_contrib_dict['native_wlwidth']
+        except KeyError:
+            pass
+
+        try:
+            del this_contrib_dict['binned_wngrid']
+            del this_contrib_dict['binned_wnwidth']
+        except KeyError:
+            pass
+
+        try:
+            del this_contrib_dict['binned_wlgrid']
+            del this_contrib_dict['binned_wlwidth']
+        except KeyError:
+            pass
+
+        for name,flux,tau,extras in contribs_component[contrib_name]:
+            
+
+            component_contrib_dict = binner.generate_spectrum_output((native_grid,flux,tau,extras),output_size=output_size)
+
+            try:
+                del component_contrib_dict['native_wngrid']
+                del component_contrib_dict['native_wnwidth']
+            except KeyError:
+                pass
+            
+            try:
+                del component_contrib_dict['native_wlgrid']
+                del component_contrib_dict['native_wlwidth']
+            except KeyError:
+                pass
+
+            try:
+                del component_contrib_dict['binned_wngrid']
+                del component_contrib_dict['binned_wnwidth']
+            except KeyError:
+                pass
+
+            try:
+                del component_contrib_dict['binned_wlgrid']
+                del component_contrib_dict['binned_wlwidth']
+            except KeyError:
+                pass
+
+            this_contrib_dict[name] = component_contrib_dict
+
+        contribution_dict[contrib_name] = this_contrib_dict
+    
+    return contribution_dict

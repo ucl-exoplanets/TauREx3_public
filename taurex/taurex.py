@@ -1,85 +1,122 @@
 """The main taurex program"""
 
-
-
-
 def main():
     import argparse
 
-    import os
     import logging
-    import numpy as np
-    from taurex.mpi import get_rank,nprocs
-    from taurex.log import Logger,setLogLevel
+    from taurex.mpi import get_rank, nprocs
+    from taurex.log import setLogLevel
     from taurex.parameter import ParameterParser
-    from taurex.util import bindown
     from taurex.output.hdf5 import HDF5Output
+    from taurex.util.output import generate_profile_dict, store_contributions
+    from .taurexdefs import OutputSize
+
     parser = argparse.ArgumentParser(description='Taurex')
-    parser.add_argument("-i", "--input",dest='input_file',type=str,required=True,help="Input par file to pass")
-    parser.add_argument("-R", "--retrieval",dest='retrieval',default=False, help="When set, runs retrieval",action='store_true')
-    parser.add_argument("-p", "--plot",dest='plot',default=False,help="Whether to plot after the run",action='store_true')
-    parser.add_argument("-g", "--debug-log",dest='debug',default=False,help="Debug log output",action='store_true')
-    parser.add_argument("-c", "--show-contrib",dest='contrib',default=False,help="Show basic contributions",action='store_true')
-    parser.add_argument("-C","--full-contrib",dest='full_contrib',default=False,help="Show ALL contributions",action='store_true')
-    parser.add_argument("-o","--output_file",dest='output_file',type=str)
+
+    parser.add_argument("-i", "--input", dest='input_file', type=str,
+                        required=True, help="Input par file to pass")
+
+    parser.add_argument("-R", "--retrieval", dest='retrieval', default=False,
+                        help="When set, runs retrieval", action='store_true')
+
+    parser.add_argument("-p", "--plot", dest='plot', default=False,
+                              help="Whether to plot after the run",
+                              action='store_true')
+
+    parser.add_argument("-g", "--debug-log", dest='debug', default=False,
+                        help="Debug log output", action='store_true')
+
+    parser.add_argument("-c", "--show-contrib", dest='contrib',
+                        default=False, help="Show basic contributions",
+                        action='store_true')
+
+    parser.add_argument("-C", "--full-contrib", dest='full_contrib',
+                        default=False, help="Show ALL contributions",
+                        action='store_true')
+
+    parser.add_argument("--light", dest='light', default=False,
+                        help="Light outputs", action='store_true')
+
+    parser.add_argument("--lighter", dest='lighter', default=False,
+                        help="Even Lighter outputs", action='store_true')
+
+    parser.add_argument("-o", "--output_file", dest='output_file', type=str)
+
+    args = parser.parse_args()
 
 
-    args=parser.parse_args()
+    output_size = OutputSize.heavy
+
+    if args.light:
+        output_size = OutputSize.light
+    
+    if args.lighter:
+        output_size = OutputSize.lighter
 
     if args.debug:
         setLogLevel(logging.DEBUG)
-        #logging.basicConfig(level=logging.DEBUG,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    #Parse the input file
+    # Parse the input file
     pp = ParameterParser()
     pp.read(args.input_file)
 
-    #Setup global parameters
+    # Setup global parameters
     pp.setup_globals()
-    #Generate a model from the input
+    # Generate a model from the input
     model = pp.generate_appropriate_model()
 
-    #build the model
+    # build the model
     model.build()
 
-    #Get the spectrum
-    observed,bindown_wngrid = pp.generate_spectrum()
-    
-    
+    # Get the spectrum
+    observation = pp.generate_observation()
 
-    #logging.info('Using grid {}'.format(bindown_wngrid))
-    #logging.info('Observed grid is {}'.format(observed.wavenumberGrid))
-    #Get the native grid
-    native_grid = model.nativeWavenumberGrid
+    binning = pp.generate_binning()
 
+    wngrid = None
 
+    if binning == 'observed' and observation is None:
+        logging.critical('Binning selected from Observation yet None provided')
+        quit()
 
-    #If we bin down then get the appropriate grid
-    if bindown_wngrid is None:
-        bindown_wngrid = native_grid
+    if binning is None:
+        if observation is None:
+            binning = model.defaultBinner()
+            wngrid = model.nativeWavenumberGrid
+        else:
+            binning = observation.create_binner()
+            wngrid = observation.wavenumberGrid
     else:
-        native_grid = native_grid[(native_grid >= bindown_wngrid.min()*0.9) & (native_grid<= bindown_wngrid.max()*1.1) ]
+        if binning is 'native':
+            binning = model.defaultBinner()
+            wngrid = model.nativeWavenumberGrid
+        elif binning is 'observed':
+            binning = observation.create_binner()
+            wngrid = observation.wavenumberGrid
+        else:
+            binning, wngrid = binning
 
-    if args.output_file and get_rank()==0:
-        from taurex.util.output import store_taurex_results,store_profiles,generate_profile_dict,generate_spectra_dict
-        #Output taurex data
+    # Handle outputs
+    if args.output_file and get_rank() == 0:
+        # Output taurex data
         with HDF5Output(args.output_file) as o:
 
             model.write(o)
 
     optimizer = None
     solution = None
+
     if args.retrieval is True:
-        if observed is None:
+        if observation is None:
             logging.critical('No spectrum is defined!!')
             quit()
-        
+
         optimizer = pp.generate_optimizer()
         optimizer.set_model(model)
-        optimizer.set_observed(observed)
+        optimizer.set_observed(observation)
 
         fitting_parameters = pp.generate_fitting_parameters()
 
-        for key,value in fitting_parameters.items():
+        for key, value in fitting_parameters.items():
             fit = value['fit']
             bounds = value['bounds']
             mode = value['mode']
@@ -90,120 +127,132 @@ def main():
                 optimizer.enable_fit(key)
             else:
                 optimizer.disable_fit(key)
-            
+
             if factor:
-                optimizer.set_factor_boundary(key,factor)
+                optimizer.set_factor_boundary(key, factor)
 
             if bounds:
-                optimizer.set_boundary(key,bounds)
-            
+                optimizer.set_boundary(key, bounds)
+
             if mode:
-                optimizer.set_mode(key,mode.lower())
+                optimizer.set_mode(key, mode.lower())
 
+        solution = optimizer.fit(output_size=output_size)
 
-        solution = optimizer.fit()
+    # Run the model
+    result = model.model()
 
-    #Run the model
-    result=model.model(bindown_wngrid,return_contrib=True,cutoff_grid=False)
-    new_absp,absp,tau,contrib = result
-    #Get out new binned down model
-    contrib_res = None
+    if args.output_file and get_rank() == 0:
 
-    if args.full_contrib or args.output_file:
-        contrib_res = model.model_full_contrib(wngrid=bindown_wngrid,cutoff_grid=False)
-
-
-    if args.output_file and get_rank()==0:
-        from taurex.util.output import store_taurex_results,store_profiles,generate_profile_dict,generate_spectra_dict
-        #Output taurex data
-        with HDF5Output(args.output_file,append=True) as o:
+        # Output taurex data
+        with HDF5Output(args.output_file, append=True) as o:
 
             out = o.create_group('Output')
-            if observed is not None:
+            if observation is not None:
                 obs = o.create_group('Observed')
-                observed.write(obs)
+                observation.write(obs)
 
-            profiles=generate_profile_dict(model)
-            if observed is not None:
-                spectrum= generate_spectra_dict(result,contrib_res,model.nativeWavenumberGrid,observed.wavenumberGrid)
-            else:
-                spectrum= generate_spectra_dict(result,contrib_res,model.nativeWavenumberGrid)
+            profiles = generate_profile_dict(model)
+            spectrum = binning.generate_spectrum_output(result,
+                                                        output_size=output_size)
 
+            spectrum['Contributions'] = store_contributions(binning, model, 
+                                                            output_size=output_size-3)
             if solution is not None:
-                out.store_dictionary(solution,group_name='Solutions')
+                out.store_dictionary(solution, group_name='Solutions')
                 priors = {}
                 priors['Profiles'] = profiles
                 priors['Spectra'] = spectrum
-                out.store_dictionary(priors,group_name='Priors')
+                out.store_dictionary(priors, group_name='Priors')
             else:
-                out.store_dictionary(profiles,group_name='Profiles')
-                out.store_dictionary(spectrum,group_name='Spectra')
-
-
+                out.store_dictionary(profiles, group_name='Profiles')
+                out.store_dictionary(spectrum, group_name='Spectra')
 
             if optimizer:
                 optimizer.write(o)
 
+    wlgrid = 10000/wngrid
 
-
-
-
-
-    
-    wlgrid = 10000/bindown_wngrid
     if args.plot:
 
-        if get_rank()==0  and nprocs()<=1:
+        if get_rank() == 0 and nprocs() <= 1:
             import matplotlib.pyplot as plt
-            fig= plt.figure()
-            ax = fig.add_subplot(1,1,1)
-            #ax.set_xscale('log')
+            fig = plt.figure()
+            ax = fig.add_subplot(1, 1, 1)
+            ax.set_xscale('log')
             ax.set_xlabel(r'Wavelength $(\mu m)$')
             ax.set_ylabel(r'$(R_p/R_s)^2$')
             is_lightcurve = False
             try:
                 from taurex.model.lightcurve.lightcurve import LightCurveModel
-                is_lightcurve = isinstance(model,LightCurveModel)
+                is_lightcurve = isinstance(model, LightCurveModel)
+                ax.set_xscale('linear')
             except ImportError:
                 pass
 
-            if observed is not None:
+            if observation is not None:
                 if is_lightcurve:
-                    ax.plot(observed.spectrum.flatten(),label='observed')
+                    ax.plot(observation.spectrum.flatten(),
+                            label='observation')
                 else:
-                    ax.errorbar(observed.wavelengthGrid,observed.spectrum,observed.errorBar,label='observed')
+                    ax.errorbar(observation.wavelengthGrid,
+                                observation.spectrum, observation.errorBar,
+                                label='observation')
 
             if is_lightcurve:
-                ax.plot(new_absp,label='forward model')
+                ax.plot(result[1], label='forward model')
             else:
-            #Plot the absorption
-                ax.plot(wlgrid,new_absp,label='forward model')
+                ax.plot(wlgrid, binning.bin_model(result)[1], label='forward model')
 
+            if args.contrib:
+                native_grid, contrib_result = model.model_contrib(wngrid=wngrid)
 
-            if args.contrib and not is_lightcurve:
-                for name,value in contrib:
-                    new_value = bindown(native_grid,value,bindown_wngrid)
-                    ax.plot(wlgrid,new_value,label='All {}'.format(name),alpha=0.8)
+                for contrib_name, contrib in contrib_result.items():
+
+                    flux, tau, extras = contrib
+
+                    binned = binning.bindown(native_grid, flux)
+                    if is_lightcurve:
+                        ax.plot(binned[1], label=contrib_name)
+                    else:
+                        ax.plot(wlgrid, binned[1], label=contrib_name)
+
             if args.full_contrib:
-                for k,v in contrib_res.items():
-                    first_name = k
-                    for out in v:
-                        second_name = out[0]
-                        label='{}-{}'.format(first_name,second_name)
+                native_grid, contrib_result = model.model_full_contrib(wngrid=wngrid)
+
+                for contrib_name, contrib in contrib_result.items():
+
+                    for name, flux, tau, extras in contrib:
+
+                        label = '{} - {}'.format(contrib_name, name)
+
+                        binned = binning.bindown(native_grid, flux)
                         if is_lightcurve:
-                            binned = out[-1][1]
-                            ax.plot(binned,label=label,alpha=0.6)
+                            ax.plot(binned[1], label=label)
                         else:
-                            binned = out[1]
+                            ax.plot(wlgrid, binned[1], label=label)
+
+            # if args.contrib and not is_lightcurve:
+            #     for name,value in contrib:
+            #         new_value = bindown(native_grid,value,bindown_wngrid)
+            #         ax.plot(wlgrid,new_value,label='All {}'.format(name),alpha=0.8)
+            # if args.full_contrib:
+            #     for k,v in contrib_res.items():
+            #         first_name = k
+            #         for out in v:
+            #             second_name = out[0]
+            #             label='{}-{}'.format(first_name,second_name)
+            #             if is_lightcurve:
+            #                 binned = out[-1][1]
+            #                 ax.plot(binned,label=label,alpha=0.6)
+            #             else:
+            #                 binned = out[1]
                                 
-                            ax.plot(wlgrid,binned,label=label,alpha=0.6)
+            #                 ax.plot(wlgrid,binned,label=label,alpha=0.6)
 
             
             
             #If we have an observation then plot it
-
-
-
 
             plt.legend()
             plt.show()
@@ -213,5 +262,5 @@ def main():
 
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     main()

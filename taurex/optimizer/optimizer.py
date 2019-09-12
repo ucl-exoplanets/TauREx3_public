@@ -2,6 +2,7 @@ from taurex.log import Logger,disableLogging,enableLogging
 import numpy as np
 from taurex.output.writeable import Writeable
 import math
+from taurex import OutputSize
 class Optimizer(Logger):
     """
     A base class that handles fitting and optimization of forward models.
@@ -26,8 +27,8 @@ class Optimizer(Logger):
     def __init__(self,name,observed=None,model=None,sigma_fraction=0.1):
         super().__init__(name)
 
-        self._model = model
-        self._observed = observed
+        self.set_model(model)
+        self.set_observed(observed)
         self._model_callback = None
         self._sigma_fraction = sigma_fraction
 
@@ -54,7 +55,8 @@ class Optimizer(Logger):
         
         """
         self._observed = observed
-
+        if observed is not None:
+            self._binner = observed.create_binner()
 
     def compile_params(self):
         """ 
@@ -342,7 +344,7 @@ class Optimizer(Logger):
         obs_bins= self._observed.wavenumberGrid
 
 
-        final_model,_,_,_ = self._model.model(obs_bins)
+        _,final_model,_,_ = self._binner.bin_model(self._model.model(obs_bins))
         res = (data.flatten() - final_model.flatten()) / datastd.flatten()
         res = np.nansum(res*res)
         if res == 0:
@@ -364,7 +366,7 @@ class Optimizer(Logger):
         raise NotImplementedError
 
 
-    def fit(self):
+    def fit(self,output_size=OutputSize.heavy):
         from taurex.log import setLogLevel
         import logging
         """
@@ -382,21 +384,21 @@ class Optimizer(Logger):
         fit_max = [x[1] for x in fit_boundaries]
 
         fit_values = self.fit_values
-        print()
-        print('-------------------------------------')
-        print('------Retrieval Parameters-----------')
-        print('-------------------------------------')
-        print()
-        print('Dimensionality of fit:',len(fit_names))
-        print()
+        self.info('')
+        self.info('-------------------------------------')
+        self.info('------Retrieval Parameters-----------')
+        self.info('-------------------------------------')
+        self.info('')
+        self.info('Dimensionality of fit: %s',len(fit_names))
+        self.info('')
         output = tabulate(zip(fit_names,fit_values,fit_min,fit_max), headers=['Param', 'Value','Bound-min', 'Bound-max'])
-        print(output)
-        print()
+        self.info('\n%s\n\n',output)
+        self.info('')
 
-        setLogLevel(logging.ERROR)
+        disableLogging()
         self.compute_fit()
-        setLogLevel(logging.INFO)
-        return  self.generate_solution()
+        enableLogging()
+        return  self.generate_solution(output_size=output_size)
 
 
 
@@ -493,7 +495,8 @@ class Optimizer(Logger):
 
             count +=1
             weights.append(weight)
-            binned,native,tau,_ = self._model.model(wngrid=binning,cutoff_grid=False)
+            native_grid,native,tau,_ = self._model.model(wngrid=binning,cutoff_grid=False)
+            binned = self._binner.bindown(native_grid,native)[1]
             #tau_profile.update(tau,weight=weight)
             tp_profiles.update(self._model.temperatureProfile,weight=weight)
             active_gases.update(self._model.chemistry.activeGasMixProfile,weight=weight)
@@ -524,8 +527,8 @@ class Optimizer(Logger):
         tau_std = None
         return tp_std,active_std,inactive_std,tau_std,binned_std,native_std
 
-    def generate_solution(self):
-        from taurex.util.output import generate_profile_dict,generate_spectra_dict
+    def generate_solution(self,output_size=OutputSize.heavy):
+        from taurex.util.output import generate_profile_dict,generate_spectra_dict,store_contributions
         """Generates a dictionar with all solutions and other useful parameters"""
         solution_dict = {}
         self.info('Generating spectra and profiles')
@@ -541,14 +544,15 @@ class Optimizer(Logger):
             
             self.update_model(optimized) #Update the model with optimized values
 
-            opt_result = self._model.model(wngrid=self._observed.wavenumberGrid,return_contrib=True,cutoff_grid=False) #Run the model
+  
 
             sol_values['Profiles']=generate_profile_dict(self._model)
+            opt_result = self._model.model(wngrid=self._observed.wavenumberGrid,cutoff_grid=False) #Run the model
 
-            opt_contributions = self._model.model_full_contrib(wngrid=self._observed.wavenumberGrid,cutoff_grid=False) #Get contributions
+            sol_values['Spectra'] = self._binner.generate_spectrum_output(opt_result,output_size=output_size)
 
-            sol_values['Spectra'] = generate_spectra_dict(opt_result,opt_contributions,self._model.nativeWavenumberGrid,bin_grid=self._observed.wavenumberGrid)
 
+            sol_values['Spectra']['Contributions'] = store_contributions(self._binner,self._model,output_size=output_size-3)
 
 
             #Store profiles here
@@ -569,6 +573,9 @@ class Optimizer(Logger):
             solution_dict['solution{}'.format(solution)] = sol_values
         
         return solution_dict
+
+
+
 
 
     def sample_parameters(self,solution):

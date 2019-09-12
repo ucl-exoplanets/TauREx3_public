@@ -107,45 +107,122 @@ class ParameterParser(Logger):
         else:
             None
 
-    def generate_spectrum(self):
-        import numpy as np
+    def generate_observation(self):
 
         config = self._raw_config.dict()
-        observed = None
-        if 'Spectrum' in config:
-            spectrum_config = config['Spectrum']
-            if 'lightcurve' in spectrum_config:
+        if 'Observation' in config:
+            observation_config = config['Observation']
+            if 'lightcurve' in observation_config:
                 from taurex.data.spectrum.lightcurve import ObservedLightCurve
-                observed = ObservedLightCurve(spectrum_config['lightcurve'])
+                return ObservedLightCurve(observation_config['lightcurve'])
 
-            elif 'observed_spectrum' in spectrum_config:
+            elif 'observed_spectrum' in observation_config:
                 from taurex.data.spectrum.observed import ObservedSpectrum
-                observed = ObservedSpectrum(spectrum_config['observed_spectrum'])
+                return ObservedSpectrum(observation_config['observed_spectrum'])
+            elif 'phasecurve_path' in observation_config:
+                self.info('Phase curves to be implemented soon...... :D ')
+            else:
+                self.warning('No observation specified........')
+                return None
+        return None
+    
+    def create_manual_binning(self, config):
+        import numpy as np
+        import math
+        from taurex.binning import FluxBinner, SimpleBinner
+        
+        binning_class = SimpleBinner
 
-            if 'grid_type' in spectrum_config:
-                grid_type = spectrum_config['grid_type']
+        if 'accurate' in config:
+            if config['accurate']:
+                binning_class = FluxBinner
+        
+        # Handle wavelength grid
+        wngrid = None
+        if 'wavelength_grid' in config:
+            start, end, size = config['wavelength_grid']
+            wngrid = 10000/np.linspace(start, end, int(size))
+            wngrid = np.sort(wngrid)
 
-                if grid_type == 'observed':
-                    if observed is not None:
-                        return observed,observed.wavenumberGrid
-                    else:
-                        self.critical('grid type is observed yet no observed_spectrum is defined!!!')
-                        raise Exception('No observed spectrum defined for observed grid_type')
-                elif grid_type == 'native':
-                    return observed,None
-                elif grid_type == 'manual':
+        elif 'wavenumber_grid' in config:
+            start, end, size = config['wavenumber_grid']
+            wngrid = np.linspace(start, end, int(size))
 
-                    if 'wavenumber_grid' in spectrum_config:
-                        start,end,size = spectrum_config['wavenumber_grid']
-                        return observed,np.linspace(start,end,int(size))
-                    elif 'wavelength_grid' in spectrum_config:
-                        start,end,size = spectrum_config['wavelength_grid']
-                        return observed,np.linspace(10000/end,10000/start,int(size))
-                    else:
-                       self.critical('grid type is manual yet neither wavelength_grid or wavenumber_grid is defined')
-                       raise Exception('wavenumber_grid/wavelength_grid not defined in input for manual grid_type')
-                else:
-                    return observed,None
+        elif 'log_wavenumber_grid' in config:
+            start, end, size = config['log_wavenumber_grid']
+            start = math.log10(start)
+            end = math.log10(end)
+            wngrid = np.logspace(start, end, int(size))
+
+        elif 'log_wavelength_grid' in config:
+            start, end, size = config['log_wavelength_grid']
+            start = math.log10(start)
+            end = math.log10(end)
+            wngrid = np.sort(10000/np.logspace(start, end, int(size)))
+
+        if wngrid is None:
+            self._logger.error('manual was selected and no grid was given.'
+                               '(Use wavelength_grid, wavenumber_grid or log versions)')
+            raise Exception('manual selected but no grid given')
+
+        return binning_class(wngrid), wngrid
+
+    def generate_binning(self):
+
+        config = self._raw_config.dict()
+        if 'Binning' in config:
+            binning_config = config['Binning']
+            if 'bin_type' in binning_config:
+                bin_type = binning_config['bin_type'].lower()
+
+                if bin_type == 'native':
+                    return 'native'
+                elif bin_type == 'observed':
+                    return 'observed'
+                elif bin_type == 'manual':
+                    return self.create_manual_binning(binning_config)
+            else:
+                return None
+        return None
+    # def generate_spectrum(self):
+    #     import numpy as np
+
+    #     config = self._raw_config.dict()
+    #     observed = None
+    #     if 'Spectrum' in config:
+    #         spectrum_config = config['Spectrum']
+    #         if 'lightcurve' in spectrum_config:
+    #             from taurex.data.spectrum.lightcurve import ObservedLightCurve
+    #             observed = ObservedLightCurve(spectrum_config['lightcurve'])
+
+    #         elif 'observed_spectrum' in spectrum_config:
+    #             from taurex.data.spectrum.observed import ObservedSpectrum
+    #             observed = ObservedSpectrum(spectrum_config['observed_spectrum'])
+
+    #         if 'grid_type' in spectrum_config:
+    #             grid_type = spectrum_config['grid_type']
+
+    #             if grid_type == 'observed':
+    #                 if observed is not None:
+    #                     return observed,observed.wavenumberGrid
+    #                 else:
+    #                     self.critical('grid type is observed yet no observed_spectrum is defined!!!')
+    #                     raise Exception('No observed spectrum defined for observed grid_type')
+    #             elif grid_type == 'native':
+    #                 return observed,None
+    #             elif grid_type == 'manual':
+
+    #                 if 'wavenumber_grid' in spectrum_config:
+    #                     start,end,size = spectrum_config['wavenumber_grid']
+    #                     return observed,np.linspace(start,end,int(size))
+    #                 elif 'wavelength_grid' in spectrum_config:
+    #                     start,end,size = spectrum_config['wavelength_grid']
+    #                     return observed,np.linspace(10000/end,10000/start,int(size))
+    #                 else:
+    #                    self.critical('grid type is manual yet neither wavelength_grid or wavenumber_grid is defined')
+    #                    raise Exception('wavenumber_grid/wavelength_grid not defined in input for manual grid_type')
+    #             else:
+    #                 return observed,None
 
     def generate_model(self):
         config = self._raw_config.dict()

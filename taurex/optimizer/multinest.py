@@ -6,7 +6,7 @@ from taurex.mpi import get_rank,barrier
 from taurex.util.util import read_table,read_error_line,read_error_into_dict,quantile_corner,recursively_save_dict_contents_to_output
 import random
 from taurex.util.util import weighted_avg_and_std
-
+from taurex import OutputSize
 
 class MultiNestOptimizer(Optimizer):
 
@@ -298,9 +298,9 @@ class MultiNestOptimizer(Optimizer):
         return NEST_out
 
 
-    def generate_solution(self):
+    def generate_solution(self,output_size=OutputSize.heavy):
 
-        solution = super().generate_solution()
+        solution = super().generate_solution(output_size=output_size)
 
         solution['GlobalStats'] = self._multinest_output['NEST_stats']
         return solution
