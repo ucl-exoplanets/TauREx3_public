@@ -186,6 +186,7 @@ def main():
             try:
                 from taurex.model.lightcurve.lightcurve import LightCurveModel
                 is_lightcurve = isinstance(model, LightCurveModel)
+                ax.set_xscale('linear')
             except ImportError:
                 pass
 

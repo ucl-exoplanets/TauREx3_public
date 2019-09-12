@@ -265,8 +265,7 @@ class LightCurveModel(ForwardModel):
 
     def model_contrib(self,wngrid=None,cutoff_grid=True):
         
-        if wngrid is None:
-            wngrid = 10000/self.lc_data['lc_info'][:,0]
+        wngrid = 10000/self.lc_data['lc_info'][:,0]
         native_grid,contribs = self._forward_model.model_contrib(wngrid,cutoff_grid)
         binner = SimpleBinner(wngrid)
         all_contrib_dict = {}
@@ -288,8 +287,8 @@ class LightCurveModel(ForwardModel):
         """Computes the forward model for a wngrid for each contribution"""
         
         
-        if wngrid is None:
-            wngrid = 10000/self.lc_data['lc_info'][:,0]
+
+        wngrid = 10000/self.lc_data['lc_info'][:,0]
         native_grid,contrib_res = self._forward_model.model_full_contrib(wngrid,cutoff_grid)
         binner = SimpleBinner(wngrid)
 
@@ -301,11 +300,8 @@ class LightCurveModel(ForwardModel):
             
             lc_contrib_list = []
 
-            for c in contrib_list:
-                name = c[0]
-                native = c[1]
-                tau =c[2]
-                extra = c[3]
+            for name,native,tau,extra in contrib_list:
+
 
                 binned = binner.bindown(native_grid,native)[1]
                 result = self.instrument_light_curve(binned,wlgrid)

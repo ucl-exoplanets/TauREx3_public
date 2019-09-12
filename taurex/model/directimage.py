@@ -24,7 +24,8 @@ class DirectImageModel(EmissionModel):
                             chemistry=None,
                             nlayers=100,
                             atm_min_pressure=1e-4,
-                            atm_max_pressure=1e6
+                            atm_max_pressure=1e6,
+                            ngauss=4,
                             ):
         super().__init__(planet,
                             star,
@@ -33,7 +34,8 @@ class DirectImageModel(EmissionModel):
                             chemistry,
                             nlayers,
                             atm_min_pressure,
-                            atm_max_pressure)
+                            atm_max_pressure,
+                            ngauss=ngauss)
     
 
     def compute_final_flux(self,f_total):
