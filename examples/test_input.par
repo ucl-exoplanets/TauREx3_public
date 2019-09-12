@@ -47,8 +47,6 @@ model_type = transmission
     
     [[Rayleigh]]
 
-    [[SimpleClouds]]
-    clouds_pressure =1e4
     
 [Binning]
 bin_type = manual
