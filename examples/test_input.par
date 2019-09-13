@@ -57,14 +57,14 @@ tier = 2
 
 
 [Binning]
-bin_type = native
+bin_type = observed
 #accurate = False
 #log_wavelength_grid = 0.3,4.1,1000
 
 
-#[Observation]
-#observed_spectrum = /Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_transmission/SPECTRUM_fit.dat
-
+[Observation]
+observed_spectrum = /Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_transmission/SPECTRUM_fit.dat
+#observed_spectrum = /Users/ahmed/Documents/repos/TauREx3/test_spectrum.dat
 
 
 
