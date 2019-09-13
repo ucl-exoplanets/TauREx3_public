@@ -357,8 +357,10 @@ class Plotter(object):
                 if isinstance(component_value,h5py.Dataset):
                         continue
                 total_label = '{}-{}'.format(contrib_name,component_name)
-
-                binned_contrib = component_value['binned_spectrum']
+                try:
+                    binned_contrib = component_value['binned_spectrum']
+                except KeyError:
+                    binned_contrib = component_value['bin_spectrum']
                 plt.plot(wlgrid, binned_contrib, label=total_label)
 
     def simple_contrib_plot(self,solution_val,wlgrid):
@@ -371,7 +373,10 @@ class Plotter(object):
                     if isinstance(component_value,h5py.Dataset):
                         continue
                     total_label = '{}-{}'.format(contrib_name,component_name)
-                    binned_contrib = component_value['binned_spectrum']
+                    try:
+                        binned_contrib = component_value['binned_spectrum']
+                    except KeyError:
+                        binned_contrib = component_value['bin_spectrum']
                     plt.plot(wlgrid, binned_contrib, label=total_label)
             else:
                 
