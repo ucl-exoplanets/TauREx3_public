@@ -163,4 +163,4 @@ class ArielInstrument(Instrument):
         wngrid, spectrum, error, grid_width = fb.bin_model(model_res)
 
 
-        return wngrid, spectrum, noise/np.sqrt(num_observations),wn_width
+        return wngrid, spectrum, noise,wn_width
