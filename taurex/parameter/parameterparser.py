@@ -98,7 +98,13 @@ class ParameterParser(Logger):
         except KeyError:
             return self.generate_model()
 
+    def generate_instrument(self):
 
+        config = self._raw_config.dict()
+        if 'Instrument' in config:
+            return create_instrument(config['Instrument'])
+        else:
+            return None
 
     def generate_optimizer(self):
         config = self._raw_config.dict()

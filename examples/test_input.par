@@ -47,15 +47,23 @@ model_type = transmission
     
     [[Rayleigh]]
 
-    
+
+
+[Instrument]
+instrument = ariel
+config_file = '/Users/ahmed/Documents/repos/ArielRad/runConfig.xml'
+tier = 2
+
+
+
 [Binning]
-bin_type = manual
-accurate = True
-log_wavelength_grid = 0.3,4.1,1000
+bin_type = native
+#accurate = False
+#log_wavelength_grid = 0.3,4.1,1000
 
 
-[Observation]
-observed_spectrum = /Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_transmission/SPECTRUM_fit.dat
+#[Observation]
+#observed_spectrum = /Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_transmission/SPECTRUM_fit.dat
 
 
 

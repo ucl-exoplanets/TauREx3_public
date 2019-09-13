@@ -22,13 +22,17 @@ class BlackbodyStar(Fittable,Logger,Writeable):
     """
     
 
-    def __init__(self,temperature=5000,radius=1.0):
+    def __init__(self,temperature=5000,radius=1.0, distance = 1,
+                  magnitudeK = 10.0,mass = 1.0,
+                      ):
         Logger.__init__(self,'Star')
         Fittable.__init__(self)
         self._temperature = temperature
         self._radius = radius*RSOL
+        self._mass = mass
         self.sed = None
-
+        self.distance = distance
+        self.magnitudeK = magnitudeK
     @property
     def radius(self):
         """
@@ -54,9 +58,14 @@ class BlackbodyStar(Fittable,Logger,Writeable):
         return self._temperature
 
     @temperature.setter
-    def temperature(self,value):
+    def temperature(self, value):
         self._temperature = value
 
+
+
+    @property
+    def mass(self):
+        return self._mass
 
     def initialize(self,wngrid):
         """
