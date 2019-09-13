@@ -257,8 +257,16 @@ class Plotter(object):
             else:
                 label = 'Fitted model'
 
-            binned_grid = solution_val['Spectra']['binned_wlgrid'][:]
-            binned_spectrum = solution_val['Spectra']['binned_spectrum'][:]
+            try:
+                binned_grid = solution_val['Spectra']['binned_wlgrid'][:]
+            except KeyError:
+                binned_grid = solution_val['Spectra']['bin_wlgrid'][:]
+            
+            try:
+                binned_spectrum = solution_val['Spectra']['binned_spectrum'][:]
+            except KeyError:
+                binned_spectrum = solution_val['Spectra']['bin_spectrum'][:]
+                
             binned_std = solution_val['Spectra']['binned_std'][:]
 
             plt.plot(binned_grid, binned_spectrum, zorder=2,color=self.cmap(float(solution_idx)/N), label=label,alpha=0.8)
