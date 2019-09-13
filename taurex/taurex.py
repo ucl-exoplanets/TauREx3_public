@@ -10,6 +10,7 @@ def main():
     from taurex.output.hdf5 import HDF5Output
     from taurex.util.output import generate_profile_dict, store_contributions
     from .taurexdefs import OutputSize
+    import numpy as np
 
     parser = argparse.ArgumentParser(description='Taurex')
 
@@ -42,6 +43,7 @@ def main():
 
     parser.add_argument("-o", "--output_file", dest='output_file', type=str)
 
+    parser.add_argument("-S", "--save-spectrum", dest='save_spectrum', type=str)
     args = parser.parse_args()
 
 
@@ -63,6 +65,9 @@ def main():
     pp.setup_globals()
     # Generate a model from the input
     model = pp.generate_appropriate_model()
+    
+
+
 
     # build the model
     model.build()
@@ -71,6 +76,10 @@ def main():
     observation = pp.generate_observation()
 
     binning = pp.generate_binning()
+
+
+    instrument = pp.generate_instrument()
+
 
     wngrid = None
 
@@ -142,6 +151,34 @@ def main():
     # Run the model
     result = model.model()
 
+    inst_result = None
+    if instrument is not None:
+        inst_result = instrument.model_noise(model,result,num_observations=2)
+
+    if args.save_spectrum is not None:
+
+        #with open(args.save_spectrum, 'w') as f:
+        from taurex.util.util import wnwidth_to_wlwidth,compute_bin_edges
+        save_wnwidth = compute_bin_edges(wngrid)[1]
+        save_wl = 10000/wngrid
+        save_wlwidth = wnwidth_to_wlwidth(wngrid,save_wnwidth)
+        save_model = binning.bin_model(result)[1]
+        save_error = np.zeros_like(save_wl)
+        if inst_result is not None:
+            inst_wngrid, inst_spectrum, inst_noise, inst_width = inst_result
+
+            save_model = inst_spectrum
+            save_wl = 10000/inst_wngrid
+
+            save_wlwidth = wnwidth_to_wlwidth(inst_wngrid, inst_width)
+
+            save_error = inst_noise
+
+        np.savetxt(args.save_spectrum,
+                   np.vstack((save_wl, save_model, save_error, 
+                              save_wlwidth)).T)
+
+
     if args.output_file and get_rank() == 0:
 
         # Output taurex data
@@ -155,6 +192,14 @@ def main():
             profiles = generate_profile_dict(model)
             spectrum = binning.generate_spectrum_output(result,
                                                         output_size=output_size)
+
+            if inst_result is not None:
+                spectrum['instrument_wngrid'] = inst_result[0]
+                spectrum['instrument_wnwidth'] = inst_result[-1]
+                spectrum['instrument_wlgrid'] = 10000/inst_result[0]
+                spectrum['instrument_spectrum'] = inst_result[1]
+                spectrum['instrument_noise'] = inst_result[2]
+                
 
             spectrum['Contributions'] = store_contributions(binning, model, 
                                                             output_size=output_size-3)
@@ -202,7 +247,26 @@ def main():
             if is_lightcurve:
                 ax.plot(result[1], label='forward model')
             else:
-                ax.plot(wlgrid, binning.bin_model(result)[1], label='forward model')
+                
+                if inst_result is not None:
+                    from taurex.util.util import wnwidth_to_wlwidth
+                    inst_wngrid, inst_spectrum, inst_noise, inst_width = inst_result
+
+                    inst_wlgrid = 10000/inst_wngrid
+
+                    inst_wlwidth = wnwidth_to_wlwidth(inst_wngrid, inst_width)
+
+                    ax.errorbar(inst_wlgrid, inst_spectrum, inst_noise,
+                                inst_wlwidth/2, '.', label='Instrument')
+                    ax.plot(wlgrid, binning.bin_model(result)[1], label='forward model')
+                    #ax.plot(inst_wlgrid, inst_spectrum, label='forward model')
+                    #ax.plot(10000/inst_result[0], inst_result[1],'.')
+                    #ax.plot((10000/inst_result[0],10000/inst_result[0]), (inst_result[1]+inst_result[2],inst_result[1]-inst_result[2]),'-')
+                    #ax.plot((10000/inst_result[0]-10000/inst_result[3]/2,10000/inst_result[0]+10000/inst_result[3]/2), (inst_result[1],inst_result[1]),'-')
+                else:
+                    ax.plot(wlgrid, binning.bin_model(result)[1], label='forward model')
+                
+                    
 
             if args.contrib:
                 native_grid, contrib_result = model.model_contrib(wngrid=wngrid)

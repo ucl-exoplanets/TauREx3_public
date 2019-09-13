@@ -181,6 +181,14 @@ def optimizer_factory(optimizer):
         raise NotImplementedError('Optimizer {} not implemented'.format(optimizer))    
 
 
+
+def instrument_factory(instrument):
+    if instrument in ('ariel', 'arielrad',):
+        from taurex.instruments.ariel import ArielInstrument
+        return ArielInstrument
+    else:
+        raise NotImplementedError('Instrument {} not implemented'.format(instrument))
+
 def create_star(config):
     try:
         star = config.pop('star_type').lower()
@@ -207,6 +215,19 @@ def create_optimizer(config):
     
     return obj
 
+
+def create_instrument(config):
+    try:
+        instruemnt = config.pop('instrument').lower()
+    except KeyError:
+        log.error('No instrument defined input')
+        raise KeyError    
+
+    klass = instrument_factory(instruemnt)
+
+    obj = klass(**config)
+    
+    return obj
 
 def generate_contributions(config):
     from taurex.contributions import AbsorptionContribution,CIAContribution,RayleighContribution

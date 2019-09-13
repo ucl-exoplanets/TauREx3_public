@@ -457,3 +457,10 @@ def clip_native_to_wngrid(native_grid, wngrid):
     wn_max = (wngrid[-1]-wngrid[-2])/2.0 + wngrid[-1]
     native_filter = (native_grid >= wn_min) & (native_grid <= wn_max)
     return native_grid[native_filter]
+
+def wnwidth_to_wlwidth(wngrid, wnwidth):
+    import numpy as np
+    left_edge = wngrid - wnwidth/2
+    right_edge = wngrid + wnwidth/2
+
+    return np.abs(10000/left_edge - 10000/right_edge)
