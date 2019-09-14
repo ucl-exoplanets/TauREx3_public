@@ -258,7 +258,7 @@ def main():
 
                     ax.errorbar(inst_wlgrid, inst_spectrum, inst_noise,
                                 inst_wlwidth/2, '.', label='Instrument')
-                    ax.plot(wlgrid, binning.bin_model(result)[1], label='forward model')
+                    #ax.plot(wlgrid, binning.bin_model(result)[1], label='forward model')
                     #ax.plot(inst_wlgrid, inst_spectrum, label='forward model')
                     #ax.plot(10000/inst_result[0], inst_result[1],'.')
                     #ax.plot((10000/inst_result[0],10000/inst_result[0]), (inst_result[1]+inst_result[2],inst_result[1]-inst_result[2]),'-')
