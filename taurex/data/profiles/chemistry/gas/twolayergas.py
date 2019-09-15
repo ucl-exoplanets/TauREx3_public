@@ -89,8 +89,8 @@ class TwoLayerGas(Gas):
         param_name = self.molecule
         param_tex = molecule_texlabel(param_name)
 
-        param_surface = '{}_S'.format(param_name)
-        param_surf_tex = '{}_S'.format(param_tex)
+        param_surface = '{}_surface'.format(param_name)
+        param_surf_tex = '{}_surface'.format(param_tex)
 
         def read_surf(self):
             return self._mix_surface
@@ -111,8 +111,8 @@ class TwoLayerGas(Gas):
         param_name = self.molecule
         param_tex = molecule_texlabel(param_name)
 
-        param_top = '{}_T'.format(param_name)
-        param_top_tex = '{}_T'.format(param_tex)
+        param_top = '{}_top'.format(param_name)
+        param_top_tex = '{}_top'.format(param_tex)
 
         def read_top(self):
             return self._mix_top
