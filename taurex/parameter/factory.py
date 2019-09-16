@@ -42,14 +42,25 @@ def create_klass(config,klass):
 
 
 
-def create_profile(config,factory):
+def create_profile(config, factory, baseclass=None):
     try:
         profile_type = config.pop('profile_type').lower()
     except KeyError:
         log.error('No profile_type defined input')
-        raise KeyError    
+        raise KeyError  
 
-    klass = factory(profile_type)
+    klass = None
+    if profile_type == 'custom':
+        try:
+            python_file = config.pop('python_file').lower()
+        except KeyError:
+            log.error('No python file for custom model')
+            raise KeyError   
+
+        klass = detect_and_return_klass(python_file,baseclass)
+
+    else:
+        klass = factory(profile_type)
 
     obj = create_klass(config,klass)
     
@@ -105,17 +116,24 @@ def star_factory(star_type):
 
 
 def create_gas_profile(config):
-    return create_profile(config,gas_factory)
+    from taurex.data.profiles.chemistry.gas import Gas
+    return create_profile(config, gas_factory, Gas)
+
 
 def create_temperature_profile(config):
-    return create_profile(config,temp_factory)
+    from taurex.data.profiles.temperature import TemperatureProfile
+    return create_profile(config, temp_factory, TemperatureProfile)
+
 
 def create_pressure_profile(config):
-    return create_profile(config,pressure_factory)
+    from taurex.data.profiles.pressure.pressureprofile import PressureProfile
+    return create_profile(config, pressure_factory, PressureProfile)
+
 
 def create_ace(config):
     from taurex.data.profiles.chemistry import ACEChemistry
     return ACEChemistry(**config)
+
 
 def create_chemistry(config):
     try:
@@ -126,18 +144,18 @@ def create_chemistry(config):
 
     if chemistry in ('ace','equilibrium'):
         return create_ace(config)
-    elif chemistry in ('taurex','complex','custom','defined'):
+    elif chemistry in ('taurex', 'complex', 'custom', 'defined'):
         from taurex.data.profiles.chemistry import TaurexChemistry
         gases = []
         config_key=[]
-        for key,value in config.items():
+        for key, value in config.items():
             
-            if isinstance(value,dict):
-                log.debug('FOUND GAS {} {}'.format(key,value))
+            if isinstance(value, dict):
+                log.debug('FOUND GAS {} {}'.format(key, value))
                 config_key.append(key)
                 gas_type = value.pop('gas_type').lower()
                 klass = gas_factory(gas_type)
-                gases.append(klass(molecule_name=key,**value))
+                gases.append(klass(molecule_name=key, **value))
 
         for k in config_key: del config[k]
         log.debug('leftover keys {}'.format(config))
@@ -150,9 +168,8 @@ def create_chemistry(config):
         raise ValueError('Unknown chemistry type {}'.format(chemistry))
 
 
-
 def model_factory(model_type):
-    if model_type =='transmission':
+    if model_type == 'transmission':
         from taurex.model import TransmissionModel
         return TransmissionModel
     elif model_type == 'emission':
@@ -163,6 +180,7 @@ def model_factory(model_type):
         return DirectImageModel
     else:
         raise NotImplementedError('Model {} not implemented'.format(model_type))
+
 
 def optimizer_factory(optimizer):
     if optimizer == 'nestle':
@@ -181,7 +199,6 @@ def optimizer_factory(optimizer):
         raise NotImplementedError('Optimizer {} not implemented'.format(optimizer))    
 
 
-
 def instrument_factory(instrument):
     if instrument in ('ariel', 'arielrad',):
         from taurex.instruments.ariel import ArielInstrument
@@ -189,27 +206,40 @@ def instrument_factory(instrument):
     else:
         raise NotImplementedError('Instrument {} not implemented'.format(instrument))
 
+
 def create_star(config):
     try:
         star = config.pop('star_type').lower()
     except KeyError:
         log.error('No star defined input')
-        raise KeyError    
+        raise KeyError
 
     klass = star_factory(star)
 
     obj = klass(**config)
-    
+
     return obj
+
 
 def create_optimizer(config):
     try:
         optimizer = config.pop('optimizer').lower()
     except KeyError:
         log.error('No optimizier defined input')
-        raise KeyError    
+        raise KeyError 
 
-    klass = optimizer_factory(optimizer)
+    klass = None
+    if optimizer == 'custom':
+        from taurex.optimizer.optimizer import Optimizer
+        try:
+            python_file = config.pop('python_file').lower()
+        except KeyError:
+            log.error('No python file for custom model')
+            raise KeyError
+
+        klass = detect_and_return_klass(python_file, Optimizer)
+    else:
+        klass = optimizer_factory(optimizer)
 
     obj = klass(**config)
     
@@ -223,7 +253,18 @@ def create_instrument(config):
         log.error('No instrument defined input')
         raise KeyError    
 
-    klass = instrument_factory(instruemnt)
+    klass = None
+    if instruemnt == 'custom':
+        from taurex.instruments.instrument import Instrument
+        try:
+            python_file = config.pop('python_file').lower()
+        except KeyError:
+            log.error('No python file for custom model')
+            raise KeyError   
+
+        klass = detect_and_return_klass(python_file,Instrument)
+    else:
+        klass = instrument_factory(instruemnt)
 
     obj = klass(**config)
     
@@ -260,13 +301,24 @@ def generate_contributions(config):
 
     
 def create_model(config,gas,temperature,pressure,planet,star):
+
     try:
         model_type = config.pop('model_type').lower()
     except KeyError:
         log.error('No model_type defined input')
         raise KeyError    
+    klass = None
+    if model_type == 'custom':
+        from taurex.model import ForwardModel
+        try:
+            python_file = config.pop('python_file').lower()
+        except KeyError:
+            log.error('No python file for custom model')
+            raise KeyError   
 
-    klass = model_factory(model_type)
+        klass = detect_and_return_klass(python_file,ForwardModel)
+    else:
+        klass = model_factory(model_type)
     log.debug('Chosen_model is {}'.format(klass))
     kwargs = get_keywordarg_dict(klass)
     log.debug('Model kwargs {}'.format(kwargs))
@@ -289,3 +341,14 @@ def create_model(config,gas,temperature,pressure,planet,star):
 
 
     return obj       
+
+def detect_and_return_klass(python_file,baseclass):
+    import ast
+    with open(python_file, "r") as source:
+        tree = ast.parse(source.read())
+    my_code = compile(tree,python_file,'exec')
+    gl= globals()
+    ll = locals()
+    exec_dict = exec(my_code,gl,ll)
+    print([(k,v) for k,v in ll.items() if isinstance(v,type) and issubclass(v,baseclass)])
+    return [(k,v) for k,v in ll.items() if isinstance(v,type) and issubclass(v,baseclass) and v.__module__.startswith('taurex.parameter.factory')][-1][-1]
