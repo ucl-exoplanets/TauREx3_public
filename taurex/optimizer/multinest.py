@@ -329,7 +329,7 @@ class MultiNestOptimizer(Optimizer):
             solution_idx = int(k[8:])
             for p_name,p_value in v['fit_params'].items():
                 idx = names.index(p_name)
-                opt_values[idx] = p_value['value']
+                opt_values[idx] = p_value['nest_map']
             
             yield solution_idx,opt_values,[
                                 ('Statistics',{'local log-evidence': self._multinest_output['NEST_stats']['modes'][solution_idx]['local log-evidence'],

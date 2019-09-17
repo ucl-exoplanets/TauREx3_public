@@ -241,7 +241,7 @@ def main():
                             label='observation')
                 else:
                     ax.errorbar(observation.wavelengthGrid,
-                                observation.spectrum, observation.errorBar,
+                                observation.spectrum, observation.errorBar,fmt='.',
                                 label='observation')
 
             if is_lightcurve:

@@ -21,7 +21,7 @@ ratio = 4.8962e-2
 
 [Temperature]
 profile_type = isothermal
-T = 1340.0
+iso_temp = 1240.0
 
 [Pressure]
 profile_type = Simple
@@ -50,16 +50,14 @@ model_type = transmission
 
 
 
-
-
 [Binning]
 bin_type = observed
 #accurate = False
 #log_wavelength_grid = 0.3,4.1,1000
 
 
-[Observation]
-observed_spectrum = /Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_transmission/SPECTRUM_fit.dat
+#[Observation]
+#observed_spectrum = /Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_transmission/SPECTRUM_fit.dat
 #observed_spectrum = /Users/ahmed/Documents/repos/TauREx3/test_spectrum.dat
 
 
