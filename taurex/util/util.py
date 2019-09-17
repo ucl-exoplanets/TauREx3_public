@@ -3,6 +3,7 @@
 from taurex.constants import AMU
 import math
 import re
+import numpy as np
 mass = {
   "H":	1.00794,
   "He":	4.002602,
