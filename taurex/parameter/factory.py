@@ -184,11 +184,8 @@ def optimizer_factory(optimizer):
 
 
 def instrument_factory(instrument):
-    if instrument in ('ariel', 'arielrad',):
-        from taurex.instruments.ariel import ArielInstrument
-        return ArielInstrument
-    else:
-        raise NotImplementedError('Instrument {} not implemented'.format(instrument))
+
+    raise NotImplementedError('Instrument {} not implemented'.format(instrument))
 
 
 def create_star(config):
