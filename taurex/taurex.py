@@ -227,7 +227,7 @@ def main():
             import matplotlib.pyplot as plt
             fig = plt.figure()
             ax = fig.add_subplot(1, 1, 1)
-            ax.set_xscale('log')
+            
             ax.set_xlabel(r'Wavelength $(\mu m)$')
             ax.set_ylabel(r'$(R_p/R_s)^2$')
             is_lightcurve = False
@@ -269,6 +269,7 @@ def main():
                 else:
                     ax.plot(wlgrid, binning.bin_model(result)[1], label='forward model')
                 
+                ax.set_xscale('log')
                     
 
             if args.contrib:
