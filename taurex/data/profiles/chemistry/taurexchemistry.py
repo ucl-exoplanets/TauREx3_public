@@ -4,6 +4,12 @@ import numpy as np
 import math
 from taurex.util import *
 from taurex.cache import OpacityCache
+from taurex.exceptions import InvalidModelException
+
+class InvalidChemistryException(InvalidModelException):
+    pass
+
+
 class TaurexChemistry(Chemistry):
     """
     The standard chemical model used in Taurex. This allows for the combination
@@ -63,7 +69,7 @@ class TaurexChemistry(Chemistry):
         if len(fill_gases) > 1 and len(ratio)!= len(fill_gases)-1:
             self.error('Fill gases and ratio count are not correctly matched')
             self.error('There should be %s ratios, you have defined %s',len(fill_gases)-1,len(ratio))
-            raise Exception('Incorrect number of ratios given')
+            raise InvalidChemistryException
 
 
         self._fill_gases = fill_gases
@@ -82,7 +88,7 @@ class TaurexChemistry(Chemistry):
 
         for idx,value in enumerate(zip(self._fill_gases[1:],self._fill_ratio)):
             gas,ratio = value
-            mol_name = '{}_{}'.format(main_gas,gas)
+            mol_name = '{}_{}'.format(gas,main_gas)
             param_name = mol_name
             param_tex = '{}/{}'.format(molecule_texlabel(gas),molecule_texlabel(main_gas))
             
@@ -121,9 +127,17 @@ class TaurexChemistry(Chemistry):
             on next initialization call.
 
         """
+
+
+
         if gas.molecule in [x.molecule for x in self._gases]:
-            self.error('Gas already exists')
-            raise Exception('Gas already exists')
+            self.error('Gas already exists %s',gas.molecule)
+            raise InvalidChemistryException
+
+        self.debug('Gas %s fill gas: %s',gas.molecule,self._fill_gases)
+        if gas.molecule in self._fill_gases:
+            self.error('Gas %s is already a fill gas: %s',gas.molecule,self._fill_gases)
+            raise InvalidChemistryException
         
         self._gases.append(gas)
         
@@ -198,9 +212,21 @@ class TaurexChemistry(Chemistry):
                 inactive_profile.append(gas.mixProfile)
                 self._inactive.append(gas.molecule)
 
+        
+
 
         total_mix = sum(active_profile) + sum(inactive_profile)
+
+        self.debug('Total mix output %s',total_mix)
         
+
+        validity = np.any(total_mix> 1.0)
+        
+        self.debug('Is invalid? %s',validity)
+
+        if validity:
+            self.error('Greater than 1.0 chemistry profile detected')
+            raise InvalidChemistryException
 
 
         mixratio_remainder = 1. - total_mix

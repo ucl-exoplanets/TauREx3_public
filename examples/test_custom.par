@@ -1,32 +1,34 @@
 [Global]
 xsec_path = /Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/xsec/TauRex_sampled_xsecs_R10000_0.3-15
-xsec_interpolation = exp
 cia_path = /Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/cia/hitran
 
 
 [Chemistry]
 chemistry_type = taurex
-n2_mix_ratio=0
-he_h2_ratio=0.17647
+fill_gases = H2,He
+ratio = 4.8962e-2
 
     [[H2O]]
-    gas_type=constant
-    mix_ratio=1e-5
+    gas_type = constant
+    mix_ratio=1.1185e-4
 
-   # [[CH4]]
-   # mix_ratio=1e-6
-   # gas_type=constant
+    [[N2]]
+    gas_type = constant
+    mix_ratio = 3.00739e-9
+
+    
 
 
 [Temperature]
-profile_type = isothermal
-iso_temp = 1500.0
+profile_type = custom
+python_file=/Users/ahmed/Documents/test_python/test_temperature.py
+iso_temp = 1340.0
 
 [Pressure]
 profile_type = Simple
 atm_min_pressure = 1e-4
 atm_max_pressure = 1e6
-nlayers = 100
+nlayers = 10
 
 [Planet]
 planet_type = Simple
@@ -46,36 +48,41 @@ model_type = transmission
     
     [[Rayleigh]]
 
-    #[[Mie]]
-    #mie_path= /Users/ahmed/Documents/repos/TauREx3/src/MIE/MgSiO3.dat
 
-    #[[SimpleClouds]]
-    #clouds_pressure =5e3
+
+[Instrument]
+instrument = ariel
+config_file = '/Users/ahmed/Documents/repos/ArielRad/runConfig.xml'
+tier = 2
+
+
 
 [Binning]
-bin_type = manual
-log_wavelength_grid = 0.3,4.1,1000
+bin_type = observed
+#accurate = False
+#log_wavelength_grid = 0.3,4.1,1000
 
 
 [Observation]
 observed_spectrum = /Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_transmission/SPECTRUM_fit.dat
+#observed_spectrum = /Users/ahmed/Documents/repos/TauREx3/test_spectrum.dat
 
 
 
 
 [Optimizer]
-optimizer = polychord
-polychord_path = /Users/ahmed/Documents/repos/TauREx3/examples/chains
-evidence_tolerance=0.5
-resume = True
+optimizer = multinest
+num_live_points = 50
+multi_nest_path=./multinest
+search_multi_modes=True
+
 
 
 [Fitting]
 T:fit = True
 T:bounds = 1200.0,1600.0
 planet_radius:fit = False
-H2O:fit = True
+H2O:fit = False
 H2O:bounds = 1e-2,1e-5
 H2O:mode = log
-#CH4:fit = True
 

@@ -17,13 +17,26 @@ class Planet(Fittable,Logger,Writeable):
 
     """
     
-    def __init__(self,mass=1.0,radius=1.0,ld_coeff=1.0,distance=1):
+    def __init__(self,planet_mass=1.0,planet_radius=1.0,
+                      planet_distance=1,
+                      impact_param=0.5,orbital_period=2.0, albedo=0.3,
+                      transit_time=3000.0):
         Logger.__init__(self,'Planet')
         Fittable.__init__(self)
-        self._mass = mass*MJUP
-        self._radius = radius*RJUP
-        self._ld_coeff = ld_coeff
-        self._distance = distance
+        self._mass = planet_mass*MJUP
+        self._radius = planet_radius*RJUP
+
+        ######
+        #
+        #  AHMED????
+        #  should distance be put in km here instead of doing this in the directimage.py???
+        #
+        #####
+        self._distance = planet_distance
+        self._impact = impact_param
+        self._orbit_period = orbital_period
+        self._albedo = albedo
+        self._transit_time = transit_time
 
     
     @fitparam(param_name='planet_mass',param_latex='$M_p$',default_fit=False,default_bounds=[0.5,1.5])
@@ -63,6 +76,26 @@ class Planet(Fittable,Logger,Writeable):
         """
         return self._mass
 
+
+    @property
+    def impactParameter(self):
+        return self._impact
+    
+    @property
+    def orbitalPeriod(self):
+        return self._orbit_period
+    
+
+    @property
+    def albedo(self):
+        return self._albedo
+    
+
+    @property
+    def transitTime(self):
+        return self._transit_time
+
+
     # @fitparam(param_name='planet_ld_coeff',param_latex=None,default_fit=False)
     # def limbDarkeningCoeff(self):
     #     return self._ld_coeff
@@ -78,6 +111,8 @@ class Planet(Fittable,Logger,Writeable):
     @distance.setter
     def distance(self,value):
         self._distance = value
+
+
 
 
     @property

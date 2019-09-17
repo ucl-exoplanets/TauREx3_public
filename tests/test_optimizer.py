@@ -4,6 +4,8 @@ from taurex.model import TransmissionModel
 from unittest.mock import patch
 
 
+
+
 class OptimizerTest(unittest.TestCase):
 
 
@@ -53,3 +55,7 @@ class OptimizerTest(unittest.TestCase):
 
         self.assertEqual(opt.fit_boundaries[t_index][0],1000.0)
         self.assertEqual(opt.fit_boundaries[t_index][1],3000.0)
+
+
+
+    

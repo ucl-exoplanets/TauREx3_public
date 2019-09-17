@@ -262,8 +262,16 @@ class Plotter(object):
             else:
                 label = 'Fitted model'
 
-            binned_grid = solution_val['Spectra']['bin_wlgrid'][:]
-            binned_spectrum = solution_val['Spectra']['bin_spectrum'][:]
+            try:
+                binned_grid = solution_val['Spectra']['binned_wlgrid'][:]
+            except KeyError:
+                binned_grid = solution_val['Spectra']['bin_wlgrid'][:]
+            
+            try:
+                binned_spectrum = solution_val['Spectra']['binned_spectrum'][:]
+            except KeyError:
+                binned_spectrum = solution_val['Spectra']['bin_spectrum'][:]
+                
             binned_std = solution_val['Spectra']['binned_std'][:]
 
             plt.plot(binned_grid, binned_spectrum, zorder=2,color=self.cmap(float(solution_idx)/N), label=label,alpha=0.8)
@@ -358,8 +366,10 @@ class Plotter(object):
                 if isinstance(component_value,h5py.Dataset):
                         continue
                 total_label = '{}-{}'.format(contrib_name,component_name)
-
-                binned_contrib = component_value['binned']
+                try:
+                    binned_contrib = component_value['binned_spectrum']
+                except KeyError:
+                    binned_contrib = component_value['bin_spectrum']
                 plt.plot(wlgrid, binned_contrib, label=total_label)
 
     def simple_contrib_plot(self,solution_val,wlgrid):
@@ -372,7 +382,10 @@ class Plotter(object):
                     if isinstance(component_value,h5py.Dataset):
                         continue
                     total_label = '{}-{}'.format(contrib_name,component_name)
-                    binned_contrib = component_value['binned']
+                    try:
+                        binned_contrib = component_value['binned_spectrum']
+                    except KeyError:
+                        binned_contrib = component_value['bin_spectrum']
                     plt.plot(wlgrid, binned_contrib, label=total_label)
             else:
                 

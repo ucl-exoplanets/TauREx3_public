@@ -2,11 +2,11 @@ from .optimizer import Optimizer
 import pymultinest
 import numpy as np
 import os
-
+from taurex.mpi import get_rank,barrier
 from taurex.util.util import read_table,read_error_line,read_error_into_dict,quantile_corner,recursively_save_dict_contents_to_output
 import random
 from taurex.util.util import weighted_avg_and_std
-
+from taurex import OutputSize
 
 class MultiNestOptimizer(Optimizer):
 
@@ -54,8 +54,14 @@ class MultiNestOptimizer(Optimizer):
 
 
         self.dir_multinest = multi_nest_path
-        if not os.path.exists(self.dir_multinest):
-            os.makedirs(self.dir_multinest)
+        if get_rank() == 0:
+            
+            if not os.path.exists(self.dir_multinest):
+                self.info('Directory %s does not exist, creating',self.dir_multinest)
+                os.makedirs(self.dir_multinest)
+        barrier()
+
+        self.info('Found directory %s',self.dir_multinest)
 
         self.resume = resume
         self.verbose = verbose_output
@@ -292,9 +298,9 @@ class MultiNestOptimizer(Optimizer):
         return NEST_out
 
 
-    def generate_solution(self):
+    def generate_solution(self,output_size=OutputSize.heavy):
 
-        solution = super().generate_solution()
+        solution = super().generate_solution(output_size=output_size)
 
         solution['GlobalStats'] = self._multinest_output['NEST_stats']
         return solution
@@ -323,7 +329,7 @@ class MultiNestOptimizer(Optimizer):
             solution_idx = int(k[8:])
             for p_name,p_value in v['fit_params'].items():
                 idx = names.index(p_name)
-                opt_values[idx] = p_value['value']
+                opt_values[idx] = p_value['nest_map']
             
             yield solution_idx,opt_values,[
                                 ('Statistics',{'local log-evidence': self._multinest_output['NEST_stats']['modes'][solution_idx]['local log-evidence'],

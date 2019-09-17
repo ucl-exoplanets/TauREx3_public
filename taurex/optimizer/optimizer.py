@@ -1,7 +1,8 @@
-from taurex.log import Logger
+from taurex.log import Logger,disableLogging,enableLogging
 import numpy as np
 from taurex.output.writeable import Writeable
 import math
+from taurex import OutputSize
 class Optimizer(Logger):
     """
     A base class that handles fitting and optimization of forward models.
@@ -26,8 +27,8 @@ class Optimizer(Logger):
     def __init__(self,name,observed=None,model=None,sigma_fraction=0.1):
         super().__init__(name)
 
-        self._model = model
-        self._observed = observed
+        self.set_model(model)
+        self.set_observed(observed)
         self._model_callback = None
         self._sigma_fraction = sigma_fraction
 
@@ -54,7 +55,8 @@ class Optimizer(Logger):
         
         """
         self._observed = observed
-
+        if observed is not None:
+            self._binner = observed.create_binner()
 
     def compile_params(self):
         """ 
@@ -337,12 +339,19 @@ class Optimizer(Logger):
         """
         from taurex.util import bindown
         import numexpr as ne
+        from taurex.exceptions import InvalidModelException
         self.update_model(fit_params)
 
         obs_bins= self._observed.wavenumberGrid
 
+        
 
-        final_model,_,_,_ = self._model.model(obs_bins)
+        try:
+            _,final_model,_,_ = self._binner.bin_model(self._model.model(obs_bins))
+        except InvalidModelException:
+            return 1e100
+
+            
         res = (data.flatten() - final_model.flatten()) / datastd.flatten()
         res = np.nansum(res*res)
         if res == 0:
@@ -364,7 +373,7 @@ class Optimizer(Logger):
         raise NotImplementedError
 
 
-    def fit(self):
+    def fit(self,output_size=OutputSize.heavy):
         from taurex.log import setLogLevel
         import logging
         """
@@ -382,21 +391,21 @@ class Optimizer(Logger):
         fit_max = [x[1] for x in fit_boundaries]
 
         fit_values = self.fit_values
-        print()
-        print('-------------------------------------')
-        print('------Retrieval Parameters-----------')
-        print('-------------------------------------')
-        print()
-        print('Dimensionality of fit:',len(fit_names))
-        print()
+        self.info('')
+        self.info('-------------------------------------')
+        self.info('------Retrieval Parameters-----------')
+        self.info('-------------------------------------')
+        self.info('')
+        self.info('Dimensionality of fit: %s',len(fit_names))
+        self.info('')
         output = tabulate(zip(fit_names,fit_values,fit_min,fit_max), headers=['Param', 'Value','Bound-min', 'Bound-max'])
-        print(output)
-        print()
+        self.info('\n%s\n\n',output)
+        self.info('')
 
-        setLogLevel(logging.ERROR)
+        disableLogging()
         self.compute_fit()
-        setLogLevel(logging.INFO)
-        return  self.generate_solution()
+        enableLogging()
+        return  self.generate_solution(output_size=output_size)
 
 
 
@@ -452,54 +461,81 @@ class Optimizer(Logger):
 
     def generate_profiles(self,solution,binning):
         from taurex.util.math import OnlineVariance
-
+        from taurex import mpi
         """Generates sigma plots for profiles"""
         from taurex.util.util import weighted_avg_and_std
         weights = []
         tp_profiles = OnlineVariance()
         active_gases = OnlineVariance()
         inactive_gases = OnlineVariance()
-        tau_profile = OnlineVariance()
+        #tau_profile = OnlineVariance()
         binned_spectrum = OnlineVariance()
         native_spectrum = OnlineVariance()
 
-        for parameters,weight in self.sample_parameters(solution): #sample likelihood space and get their parameters
+
+
+        sample_list = None
+        if mpi.get_rank() == 0:
+            sample_list = list(self.sample_parameters(solution))
+        
+        sample_list = mpi.broadcast(sample_list)
+
+        self.debug('We all got %s',sample_list)
+
+        self.info('------------Profile generation step------------------')
+
+        self.info('We are sampling %s points for the profiles',len(sample_list))
+
+        rank = mpi.get_rank()
+        size = mpi.nprocs()
+
+
+        self.info('I will only iterate through partitioned %s points (the rest is in parallel)',len(sample_list)//size)
+        disableLogging()
+        count= 0
+
+        for parameters,weight in sample_list[rank::size]: #sample likelihood space and get their parameters
             self.update_model(parameters)
 
+            if rank ==0 and count % 10 ==0 and count >0:
+                self.error('Progress {}%'.format(count*100.0        /(len(sample_list)/size)))
+
+            count +=1
             weights.append(weight)
-            binned,native,tau,_ = self._model.model(wngrid=binning,cutoff_grid=False)
-            tau_profile.update(tau,weight=weight)
+            native_grid,native,tau,_ = self._model.model(wngrid=binning,cutoff_grid=False)
+            binned = self._binner.bindown(native_grid,native)[1]
+            #tau_profile.update(tau,weight=weight)
             tp_profiles.update(self._model.temperatureProfile,weight=weight)
             active_gases.update(self._model.chemistry.activeGasMixProfile,weight=weight)
             inactive_gases.update(self._model.chemistry.inactiveGasMixProfile,weight=weight)
             binned_spectrum.update(binned,weight=weight)
             native_spectrum.update(native,weight=weight)
-
+        enableLogging()
         weights = np.array(weights)
         if np.any(weights):
-            tp_std = np.sqrt(tp_profiles.variance)
-            active_std = np.sqrt(active_gases.variance)
-            inactive_std = np.sqrt(inactive_gases.variance)
+            tp_std = np.sqrt(tp_profiles.parallelVariance())
+            active_std = np.sqrt(active_gases.parallelVariance())
+            inactive_std = np.sqrt(inactive_gases.parallelVariance())
 
-            tau_std = np.sqrt(tau_profile.variance)
+            #tau_std = np.sqrt(tau_profile.parallelVariance())
 
-            binned_std = np.sqrt(binned_spectrum.variance)
-            native_std = np.sqrt(native_spectrum.variance)
+            binned_std = np.sqrt(binned_spectrum.parallelVariance())
+            native_std = np.sqrt(native_spectrum.parallelVariance())
         else:
             self.warning('WEIGHTS ARE ALL ZERO, SETTING PROFILES STD TO ZERO')
             tp_std = np.zeros_like(tp_profiles)
             active_std = np.zeros_like(active_gases)
             inactive_std = np.zeros_like(inactive_gases)
 
-            tau_std = np.zeros_like(tau_profile)
+           # tau_std = np.zeros_like(tau_profile)
 
             binned_std = np.zeros_like(binned_spectrum)
             native_std = np.zeros_like(native_spectrum)
-
+        tau_std = None
         return tp_std,active_std,inactive_std,tau_std,binned_std,native_std
 
-    def generate_solution(self):
-        from taurex.util.output import generate_profile_dict,generate_spectra_dict
+    def generate_solution(self,output_size=OutputSize.heavy):
+        from taurex.util.output import generate_profile_dict,generate_spectra_dict,store_contributions
         """Generates a dictionar with all solutions and other useful parameters"""
         solution_dict = {}
         self.info('Generating spectra and profiles')
@@ -515,14 +551,15 @@ class Optimizer(Logger):
             
             self.update_model(optimized) #Update the model with optimized values
 
-            opt_result = self._model.model(wngrid=self._observed.wavenumberGrid,return_contrib=True,cutoff_grid=False) #Run the model
+  
 
             sol_values['Profiles']=generate_profile_dict(self._model)
+            opt_result = self._model.model(wngrid=self._observed.wavenumberGrid,cutoff_grid=False) #Run the model
 
-            opt_contributions = self._model.model_full_contrib(wngrid=self._observed.wavenumberGrid,cutoff_grid=False) #Get contributions
+            sol_values['Spectra'] = self._binner.generate_spectrum_output(opt_result,output_size=output_size)
 
-            sol_values['Spectra'] = generate_spectra_dict(opt_result,opt_contributions,self._model.nativeWavenumberGrid,bin_grid=self._observed.wavenumberGrid)
 
+            sol_values['Spectra']['Contributions'] = store_contributions(self._binner,self._model,output_size=output_size-3)
 
 
             #Store profiles here
@@ -543,6 +580,9 @@ class Optimizer(Logger):
             solution_dict['solution{}'.format(solution)] = sol_values
         
         return solution_dict
+
+
+
 
 
     def sample_parameters(self,solution):

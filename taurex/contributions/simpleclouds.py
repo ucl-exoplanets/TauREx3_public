@@ -12,7 +12,6 @@ class SimpleCloudsContribution(Contribution):
 
     def contribute(self,model,start_horz_layer,end_horz_layer,density_offset,layer,density,tau,path_length=None):
 
-        #self._total_contrib[layer,:] = self._contrib[layer,:]
         tau[layer]+=self._contrib[layer,:]
 
 
@@ -24,11 +23,11 @@ class SimpleCloudsContribution(Contribution):
         contrib = np.zeros(shape=(model.nLayers,wngrid.shape[0],))
         cloud_filtr = model.pressureProfile >= self._cloud_pressure
         contrib[cloud_filtr,:] = np.inf
-        yield 'Clouds',contrib
+        self._contrib = contrib
+        yield 'Clouds',self._contrib
 
     def prepare(self,model,wngrid):
-        self._total_contrib = np.zeros(shape=(model.nLayers,wngrid.shape[0],))
-        self._contrib = sum([x[1] for x in self.prepare_each(model,wngrid)])
+        [x[1] for x in self.prepare_each(model, wngrid)]
 
     @fitparam(param_name='clouds_pressure',param_latex='$P_\mathrm{clouds}$',default_mode='log',default_fit=False,default_bounds=[1e-3, 1e6])
     def cloudsPressure(self):

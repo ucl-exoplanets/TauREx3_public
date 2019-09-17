@@ -152,23 +152,23 @@ class ObservedSpectrumTest(unittest.TestCase):
         self.assertIsNotNone(test_spec.binWidths)
 
 
-    @patch("numpy.loadtxt", return_value=test_data_with_bin)
-    def test_bin_edge_calc_with_bin(self,mock_load):
-        test_spec = ObservedSpectrum('TestFile')
-        mock_load.assert_called_with('TestFile')
+    # @patch("numpy.loadtxt", return_value=test_data_with_bin)
+    # def test_bin_edge_calc_with_bin(self,mock_load):
+    #     test_spec = ObservedSpectrum('TestFile')
+    #     mock_load.assert_called_with('TestFile')
 
-        np.testing.assert_array_equal(test_data_with_bin,test_spec.rawData)
-        np.testing.assert_array_equal(test_data_with_bin[:,3],test_spec.binWidths)
-        np.testing.assert_array_equal(self._taurex_binwidths(),test_spec.binEdges)
+    #     np.testing.assert_array_equal(test_data_with_bin,test_spec.rawData)
+    #     np.testing.assert_array_equal(test_data_with_bin[:,3],test_spec.binWidths)
+    #     np.testing.assert_array_equal(self._taurex_binwidths(),test_spec.binEdges)
 
 
-    @patch("numpy.loadtxt", return_value=test_data_without_bin)
-    def test_bin_edge_calc_without_bin(self,mock_load):
-        test_spec = ObservedSpectrum('TestFile')
-        mock_load.assert_called_with('TestFile')
+    # @patch("numpy.loadtxt", return_value=test_data_without_bin)
+    # def test_bin_edge_calc_without_bin(self,mock_load):
+    #     test_spec = ObservedSpectrum('TestFile')
+    #     mock_load.assert_called_with('TestFile')
         
-        bin_widths,bin_edges = self._taurex_extrap_bin()
+    #     bin_widths,bin_edges = self._taurex_extrap_bin()
 
-        np.testing.assert_array_equal(test_data_without_bin,test_spec.rawData)
-        np.testing.assert_array_equal(bin_widths,test_spec.binWidths)
-        np.testing.assert_array_equal(bin_edges,test_spec.binEdges)
+    #     np.testing.assert_array_equal(test_data_without_bin,test_spec.rawData)
+    #     np.testing.assert_array_equal(bin_widths,test_spec.binWidths)
+    #     np.testing.assert_array_equal(bin_edges,test_spec.binEdges)

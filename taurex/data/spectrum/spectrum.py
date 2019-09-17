@@ -16,17 +16,23 @@ class BaseSpectrum(Logger,Writeable):
     Parameters
     ----------
     
-    name : str 
+    name : str
         Name to be used in logging
-
-    
+   
     """
 
 
     def __init__(self,name):
         super().__init__(name)
 
-    
+    def create_binner(self):
+        from taurex.binning import FluxBinner
+        """
+        Creates the appropriate binning object
+        """
+
+        return FluxBinner(wngrid=self.wavenumberGrid,
+                          wngrid_width=self.binWidths)
 
     @property
     def spectrum(self):
@@ -92,7 +98,7 @@ class BaseSpectrum(Logger,Writeable):
         **Requires Implementation**
 
 
-        Should return the bin edges of the wavelength grid
+        Should return the bin edges of the wavenumber grid
 
         Raises
         ------
@@ -107,7 +113,7 @@ class BaseSpectrum(Logger,Writeable):
         **Requires Implementation**
 
 
-        Should return the widths of each bin in the wavelength grid
+        Should return the widths of each bin in the wavenumber grid
 
         Raises
         ------
@@ -133,6 +139,10 @@ class BaseSpectrum(Logger,Writeable):
         """
         raise NotImplementedError
     
+    
+
+
+
     def write(self,output):
         output.write_array('wlgrid',self.wavelengthGrid)
         output.write_array('spectrum',self.spectrum)

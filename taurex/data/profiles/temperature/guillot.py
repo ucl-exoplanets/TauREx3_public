@@ -46,7 +46,7 @@ class Guillot2010(TemperatureProfile):
     def equilTemperature(self,value):
         self.T_irr=value
 
-    @fitparam(param_name='kappa_ir',param_latex='$k_\\mathrm{ir}$',default_fit=False,default_bounds=[1e-10,1], default_mode='log')
+    @fitparam(param_name='kappa_irr',param_latex='$k_\\mathrm{irr}$',default_fit=False,default_bounds=[1e-10,1], default_mode='log')
     def meanInfraOpacity(self):
         """mean infra-red opacity"""
         return self.kappa_ir

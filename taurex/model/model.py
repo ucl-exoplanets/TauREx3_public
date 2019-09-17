@@ -7,7 +7,11 @@ from taurex.output.writeable import Writeable
 class ForwardModel(Logger,Fittable,Writeable):
     """A base class for producing forward models"""
 
-    def __init__(self,name):
+
+
+
+
+    def __init__(self, name):
         Logger.__init__(self,name)
         Fittable.__init__(self)
         self.opacity_dict = {}
@@ -26,6 +30,10 @@ class ForwardModel(Logger,Fittable,Writeable):
         return self._fitting_parameters[key][3](value) 
 
 
+    def defaultBinner(self):
+        from taurex.binning import NativeBinner
+        return NativeBinner()
+
 
     def add_contribution(self,contrib):
         from taurex.contributions import Contribution
@@ -43,12 +51,12 @@ class ForwardModel(Logger,Fittable,Writeable):
     def build(self):
         raise NotImplementedError
 
-    def model(self,wngrid=None,return_contrib=False,cutoff_grid=True):
+    def model(self,wngrid=None,cutoff_grid=True):
         """Computes the forward model for a wngrid"""
         raise NotImplementedError
+        
 
-
-    def model_full_contrib(self,wngrid=None,return_contrib=True,cutoff_grid=True):
+    def model_full_contrib(self,wngrid=None,cutoff_grid=True):
         """Computes the forward model for a wngrid for each contribution"""
         raise NotImplementedError
     

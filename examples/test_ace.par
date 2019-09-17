@@ -40,11 +40,9 @@ model_type = transmission
     [[Rayleigh]]
 
 
-[Spectrum]
-#observed_spectrum = C:/Users/Ahmed/Documents/TaurexData/tests/test_0_transmission/SPECTRUM_fit.dat
-grid_type = native
-#wavenumber_grid = 0.0,10000.0,10000
-wavelength_grid = 0.1,9.0,3000
+[Binning]
+bin_type = manual
+log_wavelength_grid = 0.3,4,100
 
 
 
