@@ -83,6 +83,9 @@ def main():
 
     wngrid = None
 
+
+    model.model()
+    
     if binning == 'observed' and observation is None:
         logging.critical('Binning selected from Observation yet None provided')
         quit()
