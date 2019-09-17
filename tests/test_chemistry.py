@@ -14,7 +14,7 @@ class TaurexChemistryTest(unittest.TestCase):
         tc = TaurexChemistry()
         
         params = tc.fitting_parameters()
-        self.assertIn('H2_He',params)
+        self.assertIn('He_H2',params)
 
     def test_add(self):
         from taurex.cache import OpacityCache
@@ -34,14 +34,14 @@ class TaurexChemistryTest(unittest.TestCase):
         params = tc.fitting_parameters()
 
         self.assertIn('N2',params)
-        self.assertIn('H2_He',params)
+        self.assertIn('He_H2',params)
 
         self.assertIn('H2O',params)
         self.assertEqual(params['H2O'][2](),1e-5)
-        self.assertIn('CH4_T',params)
-        self.assertIn('CH4_S',params)
-        self.assertIn('C2H2_T',params)
-        self.assertIn('C2H2_S',params)
+        self.assertIn('CH4_top',params)
+        self.assertIn('CH4_surface',params)
+        self.assertIn('C2H2_top',params)
+        self.assertIn('C2H2_surface',params)
         self.assertIn('CH4_P',params)
 
         self.assertIsNotNone(tc.muProfile)
