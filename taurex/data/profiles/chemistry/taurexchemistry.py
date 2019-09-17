@@ -4,6 +4,12 @@ import numpy as np
 import math
 from taurex.util import *
 from taurex.cache import OpacityCache
+from taurex.exceptions import InvalidModelException
+
+class InvalidChemistryException(InvalidModelException):
+    pass
+
+
 class TaurexChemistry(Chemistry):
     """
     The standard chemical model used in Taurex. This allows for the combination
@@ -200,7 +206,9 @@ class TaurexChemistry(Chemistry):
 
 
         total_mix = sum(active_profile) + sum(inactive_profile)
-        
+        if np.any(total_mix> 1.0):
+            self.error('Greater than 1.0 chemistry profile detected')
+            raise InvalidChemistryException
 
 
         mixratio_remainder = 1. - total_mix

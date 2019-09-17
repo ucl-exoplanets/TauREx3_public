@@ -339,12 +339,19 @@ class Optimizer(Logger):
         """
         from taurex.util import bindown
         import numexpr as ne
+        from taurex.exceptions import InvalidModelException
         self.update_model(fit_params)
 
         obs_bins= self._observed.wavenumberGrid
 
+        
 
-        _,final_model,_,_ = self._binner.bin_model(self._model.model(obs_bins))
+        try:
+            _,final_model,_,_ = self._binner.bin_model(self._model.model(obs_bins))
+        except InvalidModelException:
+            return 1e100
+
+            
         res = (data.flatten() - final_model.flatten()) / datastd.flatten()
         res = np.nansum(res*res)
         if res == 0:
