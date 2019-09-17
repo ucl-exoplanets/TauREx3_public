@@ -21,7 +21,7 @@ ratio = 4.8962e-2
 
 [Temperature]
 profile_type = isothermal
-iso_temp = 1340.0
+T = 1340.0
 
 [Pressure]
 profile_type = Simple

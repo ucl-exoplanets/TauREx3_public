@@ -14,10 +14,10 @@ class Isothermal(TemperatureProfile):
     """
 
 
-    def __init__(self,iso_temp=1500):
+    def __init__(self,T=1500):
         super().__init__('Isothermal')
 
-        self._iso_temp = iso_temp
+        self._iso_temp = T
     
 
     @fitparam(param_name='T',param_latex='$T$',default_fit=False,default_bounds=[300.0, 2000.0])

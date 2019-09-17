@@ -82,7 +82,7 @@ class TaurexChemistry(Chemistry):
 
         for idx,value in enumerate(zip(self._fill_gases[1:],self._fill_ratio)):
             gas,ratio = value
-            mol_name = '{}_{}'.format(main_gas,gas)
+            mol_name = '{}_{}'.format(gas,main_gas)
             param_name = mol_name
             param_tex = '{}/{}'.format(molecule_texlabel(gas),molecule_texlabel(main_gas))
             
