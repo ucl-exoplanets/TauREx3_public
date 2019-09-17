@@ -43,24 +43,8 @@ def create_klass(config,klass):
 
 
 def create_profile(config, factory, baseclass=None):
-    try:
-        profile_type = config.pop('profile_type').lower()
-    except KeyError:
-        log.error('No profile_type defined input')
-        raise KeyError  
-
-    klass = None
-    if profile_type == 'custom':
-        try:
-            python_file = config.pop('python_file').lower()
-        except KeyError:
-            log.error('No python file for custom model')
-            raise KeyError   
-
-        klass = detect_and_return_klass(python_file,baseclass)
-
-    else:
-        klass = factory(profile_type)
+    config, klass = determine_klass(config, 'profile_type',factory,
+                                    baseclass)
 
     obj = create_klass(config,klass)
     
@@ -208,13 +192,9 @@ def instrument_factory(instrument):
 
 
 def create_star(config):
-    try:
-        star = config.pop('star_type').lower()
-    except KeyError:
-        log.error('No star defined input')
-        raise KeyError
-
-    klass = star_factory(star)
+    from taurex.data.stellar.star import BlackbodyStar
+    config, klass = determine_klass(config, 'star_type', star_factory,
+                                    BlackbodyStar)
 
     obj = klass(**config)
 
@@ -222,56 +202,49 @@ def create_star(config):
 
 
 def create_optimizer(config):
-    try:
-        optimizer = config.pop('optimizer').lower()
-    except KeyError:
-        log.error('No optimizier defined input')
-        raise KeyError 
-
-    klass = None
-    if optimizer == 'custom':
-        from taurex.optimizer.optimizer import Optimizer
-        try:
-            python_file = config.pop('python_file').lower()
-        except KeyError:
-            log.error('No python file for custom model')
-            raise KeyError
-
-        klass = detect_and_return_klass(python_file, Optimizer)
-    else:
-        klass = optimizer_factory(optimizer)
+    from taurex.optimizer.optimizer import Optimizer
+    config, klass = determine_klass(config, 'optimizer', optimizer_factory,
+                                    Optimizer)
 
     obj = klass(**config)
     
     return obj
 
 
-def create_instrument(config):
+def determine_klass(config, field, factory, baseclass=None):
+
     try:
-        instruemnt = config.pop('instrument').lower()
+        klass_field = config.pop(field).lower()
     except KeyError:
-        log.error('No instrument defined input')
-        raise KeyError    
+        log.error('Field not defined in {}'.format(field))
+        raise KeyError
 
     klass = None
-    if instruemnt == 'custom':
-        from taurex.instruments.instrument import Instrument
+    if klass_field == 'custom':
         try:
             python_file = config.pop('python_file').lower()
         except KeyError:
-            log.error('No python file for custom model')
-            raise KeyError   
+            log.error('No python file for custom profile/model')
+            raise KeyError
 
-        klass = detect_and_return_klass(python_file,Instrument)
+        klass = detect_and_return_klass(python_file, baseclass)
     else:
-        klass = instrument_factory(instruemnt)
+        klass = factory(klass_field)
+
+    return config, klass
+
+
+def create_instrument(config):
+    from taurex.instruments.instrument import Instrument
+    config, klass = determine_klass(config, 'instrument', instrument_factory,
+                                    Instrument)
 
     obj = klass(**config)
     
     return obj
 
 def generate_contributions(config):
-    from taurex.contributions import AbsorptionContribution,CIAContribution,RayleighContribution
+    from taurex.contributions import AbsorptionContribution, CIAContribution, RayleighContribution
 
     contributions = []
     for key in config.keys():
