@@ -49,12 +49,6 @@ model_type = transmission
 
 
 
-[Instrument]
-instrument = ariel
-config_file = '/Users/ahmed/Documents/repos/ArielRad/runConfig.xml'
-tier = 2
-
-
 
 [Binning]
 bin_type = observed
