@@ -156,7 +156,7 @@ def main():
 
     inst_result = None
     if instrument is not None:
-        inst_result = instrument.model_noise(model,result,num_observations=2)
+        inst_result = instrument.model_noise(model,result,num_observations=1)
 
     if args.save_spectrum is not None and get_rank()==0:
 
