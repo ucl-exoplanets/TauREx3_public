@@ -210,6 +210,11 @@ def create_star(config):
 
 def create_planet(config):
     from taurex.data.planet import Planet
+
+    if not 'planet_type' in config:
+        config['planet_type']= 'simple'
+
+
     config, klass = determine_klass(config, 'planet_type', planet_factory,
                                     Planet)
 
