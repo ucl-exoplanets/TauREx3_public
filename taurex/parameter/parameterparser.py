@@ -102,7 +102,16 @@ class ParameterParser(Logger):
 
         config = self._raw_config.dict()
         if 'Instrument' in config:
-            return create_instrument(config['Instrument'])
+            inst_config = config['Instrument']
+
+            try:
+                num_obs = inst_config.pop('num_observations')
+            except KeyError:
+                num_obs = 1
+
+
+            inst = create_instrument(inst_config)
+            return inst,num_obs
         else:
             return None
 

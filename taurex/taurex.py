@@ -79,6 +79,9 @@ def main():
 
 
     instrument = pp.generate_instrument()
+    num_obs=1
+    if instrument is not None:
+        instrument,num_obs = instrument
 
 
     wngrid = None
@@ -156,7 +159,7 @@ def main():
 
     inst_result = None
     if instrument is not None:
-        inst_result = instrument.model_noise(model,result,num_observations=1)
+        inst_result = instrument.model_noise(model,model_res=result,num_observations=num_obs)
 
     if args.save_spectrum is not None and get_rank()==0:
 
@@ -259,9 +262,11 @@ def main():
 
                     inst_wlwidth = wnwidth_to_wlwidth(inst_wngrid, inst_width)
 
+                    
+                    ax.plot(wlgrid, binning.bin_model(result)[1], label='forward model')
                     ax.errorbar(inst_wlgrid, inst_spectrum, inst_noise,
                                 inst_wlwidth/2, '.', label='Instrument')
-                    #ax.plot(wlgrid, binning.bin_model(result)[1], label='forward model')
+
                     #ax.plot(inst_wlgrid, inst_spectrum, label='forward model')
                     #ax.plot(10000/inst_result[0], inst_result[1],'.')
                     #ax.plot((10000/inst_result[0],10000/inst_result[0]), (inst_result[1]+inst_result[2],inst_result[1]-inst_result[2]),'-')
