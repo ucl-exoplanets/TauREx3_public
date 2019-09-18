@@ -1,5 +1,5 @@
 from taurex.log import Logger
-from taurex.constants import G,RJUP,MJUP,RSOL
+from taurex.constants import G,RJUP,MJUP,RSOL,MSOL
 from taurex.data.fittable import fitparam,Fittable
 import numpy as np
 from taurex.util.emission import black_body
@@ -29,7 +29,8 @@ class BlackbodyStar(Fittable,Logger,Writeable):
         Fittable.__init__(self)
         self._temperature = temperature
         self._radius = radius*RSOL
-        self._mass = mass
+        self._mass = mass*MSOL
+        self.debug('Star mass %s',self._mass)
         self.sed = None
         self.distance = distance
         self.magnitudeK = magnitudeK
