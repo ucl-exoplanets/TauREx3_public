@@ -268,8 +268,7 @@ class ParameterParser(Logger):
         config = self._raw_config.dict()
 
         if 'Planet' in config:
-            from taurex.data.planet import Planet
-            return create_klass(config['Planet'],Planet)
+            return create_planet(config['Planet'])
         else:
             return None
     def generate_star(self):

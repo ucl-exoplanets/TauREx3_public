@@ -29,7 +29,7 @@ class EmissionModel(SimpleForwardModel):
                             atm_max_pressure=1e6,
                             ngauss = 4
                             ):
-        super().__init__('emission_model',planet,
+        super().__init__(self.__class__.__name__,planet,
                             star,
                             pressure_profile,
                             temperature_profile,
@@ -56,7 +56,13 @@ class EmissionModel(SimpleForwardModel):
         #quit()
         star_radius = self._star.radius
         planet_radius = self._planet.fullRadius
-        return (f_total/star_sed) * (planet_radius/star_radius)**2
+        self.debug('star_radius %s',self._star.radius)
+        self.debug('planet_radius %s',self._star.radius)
+        last_flux = (f_total/star_sed) * (planet_radius/star_radius)**2
+
+        self.debug('last_flux %s', last_flux)
+
+        return last_flux
 
 
 

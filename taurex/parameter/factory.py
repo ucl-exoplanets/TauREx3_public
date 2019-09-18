@@ -23,19 +23,23 @@ def get_keywordarg_dict(klass):
 
 def create_klass(config,klass):
     kwargs = get_keywordarg_dict(klass)
-    
-    for key in kwargs.keys():
-        if key in config:
-            value = config.pop(key)
+
+    for key in config:
+        if key in kwargs:
+            value = config[key]
             kwargs[key] = value
-    
+        else:
+            log.error('Object {} does not have parameter {}'.format(klass.__name__,key))
+            log.error('Available parameters are %s',kwargs.keys())
+            raise KeyError
     obj = klass(**kwargs)
 
-    for key,value in config.items():
-        try:
-            obj[key] = value
-        except KeyError:
-            log.warning('Object {} does not have parameter {}, skipping'.format(klass.__name__,key))
+    # for key,value in config.items():
+    #     try:
+    #         obj[key] = value
+    #     except KeyError:
+
+    #         raise KeyError
     return obj
 
 
@@ -166,6 +170,13 @@ def model_factory(model_type):
         raise NotImplementedError('Model {} not implemented'.format(model_type))
 
 
+def planet_factory(planet_type):
+    if planet_type in ('simple', 'planet', 'basic','meme',):
+        from taurex.data import Planet
+        return Planet
+    else:
+        raise NotImplementedError('Model {} not implemented'.format(model_type))
+
 def optimizer_factory(optimizer):
     if optimizer == 'nestle':
         from taurex.optimizer.nestle import NestleOptimizer
@@ -192,6 +203,15 @@ def create_star(config):
     from taurex.data.stellar.star import BlackbodyStar
     config, klass = determine_klass(config, 'star_type', star_factory,
                                     BlackbodyStar)
+
+    obj = klass(**config)
+
+    return obj
+
+def create_planet(config):
+    from taurex.data.planet import Planet
+    config, klass = determine_klass(config, 'planet_type', planet_factory,
+                                    Planet)
 
     obj = klass(**config)
 
@@ -271,24 +291,11 @@ def generate_contributions(config):
 
     
 def create_model(config,gas,temperature,pressure,planet,star):
+    from taurex.model import ForwardModel
+    print(config)
+    config, klass = determine_klass(config, 'model_type', model_factory,
+                                    ForwardModel)
 
-    try:
-        model_type = config.pop('model_type').lower()
-    except KeyError:
-        log.error('No model_type defined input')
-        raise KeyError    
-    klass = None
-    if model_type == 'custom':
-        from taurex.model import ForwardModel
-        try:
-            python_file = config.pop('python_file').lower()
-        except KeyError:
-            log.error('No python file for custom model')
-            raise KeyError   
-
-        klass = detect_and_return_klass(python_file,ForwardModel)
-    else:
-        klass = model_factory(model_type)
     log.debug('Chosen_model is {}'.format(klass))
     kwargs = get_keywordarg_dict(klass)
     log.debug('Model kwargs {}'.format(kwargs))
