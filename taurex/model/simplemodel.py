@@ -98,6 +98,7 @@ class SimpleForwardModel(ForwardModel):
             from taurex.data.stellar import BlackbodyStar
             self.warning('No star, using the Sun')
             self._star = BlackbodyStar()
+            
     def initialize_profiles(self):
         self.info('Computing pressure profile')
         
