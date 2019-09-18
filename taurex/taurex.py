@@ -158,7 +158,7 @@ def main():
     if instrument is not None:
         inst_result = instrument.model_noise(model,result,num_observations=2)
 
-    if args.save_spectrum is not None:
+    if args.save_spectrum is not None and get_rank()==0:
 
         #with open(args.save_spectrum, 'w') as f:
         from taurex.util.util import wnwidth_to_wlwidth,compute_bin_edges
