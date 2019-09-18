@@ -1,5 +1,5 @@
 from taurex.log import Logger
-from taurex.constants import G,RJUP,MJUP
+from taurex.constants import G,RJUP,MJUP,AU
 from .fittable import fitparam,Fittable
 import numpy as np
 from taurex.output.writeable import Writeable
@@ -32,7 +32,7 @@ class Planet(Fittable,Logger,Writeable):
         #  should distance be put in km here instead of doing this in the directimage.py???
         #
         #####
-        self._distance = planet_distance
+        self._distance = planet_distance*AU
         self._impact = impact_param
         self._orbit_period = orbital_period
         self._albedo = albedo
