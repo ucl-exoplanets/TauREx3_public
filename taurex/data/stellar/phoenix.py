@@ -51,15 +51,15 @@ class PhoenixStar(BlackbodyStar):
 
     def __init__(self,temperature=5000,radius=1.0,metallicity=1.0,mass=1.0,distance=1,
                   magnitudeK = 10.0,phoenix_path=None):
-        super().__init__(temperature=temperature,radius=radius)
+        super().__init__(temperature=temperature,radius=radius,
+            distance = distance,
+                  magnitudeK = magnitudeK,mass = mass,)
         if phoenix_path is None:
             self.error('No file path to phoenix files defined')
             raise Exception('No file path to phoenix files defined')
         
         self.info('Star is PHOENIX type')
         self._phoenix_path = phoenix_path
-
-        self._mass = mass * MSOL
         
         
         self._metallicity = metallicity
@@ -147,7 +147,7 @@ class PhoenixStar(BlackbodyStar):
         M : float
 
         """
-        return self._temperature
+        return self._mass
 
     @mass.setter
     def mass(self,value):
