@@ -47,8 +47,12 @@ model_type = transmission
     
     [[Rayleigh]]
 
-
-
+    [[LeeMie]]
+    mie_radius=0.01
+    mie_Q=40
+    mie_mix_ratio=1e-15
+    mie_bottom_pressure=1e2
+    mie_top_pressure=1e-3
 
 
 
