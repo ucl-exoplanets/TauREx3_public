@@ -10,8 +10,9 @@ from .absorption import AbsorptionContribution
 from .cia import CIAContribution
 from .rayleigh import RayleighContribution
 from .simpleclouds import SimpleCloudsContribution
+from .leemie import LeeMieContribution
 try:
-    from .mie import MieContribution
+    from .bhmie import BHMieContribution
 except ImportError:
     from taurex.log.logger import root_logger
     root_logger.error('MIE could not be loaded')
