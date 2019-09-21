@@ -18,16 +18,21 @@ ratio = 4.8962e-2
 
     
 
-
 [Temperature]
-profile_type = isothermal
-T = 1340.0
+#profile_type = isothermal
+#T = 1997
+profile_type = NPoint
+T_surface = 2500
+T_top = 1800
+P_top = 1e-1
+temperature_points = 2000,
+pressure_points = 1e3,
 
 [Pressure]
 profile_type = Simple
 atm_min_pressure = 1e-4
 atm_max_pressure = 1e6
-nlayers = 10
+nlayers = 100
 
 [Planet]
 planet_type = Simple
@@ -38,7 +43,7 @@ planet_radius = 1.0
 star_type = blackbody
 
 [Model]
-model_type = transmission
+model_type = emission
 
     [[Absorption]]
     
@@ -48,22 +53,22 @@ model_type = transmission
     [[Rayleigh]]
 
     [[LeeMie]]
-    mie_radius=0.01
-    mie_Q=40
-    mie_mix_ratio=1e-15
-    mie_bottom_pressure=1e2
-    mie_top_pressure=1e-3
+    mie_radius=0.1
+    mie_Q=80
+    mie_mix_ratio=1e-5
+    mie_bottom_pressure=-1
+    mie_top_pressure=1e3
 
 
 
 [Binning]
-bin_type = observed
-#accurate = False
-#log_wavelength_grid = 0.3,4.1,1000
+bin_type = manual
+accurate = False
+log_wavelength_grid = 0.3,4.1,1000
 
 
-[Observation]
-observed_spectrum = /Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_transmission/SPECTRUM_fit.dat
+#[Observation]
+#observed_spectrum = /Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_transmission/SPECTRUM_fit.dat
 #observed_spectrum = /Users/ahmed/Documents/repos/TauREx3/test_spectrum.dat
 
 

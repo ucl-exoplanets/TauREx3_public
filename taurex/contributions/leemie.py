@@ -11,7 +11,7 @@ class LeeMieContribution(Contribution):
     def __init__(self, mie_radius=0.01, mie_Q=40,
                  mie_mix_ratio=1e-10, mie_bottom_pressure=-1,
                  mie_top_pressure=-1):
-        super().__init__(self.__class__.__name__)
+        super().__init__('Mie Lee')
 
         self._mie_radius = mie_radius
         self._mie_q = mie_Q
@@ -84,24 +84,38 @@ class LeeMieContribution(Contribution):
         if top_pressure < 0:
             top_pressure = pressure_profile[-1]       
 
-        wltmp = 1000/wngrid
+        wltmp = 10000/wngrid
+
         a = self.mieRadius
 
         x = 2.0 * np.pi * a / wltmp
-#       
-        a *= 1e-4
-
+        self.debug('wngrid %s', wngrid)
+        self.debug('x %s', x)
         Qext = 5.0 / (self.mieQ * x**(-4.0) + x**(0.2))
 
         sigma_xsec = np.zeros(shape=(self._nlayers, wngrid.shape[0]))
 
-        sigma_mie = Qext * np.pi * (a**2.0)
+        am=a*1e-6
 
+        sigma_mie = Qext * np.pi * (am**2.0)
+
+        self.debug('Qext %s', Qext)
+        self.debug('radius um %s', a)
+        self.debug('sigma %s', sigma_mie)
+
+        self.debug('bottome_pressure %s',bottom_pressure)
+        self.debug('top_pressure %s',top_pressure)
+
+        
         cloud_filter = (pressure_profile <= bottom_pressure) & (pressure_profile >= top_pressure)
 
-        sigma_xsec[cloud_filter, ...] = sigma_mie * self.mieMixing
+        sigma_xsec[cloud_filter, ...] = sigma_mie 
 
-        self.sigma_xsec = sigma_xsec
+        self.sigma_xsec = sigma_xsec * self.mieMixing
+
+        self.debug('final xsec %s', self.sigma_xsec[:, :])
+        self.debug('final xsec %s', self.sigma_xsec.max())
+        
         #self._total_contrib[...]=0.0
         yield 'Mie', sigma_xsec
 
