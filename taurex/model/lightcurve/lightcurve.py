@@ -221,14 +221,27 @@ class LightCurveModel(ForwardModel):
     def light_curve_chain(self, model, time_array, period, sma_over_rs, eccentricity, inclination, periastron,
                           mid_time, ldcoeff, Nfactor ):
         """Create model light-curve and lightcurve chain."""
+        from taurex.model import TransmissionModel,EmissionModel
         result = []
         # self.info('Creating Lightcurve chain.')
         for n in range(len(model)):
-            transit_light_curve = plc.transit('claret', ldcoeff[n], np.sqrt(model[n]), period,
-                                          sma_over_rs, eccentricity, inclination, periastron,
-                                          mid_time, time_array)
-            result.append(transit_light_curve * Nfactor[n])
+            if isinstance(self._forward_model, TransmissionModel):
+                self.debug('Using Transit')
+                transit_light_curve = plc.transit('claret', ldcoeff[n], np.sqrt(model[n]), period,
+                                            sma_over_rs, eccentricity, inclination, periastron,
+                                            mid_time, time_array)
+                result.append(transit_light_curve * Nfactor[n])
+            elif isinstance(self._forward_model, EmissionModel):
+                self.debug('Using Eclipse')
+                rp_over_rs = (self._forward_model.planet.fullRadius/self._forward_model.star.radius)
+                self.debug('rp_over_rs %s',rp_over_rs)
+                self.debug('fp_over_fs %s',np.sqrt(model[n]))
+                transit_light_curve = plc.eclipse(np.sqrt(model[n])*rp_over_rs, rp_over_rs, period,
+                                            sma_over_rs, eccentricity, inclination, periastron,
+                                           mid_time, time_array)
+                result.append(transit_light_curve * Nfactor[n])
 
+        self.debug('Result %s',result)
         return np.concatenate(result)
 
 
