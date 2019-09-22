@@ -288,9 +288,12 @@ def generate_contributions(config):
         elif key == 'SimpleClouds':
              from taurex.contributions import SimpleCloudsContribution
              contributions.append(create_klass(config[key],SimpleCloudsContribution))
-        elif key == 'Mie':
-             from taurex.contributions import MieContribution
-             contributions.append(create_klass(config[key],MieContribution))
+        elif key == 'BHMie':
+             from taurex.contributions import BHMieContribution
+             contributions.append(create_klass(config[key],BHMieContribution))
+        elif key == 'LeeMie':
+             from taurex.contributions import LeeMieContribution
+             contributions.append(create_klass(config[key],LeeMieContribution))
 
     return contributions
 
