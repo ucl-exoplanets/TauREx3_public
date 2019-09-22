@@ -8,7 +8,7 @@ from taurex.external.mie import bh_mie
 
 
 
-class MieContribution(Contribution):
+class BHMieContribution(Contribution):
 
 
     def __init__(self,mie_path=None,mie_type='cloud',particle_radius=1.0,cloud_mix=1.0,cloud_bottom_pressure=1e-2,
@@ -18,10 +18,11 @@ class MieContribution(Contribution):
         self.load_mie_indices()
         self._mie_type = mie_type.lower()
 
-        self._mie_radius = 1.0
-        self._mix_cloud_mix = 1.0
-        self._cloud_top_pressure = 1.0
-        self._cloud_bottom_pressure = -1.0
+        self._mie_radius = particle_radius
+        self._mix_cloud_mix = cloud_mix
+        self._cloud_top_pressure = cloud_top_pressure
+        self._cloud_bottom_pressure = cloud_bottom_pressure  
+        
     def load_mie_indices(self):
         import pathlib
         if self._mie_path is None:
@@ -33,8 +34,7 @@ class MieContribution(Contribution):
         species_name = pathlib.Path(self._mie_path).stem
         self.info('Preloading Mie refractive indices for %s' % species_name)
         self.mie_indices = mie_raw
-        self.mie_species = species_name       
-
+        self.mie_species = species_name  
 
 
     @property
@@ -61,38 +61,38 @@ class MieContribution(Contribution):
     def mieType(self):
         return self._mie_type
 
-    @fitparam(param_name='log_clouds_particle_size',param_latex='log($R_\\mathrm{clouds}$)',default_fit=False,default_bounds=[-10,1])
+    @fitparam(param_name='clouds_particle_size',param_latex='$R_\\mathrm{clouds}$',default_fit=False,default_bounds=[-10,1])
     def particleSize(self):
-        return math.log10(self._mie_radius)
+        return self._mie_radius
     
     @particleSize.setter
-    def particleSize(self,value):
-        self._mie_radius = 10.0**value
+    def particleSize(self, value):
+        self._mie_radius = value
     
 
-    @fitparam(param_name='log_clouds_topP',param_latex='$log(P_\\mathrm\{top\})$',default_fit=False,default_bounds=[-1,1])
+    @fitparam(param_name='clouds_topP',param_latex='$P_\\mathrm\{top\}$',default_fit=False,default_bounds=[-1,1])
     def cloudTopPressure(self):
-        return math.log10(self._cloud_top_pressure)
+        return self._cloud_top_pressure
     
     @cloudTopPressure.setter
-    def cloudTopPressure(self,value):
-        self._cloud_top_pressure = 10**value
+    def cloudTopPressure(self, value):
+        self._cloud_top_pressure = value
 
-    @fitparam(param_name='log_clouds_bottomP',param_latex='$log(P_\\mathrm\{bottom\})$',default_fit=False,default_bounds=[-1,1])
+    @fitparam(param_name='clouds_bottomP',param_latex='$P_\\mathrm\{bottom\}$',default_fit=False,default_bounds=[-1,1])
     def cloudBottomPressure(self):
-        return math.log10(self._cloud_bottom_pressure)
+        return self._cloud_bottom_pressure
     
     @cloudBottomPressure.setter
     def cloudBottomPressure(self,value):
-        self._cloud_bottom_pressure = 10**value
+        self._cloud_bottom_pressure = value
 
-    @fitparam(param_name='log_cloud_mixing',param_latex='log($\\chi_\\mathrm\{clouds\}$)',default_fit=False,default_bounds=[-1,1])
+    @fitparam(param_name='cloud_mixing',param_latex='$\\chi_\\mathrm\{clouds\}$',default_fit=False,default_bounds=[-1,1])
     def cloudMixing(self):
         return math.log10(self._mix_cloud_mix)
     
     @cloudMixing.setter
     def cloudMixing(self,value):
-        self._mix_cloud_mix = 10**value
+        self._mix_cloud_mix =value
 
 
     def contribute(self,model,start_horz_layer,end_horz_layer,density_offset,layer,density,tau,path_length=None):
@@ -133,7 +133,6 @@ class MieContribution(Contribution):
         #average mie cross section weighted by particle size distribution
         self._sig_out_aver = np.average(sig_out,weights=na_clip,axis=1)
     
-
     def finalize(self,model):
         raise NotImplementedError
 
