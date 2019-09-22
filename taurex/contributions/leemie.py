@@ -11,7 +11,7 @@ class LeeMieContribution(Contribution):
     def __init__(self, mie_radius=0.01, mie_Q=40,
                  mie_mix_ratio=1e-10, mie_bottom_pressure=-1,
                  mie_top_pressure=-1):
-        super().__init__('Mie Lee')
+        super().__init__('Mie')
 
         self._mie_radius = mie_radius
         self._mie_q = mie_Q
@@ -117,7 +117,7 @@ class LeeMieContribution(Contribution):
         self.debug('final xsec %s', self.sigma_xsec.max())
         
         #self._total_contrib[...]=0.0
-        yield 'Mie', sigma_xsec
+        yield 'Lee', sigma_xsec
 
 
     def write(self,output):
