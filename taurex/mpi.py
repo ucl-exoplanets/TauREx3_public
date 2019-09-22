@@ -13,7 +13,7 @@ def nprocs():
     try:
         from mpi4py import MPI
     except ImportError:
-        return 0  
+        return 1
 
     comm = MPI.COMM_WORLD
 
