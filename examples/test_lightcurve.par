@@ -55,7 +55,7 @@ star_type = blackbody
 radius = 1.155
 
 [Model]
-model_type = emission
+model_type = transmission
 
     [[Absorption]]
     
