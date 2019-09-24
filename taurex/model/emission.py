@@ -73,7 +73,7 @@ class EmissionModel(SimpleForwardModel):
         dz=np.gradient(self.altitudeProfile)
         
 
-        density= self.densityProfile
+        density = self.densityProfile
 
         wngrid_size=wngrid.shape[0]
         

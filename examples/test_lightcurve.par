@@ -9,32 +9,35 @@ cia_path = "/Users/ahmed/Documents/taurex_files/taurex_cobweb/Input/cia/hitran"
 
 [Chemistry]
 chemistry_type = taurex
-fill_gases = H2,He
-ratio=1
+fill_gases = H2,He, N2
+ratio = 0.17, 0.5
 
     [[H2O]]
     gas_type = constant
-    mix_ratio = 1e-5
-
-    [[HCN]]
-    gas_type = constant
-    mix_ratio = 1e-6
-
-    [[NH3]]
-    gas_type = constant
-    mix_ratio = 1e-6
+    mix_ratio=1e-7
 
     [[CH4]]
     gas_type = constant
-    mix_ratio=1e-8
+    mix_ratio = 1e-6
 
+    [[CO]]
+    gas_type = constant
+    mix_ratio = 1e-3
 
-
+    [[HCN]]
+    gas_type = constant
+    mix_ratio = 1e-5
 
 
 [Temperature]
-profile_type = isothermal
-iso_temp = 1300.0
+#profile_type = isothermal
+#T = 1997
+profile_type = NPoint
+T_surface = 2500
+T_top = 1800
+P_top = 1e-1
+temperature_points = 2000,
+pressure_points = 1e3,
 
 [Pressure]
 profile_type = Simple
@@ -61,9 +64,6 @@ model_type = transmission
 
     [[Rayleigh]]
 
-
-    [[SimpleClouds]]
-    clouds_pressure =1e4
 
 
 [Lightcurve]
