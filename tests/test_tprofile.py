@@ -4,6 +4,7 @@ from taurex.data.profiles.temperature.tprofile import TemperatureProfile
 from taurex.data.profiles.temperature import NPoint
 from taurex.data.planet import Earth
 from taurex.data.profiles.temperature import Rodgers2000
+from taurex.data.profiles.temperature.temparray import TemperatureArray
 class TemperatureProfileTest(unittest.TestCase):
  
     def setUp(self):
@@ -160,6 +161,29 @@ class RodgersTest(unittest.TestCase):
         rp.initialize_profile(Earth(),test_layers,pres_prof)
 
         rp.profile
+
+
+class TemperatureArrayTest(unittest.TestCase):
+
+    def test_basic(self):
+
+        ag = TemperatureArray(tp_array=[200.0, 100.0])
+
+        ag.initialize_profile(None, 2, None)
+
+        self.assertEqual(ag.profile[0], 200)
+        self.assertEqual(ag.profile[-1], 100)
+
+    
+    def test_interpolation(self):
+        ag = TemperatureArray(tp_array=[200.0, 100.0])
+
+        ag.initialize_profile(None, 3, None)
+
+        self.assertEqual(ag.profile[0], 200)
+        self.assertEqual(ag.profile[1], 150)
+        self.assertEqual(ag.profile[-1], 100)
+
 
 if __name__ == '__main__':
     unittest.main()
