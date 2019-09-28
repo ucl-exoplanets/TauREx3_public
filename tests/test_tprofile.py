@@ -5,6 +5,8 @@ from taurex.data.profiles.temperature import NPoint
 from taurex.data.planet import Earth
 from taurex.data.profiles.temperature import Rodgers2000
 from taurex.data.profiles.temperature.temparray import TemperatureArray
+
+
 class TemperatureProfileTest(unittest.TestCase):
  
     def setUp(self):
