@@ -3,6 +3,7 @@ import numpy as np
 from taurex.data.profiles.chemistry.gas.constantgas import ConstantGas
 from taurex.data.profiles.chemistry.gas.twopointgas import TwoPointGas
 from taurex.data.profiles.chemistry.gas.twolayergas import TwoLayerGas
+from taurex.data.profiles.chemistry.gas.arraygas import ArrayGas
 
 class ConstantGasTest(unittest.TestCase):
 
@@ -83,7 +84,29 @@ class TwoLayerProfileTest(unittest.TestCase):
         self.assertEqual(params['CH4_top'][2](),1e-7)       
 
         self.assertEqual(cgp.mixRatioSurface,1e-5)
-        self.assertEqual(cgp.mixRatioTop,1e-7)   
+        self.assertEqual(cgp.mixRatioTop,1e-7) 
+
+
+class ArrayGasTest(unittest.TestCase):
+
+    def test_basic(self):
+
+        ag = ArrayGas(molecule_name='H2O2',mix_ratio_array=[1e-3, 1e-7])
+
+        ag.initialize_profile(2, None, None, None)
+
+        self.assertEqual(ag.mixProfile[0], 1e-3)
+        self.assertEqual(ag.mixProfile[-1], 1e-7)
+
+    
+    def test_interpolation(self):
+        ag = ArrayGas(molecule_name='H2O2',mix_ratio_array=[1e-3, 1e-7])
+
+        ag.initialize_profile(3, None, None, None)
+
+        self.assertEqual(ag.mixProfile[0], 1e-3)
+        self.assertEqual(ag.mixProfile[1], (1e-3 + 1e-7)/2)
+        self.assertEqual(ag.mixProfile[-1], 1e-7)
 # class TaurexProfileTest(unittest.TestCase):
 
 #     def setUp(self):
