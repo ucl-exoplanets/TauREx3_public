@@ -117,7 +117,7 @@ class ObservedSpectrumTest(unittest.TestCase):
 
 
     @patch("numpy.loadtxt", return_value=np.ones(shape=(1000,4),dtype=np.float))
-    def test_with_bin(self,mock_load):
+    def test_with_bin(self, mock_load):
         test_spec = ObservedSpectrum('TestFile')
         mock_load.assert_called_with('TestFile')
         test_spec.spectrum
