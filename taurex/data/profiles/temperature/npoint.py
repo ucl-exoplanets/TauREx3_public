@@ -49,8 +49,8 @@ class NPoint(TemperatureProfile):
     def __init__(self,T_surface=100.0,T_top=20.0,P_surface=None,P_top=None,temperature_points=[],pressure_points=[],smoothing_window=10):
         super().__init__('{}Point'.format(len(temperature_points)+2))
 
-        if not isinstance(temperature_points,list):
-            raise Exception('t_point is not a list')
+        if not hasattr(temperature_points,'__len__'):
+            raise Exception('t_point is not an iterable')
 
         if len(temperature_points) != len(pressure_points):
             self.error('Number of temeprature points != number of pressure points')
