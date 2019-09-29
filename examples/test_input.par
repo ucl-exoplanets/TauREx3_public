@@ -62,10 +62,10 @@ log_wavelength_grid = 0.6,4.1,30
 
 [Instrument]
 instrument = snr
-SNR = 10
+SNR = 1
 
-#[Observation]
-#taurex_spectrum = self
+[Observation]
+taurex_spectrum = self
 #observed_spectrum = /Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_transmission/SPECTRUM_fit.dat
 #observed_spectrum = /Users/ahmed/Documents/repos/TauREx3/test_spectrum.dat
 
