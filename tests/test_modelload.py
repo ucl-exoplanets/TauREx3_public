@@ -171,3 +171,27 @@ class PlanetLoadTest(HDFTester):
         self.assertEqual(planet._transit_time, loaded._transit_time)
         self.assertEqual(planet._distance, loaded._distance)
         self.assertEqual(planet._orbit_period, loaded._orbit_period)
+
+
+class StarLoadTest(HDFTester):
+
+    def test_blackbody(self):
+        from taurex.data.stellar import BlackbodyStar
+        from taurex.util.hdf5 import load_star_from_hdf5
+        
+        star = BlackbodyStar(6000, 1.5, 1.5, 15.0, 1.5, 1.5)
+        wngrid = np.linspace(300, 3000,10)
+        star.initialize(wngrid)
+        file_path = self.gen_valid_hdf5_output(star, 'Test')
+
+        with h5py.File(file_path, 'r') as f:
+            loaded = load_star_from_hdf5(f['Test'])
+        loaded.initialize(wngrid)
+        self.assertTrue(isinstance(loaded, BlackbodyStar))
+        self.assertEqual(star._mass, loaded._mass)
+        self.assertEqual(star._metallicity, loaded._metallicity)
+        self.assertEqual(star._radius, loaded._radius)
+        self.assertEqual(star.distance, loaded.distance)
+        self.assertEqual(star.magnitudeK, loaded.magnitudeK)
+        self.assertEqual(star.temperature, loaded.temperature)
+        np.testing.assert_array_equal(star.sed,loaded.sed)

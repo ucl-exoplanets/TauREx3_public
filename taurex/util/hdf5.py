@@ -53,3 +53,6 @@ def load_planet_from_hdf5(loc):
     return load_generic_profile_from_hdf5(loc, 'Planet',
                                           'taurex.data.planet','planet_type',
                                           'Planet')
+def load_star_from_hdf5(loc):
+    return load_generic_profile_from_hdf5(loc, 'Star',
+                                          'taurex.data.stellar', 'star_type')
