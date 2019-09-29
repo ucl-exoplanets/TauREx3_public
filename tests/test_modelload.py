@@ -298,3 +298,122 @@ class ContribLoadTest(HDFTester):
         self.assertEqual(lee_mie.mieBottomPressure, loaded.mieBottomPressure)
         self.assertEqual(lee_mie.mieTopPressure, loaded.mieTopPressure)
         self.assertEqual(lee_mie.mieMixing, loaded.mieMixing)
+
+
+class ModelLoadTest(HDFTester):
+
+    def test_transmission(self):
+        from taurex.util.hdf5 import load_model_from_hdf5
+        from taurex.model import TransmissionModel
+        from taurex.data.profiles.chemistry import TaurexChemistry, ConstantGas
+        from taurex.contributions import AbsorptionContribution, RayleighContribution
+        from taurex.cache import OpacityCache
+
+        with patch.object(OpacityCache, "find_list_of_molecules") as mock_my_method:
+            mock_my_method.return_value = ['H2O']
+            chem = TaurexChemistry()
+            chem.addGas(ConstantGas())
+
+        tm = TransmissionModel(chemistry=chem)
+        tm.add_contribution(AbsorptionContribution())
+        tm.add_contribution(RayleighContribution())
+        tm.build()
+        tm.initialize_profiles()
+        wngrid = np.linspace(100,400)
+        tm.star.initialize(wngrid)
+        with patch.object(TransmissionModel, "model") as mock_my_method:
+            mock_my_method = None
+            file_path = self.gen_valid_hdf5_output(tm, 'Test')
+
+        with h5py.File(file_path, 'r') as f:
+            loaded = load_model_from_hdf5(f['Test']['ModelParameters'])
+
+        loaded.build()
+        loaded.initialize_profiles()
+        wngrid = np.linspace(100, 400)
+
+        self.assertTrue(isinstance(loaded, TransmissionModel))
+        np.testing.assert_array_equal(loaded.densityProfile, tm.densityProfile)
+
+        truth_contrib = [type(c) for c in tm.contribution_list]
+        loaded_contrib = [type(c) for c in loaded.contribution_list]
+
+        self.assertTrue(set(truth_contrib) == set(loaded_contrib))
+
+    def test_emission(self):
+        from taurex.util.hdf5 import load_model_from_hdf5
+        from taurex.model import EmissionModel
+        from taurex.data.profiles.chemistry import TaurexChemistry, ConstantGas
+        from taurex.contributions import AbsorptionContribution, RayleighContribution
+        from taurex.cache import OpacityCache
+
+        with patch.object(OpacityCache, "find_list_of_molecules") as mock_my_method:
+            mock_my_method.return_value = ['H2O']
+            chem = TaurexChemistry()
+            chem.addGas(ConstantGas())
+
+        tm = EmissionModel(chemistry=chem,ngauss=10)
+        tm.add_contribution(AbsorptionContribution())
+        tm.add_contribution(RayleighContribution())
+        tm.build()
+        tm.initialize_profiles()
+        wngrid = np.linspace(100,400)
+        tm.star.initialize(wngrid)
+        with patch.object(EmissionModel, "model") as mock_my_method:
+            mock_my_method = None
+            file_path = self.gen_valid_hdf5_output(tm, 'Test')
+
+        with h5py.File(file_path, 'r') as f:
+            loaded = load_model_from_hdf5(f['Test']['ModelParameters'])
+
+        loaded.build()
+        loaded.initialize_profiles()
+        wngrid = np.linspace(100, 400)
+
+        self.assertTrue(isinstance(loaded, EmissionModel))
+        np.testing.assert_array_equal(loaded.densityProfile, tm.densityProfile)
+
+        truth_contrib = [type(c) for c in tm.contribution_list]
+        loaded_contrib = [type(c) for c in loaded.contribution_list]
+
+        self.assertTrue(set(truth_contrib) == set(loaded_contrib))
+        self.assertEqual(tm._ngauss, loaded._ngauss)
+
+    def test_directimage(self):
+        from taurex.util.hdf5 import load_model_from_hdf5
+        from taurex.model import DirectImageModel
+        from taurex.data.profiles.chemistry import TaurexChemistry, ConstantGas
+        from taurex.contributions import AbsorptionContribution, RayleighContribution
+        from taurex.cache import OpacityCache
+
+        with patch.object(OpacityCache, "find_list_of_molecules") as mock_my_method:
+            mock_my_method.return_value = ['H2O']
+            chem = TaurexChemistry()
+            chem.addGas(ConstantGas())
+
+        tm = DirectImageModel(chemistry=chem,ngauss=10)
+        tm.add_contribution(AbsorptionContribution())
+        tm.add_contribution(RayleighContribution())
+        tm.build()
+        tm.initialize_profiles()
+        wngrid = np.linspace(100,400)
+        tm.star.initialize(wngrid)
+        with patch.object(DirectImageModel, "model") as mock_my_method:
+            mock_my_method = None
+            file_path = self.gen_valid_hdf5_output(tm, 'Test')
+
+        with h5py.File(file_path, 'r') as f:
+            loaded = load_model_from_hdf5(f['Test']['ModelParameters'])
+
+        loaded.build()
+        loaded.initialize_profiles()
+        wngrid = np.linspace(100, 400)
+
+        self.assertTrue(isinstance(loaded, DirectImageModel))
+        np.testing.assert_array_equal(loaded.densityProfile, tm.densityProfile)
+
+        truth_contrib = [type(c) for c in tm.contribution_list]
+        loaded_contrib = [type(c) for c in loaded.contribution_list]
+
+        self.assertTrue(set(truth_contrib) == set(loaded_contrib))
+        self.assertEqual(tm._ngauss, loaded._ngauss)

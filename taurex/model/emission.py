@@ -131,3 +131,8 @@ class EmissionModel(SimpleForwardModel):
         self.debug('flux_total %s',flux_total)
         
         return self.compute_final_flux(flux_total).flatten(),tau
+
+    def write(self,output):
+        model = super().write(output)
+        model.write_scalar('ngauss', self._ngauss)
+        return model
