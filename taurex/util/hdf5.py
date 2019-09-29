@@ -43,3 +43,8 @@ def load_pressure_from_hdf5(loc):
     return load_generic_profile_from_hdf5(loc, 'Pressure',
                                           'taurex.data.profiles.pressure',
                                           'pressure_type')
+
+def load_gas_from_hdf5(loc, molecule):
+    return load_generic_profile_from_hdf5(loc, molecule,
+                                          'taurex.data.profiles.chemistry',
+                                          'gas_type')

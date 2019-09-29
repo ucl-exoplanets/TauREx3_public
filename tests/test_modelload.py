@@ -1,5 +1,5 @@
 import unittest
-from taurex.util.hdf5 import load_temperature_from_hdf5, load_pressure_from_hdf5
+from taurex.util.hdf5 import load_temperature_from_hdf5, load_pressure_from_hdf5, load_gas_from_hdf5
 from taurex.output.hdf5 import HDF5Output
 import tempfile,shutil
 import numpy as np
@@ -120,3 +120,32 @@ class PressLoadTest(HDFTester):
         
         loaded.compute_pressure_profile()
         np.testing.assert_array_equal(pres.profile, loaded.profile)
+
+class GasLoadTest(HDFTester):
+
+    def test_constant_gas(self):
+        from taurex.data.profiles.chemistry import ConstantGas
+
+        gas = ConstantGas('H2O', 1e-4)
+        file_path = self.gen_valid_hdf5_output(gas, 'Test')
+
+        with h5py.File(file_path, 'r') as f:
+            loaded = load_gas_from_hdf5(f['Test'],'H2O')
+
+        self.assertTrue(isinstance(loaded, ConstantGas))
+        self.assertEqual(gas._mix_ratio, loaded._mix_ratio)
+
+    def test_twolayer_gas(self):
+        from taurex.data.profiles.chemistry import TwoLayerGas
+
+        gas = TwoLayerGas('H2O', 1e-4, 1e-7, 1e2, 15)
+        file_path = self.gen_valid_hdf5_output(gas, 'Test')
+
+        with h5py.File(file_path, 'r') as f:
+            loaded = load_gas_from_hdf5(f['Test'],'H2O')
+
+        self.assertTrue(isinstance(loaded, TwoLayerGas))
+        self.assertEqual(gas._mix_ratio_pressure, loaded._mix_ratio_pressure)
+        self.assertEqual(gas._mix_surface, loaded._mix_surface)
+        self.assertEqual(gas._mix_top, loaded._mix_top)
+        self.assertEqual(gas._mix_ratio_smoothing, loaded._mix_ratio_smoothing)
