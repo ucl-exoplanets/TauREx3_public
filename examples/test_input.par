@@ -66,8 +66,14 @@ bin_type = manual
 accurate = False
 log_wavelength_grid = 0.3,4.1,1000
 
+[Instrument]
+instrument = custom
+python_file = /Users/ahmed/Documents/repos/AlfNoor/alfnoor/instruments/ariel.py
+config_file = '/Users/ahmed/Documents/repos/ArielRad/runConfig.xml'
+tier = 2
 
-#[Observation]
+[Observation]
+taurex_spectrum = self
 #observed_spectrum = /Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_transmission/SPECTRUM_fit.dat
 #observed_spectrum = /Users/ahmed/Documents/repos/TauREx3/test_spectrum.dat
 
