@@ -195,7 +195,7 @@ class TaurexSpectrumTest(unittest.TestCase):
 
         return file_path, wngrid, wlgrid, spectrum, error, wnwidth, wlwidth
 
-    def test_correct_shape(self):
+    def test_valid_opt(self):
 
         res = self.gen_valid_hdf5_output()
         file_path, wngrid, wlgrid, spectrum, error, wnwidth, wlwidth = res
