@@ -88,5 +88,5 @@ class CIAContribution(Contribution):
 
     def write(self,output):
         contrib = super().write(output)
-        contrib.write_string_array('cia-pairs',self.ciaPairs)
+        contrib.write_string_array('cia_pairs',self.ciaPairs)
         return contrib

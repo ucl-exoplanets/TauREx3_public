@@ -53,16 +53,13 @@ class PhoenixStar(BlackbodyStar):
                   magnitudeK = 10.0,phoenix_path=None):
         super().__init__(temperature=temperature,radius=radius,
             distance = distance,
-                  magnitudeK = magnitudeK,mass = mass,)
+                  magnitudeK = magnitudeK,mass = mass, metallicity=metallicity)
         if phoenix_path is None:
             self.error('No file path to phoenix files defined')
             raise Exception('No file path to phoenix files defined')
-        
+
         self.info('Star is PHOENIX type')
         self._phoenix_path = phoenix_path
-        
-        
-        self._metallicity = metallicity
 
         self.get_avail_phoenix()
         self.use_blackbody = False
@@ -316,3 +313,8 @@ class PhoenixStar(BlackbodyStar):
         sed : :obj:`array`
         """
         return self.sed
+
+    def write(self, output):
+        star = super().write(output)
+        star.write_string('phoenix_path', self._phoenix_path)
+        return star
