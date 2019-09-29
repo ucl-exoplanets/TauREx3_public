@@ -194,4 +194,5 @@ class StarLoadTest(HDFTester):
         self.assertEqual(star.distance, loaded.distance)
         self.assertEqual(star.magnitudeK, loaded.magnitudeK)
         self.assertEqual(star.temperature, loaded.temperature)
-        np.testing.assert_array_equal(star.sed,loaded.sed)
+        np.testing.assert_array_equal(star.sed, loaded.sed)
+        
