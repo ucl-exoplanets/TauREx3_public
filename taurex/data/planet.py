@@ -140,15 +140,21 @@ class Planet(Fittable,Logger,Writeable):
 
         return (G * self.fullMass) / ((self.fullRadius+height)**2) 
 
-    def write(self,output):
+    def write(self, output):
         planet = output.create_group('Planet')
-        planet.write_string('planet_type',self.__class__.__name__)
-        planet.write_scalar('mass',self._mass)
-        planet.write_scalar('radius',self._radius)
-        planet.write_scalar('mass_MJUP',self.mass)
-        planet.write_scalar('radius_RJUP',self.radius)
-        planet.write_scalar('distance',self._distance)
-        planet.write_scalar('surface_gravity',self.gravity)
+
+        planet.write_string('planet_type', self.__class__.__name__)
+        planet.write_scalar('planet_mass', self._mass)
+        planet.write_scalar('planet_radius', self._radius)
+        planet.write_scalar('planet_distance', self._distance)
+        planet.write_scalar('impact_param', self._impact)
+        planet.write_scalar('orbital_period', self.orbitalPeriod)
+        planet.write_scalar('albedo', self.albedo)
+        planet.write_scalar('transit_time', self.transitTime)
+
+        planet.write_scalar('mass_MJUP', self.mass)
+        planet.write_scalar('radius_RJUP', self.radius)
+        planet.write_scalar('surface_gravity', self.gravity)
         return planet
 
 class Earth(Planet):
