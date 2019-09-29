@@ -77,18 +77,6 @@ def main():
 
     binning = pp.generate_binning()
 
-
-    instrument = pp.generate_instrument()
-    num_obs=1
-    if instrument is not None:
-        instrument,num_obs = instrument
-
-    if observation == 'self' and instrument is None:
-        logging.getLogger('taurex').critical('Instrument nust be specified when using self option')
-        raise ValueError('No instruemnt specified for self option')
-
-
-
     wngrid = None
 
 
@@ -112,6 +100,17 @@ def main():
             wngrid = observation.wavenumberGrid
         else:
             binning, wngrid = binning
+
+    instrument = pp.generate_instrument(binner=binning)
+    
+    num_obs=1
+    if instrument is not None:
+        instrument,num_obs = instrument
+
+    if observation == 'self' and instrument is None:
+        logging.getLogger('taurex').critical('Instrument nust be specified when using self option')
+        raise ValueError('No instruemnt specified for self option')
+
     # Run the model
     result = model.model()
 
@@ -123,7 +122,13 @@ def main():
     # Observation on self
     if observation == 'self':
         from taurex.data.spectrum import ArraySpectrum
-        observation = ArraySpectrum(np.vstack(inst_result[:3]).T)
+        from taurex.util.util import wnwidth_to_wlwidth
+        inst_wngrid, inst_spectrum, inst_noise, inst_width = inst_result
+
+        inst_wlgrid = 10000/inst_wngrid
+
+        inst_wlwidth = wnwidth_to_wlwidth(inst_wngrid, inst_width)
+        observation = ArraySpectrum(np.vstack([inst_wlgrid,inst_spectrum,inst_noise,inst_wlwidth]).T)
 
     # Handle outputs
     if args.output_file and get_rank() == 0:
@@ -215,7 +220,6 @@ def main():
                 spectrum['instrument_wlgrid'] = 10000/inst_result[0]
                 spectrum['instrument_spectrum'] = inst_result[1]
                 spectrum['instrument_noise'] = inst_result[2]
-                
 
             spectrum['Contributions'] = store_contributions(binning, model, 
                                                             output_size=output_size-3)
@@ -315,27 +319,6 @@ def main():
                         else:
                             ax.plot(wlgrid, binned[1], label=label)
 
-            # if args.contrib and not is_lightcurve:
-            #     for name,value in contrib:
-            #         new_value = bindown(native_grid,value,bindown_wngrid)
-            #         ax.plot(wlgrid,new_value,label='All {}'.format(name),alpha=0.8)
-            # if args.full_contrib:
-            #     for k,v in contrib_res.items():
-            #         first_name = k
-            #         for out in v:
-            #             second_name = out[0]
-            #             label='{}-{}'.format(first_name,second_name)
-            #             if is_lightcurve:
-            #                 binned = out[-1][1]
-            #                 ax.plot(binned,label=label,alpha=0.6)
-            #             else:
-            #                 binned = out[1]
-                                
-            #                 ax.plot(wlgrid,binned,label=label,alpha=0.6)
-
-            
-            
-            #If we have an observation then plot it
 
             plt.legend()
             plt.show()
