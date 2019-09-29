@@ -309,7 +309,7 @@ class TaurexChemistry(Chemistry):
         if isinstance(self._fill_gases , float):
             gas_entry.write_scalar('ratio',self._fill_ratio)
         elif hasattr(self._fill_gases, '__len__'):
-            gas_entry.write_array('ratio',self._fill_ratio)
+            gas_entry.write_array('ratio',np.array(self._fill_ratio))
         gas_entry.write_string_array('fill_gases',self._fill_gases)
         for gas in self._gases:
             gas.write(gas_entry)
