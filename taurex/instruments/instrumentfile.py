@@ -2,6 +2,7 @@ from .instrument import Instrument
 import numpy as np
 from taurex.binning import FluxBinner
 import math
+from taurex.util.util import wnwidth_to_wlwidth
 
 
 class InstrumentFile(Instrument):
@@ -47,10 +48,7 @@ class InstrumentFile(Instrument):
 
     def create_wn_widths(self):
 
-        left_wl = self._wlgrid - self._wlwidths/2
-        right_wl = self._wlgrid + self._wlwidths/2
-
-        self._wnwidths = np.abs(10000/left_wl - 10000/right_wl)
+        self._wnwidths = wnwidth_to_wlwidth(self._wlgrid, self._wlwidths)
 
     def model_noise(self, model, model_res=None, num_observations=1):
 
