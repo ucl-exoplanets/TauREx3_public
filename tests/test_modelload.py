@@ -1,10 +1,10 @@
 import unittest
-from taurex.util.hdf5 import load_temperature_from_hdf5, load_pressure_from_hdf5, load_gas_from_hdf5
+from taurex.util.hdf5 import load_temperature_from_hdf5, load_pressure_from_hdf5, load_gas_from_hdf5,load_chemistry_from_hdf5
 from taurex.output.hdf5 import HDF5Output
 import tempfile,shutil
 import numpy as np
 import h5py
-
+from unittest.mock import patch
 
 class HDFTester(unittest.TestCase):
 
@@ -178,9 +178,9 @@ class StarLoadTest(HDFTester):
     def test_blackbody(self):
         from taurex.data.stellar import BlackbodyStar
         from taurex.util.hdf5 import load_star_from_hdf5
-        
+
         star = BlackbodyStar(6000, 1.5, 1.5, 15.0, 1.5, 1.5)
-        wngrid = np.linspace(300, 3000,10)
+        wngrid = np.linspace(300, 3000, 10)
         star.initialize(wngrid)
         file_path = self.gen_valid_hdf5_output(star, 'Test')
 
@@ -195,4 +195,37 @@ class StarLoadTest(HDFTester):
         self.assertEqual(star.magnitudeK, loaded.magnitudeK)
         self.assertEqual(star.temperature, loaded.temperature)
         np.testing.assert_array_equal(star.sed, loaded.sed)
+
+class ChemistryLoadTest(HDFTester):
+    
         
+    def test_taurex_chemistry(self):
+        from taurex.data.profiles.chemistry import TaurexChemistry,ConstantGas
+        from taurex.cache import OpacityCache
+
+        
+        molecules = ['H2O', 'CH4']
+        mix_ratios = [1e-2, 1e-8]
+        molecule_classes = [ConstantGas, ConstantGas]
+
+        with patch.object(OpacityCache, "find_list_of_molecules") as mock_my_method:
+            mock_my_method.return_value = molecules
+        
+            chemistry = TaurexChemistry(fill_gases=['H2', 'N2'], ratio=0.145)
+
+            for mol,mix,klass in zip(molecules, mix_ratios, molecule_classes):
+                chemistry.addGas(klass(mol, mix))
+
+        chemistry.initialize_chemistry(100, None, None, None)
+        file_path = self.gen_valid_hdf5_output(chemistry, 'Test')
+        
+        with patch.object(OpacityCache, "find_list_of_molecules") as mock_my_method:
+            mock_my_method.return_value = molecules
+            with h5py.File(file_path, 'r') as f:
+                loaded = load_chemistry_from_hdf5(f['Test'])
+
+        loaded.initialize_chemistry(100, None, None, None)
+        self.assertTrue(set(chemistry._fill_gases) == set(loaded._fill_gases))
+        self.assertTrue(set(chemistry._fill_ratio) == set(loaded._fill_ratio))
+        np.testing.assert_equal(chemistry.activeGasMixProfile,loaded.activeGasMixProfile)
+

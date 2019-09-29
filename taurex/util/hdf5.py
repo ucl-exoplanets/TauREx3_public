@@ -1,7 +1,7 @@
 
 from .util import class_for_name
 import h5py
-
+import numpy as np
 
 def get_klass_args(klass):
     import inspect
@@ -30,7 +30,11 @@ def load_generic_profile_from_hdf5(loc, label, module, identifier, profile_type=
     for kw in klass_kwargs:
         
         if kw in temp_keys:
-            args_dict[kw] = t_loc[kw][()]
+            v = t_loc[kw][()]
+            if isinstance(v, np.ndarray) and v.dtype.type is np.string_:
+                from taurex.util.util import decode_string_array
+                v = decode_string_array(v)
+            args_dict[kw] = v
 
     return klass(**args_dict)
 
@@ -56,3 +60,20 @@ def load_planet_from_hdf5(loc):
 def load_star_from_hdf5(loc):
     return load_generic_profile_from_hdf5(loc, 'Star',
                                           'taurex.data.stellar', 'star_type')
+
+def load_chemistry_from_hdf5(loc):
+    from taurex.data.profiles.chemistry import TaurexChemistry
+    from taurex.util.util import decode_string_array
+    chemistry = load_generic_profile_from_hdf5(loc, 'Chemistry',
+                                               'taurex.data.profiles.chemistry',
+                                               'chemistry_type')
+
+    if isinstance(chemistry, TaurexChemistry):
+        for mol in decode_string_array(loc['Chemistry']['active_gases'][()]):
+            if mol not in chemistry._fill_gases:
+                chemistry.addGas(load_gas_from_hdf5(loc['Chemistry'], mol))
+        for mol in decode_string_array(loc['Chemistry']['inactive_gases']):
+            if mol not in chemistry._fill_gases:
+                chemistry.addGas(load_gas_from_hdf5(loc['Chemistry'], mol))
+
+    return chemistry
