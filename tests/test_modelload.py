@@ -218,7 +218,7 @@ class ChemistryLoadTest(HDFTester):
 
         chemistry.initialize_chemistry(100, None, None, None)
         file_path = self.gen_valid_hdf5_output(chemistry, 'Test')
-        
+
         with patch.object(OpacityCache, "find_list_of_molecules") as mock_my_method:
             mock_my_method.return_value = molecules
             with h5py.File(file_path, 'r') as f:
@@ -229,3 +229,72 @@ class ChemistryLoadTest(HDFTester):
         self.assertTrue(set(chemistry._fill_ratio) == set(loaded._fill_ratio))
         np.testing.assert_equal(chemistry.activeGasMixProfile,loaded.activeGasMixProfile)
 
+
+
+class ContribLoadTest(HDFTester):
+
+    def test_absorption(self):
+        from taurex.contributions import AbsorptionContribution
+        from taurex.util.hdf5 import load_contrib_from_hdf5
+        abs_c = AbsorptionContribution()
+        file_path = self.gen_valid_hdf5_output(abs_c, 'Test')
+
+        with h5py.File(file_path, 'r') as f:
+            loaded = load_contrib_from_hdf5(f['Test'], AbsorptionContribution.__name__)
+
+        self.assertTrue(isinstance(loaded, AbsorptionContribution))
+
+
+    def test_rayleigh(self):
+        from taurex.contributions import RayleighContribution
+        from taurex.util.hdf5 import load_contrib_from_hdf5
+        ray_c = RayleighContribution()
+        file_path = self.gen_valid_hdf5_output(ray_c, 'Test')
+
+        with h5py.File(file_path, 'r') as f:
+            loaded = load_contrib_from_hdf5(f['Test'], RayleighContribution.__name__)
+
+        self.assertTrue(isinstance(loaded, RayleighContribution))
+
+    def test_cia(self):
+        from taurex.contributions import CIAContribution
+        from taurex.util.hdf5 import load_contrib_from_hdf5
+        cia_c = CIAContribution(cia_pairs=['H2-He', 'H2-H2'])
+        file_path = self.gen_valid_hdf5_output(cia_c, 'Test')
+
+        with h5py.File(file_path, 'r') as f:
+            loaded = load_contrib_from_hdf5(f['Test'],
+                                            CIAContribution.__name__)
+
+        self.assertTrue(isinstance(loaded, CIAContribution))
+        self.assertTrue(set(cia_c._cia_pairs) == set(loaded._cia_pairs))
+
+    def test_simpleclouds(self):
+        from taurex.contributions import SimpleCloudsContribution
+        from taurex.util.hdf5 import load_contrib_from_hdf5
+        clouds_c = SimpleCloudsContribution(clouds_pressure=1e3)
+        file_path = self.gen_valid_hdf5_output(clouds_c, 'Test')
+
+        with h5py.File(file_path, 'r') as f:
+            loaded = load_contrib_from_hdf5(f['Test'],
+                                            SimpleCloudsContribution.__name__)
+
+        self.assertTrue(isinstance(loaded, SimpleCloudsContribution))
+        self.assertEqual(clouds_c.cloudsPressure, loaded.cloudsPressure)
+
+    def test_leemie(self):
+        from taurex.contributions import LeeMieContribution
+        from taurex.util.hdf5 import load_contrib_from_hdf5
+        lee_mie = LeeMieContribution(1.0, 20, 1e-4, 1e-2, 1e-3)
+        file_path = self.gen_valid_hdf5_output(lee_mie, 'Test')
+
+        with h5py.File(file_path, 'r') as f:
+            loaded = load_contrib_from_hdf5(f['Test'],
+                                            LeeMieContribution.__name__)
+
+        self.assertTrue(isinstance(loaded, LeeMieContribution))
+        self.assertEqual(lee_mie.mieQ, loaded.mieQ)
+        self.assertEqual(lee_mie.mieRadius, loaded.mieRadius)
+        self.assertEqual(lee_mie.mieBottomPressure, loaded.mieBottomPressure)
+        self.assertEqual(lee_mie.mieTopPressure, loaded.mieTopPressure)
+        self.assertEqual(lee_mie.mieMixing, loaded.mieMixing)

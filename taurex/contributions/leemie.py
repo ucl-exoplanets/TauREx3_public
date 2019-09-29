@@ -126,5 +126,5 @@ class LeeMieContribution(Contribution):
         contrib.write_scalar('mie_Q', self._mie_q)
         contrib.write_scalar('mie_mix_ratio', self._mie_mix)
         contrib.write_scalar('mie_bottom_pressure', self._mie_bottom_pressure)
-        contrib.write_scalar('mie_top_pressure', self._mix_top_pressure)
+        contrib.write_scalar('mie_top_pressure', self._mie_top_pressure)
         return contrib
