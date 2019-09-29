@@ -19,14 +19,8 @@ ratio = 4.8962e-2
     
 
 [Temperature]
-#profile_type = isothermal
-#T = 1997
-profile_type = NPoint
-T_surface = 2500
-T_top = 1800
-P_top = 1e-1
-temperature_points = 2000,
-pressure_points = 1e3,
+profile_type = isothermal
+T = 1997
 
 [Pressure]
 profile_type = Simple
@@ -43,7 +37,7 @@ planet_radius = 1.0
 star_type = blackbody
 
 [Model]
-model_type = emission
+model_type = transmission
 
     [[Absorption]]
     
@@ -52,22 +46,26 @@ model_type = emission
     
     [[Rayleigh]]
 
-    [[LeeMie]]
-    mie_radius=0.1
-    mie_Q=80
-    mie_mix_ratio=1e-5
-    mie_bottom_pressure=-1
-    mie_top_pressure=1e3
+    #[[LeeMie]]
+    #mie_radius=0.1
+    #mie_mix_ratio=1e-5
+    #mie_Q=80
+    #mie_bottom_pressure=-1
+    #mie_top_pressure=1e3
 
 
 
 [Binning]
 bin_type = manual
-accurate = False
-log_wavelength_grid = 0.3,4.1,1000
+accurate = true
+log_wavelength_grid = 0.6,4.1,30
 
+[Instrument]
+instrument = snr
+SNR = 100
 
-#[Observation]
+[Observation]
+taurex_spectrum = self
 #observed_spectrum = /Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_transmission/SPECTRUM_fit.dat
 #observed_spectrum = /Users/ahmed/Documents/repos/TauREx3/test_spectrum.dat
 
@@ -84,7 +82,7 @@ search_multi_modes=True
 
 [Fitting]
 T:fit = True
-T:bounds = 1200.0,1600.0
+T:factor = 0.75,1.25
 planet_radius:fit = False
 H2O:fit = False
 H2O:bounds = 1e-2,1e-5
