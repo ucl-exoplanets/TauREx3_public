@@ -195,8 +195,9 @@ def optimizer_factory(optimizer):
 
 
 def instrument_factory(instrument):
-
-    raise NotImplementedError('Instrument {} not implemented'.format(instrument))
+    if instrument in ('file', 'fromfile',):
+        from taurex.instruments import InstrumentFile
+        return InstrumentFile
 
 
 def create_star(config):
@@ -208,12 +209,12 @@ def create_star(config):
 
     return obj
 
+
 def create_planet(config):
     from taurex.data.planet import Planet
 
-    if not 'planet_type' in config:
-        config['planet_type']= 'simple'
-
+    if 'planet_type' not in config:
+        config['planet_type'] = 'simple'
 
     config, klass = determine_klass(config, 'planet_type', planet_factory,
                                     Planet)

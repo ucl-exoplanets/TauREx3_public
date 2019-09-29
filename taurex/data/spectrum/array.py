@@ -29,6 +29,8 @@ class ArraySpectrum(BaseSpectrum):
         self._sort_spectrum()
         self._process_spectrum()
 
+        self._wnwidths = wnwidth_to_wlwidth(self.wavelengthGrid,
+                                            self._bin_widths)
     def _sort_spectrum(self):
         self._obs_spectrum = self._obs_spectrum[self._obs_spectrum[:, 0].argsort(axis=0)[::-1]]
 
@@ -41,9 +43,9 @@ class ArraySpectrum(BaseSpectrum):
         if self.rawData.shape[1] == 4:
             self._bin_widths = self._obs_spectrum[:, 3]
             obs_wl = self.wavelengthGrid[::-1]
-            obs_bw = self.binWidths[::-1]
+            obs_bw = self._bin_widths[::-1]
 
-            bin_edges = np.zeros(shape=(len(self.binWidths)*2,))
+            bin_edges = np.zeros(shape=(len(self._bin_widths)*2,))
 
             bin_edges[0::2] = obs_wl - obs_bw/2
             bin_edges[1::2] = obs_wl + obs_bw/2
@@ -52,6 +54,7 @@ class ArraySpectrum(BaseSpectrum):
             self._bin_edges = bin_edges[::-1]
         else:
             self.manual_binning()
+
 
     @property
     def rawData(self):
@@ -80,7 +83,7 @@ class ArraySpectrum(BaseSpectrum):
     @property
     def binWidths(self):
         """bin widths"""
-        return wnwidth_to_wlwidth(self.wavelengthGrid, self._bin_widths)
+        return self._wnwidths
 
     @property
     def errorBar(self):
@@ -88,15 +91,8 @@ class ArraySpectrum(BaseSpectrum):
         return self.rawData[:, 2]
 
     def manual_binning(self):
+        from taurex.util.util import compute_bin_edges
         """
         Performs the calculation of bin edges when none are present
         """
-        bin_edges = []
-        wl_grid = self.wavelengthGrid
-
-        bin_edges.append(wl_grid[0]-(wl_grid[1]-wl_grid[0])/2)
-        for i in range(wl_grid.shape[0]-1):
-            bin_edges.append(wl_grid[i]+(wl_grid[i+1]-wl_grid[i])/2.0)
-        bin_edges.append((wl_grid[-1]-wl_grid[-2])/2.0 + wl_grid[-1])
-        self._bin_edges = np.array(bin_edges)
-        self._bin_widths = np.abs(np.diff(self._bin_edges))
+        self._bin_edges, self._bin_widths = compute_bin_edges(self.wavelengthGrid)
