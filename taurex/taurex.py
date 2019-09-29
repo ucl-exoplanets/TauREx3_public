@@ -88,7 +88,7 @@ def main():
 
 
     model.model()
-    
+
     if binning == 'observed' and observation is None:
         logging.critical('Binning selected from Observation yet None provided')
         quit()
@@ -263,7 +263,7 @@ def main():
                     inst_wlwidth = wnwidth_to_wlwidth(inst_wngrid, inst_width)
 
                     
-                    ax.plot(wlgrid, binning.bin_model(result)[1], label='forward model')
+                    #ax.plot(wlgrid, binning.bin_model(result)[1], label='forward model')
                     ax.errorbar(inst_wlgrid, inst_spectrum, inst_noise,
                                 inst_wlwidth/2, '.', label='Instrument')
 
