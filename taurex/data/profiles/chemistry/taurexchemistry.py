@@ -60,10 +60,10 @@ class TaurexChemistry(Chemistry):
         self._active = []
         self._inactive = []
 
-        if isinstance(fill_gases,str):
+        if isinstance(fill_gases, str):
             fill_gases = [fill_gases]
 
-        if isinstance(ratio,float):
+        if isinstance(ratio, float):
             ratio = [ratio]
 
         if len(fill_gases) > 1 and len(ratio)!= len(fill_gases)-1:
@@ -306,9 +306,11 @@ class TaurexChemistry(Chemistry):
 
     def write(self,output):
         gas_entry = super().write(output)
-        fill_entry = gas_entry.create_group('Fill_gases')
-        fill_entry.write_scalar('ratio',self._fill_ratio)
-        fill_entry.write_string_array('Fill-gases',self._fill_gases)
+        if isinstance(self._fill_gases , float):
+            gas_entry.write_scalar('ratio',self._fill_ratio)
+        elif hasattr(self._fill_gases, '__len__'):
+            gas_entry.write_array('ratio',self._fill_ratio)
+        gas_entry.write_string_array('fill_gases',self._fill_gases)
         for gas in self._gases:
             gas.write(gas_entry)
 

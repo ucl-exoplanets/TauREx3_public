@@ -67,6 +67,6 @@ class ConstantGas(Gas):
 
     def write(self,output):
         gas_entry = super().write(output)
-        gas_entry.write_scalar('mix_ratio',self.mixProfile)
+        gas_entry.write_scalar('mix_ratio', self._mix_ratio)
 
         return gas_entry

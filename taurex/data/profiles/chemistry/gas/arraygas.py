@@ -54,6 +54,6 @@ class ArrayGas(Gas):
 
     def write(self, output):
         gas_entry = super().write(output)
-        gas_entry.write_array('mix_ratio', self.mixProfile)
+        gas_entry.write_array('mix_ratio_array', self._mix_ratio_array)
 
         return gas_entry

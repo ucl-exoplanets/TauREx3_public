@@ -40,10 +40,14 @@ class ACEChemistry(Chemistry):
     """N solar abundance"""
 
 
-    def __init__(self,metallicity=1.0,co_ratio=0.54951,therm_file = None,spec_file=None):
+    def __init__(self,ace_metallicity=1.0,
+                      ace_co_ratio=0.54951,
+                      therm_file = None,
+                      spec_file=None):
+
         super().__init__('ACE')
-        self.ace_metallicity = metallicity
-        self.ace_co = co_ratio
+        self.ace_metallicity = ace_metallicity
+        self.ace_co = ace_co_ratio
         self.active_gases = None
         self.inactive_gases = None
         self._get_files(therm_file,spec_file)
@@ -169,7 +173,9 @@ class ACEChemistry(Chemistry):
         self.He_abund_dex = self.ace_He_solar
 
 
-    def compute_active_gas_profile(self,nlayers,altitude_profile,pressure_profile,temperature_profile):
+    def compute_active_gas_profile(self, nlayers, altitude_profile,
+                                   pressure_profile,
+                                   temperature_profile):
         """Computes gas profiles of both active and inactive molecules for each layer
 
         Parameters
@@ -253,8 +259,12 @@ class ACEChemistry(Chemistry):
     def write(self,output):
 
         gas_entry = super().write(output)
-        gas_entry.write_scalar('metallicity',self.ace_metallicity)
-        gas_entry.write_scalar('co_ratio',self.ace_co)
+        gas_entry.write_scalar('ace_metallicity', self.ace_metallicity)
+        gas_entry.write_scalar('ace_co_ratio', self.ace_co)
+        if self._thermfile is not None:
+            gas_entry.write_string('therm_file', self._thermfile)
+        if self._specfile is not None:
+            gas_entry.write_string('spec_file', self._specfile)
 
         return gas_entry
 

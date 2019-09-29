@@ -172,7 +172,7 @@ class TwoLayerGas(Gas):
         self._mix_profile =  chemprofile[::-1]
         self._mix_profile[border:-border] = C_smooth[::-1]
 
-    def write(self,output):
+    def write(self, output):
         gas_entry = super().write(output)
         gas_entry.write_scalar('mix_ratio_top', self.mixRatioTop)
         gas_entry.write_scalar('mix_ratio_surface', self.mixRatioSurface)
