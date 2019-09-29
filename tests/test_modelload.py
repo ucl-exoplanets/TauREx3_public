@@ -417,3 +417,4 @@ class ModelLoadTest(HDFTester):
 
         self.assertTrue(set(truth_contrib) == set(loaded_contrib))
         self.assertEqual(tm._ngauss, loaded._ngauss)
+

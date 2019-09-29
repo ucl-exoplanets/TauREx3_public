@@ -125,3 +125,34 @@ def load_model_from_hdf5(loc):
                                                       contrib))
 
     return model
+
+
+def taurex_hdf5_to_model(filename):
+
+    import h5py
+    with h5py.File(filename, 'r') as f:
+        model = load_model_from_hdf5(f['ModelParameters'])
+
+    return model
+
+def taurex_hdf5_to_observation(filename):
+
+    import h5py
+    from taurex.util.util import wnwidth_to_wlwidth
+    from taurex.data.spectrum import ArraySpectrum
+    with h5py.File(filename, 'r') as f:
+        try:
+            instrument_section = f['Output']['Spectra']
+        except KeyError:
+            raise KeyError('No instrument data found in HDF5 or retrieval hdf5 used')
+        inst_wngrid = instrument_section['instrument_wngrid'][...]
+        inst_spectrum = instrument_section['instrument_spectrum'][...]
+        inst_noise = instrument_section['instrument_noise'][...]
+        inst_width = instrument_section['instrument_wnwidth'][...]
+
+        inst_wlgrid = 10000/inst_wngrid
+
+        inst_wlwidth = wnwidth_to_wlwidth(inst_wngrid, inst_width)
+        observation = ArraySpectrum(np.vstack([inst_wlgrid, inst_spectrum,
+                                               inst_noise, inst_wlwidth]).T)
+    return observation
