@@ -102,7 +102,7 @@ def main():
             binning, wngrid = binning
 
     instrument = pp.generate_instrument(binner=binning)
-    
+
     num_obs=1
     if instrument is not None:
         instrument,num_obs = instrument
@@ -111,12 +111,9 @@ def main():
         logging.getLogger('taurex').critical('Instrument nust be specified when using self option')
         raise ValueError('No instruemnt specified for self option')
 
-    # Run the model
-    result = model.model()
-
     inst_result = None
     if instrument is not None:
-        inst_result = instrument.model_noise(model, model_res=result, num_observations=num_obs)
+        inst_result = instrument.model_noise(model, model_res=model.model(), num_observations=num_obs)
 
 
     # Observation on self

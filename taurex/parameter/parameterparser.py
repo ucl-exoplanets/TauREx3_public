@@ -98,7 +98,7 @@ class ParameterParser(Logger):
         except KeyError:
             return self.generate_model()
 
-    def generate_instrument(self):
+    def generate_instrument(self, binner=None):
 
         config = self._raw_config.dict()
         if 'Instrument' in config:
@@ -109,11 +109,26 @@ class ParameterParser(Logger):
             except KeyError:
                 num_obs = 1
 
-
+            if 'instrument' in inst_config:
+                if inst_config['instrument'].lower() in ('snr', 'signalnoise', ):
+                    inst = self.create_snr(binner, inst_config)
+                    return inst,num_obs
             inst = create_instrument(inst_config)
             return inst,num_obs
         else:
             return None
+
+    def create_snr(self,binner,config):
+        from taurex.instruments.snr import SNRInstrument
+        if binner is None:
+            self.critical('Binning must be defined for SNR instrument')
+            raise ValueError('Binning must be defined for SNR instrument')
+        else:
+            SNR = 10
+            if 'SNR' in config:
+                SNR = config['SNR']
+            
+            return SNRInstrument(SNR=SNR,binner=binner)
 
     def generate_optimizer(self):
         config = self._raw_config.dict()
