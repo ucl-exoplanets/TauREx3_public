@@ -2,8 +2,12 @@ import unittest
 from unittest.mock import patch
 from taurex.data.spectrum.spectrum import BaseSpectrum
 from taurex.data.spectrum.observed import ObservedSpectrum
+from taurex.data.spectrum.taurex import TaurexSpectrum
 import numpy as np
- 
+import tempfile
+import shutil
+
+
 test_data_with_bin = np.array([[7.27555920e+00, 1.45008637e-02, 7.42433558e-05, 4.76957670e-01],
        [6.81373911e+00, 1.45861957e-02, 7.06735254e-05, 4.46682521e-01],
        [6.38123330e+00, 1.43091103e-02, 6.47629305e-05, 4.18329104e-01],
@@ -152,23 +156,53 @@ class ObservedSpectrumTest(unittest.TestCase):
         self.assertIsNotNone(test_spec.binWidths)
 
 
-    # @patch("numpy.loadtxt", return_value=test_data_with_bin)
-    # def test_bin_edge_calc_with_bin(self,mock_load):
-    #     test_spec = ObservedSpectrum('TestFile')
-    #     mock_load.assert_called_with('TestFile')
+class TaurexSpectrumTest(unittest.TestCase):
 
-    #     np.testing.assert_array_equal(test_data_with_bin,test_spec.rawData)
-    #     np.testing.assert_array_equal(test_data_with_bin[:,3],test_spec.binWidths)
-    #     np.testing.assert_array_equal(self._taurex_binwidths(),test_spec.binEdges)
+    def setUp(self):
 
+        # Create a temporary directory
+        self.test_dir = tempfile.mkdtemp()
 
-    # @patch("numpy.loadtxt", return_value=test_data_without_bin)
-    # def test_bin_edge_calc_without_bin(self,mock_load):
-    #     test_spec = ObservedSpectrum('TestFile')
-    #     mock_load.assert_called_with('TestFile')
-        
-    #     bin_widths,bin_edges = self._taurex_extrap_bin()
+    def tearDown(self):
+        shutil.rmtree(self.test_dir)
 
-    #     np.testing.assert_array_equal(test_data_without_bin,test_spec.rawData)
-    #     np.testing.assert_array_equal(bin_widths,test_spec.binWidths)
-    #     np.testing.assert_array_equal(bin_edges,test_spec.binEdges)
+    def gen_valid_hdf5_output(self):
+        import os
+        from taurex.output.hdf5 import HDF5Output
+
+        from taurex.util.util import wnwidth_to_wlwidth, compute_bin_edges
+        file_path = os.path.join(self.test_dir, 'test.hdf5')
+
+        test_dict = {}
+
+        wngrid = np.linspace(100, 1000, 100)
+        wlgrid = 10000/wngrid
+        spectrum = np.random.rand(100)
+        error = np.random.rand(100)
+        wnwidth = compute_bin_edges(wngrid)[-1]
+        wlwidth = wnwidth_to_wlwidth(wngrid, wnwidth)
+
+        test_dict['instrument_wlgrid'] = wlgrid
+        test_dict['instrument_wngrid'] = wngrid
+        test_dict['instrument_spectrum'] = spectrum
+        test_dict['instrument_noise'] = error
+        test_dict['instrument_wnwidth'] = wnwidth
+
+        with HDF5Output(file_path) as f:
+
+            group = f.create_group('Output')
+            group.store_dictionary(test_dict, group_name='Spectra')
+
+        return file_path, wngrid, wlgrid, spectrum, error, wnwidth, wlwidth
+
+    def test_valid_opt(self):
+
+        res = self.gen_valid_hdf5_output()
+        file_path, wngrid, wlgrid, spectrum, error, wnwidth, wlwidth = res
+        ts = TaurexSpectrum(file_path)
+        self.assertEqual(ts._obs_spectrum.shape[0], 100)
+        self.assertEqual(ts._obs_spectrum.shape[1], 4)
+        np.testing.assert_array_equal(ts.spectrum, spectrum)
+        np.testing.assert_array_equal(ts.wavelengthGrid, wlgrid)
+        np.testing.assert_array_equal(ts.errorBar, error)
+        np.testing.assert_array_almost_equal(ts.binWidths, wnwidth)

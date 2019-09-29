@@ -1,6 +1,6 @@
 from .spectrum import BaseSpectrum
 import numpy as np
-
+from taurex.util.util import wnwidth_to_wlwidth
 class ArraySpectrum(BaseSpectrum):
     """
     Loads an observed spectrum from an array and computes bin
@@ -80,7 +80,7 @@ class ArraySpectrum(BaseSpectrum):
     @property
     def binWidths(self):
         """bin widths"""
-        return 10000/(self.wavelengthGrid-self._bin_widths/2) - 10000/(self.wavelengthGrid+self._bin_widths/2)
+        return wnwidth_to_wlwidth(self.wavelengthGrid, self._bin_widths)
 
     @property
     def errorBar(self):
