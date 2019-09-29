@@ -29,8 +29,13 @@ class SNRInstrument(Instrument):
         if model_res is None:
             model_res = model.model()
 
+
+
+
         wngrid, spectrum, error, grid_width = self._binner.bin_model(model_res)
 
-        noise = spectrum/self._SNR
+        signal = spectrum.max() - spectrum.min()
+
+        noise = np.ones(spectrum.shape)*signal/self._SNR
 
         return wngrid, spectrum, noise / math.sqrt(num_observations), grid_width
