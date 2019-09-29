@@ -149,3 +149,25 @@ class GasLoadTest(HDFTester):
         self.assertEqual(gas._mix_surface, loaded._mix_surface)
         self.assertEqual(gas._mix_top, loaded._mix_top)
         self.assertEqual(gas._mix_ratio_smoothing, loaded._mix_ratio_smoothing)
+
+
+
+class PlanetLoadTest(HDFTester):
+
+    def test_planet(self):
+        from taurex.data.planet import Planet
+        from taurex.util.hdf5 import load_planet_from_hdf5
+        
+        planet = Planet(1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1000.0)
+
+        file_path = self.gen_valid_hdf5_output(planet, 'Test')
+
+        with h5py.File(file_path, 'r') as f:
+            loaded = load_planet_from_hdf5(f['Test'])
+        
+        self.assertTrue(isinstance(loaded, Planet))
+        self.assertEqual(planet._mass, loaded._mass)
+        self.assertEqual(planet._radius, loaded._radius)
+        self.assertEqual(planet._transit_time, loaded._transit_time)
+        self.assertEqual(planet._distance, loaded._distance)
+        self.assertEqual(planet._orbit_period, loaded._orbit_period)

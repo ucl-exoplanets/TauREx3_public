@@ -14,9 +14,10 @@ def get_klass_args(klass):
 
     return keyword_args
 
-def load_generic_profile_from_hdf5(loc, label, module, identifier):
+def load_generic_profile_from_hdf5(loc, label, module, identifier, profile_type=None):
     t_loc = loc[label]
-    profile_type = t_loc[identifier][()]
+    if profile_type is None:
+        profile_type = t_loc[identifier][()]
     
     temp_keys = list(t_loc.keys())
 
@@ -48,3 +49,7 @@ def load_gas_from_hdf5(loc, molecule):
     return load_generic_profile_from_hdf5(loc, molecule,
                                           'taurex.data.profiles.chemistry',
                                           'gas_type')
+def load_planet_from_hdf5(loc):
+    return load_generic_profile_from_hdf5(loc, 'Planet',
+                                          'taurex.data.planet','planet_type',
+                                          'Planet')
