@@ -57,12 +57,12 @@ model_type = transmission
 
 [Binning]
 bin_type = manual
-accurate = False
-log_wavelength_grid = 0.3,4.1,30
+accurate = true
+log_wavelength_grid = 0.6,4.1,30
 
 [Instrument]
 instrument = snr
-SNR = 10
+SNR = 100
 
 [Observation]
 taurex_spectrum = self
@@ -82,7 +82,7 @@ search_multi_modes=True
 
 [Fitting]
 T:fit = True
-T:factor = 0.5,1.5
+T:factor = 0.75,1.25
 planet_radius:fit = False
 H2O:fit = False
 H2O:bounds = 1e-2,1e-5
