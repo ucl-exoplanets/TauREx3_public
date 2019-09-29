@@ -330,9 +330,8 @@ class SimpleForwardModel(ForwardModel):
         raise NotImplementedError
 
     def write(self,output):
-
-        #Run a model if needed
-        self.model(self.nativeWavenumberGrid)
+            #Run a model if needed
+        self.model()
 
         model = super().write(output)
 

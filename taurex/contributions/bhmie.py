@@ -152,7 +152,7 @@ class BHMieContribution(Contribution):
         contrib.write_scalar('cloud_particle_size',self._mie_radius)
         contrib.write_scalar('cloud_top_pressure',self._cloud_top_pressure)
         contrib.write_scalar('cloud_bottom_pressure',self._cloud_bottom_pressure)
-        contrib.write_scalar('cloud_mixing',self._mix_cloud_mix)
-        contrib.write_array('averaged_sigma',self._sig_out_aver)
-        contrib.write_array('wavenumber_grid',self.wavenumberGrid)
+        contrib.write_scalar('cloud_mix',self._mix_cloud_mix)
+        contrib.write_string('mie_path',self._mie_path)
+        contrib.write_string('mie_type', self._mie_type)
         return contrib

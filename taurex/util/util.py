@@ -461,3 +461,13 @@ def clip_native_to_wngrid(native_grid, wngrid):
 
 def wnwidth_to_wlwidth(wngrid, wnwidth):
     return 10000*wnwidth/(wngrid**2)
+
+
+
+def class_for_name(module_name, class_name):
+    import importlib
+    # load the module, will raise ImportError if module cannot be loaded
+    m = importlib.import_module(module_name)
+    # get the class, will raise AttributeError if class cannot be found
+    c = getattr(m, class_name)
+    return c

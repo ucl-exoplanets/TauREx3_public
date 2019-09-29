@@ -45,5 +45,5 @@ class Isothermal(TemperatureProfile):
 
     def write(self,output):
         temperature = super().write(output)
-        temperature.write_scalar('iso_temp',self._iso_temp)
+        temperature.write_scalar('T', self._iso_temp)
         return temperature

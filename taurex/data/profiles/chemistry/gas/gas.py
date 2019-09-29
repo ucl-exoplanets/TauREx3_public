@@ -61,4 +61,5 @@ class Gas(Fittable,Logger,Writeable):
 
         gas_entry = output.create_group(self.molecule)
         gas_entry.write_string('gas_type',self.__class__.__name__)
+        gas_entry.write_string('molecule_name', self._molecule_name)
         return gas_entry

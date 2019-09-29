@@ -122,6 +122,6 @@ class Contribution(Fittable,Logger,Writeable):
     
 
     def write(self,output):
-        contrib = output.create_group(self.name)
+        contrib = output.create_group(self.__class__.__name__)
         return contrib
 
