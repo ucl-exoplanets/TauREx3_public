@@ -127,6 +127,11 @@ class ParameterParser(Logger):
                 return ObservedSpectrum(observation_config['observed_spectrum'])
             elif 'phasecurve_path' in observation_config:
                 self.info('Phase curves to be implemented soon...... :D ')
+            elif 'taurex_spectrum' in observation_config:
+                if observation_config['taurex_spectrum'] == 'self':
+                    return 'self'
+                from taurex.data.spectrum.taurex import TaurexSpectrum
+                return TaurexSpectrum(observation_config['taurex_spectrum'])
             else:
                 self.warning('No observation specified........')
                 return None
@@ -273,7 +278,7 @@ class ParameterParser(Logger):
             return None
     def generate_star(self):
         config = self._raw_config.dict()
-        
+
         if 'Star' in config:
             return create_star(config['Star'])
         else:

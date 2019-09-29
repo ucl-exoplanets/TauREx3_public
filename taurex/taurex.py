@@ -83,11 +83,14 @@ def main():
     if instrument is not None:
         instrument,num_obs = instrument
 
+    if observation == 'self' and instrument is None:
+        logging.getLogger('taurex').critical('Instrument nust be specified when using self option')
+        raise ValueError('No instruemnt specified for self option')
+
+
 
     wngrid = None
 
-
-    model.model()
 
     if binning == 'observed' and observation is None:
         logging.critical('Binning selected from Observation yet None provided')
@@ -109,6 +112,18 @@ def main():
             wngrid = observation.wavenumberGrid
         else:
             binning, wngrid = binning
+    # Run the model
+    result = model.model()
+
+    inst_result = None
+    if instrument is not None:
+        inst_result = instrument.model_noise(model, model_res=result, num_observations=num_obs)
+
+
+    # Observation on self
+    if observation == 'self':
+        from taurex.data.spectrum import ArraySpectrum
+        observation = ArraySpectrum(np.vstack(inst_result[:3]).T)
 
     # Handle outputs
     if args.output_file and get_rank() == 0:
@@ -153,13 +168,8 @@ def main():
                 optimizer.set_mode(key, mode.lower())
 
         solution = optimizer.fit(output_size=output_size)
+        result = model.model()
 
-    # Run the model
-    result = model.model()
-
-    inst_result = None
-    if instrument is not None:
-        inst_result = instrument.model_noise(model,model_res=result,num_observations=num_obs)
 
     if args.save_spectrum is not None and get_rank()==0:
 
