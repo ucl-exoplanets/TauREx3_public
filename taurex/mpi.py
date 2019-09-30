@@ -25,7 +25,7 @@ def allgather(value):
     try:
         from mpi4py import MPI
     except ImportError:
-        return value 
+        return [value] 
 
     comm = MPI.COMM_WORLD
     data = value
