@@ -15,7 +15,7 @@ def get_klass_args(klass):
 
 def load_generic_profile_from_hdf5(loc, module, identifier, 
                                    profile_type=None, premade_dict=None):
-    
+
     if profile_type is None:
         profile_type = loc[identifier][()]
 
