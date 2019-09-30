@@ -190,9 +190,9 @@ class MultiNestOptimizer(Optimizer):
 
         self.warning('Store the multinest results')
         NEST_out = {'solutions': {}}
-        data = np.loadtxt(os.path.join(self.dir_multinest, '1-.txt'))
+        data = np.loadtxt(os.path.join(self.dir_multinest, '{}.txt'.format(self.multinest_prefix)))
 
-        NEST_analyzer = pymultinest.Analyzer(n_params=len(self.fitting_parameters), outputfiles_basename=os.path.join(self.dir_multinest, '1-'))
+        NEST_analyzer = pymultinest.Analyzer(n_params=len(self.fitting_parameters), outputfiles_basename=os.path.join(self.dir_multinest, self.multinest_prefix))
         NEST_stats = NEST_analyzer.get_stats()
         NEST_out['NEST_stats'] = NEST_stats
         NEST_out['global_logE'] = (NEST_out['NEST_stats']['global evidence'], NEST_out['NEST_stats']['global evidence error'])
@@ -200,7 +200,7 @@ class MultiNestOptimizer(Optimizer):
 
         #Bypass if run in multimodes = False. Pymultinest.Analyser does not report means and sigmas in this case
         if len(NEST_out['NEST_stats']['modes']) == 0:
-            with open(os.path.join(self.dir_multinest, '1-stats.dat')) as file:
+            with open(os.path.join(self.dir_multinest, '{}stats.dat'.format(self.multinest_prefix))) as file:
                 lines = file.readlines()
             stats = {'modes': []}
             read_error_into_dict(lines[0], stats)
@@ -241,7 +241,7 @@ class MultiNestOptimizer(Optimizer):
             # separate modes. get individual samples for each mode
 
             # get parameter values and sample probability (=weight) for each mode
-            with open(os.path.join(self.dir_multinest, '1-post_separate.dat')) as f:
+            with open(os.path.join(self.dir_multinest, '{}post_separate.dat'.format(self.multinest_prefix))) as f:
                 lines = f.readlines()
                 for idx, line in enumerate(lines):
                     if idx > 2: # skip the first two lines
