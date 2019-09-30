@@ -1,7 +1,6 @@
 
 import os
-import matplotlib.pyplot as plt
-from matplotlib import cm
+
 import numpy as np
 import h5py
 from taurex import OutputSize
@@ -217,6 +216,8 @@ def plot_taurex_results_from_hdf5(arg_output):
     plot_spectrum(spectrum, os.path.splitext(arg_output)[0] +'_spectrum.pdf', observed=observed)
 
 def plot_spectrum(spectrum, arg_output, observed = None):
+    import matplotlib.pyplot as plt
+    from matplotlib import cm
     cmap = cm.get_cmap('Set1')
 
 

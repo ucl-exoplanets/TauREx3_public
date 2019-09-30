@@ -11,20 +11,21 @@ from taurex import OutputSize
 class MultiNestOptimizer(Optimizer):
 
 
-    def __init__(self,multi_nest_path=None,observed=None,model=None,
-                sampling_efficiency='parameter',
-                num_live_points=1500,
-                max_iterations=0,
-                search_multi_modes = True,
-                num_params_cluster=None,
-                maximum_modes=100,
-                constant_efficiency_mode=False,
-                evidence_tolerance=0.5,
-                mode_tolerance=-1e90,
-                importance_sampling=False,
-                resume=False,
-                verbose_output=True,sigma_fraction=0.1):
-        super().__init__('Multinest',observed,model,sigma_fraction)
+    def __init__(self, multi_nest_path=None, observed=None, model=None,
+                 sampling_efficiency='parameter',
+                 num_live_points=1500,
+                 max_iterations=0,
+                 search_multi_modes=True,
+                 num_params_cluster=None,
+                 maximum_modes=100,
+                 constant_efficiency_mode=False,
+                 evidence_tolerance=0.5,
+                 mode_tolerance=-1e90,
+                 importance_sampling=False,
+                 resume=False,
+                 multinest_prefix='1-',
+                 verbose_output=True, sigma_fraction=0.1):
+        super().__init__('Multinest', observed, model, sigma_fraction)
 
         # sampling chains directory
         self.nest_path = 'chains/'
@@ -37,7 +38,8 @@ class MultiNestOptimizer(Optimizer):
         self.max_iter = int(max_iterations)
         # search for multiple modes
         self.multimodes = search_multi_modes
-        #parameters on which to cluster, e.g. if nclust_par = 3, it will cluster on the first 3 parameters only.
+        # parameters on which to cluster, e.g. if nclust_par = 3, it will 
+        # cluster on the first 3 parameters only.
         #if ncluster_par = -1 it clusters on all parameters
         self.nclust_par = num_params_cluster
         # maximum number of modes
@@ -52,16 +54,18 @@ class MultiNestOptimizer(Optimizer):
         if self.imp_sampling:
             self.multimodes = False
 
+        self.multinest_prefix = multinest_prefix
 
         self.dir_multinest = multi_nest_path
         if get_rank() == 0:
             
             if not os.path.exists(self.dir_multinest):
-                self.info('Directory %s does not exist, creating',self.dir_multinest)
+                self.info('Directory %s does not exist, creating',
+                          self.dir_multinest)
                 os.makedirs(self.dir_multinest)
         barrier()
 
-        self.info('Found directory %s',self.dir_multinest)
+        self.info('Found directory %s', self.dir_multinest)
 
         self.resume = resume
         self.verbose = verbose_output
@@ -90,30 +94,29 @@ class MultiNestOptimizer(Optimizer):
             #print(type(cube))
             for idx,bounds in enumerate(self.fit_boundaries):
                 # print(idx,self.fitting_parameters[idx])
-                bound_min,bound_max = bounds
+                bound_min, bound_max = bounds
                 cube[idx] = (cube[idx] * (bound_max-bound_min)) + bound_min
                 #print('CUBE idx',cube[idx])
             #print('-----------')
-        status = None
-        def dump_call(nSamples,nlive,nPar,physLive,posterior,paramConstr,maxloglike,logZ,INSlogZ,logZerr,context):
-            status = (nSamples,nlive,nPar,physLive,posterior,paramConstr,maxloglike,logZ,INSlogZ,logZerr,context)
-
-
+        # status = None
+        # def dump_call(nSamples,nlive,nPar,physLive,posterior,paramConstr,maxloglike,logZ,INSlogZ,logZerr,context):
+        #    status = (nSamples,nlive,nPar,physLive,posterior,paramConstr,maxloglike,logZ,INSlogZ,logZerr,context)
 
         ndim = len(self.fitting_parameters)
         self.warning('Number of dimensions {}'.format(ndim))
         self.warning('Fitting parameters {}'.format(self.fitting_parameters))
 
-
         ncluster = self.nclust_par
-        if isinstance(ncluster,float):
+
+        if isinstance(ncluster, float):
             ncluster = int(ncluster)
 
-        if ncluster is not None and ncluster <=0:
-                ncluster = None
+        if ncluster is not None and ncluster <= 0:
+            ncluster = None
+
         if ncluster is None:
-            self.nclust_par = ndim #For writing to output later on
-        
+            self.nclust_par = ndim  # For writing to output later on
+
         self.info('Beginning fit......')
         pymultinest.run(LogLikelihood=multinest_loglike,
                         Prior=multinest_uniform_prior,
@@ -121,16 +124,17 @@ class MultiNestOptimizer(Optimizer):
                         multimodal=self.multimodes,
                         n_clustering_params=ncluster,
                         max_modes=self.max_modes,
-                        outputfiles_basename=os.path.join(self.dir_multinest, '1-'),
-                        const_efficiency_mode = self.const_eff,
-                        importance_nested_sampling = self.imp_sampling,
-                        resume = self.resume,
-                        verbose = self.verbose,
-                        sampling_efficiency = self.sampling_eff,
-                        evidence_tolerance = self.evidence_tolerance,
-                        mode_tolerance = self.mode_tolerance,
-                        n_live_points = self.n_live_points,
-                        max_iter= self.max_iter
+                        outputfiles_basename=os.path.join(self.dir_multinest,
+                                                          self.multinest_prefix),
+                        const_efficiency_mode=self.const_eff,
+                        importance_nested_sampling=self.imp_sampling,
+                        resume=self.resume,
+                        verbose=self.verbose,
+                        sampling_efficiency=self.sampling_eff,
+                        evidence_tolerance=self.evidence_tolerance,
+                        mode_tolerance=self.mode_tolerance,
+                        n_live_points=self.n_live_points,
+                        max_iter=self.max_iter
                         )
         
         self.info('Fit complete.....')
@@ -140,7 +144,7 @@ class MultiNestOptimizer(Optimizer):
 
 
 
-    def write_optimizer(self,output):
+    def write_optimizer(self, output):
         opt = super().write_optimizer(output)
 
         # sampling efficiency (parameter, ...)
@@ -164,32 +168,31 @@ class MultiNestOptimizer(Optimizer):
         # importance nested sampling
         opt.write_scalar('importance_sampling ',self.imp_sampling)
 
-
         return opt
     
-    def write_fit(self,output):
+    def write_fit(self, output):
         fit = super().write_fit(output)
 
         if self._multinest_output:
-            recursively_save_dict_contents_to_output(output,self._multinest_output)
+            recursively_save_dict_contents_to_output(output, self._multinest_output)
 
 
 
         return fit
 
 
-    #Laziness brought us to this point
-    #This function is so big and I cannot be arsed to rewrite this in a nicer way, if some angel does it
-    #for me then I will buy them TWO beers.
+    # Laziness brought us to this point
+    # This function is so big and I cannot be arsed to rewrite this in a nicer way, if some angel does it
+    # for me then I will buy them TWO beers.
     def store_nest_solutions(self):
         
 
 
         self.warning('Store the multinest results')
         NEST_out = {'solutions': {}}
-        data = np.loadtxt(os.path.join(self.dir_multinest, '1-.txt'))
+        data = np.loadtxt(os.path.join(self.dir_multinest, '{}.txt'.format(self.multinest_prefix)))
 
-        NEST_analyzer = pymultinest.Analyzer(n_params=len(self.fitting_parameters), outputfiles_basename=os.path.join(self.dir_multinest, '1-'))
+        NEST_analyzer = pymultinest.Analyzer(n_params=len(self.fitting_parameters), outputfiles_basename=os.path.join(self.dir_multinest, self.multinest_prefix))
         NEST_stats = NEST_analyzer.get_stats()
         NEST_out['NEST_stats'] = NEST_stats
         NEST_out['global_logE'] = (NEST_out['NEST_stats']['global evidence'], NEST_out['NEST_stats']['global evidence error'])
@@ -197,7 +200,7 @@ class MultiNestOptimizer(Optimizer):
 
         #Bypass if run in multimodes = False. Pymultinest.Analyser does not report means and sigmas in this case
         if len(NEST_out['NEST_stats']['modes']) == 0:
-            with open(os.path.join(self.dir_multinest, '1-stats.dat')) as file:
+            with open(os.path.join(self.dir_multinest, '{}stats.dat'.format(self.multinest_prefix))) as file:
                 lines = file.readlines()
             stats = {'modes': []}
             read_error_into_dict(lines[0], stats)
@@ -238,7 +241,7 @@ class MultiNestOptimizer(Optimizer):
             # separate modes. get individual samples for each mode
 
             # get parameter values and sample probability (=weight) for each mode
-            with open(os.path.join(self.dir_multinest, '1-post_separate.dat')) as f:
+            with open(os.path.join(self.dir_multinest, '{}post_separate.dat'.format(self.multinest_prefix))) as f:
                 lines = f.readlines()
                 for idx, line in enumerate(lines):
                     if idx > 2: # skip the first two lines
@@ -261,8 +264,8 @@ class MultiNestOptimizer(Optimizer):
                 modes_array.append(mode_array)
         else:
             # not running in multimode. Get chains directly from file 1-.txt
-            modes_array = [data[:,2:]]
-            chains_weights = [data[:,0]]
+            modes_array = [data[:, 2:]]
+            chains_weights = [data[:, 0]]
             modes_weights.append(chains_weights[0])
             modes = [0]
 

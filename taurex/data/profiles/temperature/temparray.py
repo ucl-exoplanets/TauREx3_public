@@ -31,3 +31,11 @@ class TemperatureArray(TemperatureProfile):
             interp_array = np.linspace(0.0, 1.0, self.nlayers)
 
             return np.interp(interp_array, interp_temp, self._tp_profile)
+
+    def write(self, output):
+
+        temperature = super().write(output)
+
+        temperature.write_scalar('tp_array', self._tp_profile)
+
+        return temperature

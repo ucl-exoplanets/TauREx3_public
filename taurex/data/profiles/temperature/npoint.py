@@ -49,8 +49,8 @@ class NPoint(TemperatureProfile):
     def __init__(self,T_surface=100.0,T_top=20.0,P_surface=None,P_top=None,temperature_points=[],pressure_points=[],smoothing_window=10):
         super().__init__('{}Point'.format(len(temperature_points)+2))
 
-        if not isinstance(temperature_points,list):
-            raise Exception('t_point is not a list')
+        if not hasattr(temperature_points,'__len__'):
+            raise Exception('t_point is not an iterable')
 
         if len(temperature_points) != len(pressure_points):
             self.error('Number of temeprature points != number of pressure points')
@@ -193,9 +193,9 @@ class NPoint(TemperatureProfile):
     def write(self,output):
         temperature = super().write(output)
 
-        temperature.write_scalar('temp_surface',self._T_surface)
-        temperature.write_scalar('temp_top',self._T_top)
-        temperature.write_array('temp_points',np.array(self._t_points))
+        temperature.write_scalar('T_surface',self._T_surface)
+        temperature.write_scalar('T_top',self._T_top)
+        temperature.write_array('temperature_points',np.array(self._t_points))
 
         P_surface = self._P_surface
         P_top = self._P_top
@@ -204,10 +204,10 @@ class NPoint(TemperatureProfile):
         if not P_top:
             P_top = -1
 
-        temperature.write_scalar('pressure_surface',P_surface)
-        temperature.write_scalar('pressure_top',P_top)
+        temperature.write_scalar('P_surface',P_surface)
+        temperature.write_scalar('P_top',P_top)
         temperature.write_array('pressure_points',np.array(self._p_points))
 
-        temperature.write_scalar('smoothin_window',self._smooth_window)
+        temperature.write_scalar('smoothing_window',self._smooth_window)
 
         return temperature

@@ -34,11 +34,11 @@ class PressureProfile(Fittable,Logger):
         """
         raise NotImplementedError
 
-    def write(self,output):
+    def write(self, output):
         pressure = output.create_group('Pressure')
-        pressure.write_string('pressure_type',self.__class__.__name__)
-        pressure.write_scalar('nLayers',self._nlayers)
-        pressure.write_array('profile',self.profile)
+        pressure.write_string('pressure_type', self.__class__.__name__)
+        pressure.write_scalar('nlayers', self._nlayers)
+        pressure.write_array('profile', self.profile)
         return pressure
 
 class SimplePressureProfile(PressureProfile):
@@ -57,7 +57,10 @@ class SimplePressureProfile(PressureProfile):
         maximum pressure in Pascal (surface of planet)
 
     """
-    def __init__(self,nlayers=100,atm_min_pressure=1e-4,atm_max_pressure=1e6):
+    def __init__(self, nlayers=100,
+                 atm_min_pressure=1e-4,
+                 atm_max_pressure=1e6):
+
         super().__init__('pressure_profile',nlayers)
         self.pressure_profile = None
         self._atm_min_pressure = atm_min_pressure
