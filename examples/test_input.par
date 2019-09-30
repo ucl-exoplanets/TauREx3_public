@@ -26,7 +26,7 @@ T = 1997
 profile_type = Simple
 atm_min_pressure = 1e-4
 atm_max_pressure = 1e6
-nlayers = 100
+nlayers = 10
 
 [Planet]
 planet_type = Simple
@@ -73,10 +73,8 @@ taurex_spectrum = self
 
 
 [Optimizer]
-optimizer = multinest
+optimizer = nestle
 num_live_points = 50
-multi_nest_path=./multinest
-search_multi_modes=True
 
 
 
