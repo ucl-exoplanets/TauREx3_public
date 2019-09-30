@@ -25,6 +25,7 @@ requires = []
 
 install_requires = ['numpy','cython',
         'configobj',
+        'scipy',
         'numba',
         'astropy',
         'numexpr',
