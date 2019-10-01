@@ -196,7 +196,7 @@ def main():
                    np.vstack((save_wl, save_model, save_error, 
                               save_wlwidth)).T)
 
-
+    result = model.model()
     if args.output_file and get_rank() == 0:
 
         # Output taurex data
