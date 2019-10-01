@@ -1,10 +1,13 @@
 import h5py
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import taurex.plot.corner as corner
 import matplotlib as mpl
 from taurex.util.util import decode_string_array
 import os
+
 class Plotter(object):
     phi = 1.618
 
