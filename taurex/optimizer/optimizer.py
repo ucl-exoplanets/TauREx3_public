@@ -581,7 +581,6 @@ class Optimizer(Logger):
 
         for solution,optimized,values in self.get_solution(): 
             mu = self.compute_mu_derived_trace(solution)
-            print(mu)
             solution_dict['solution{}'.format(solution)]['fit_params']['mu_derived'] = mu
 
 
