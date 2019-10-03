@@ -401,6 +401,8 @@ def recursively_save_dict_contents_to_output(output, dic):
                 item = list(item)
             if True in [isinstance(x,str) for x in item]:
                 output.write_string_array(key,item)
+            else:
+                output.write_array(key,np.array(item))
         
         elif isinstance(item, dict):
             group = output.create_group(key)
