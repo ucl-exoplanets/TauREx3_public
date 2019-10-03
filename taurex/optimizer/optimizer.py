@@ -578,12 +578,44 @@ class Optimizer(Logger):
 
 
             solution_dict['solution{}'.format(solution)] = sol_values
-        
+
+        for solution,optimized,values in self.get_solution(): 
+            mu = self.compute_mu_derived_trace(solution)
+            print(mu)
+            solution_dict['solution{}'.format(solution)]['fit_params']['mu_derived'] = mu
+
+
         return solution_dict
 
 
 
+    def compute_mu_derived_trace(self,solution):
+        from taurex.util.util import quantile_corner
+        from taurex.constants import AMU
+        sigma_frac = self._sigma_fraction
+        self._sigma_fraction = 1.0
+        mu_trace = []
+        weights = []
+        for parameters,weight in self.sample_parameters(solution):
+            self.update_model(parameters)   
+            self._model.initialize_profiles()
+            mu_trace.append(self._model.chemistry.muProfile[0]/AMU)
+            weights.append(weight)
 
+
+
+        self._sigma_fraction = sigma_frac
+        q_16, q_50, q_84 = quantile_corner(np.array(mu_trace), [0.16, 0.5, 0.84],
+                                           weights=np.array(weights))
+
+        #print(mu_trace)
+        mu_derived = {
+            'value' : q_50,
+            'sigma_m' : q_50-q_16,
+            'sigma_p' : q_84-q_50,
+            'trace': mu_trace,
+        }
+        return mu_derived
 
     def sample_parameters(self,solution):
         raise NotImplementedError
