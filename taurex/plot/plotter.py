@@ -43,7 +43,16 @@ class Plotter(object):
 
         solution_ranges = []
 
+
+
+        mu_derived = None
         for idx,sol in self.solution_iter():
+            
+            mu_derived = self.get_mu_parameters(sol)
+
+
+            fitting_names = self.fittingNames
+
 
             fit_params = sol['fit_params']
             param_list = []
@@ -54,15 +63,31 @@ class Plotter(object):
                 val = param_values['value'][()]
 
                 param_list.append([val,val- 5.0*sigma_m,val+5.0*sigma_p])
+            
+            if mu_derived is not None:
+                sigma_m = mu_derived['sigma_m'][()]
+                sigma_p = mu_derived['sigma_p'][()]
+                val = mu_derived['value'][()]     
+                param_list.append([val, val- 5.0*sigma_m,val+5.0*sigma_p])
+            
             solution_ranges.append(param_list)
-        
+
+
+        fitting_boundary_low = self.fittingBoundaryLow
+        fitting_boundary_high = self.fittingBoundaryHigh
+
+        if mu_derived is not None:
+            fitting_boundary_low = np.concatenate((fitting_boundary_low, [-1e99]))
+            fitting_boundary_high = np.concatenate((fitting_boundary_high, [1e99]))
+
+
         range_all = np.array(solution_ranges)
 
         range_min = np.min(range_all[:,:,1],axis=0)
         range_max = np.max(range_all[:,:,2],axis=0)
 
-        range_min = np.where(range_min < self.fittingBoundaryLow, self.fittingBoundaryLow,range_min)
-        range_max = np.where(range_max > self.fittingBoundaryHigh, self.fittingBoundaryHigh,range_max)
+        range_min = np.where(range_min < fitting_boundary_low, fitting_boundary_low,range_min)
+        range_max = np.where(range_max > fitting_boundary_high, fitting_boundary_high,range_max)
 
         return list(zip(range_min,range_max)) 
             
@@ -158,8 +183,6 @@ class Plotter(object):
             plt.plot(temp_prof, pres_prof, color=self.cmap(float(solution_idx)/self.num_solutions), label=label)
             plt.fill_betweenx(pres_prof,  temp_prof-temp_prof_std,  temp_prof+temp_prof_std, color=self.cmap(float(solution_idx)/self.num_solutions), alpha=0.5)
 
-
-
         plt.yscale('log')
         plt.gca().invert_yaxis()
         plt.xlabel('Temperature (K)')
@@ -175,6 +198,15 @@ class Plotter(object):
         plt.savefig(os.path.join(self.out_folder, '%s_tp_profile.pdf' % (self.prefix)))
         plt.close()
 
+
+    def get_mu_parameters(self, solution):
+        if 'mu_derived' not in solution['fit_params'].keys():
+            return None
+        else:
+            return solution['fit_params']['mu_derived']
+
+
+
     def plot_posteriors(self):
         if not self.is_retrieval:
             raise Exception('HDF5 was not generated from retrieval, no posteriors found')
@@ -187,6 +219,8 @@ class Plotter(object):
 
             # print(solution_idx)
 
+            mu_derived = self.get_mu_parameters(solution_val)
+
             tracedata = solution_val['tracedata']
             weights = solution_val['weights']
 
@@ -194,7 +228,13 @@ class Plotter(object):
 
             if solution_idx > 0:
                 figure_past = figs[solution_idx - 1]
-                
+
+            latex_names = self.fittingLatex
+
+            if mu_derived is not None:
+                latex_names.append('$\mu$ (derived)')
+                tracedata = np.column_stack((tracedata, mu_derived['trace']))
+
 
             color_idx = np.float(solution_idx)/self.num_solutions
 
@@ -207,7 +247,7 @@ class Plotter(object):
 
             fig =  corner.corner(tracedata,
                                     weights=weights,
-                                    labels=self.fittingLatex,
+                                    labels=latex_names,
                                     label_kwargs=dict(fontsize=20),
                                     smooth=True,
                                     scale_hist=True,
