@@ -39,9 +39,9 @@ class DirectImageModel(EmissionModel):
     
 
     def compute_final_flux(self,f_total):
-        planet_distance_meters = self._planet.distance
+        star_distance_meters = self._star.distance*3.08567758e16
 
-        SDR = pow((planet_distance_meters/3.08567758e16),2)
+        SDR = pow((star_distance_meters/3.08567758e16),2)
         SDR = 1.0
         planet_radius = self._planet.fullRadius
-        return((f_total * (planet_radius**2) * 2.0 * PI) / (4 * PI * (planet_distance_meters**2))) * SDR
+        return((f_total * (planet_radius**2) * 2.0 * PI) / (4 * PI * (star_distance_meters**2))) * SDR
