@@ -390,26 +390,41 @@ def recursively_save_dict_contents_to_output(output, dic):
     import numpy as np
 
     for key, item in dic.items():
-        if isinstance(item,(float,int,np.int64,np.float64,)):
-            output.write_scalar(key,item)
-        elif isinstance(item,(np.ndarray,)):
-            output.write_array(key,item)
-        elif isinstance(item,(str,)):
-            output.write_string(key,item)
-        elif isinstance(item,(list,tuple,)):
-            if isinstance(item,tuple):
-                item = list(item)
-            if True in [isinstance(x,str) for x in item]:
-                output.write_string_array(key,item)
-            else:
-                output.write_array(key,np.array(item))
         
-        elif isinstance(item, dict):
+        
+
+            try:
+                store_thing(output, key, item)
+            except TypeError:
+                raise ValueError('Cannot save %s type'%type(item))
+
+
+def store_thing(output, key, item):
+    if isinstance(item, (float,int,np.int64,np.float64,)):
+        output.write_scalar(key,item)
+    elif isinstance(item,(np.ndarray,)):
+        output.write_array(key,item)
+    elif isinstance(item,(str,)):
+        output.write_string(key,item)
+    elif isinstance(item,(list,tuple,)):
+        if isinstance(item,tuple):
+            item = list(item)
+        if True in [isinstance(x,str) for x in item]:
+            output.write_string_array(key,item)
+        else:
+            try:
+                output.write_array(key,np.array(item))
+                
+            except TypeError:
+                for idx,val in enumerate(item):
+                    new_key = '{}{}'.format(key,idx)
+                    store_thing(output,new_key,val)
+
+    elif isinstance(item, dict):
             group = output.create_group(key)
             recursively_save_dict_contents_to_output(group, item)
-        else:
-            raise ValueError('Cannot save %s type'%type(item))
-
+    else:
+        raise TypeError
 
 
 def weighted_avg_and_std(values, weights, axis=None):
