@@ -171,9 +171,9 @@ def main():
 
         solution = optimizer.fit(output_size=output_size)
 
-        for solution, optimized, values in optimizer.get_solution():
-            optimizer.update_model(optimized)
-            break
+        # for solution, optimized, values in optimizer.get_solution():
+        #     optimizer.update_model(optimized)
+        #     break
 
         result = model.model()
 
@@ -202,6 +202,9 @@ def main():
                               save_wlwidth)).T)
 
     result = model.model()
+
+
+
     if args.output_file and get_rank() == 0:
 
         # Output taurex data
@@ -239,7 +242,6 @@ def main():
                 optimizer.write(o)
 
     wlgrid = 10000/wngrid
-
     if args.plot:
 
         if get_rank() == 0 and nprocs() <= 1:
