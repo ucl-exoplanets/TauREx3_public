@@ -124,6 +124,8 @@ class NestleOptimizer(Optimizer):
         opt_values = self.fit_values
 
         for k,v in self._nestle_output['solution']['fitparams'].items():
+            if k in ('mu_derived',):
+                continue
             idx = names.index(k)
             opt_values[idx] = v['value']
         
