@@ -170,6 +170,11 @@ def main():
                 optimizer.set_mode(key, mode.lower())
 
         solution = optimizer.fit(output_size=output_size)
+
+        for solution, optimized, values in optimizer.get_solution():
+            optimizer.update_model(optimized)
+            break
+
         result = model.model()
 
 
