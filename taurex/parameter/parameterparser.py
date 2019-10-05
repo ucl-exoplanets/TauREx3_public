@@ -156,6 +156,9 @@ class ParameterParser(Logger):
                     return 'self'
                 from taurex.data.spectrum.taurex import TaurexSpectrum
                 return TaurexSpectrum(observation_config['taurex_spectrum'])
+            elif 'iraclis_spectrum' in observation_config:
+                from taurex.data.spectrum.iraclis import IraclisSpectrum
+                return IraclisSpectrum(observation_config['iraclis_spectrum'])
             else:
                 self.warning('No observation specified........')
                 return None
