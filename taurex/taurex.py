@@ -171,7 +171,7 @@ def main():
 
         solution = optimizer.fit(output_size=output_size)
 
-        for solution, optimized, values in optimizer.get_solution():
+        for _, optimized, _ in optimizer.get_solution():
             optimizer.update_model(optimized)
             break
 
