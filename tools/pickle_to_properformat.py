@@ -31,10 +31,13 @@ if __name__ == "__main__":
             fd.create_dataset('xsecarr',data=xsec_pickle['xsecarr'],shape=xsec_pickle['xsecarr'].shape)
             press.attrs['units'] = args.p_unit
             print('stored pressure', xsec_pickle['p'])
+            print('Pressure units are', args.p_unit)
             fd.create_dataset('mol_name',data=mol_name)
             fd.create_dataset('key_iso_II',data='pickle')
 
         from taurex.opacity.hdf5opacity import HDF5Opacity
         hdf5 = HDF5Opacity(args.output)
         print('Pressure in pascal is ',hdf5.pressureGrid)
+        print('Molecule name in HDF5 is',hdf5.moleculeName)
+        
         #Testing with
