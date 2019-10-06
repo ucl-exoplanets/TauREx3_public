@@ -69,6 +69,14 @@ def compute_rayleigh_cross_section(wngrid,n,n_air = 2.6867805e25,king=1.0):
 
     return sigma
 
+def test_nan(val):
+    if hasattr(val,'__len__'):
+        return np.isnan(val).any()
+    else:
+        return val != val
+        
+
+
 class OnlineVariance(object):
     """USes the M2 algorithm to compute the variance in a streaming fashion"""
 
@@ -95,7 +103,10 @@ class OnlineVariance(object):
         
 
         mean_old = self.mean
-        self.mean = mean_old + (weight / self.wcount) * (value - mean_old)
+        try:
+            self.mean = mean_old + (weight / self.wcount) * (value - mean_old)
+        except ZeroDivisionError:
+            self.mean = value*0.0
         self.M2 += weight * (value - mean_old) * (value - self.mean)
 
     @property
@@ -114,32 +125,46 @@ class OnlineVariance(object):
 
 
     def combine_variance(self,averages, variances, counts):
+        good_idx = [idx for idx,a in enumerate(averages) if not test_nan(a)]
+        averages = [averages[idx] for idx in good_idx]
+        variances = [variances[idx] for idx in good_idx]
+        counts = [counts[idx] for idx in good_idx]
+        good_variance = None
+        if not test_nan(variances):
+            try:
+                good_variance = variances[np.where(~np.isnan(variances))[0][0]]*0.0
+            except IndexError:
+                good_variance = None
+        #print(good_idx,'Good',good_variance)
+        variances = [v if not test_nan(v) else good_variance for v in variances] 
+        #print('NEWAVERAGES',averages) 
+        #print('NEW WEIGHTS',counts)      
+        
         average = np.average(averages, weights=counts,axis=0)
-
+        
+        #print('final average',average)
         size = np.sum(counts)
         
         counts = np.array(counts) * size/np.sum(counts)
         if hasattr(average,'__len__'):
             average = average[None,...]
-	    #for x in range(1,len(variances.shape
             for x in range(1,len(average.shape)):
                 counts = counts[:,None]
-        
-        squares = counts*variances
-        squares += counts*(average - averages)**2
+        squares = 0.0
+        if good_variance is not None:
+            squares = counts*np.nan_to_num(variances)
+        #print(counts,variances,squares)
+        squares = squares + counts*(average - averages)**2
 
         return average,np.sum(squares,axis=0)/size
     def parallelVariance(self):
         from taurex import mpi
 
         variance = self.variance
-        if variance is np.nan:
-            variance = 0
         
-
         mean = self.mean
         if mean is None:
-            mean = 0.0
+            mean = np.nan
 	
 
         variances = mpi.allgather(variance)
@@ -148,8 +173,10 @@ class OnlineVariance(object):
         averages = mpi.allgather(mean)
         counts = mpi.allgather(self.wcount)
         #all_data = [(v,m,c) for v,m,c in zip(variances,averages,counts) if not v is 0 and not averages is 0.0 and not counts is 0.0]        
+        #print('VARIANCES',variances)
+        #print('AVERAGES',averages)
+        #print('COUNTS',counts)
         
-
         finalvariance = self.combine_variance(averages,variances,counts)
         return finalvariance[-1]
 
