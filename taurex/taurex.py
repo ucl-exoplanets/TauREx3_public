@@ -170,6 +170,11 @@ def main():
                 optimizer.set_mode(key, mode.lower())
 
         solution = optimizer.fit(output_size=output_size)
+
+        for _, optimized, _ in optimizer.get_solution():
+            optimizer.update_model(optimized)
+            break
+
         result = model.model()
 
 
@@ -195,6 +200,9 @@ def main():
         np.savetxt(args.save_spectrum,
                    np.vstack((save_wl, save_model, save_error, 
                               save_wlwidth)).T)
+
+    result = model.model()
+
 
 
     if args.output_file and get_rank() == 0:
@@ -234,7 +242,6 @@ def main():
                 optimizer.write(o)
 
     wlgrid = 10000/wngrid
-
     if args.plot:
 
         if get_rank() == 0 and nprocs() <= 1:

@@ -289,6 +289,8 @@ class PolyChordOptimizer(Optimizer):
             solution_idx = int(k[8:])
             print('SOlution ID',solution_idx)
             for p_name,p_value in v['fit_params'].items():
+                if p_name in ('mu_derived',):
+                    continue
                 idx = names.index(p_name)
                 opt_values[idx] = p_value['value']
             

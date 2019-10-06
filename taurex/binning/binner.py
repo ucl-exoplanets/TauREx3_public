@@ -24,8 +24,8 @@ class Binner(Logger):
         output['native_wlgrid'] = 10000/wngrid
         output['native_spectrum'] = flux
         output['binned_spectrum'] = self.bindown(wngrid, flux)[1]
-        output['native_wnwidth'] = compute_bin_edges(wngrid)
-        output['native_wlwidth'] = compute_bin_edges(10000/wngrid)
+        output['native_wnwidth'] = compute_bin_edges(wngrid)[-1]
+        output['native_wlwidth'] = compute_bin_edges(10000/wngrid)[-1]
         if output_size > OutputSize.lighter:
             output['binned_tau'] = self.bindown(wngrid, tau)[1]
             if output_size > OutputSize.light:
