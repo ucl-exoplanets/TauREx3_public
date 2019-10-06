@@ -514,7 +514,7 @@ class Optimizer(Logger):
         enableLogging()
 
 
-        total_counts = sum(all_gather(count))
+        total_counts = sum(allgather(count))
 
         if total_counts > 0:
             tp_std = np.sqrt(tp_profiles.parallelVariance())
