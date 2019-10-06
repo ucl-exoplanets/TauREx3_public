@@ -3,6 +3,7 @@ import numpy as np
 from taurex.output.writeable import Writeable
 import math
 from taurex import OutputSize
+from taurex.mpi import allgather
 class Optimizer(Logger):
     """
     A base class that handles fitting and optimization of forward models.
@@ -511,8 +512,11 @@ class Optimizer(Logger):
             binned_spectrum.update(binned,weight=weight)
             native_spectrum.update(native,weight=weight)
         enableLogging()
-        weights = np.array(weights)
-        if np.any(weights):
+
+
+        total_counts = sum(all_gather(count))
+
+        if total_counts > 0:
             tp_std = np.sqrt(tp_profiles.parallelVariance())
             active_std = np.sqrt(active_gases.parallelVariance())
             inactive_std = np.sqrt(inactive_gases.parallelVariance())
