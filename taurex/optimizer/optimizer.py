@@ -490,7 +490,7 @@ class Optimizer(Logger):
         rank = mpi.get_rank()
         size = mpi.nprocs()
 
-
+        enableLogging()
         self.info('I will only iterate through partitioned %s points (the rest is in parallel)',len(sample_list)//size)
         disableLogging()
         count= 0
@@ -499,7 +499,9 @@ class Optimizer(Logger):
             self.update_model(parameters)
 
             if rank ==0 and count % 10 ==0 and count >0:
-                self.error('Progress {}%'.format(count*100.0        /(len(sample_list)/size)))
+                enableLogging()
+                self.info('Progress {}%'.format(count*100.0        /(len(sample_list)/size)))
+                disableLogging()
 
             count +=1
             weights.append(weight)
@@ -511,30 +513,26 @@ class Optimizer(Logger):
             inactive_gases.update(self._model.chemistry.inactiveGasMixProfile,weight=weight)
             binned_spectrum.update(binned,weight=weight)
             native_spectrum.update(native,weight=weight)
+
+        
+        if len(weights) == 0:
+            weight = 0.0
+            weights.append(0.0)
+            native_grid,native,tau,_ = self._model.model(wngrid=binning,cutoff_grid=False)
+            binned = self._binner.bindown(native_grid,native)[1]
+            #tau_profile.update(tau,weight=weight)
+            tp_profiles.update(self._model.temperatureProfile,weight=weight)
+            active_gases.update(self._model.chemistry.activeGasMixProfile,weight=weight)
+            inactive_gases.update(self._model.chemistry.inactiveGasMixProfile,weight=weight)
         enableLogging()
+        tp_std = np.sqrt(tp_profiles.parallelVariance())
+        active_std = np.sqrt(active_gases.parallelVariance())
+        inactive_std = np.sqrt(inactive_gases.parallelVariance())
 
+        #tau_std = np.sqrt(tau_profile.parallelVariance())
 
-        total_counts = sum(allgather(count))
-
-        if total_counts > 0:
-            tp_std = np.sqrt(tp_profiles.parallelVariance())
-            active_std = np.sqrt(active_gases.parallelVariance())
-            inactive_std = np.sqrt(inactive_gases.parallelVariance())
-
-            #tau_std = np.sqrt(tau_profile.parallelVariance())
-
-            binned_std = np.sqrt(binned_spectrum.parallelVariance())
-            native_std = np.sqrt(native_spectrum.parallelVariance())
-        else:
-            self.warning('WEIGHTS ARE ALL ZERO, SETTING PROFILES STD TO ZERO')
-            tp_std = np.zeros_like(tp_profiles)
-            active_std = np.zeros_like(active_gases)
-            inactive_std = np.zeros_like(inactive_gases)
-
-           # tau_std = np.zeros_like(tau_profile)
-
-            binned_std = np.zeros_like(binned_spectrum)
-            native_std = np.zeros_like(native_spectrum)
+        binned_std = np.sqrt(binned_spectrum.parallelVariance())
+        native_std = np.sqrt(native_spectrum.parallelVariance())
         tau_std = None
         return tp_std,active_std,inactive_std,tau_std,binned_std,native_std
 

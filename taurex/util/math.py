@@ -114,40 +114,32 @@ class OnlineVariance(object):
 
 
     def combine_variance(self,averages, variances, counts):
-        
-        safe_idx = [i for i,a in enumerate(averages) if a is not None] 
-        
-
-        averages = [averages[idx] for idx in safe_idx]
-        variances = [variances[idx] for idx in safe_idx]
-        counts = [counts[idx] for idx in safe_idx]
-
-        average = np.average(averages, weights=counts, axis=0)
+        average = np.average(averages, weights=counts,axis=0)
 
         size = np.sum(counts)
         
         counts = np.array(counts) * size/np.sum(counts)
-        if hasattr(average, '__len__'):
-            average = average[None, ...]
+        if hasattr(average,'__len__'):
+            average = average[None,...]
 	    #for x in range(1,len(variances.shape
-            for x in range(1, len(average.shape)):
-                counts = counts[:, None]
+            for x in range(1,len(average.shape)):
+                counts = counts[:,None]
         
         squares = counts*variances
         squares += counts*(average - averages)**2
 
-        return average, np.sum(squares, axis=0)/size
+        return average,np.sum(squares,axis=0)/size
     def parallelVariance(self):
         from taurex import mpi
 
         variance = self.variance
         if variance is np.nan:
-            variance = None
+            variance = 0
         
 
         mean = self.mean
         if mean is None:
-            mean = None
+            mean = 0.0
 	
 
         variances = mpi.allgather(variance)
