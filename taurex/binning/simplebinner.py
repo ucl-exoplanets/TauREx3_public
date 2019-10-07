@@ -9,7 +9,9 @@ class SimpleBinner(Binner):
     def __init__(self, wngrid, wngrid_width=None):
 
         self._wngrid = wngrid
-        self._wn_width = wngrid_width or compute_bin_edges(self._wngrid)[-1]
+        self._wn_width = wngrid_width 
+        if self._wn_width is None:
+            wngrid_width = compute_bin_edges(self._wngrid)[-1]
 
     def bindown(self, wngrid, spectrum, grid_width=None, error=None):
 

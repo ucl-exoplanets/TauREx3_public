@@ -26,12 +26,12 @@ class BaseSpectrum(Logger,Writeable):
         super().__init__(name)
 
     def create_binner(self):
-        from taurex.binning import FluxBinner
+        from taurex.binning import FluxBinner, SimpleBinner
         """
         Creates the appropriate binning object
         """
 
-        return FluxBinner(wngrid=self.wavenumberGrid,
+        return SimpleBinner(wngrid=self.wavenumberGrid,
                           wngrid_width=self.binWidths)
 
     @property

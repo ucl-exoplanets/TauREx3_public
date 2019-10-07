@@ -471,8 +471,13 @@ def compute_bin_edges(wngrid):
 
 
 def clip_native_to_wngrid(native_grid, wngrid):
-    wn_min = max(wngrid[0]-(wngrid[1]-wngrid[0])/2, 1)
-    wn_max = (wngrid[-1]-wngrid[-2])/2.0 + wngrid[-1]
+
+    min_wngrid = wngrid.min()
+    max_wngrid = wngrid.max()
+
+    wn_min = max(min_wngrid-(wngrid[1]-min_wngrid)/2, 1)
+    wn_max = (max_wngrid-wngrid[-2])/2.0 + max_wngrid
+
     native_filter = (native_grid >= wn_min) & (native_grid <= wn_max)
     return native_grid[native_filter]
 
