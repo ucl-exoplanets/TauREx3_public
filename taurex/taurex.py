@@ -2,6 +2,8 @@
 
 def main():
     import argparse
+    import datetime
+
 
     import logging
     from taurex.mpi import get_rank, nprocs
@@ -57,6 +59,11 @@ def main():
 
     if args.debug:
         setLogLevel(logging.DEBUG)
+
+
+
+    logging.info('TAUREX PROGRAM START AT %s', datetime.datetime.now())
+
     # Parse the input file
     pp = ParameterParser()
     pp.read(args.input_file)
@@ -242,6 +249,10 @@ def main():
                 optimizer.write(o)
 
     wlgrid = 10000/wngrid
+#    wlgrid = 10000/wngrid
+    logging.info('TAUREX PROGRAM START AT %s', datetime.datetime.now())
+
+
     if args.plot:
 
         if get_rank() == 0 and nprocs() <= 1:
@@ -333,4 +344,5 @@ def main():
 
 
 if __name__ == "__main__":
+
     main()
