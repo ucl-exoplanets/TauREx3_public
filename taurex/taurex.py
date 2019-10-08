@@ -250,7 +250,7 @@ def main():
 
     wlgrid = 10000/wngrid
 #    wlgrid = 10000/wngrid
-    logging.info('TAUREX PROGRAM START AT %s', datetime.datetime.now())
+    logging.info('TAUREX PROGRAM END AT %s', datetime.datetime.now())
 
 
     if args.plot:
