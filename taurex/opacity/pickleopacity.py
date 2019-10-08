@@ -32,8 +32,12 @@ class PickleOpacity(InterpolatingOpacity):
 
         #Load the pickle file
         self.info('Loading opacity from {}'.format(filename))
-        with open(filename,'rb') as f:
-            self._spec_dict = pickle.load(f)
+        try:
+            with open(filename,'rb') as f:
+                self._spec_dict = pickle.load(f)
+        except UnicodeDecodeError:
+            with open(filename,'rb') as f:
+                self._spec_dict = pickle.load(f,encoding='latin1')          
         
         self._wavenumber_grid = self._spec_dict['wno']
 
