@@ -32,7 +32,7 @@ class Opacity(Logger):
         raise NotImplementedError
 
 
-    def compute_opacity(self,temperature,pressure):
+    def compute_opacity(self,temperature,pressure,wngrid=None):
         raise NotImplementedError
 
     
@@ -40,7 +40,13 @@ class Opacity(Logger):
 
 
     def opacity(self,temperature,pressure,wngrid=None):
-        orig=np.nan_to_num(self.compute_opacity(temperature,pressure))
+        
+        if wngrid is None:
+            wngrid_filter = slice(None)
+        else:
+            wngrid_filter = (self.wavenumberGrid >= wngrid.min()) & (self.wavenumberGrid <= wngrid.max())
+
+        orig=np.nan_to_num(self.compute_opacity(temperature,pressure,wngrid_filter))
 
         if wngrid is None:
             return orig
@@ -52,4 +58,4 @@ class Opacity(Logger):
             #     return np.append(np.histogram(self.wavenumberGrid,wngrid, weights=orig)[0]/np.histogram(self.wavenumberGrid,wngrid)[0],0)
 
             # else:
-            return np.interp(wngrid,self.wavenumberGrid,orig)
+            return np.interp(wngrid, self.wavenumberGrid[wngrid_filter], orig)

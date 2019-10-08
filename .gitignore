@@ -18,6 +18,7 @@ lib/
 lib64/
 parts/
 sdist/
+test_cases/
 var/
 wheels/
 test_output/

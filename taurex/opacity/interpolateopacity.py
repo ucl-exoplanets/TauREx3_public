@@ -35,11 +35,11 @@ class InterpolatingOpacity(Opacity):
         self._interp_mode = interp_mode.strip()
 
     
-    def interp_temp_only(self,T,t_idx_min,t_idx_max,P):
+    def interp_temp_only(self,T,t_idx_min,t_idx_max,P, filt):
         Tmax = self.temperatureGrid[t_idx_max]
         Tmin = self.temperatureGrid[t_idx_min]
-        fx0=self.xsecGrid[P,t_idx_min]
-        fx1 = self.xsecGrid[P,t_idx_max]
+        fx0=self.xsecGrid[P,t_idx_min,filt]
+        fx1 = self.xsecGrid[P,t_idx_max,filt]
 
         if self._interp_mode == 'linear':
             return interp_lin_only(fx0,fx1,T,Tmin,Tmax)
@@ -48,16 +48,16 @@ class InterpolatingOpacity(Opacity):
         else:
             raise ValueError('Unknown interpolation mode {}'.format(self._interp_mode))
 
-    def interp_pressure_only(self,P,p_idx_min,p_idx_max,T):
+    def interp_pressure_only(self,P,p_idx_min,p_idx_max,T,filt):
         Pmax = self.pressureGrid[p_idx_max]
         Pmin = self.pressureGrid[p_idx_min]
-        fx0=self.xsecGrid[p_idx_min,T]
-        fx1 = self.xsecGrid[p_idx_max,T]
+        fx0=self.xsecGrid[p_idx_min,T,filt]
+        fx1 = self.xsecGrid[p_idx_max,T,filt]
 
         return interp_lin_only(fx0,fx1,P,Pmin,Pmax)
 
 
-    def interp_bilinear_grid(self,T,P,t_idx_min,t_idx_max,p_idx_min,p_idx_max):
+    def interp_bilinear_grid(self,T,P,t_idx_min,t_idx_max,p_idx_min,p_idx_max,wngrid_filter=None):
         import numexpr as ne
         
 
@@ -65,13 +65,20 @@ class InterpolatingOpacity(Opacity):
 
         if p_idx_max == 0 and t_idx_max == 0:
 
-            return np.zeros_like(self.xsecGrid[0,0])
+            return np.zeros_like(self.xsecGrid[0,0,wngrid_filter])
+
+
+
 
         check_pressure_max = P >= self._max_pressure
         check_temperature_max = T >= self._max_temperature
 
         check_pressure_min = P < self._min_pressure
         check_temperature_min = T < self._min_temperature
+        if wngrid_filter is None:
+            wngrid_filter = slice(None)
+        
+
 
 
         self.debug('Check pressure min/max %s/%s',check_pressure_min,check_pressure_max)
@@ -79,35 +86,35 @@ class InterpolatingOpacity(Opacity):
         #Are we both max?
         if check_pressure_max and check_temperature_max:
             self.debug('Maximum Temperature pressure reached. Using last')
-            return self.xsecGrid[-1,-1] 
+            return self.xsecGrid[-1,-1,wngrid_filter] 
 
         #Max pressure
         if check_pressure_max:
             self.debug('Max pressure reached. Interpolating temperature only')
-            return self.interp_temp_only(T,t_idx_min,t_idx_max,-1)
+            return self.interp_temp_only(T,t_idx_min,t_idx_max,-1, wngrid_filter)
         
         #Max temperature
         if check_temperature_max:
             self.debug('Max temperature reached. Interpolating pressure only')
-            return self.interp_pressure_only(P,p_idx_min,p_idx_max,-1)
+            return self.interp_pressure_only(P,p_idx_min,p_idx_max,-1, wngrid_filter)
 
         if check_pressure_min and check_temperature_min:
-            return self.xsecGrid[0,0]
+            return self.xsecGrid[0,0,wngrid_filter]
         
         if check_pressure_min:
             self.debug('Min pressure reached. Interpolating temperature only')
-            return self.interp_temp_only(T,t_idx_min,t_idx_max,0)          
+            return self.interp_temp_only(T,t_idx_min,t_idx_max,0, wngrid_filter)          
 
         if check_temperature_min:
             self.debug('Min temeprature reached. Interpolating pressure only')
-            return self.interp_pressure_only(P,p_idx_min,p_idx_max,0)  
+            return self.interp_pressure_only(P,p_idx_min,p_idx_max,0, wngrid_filter)  
 
         
 
-        q_11 = self.xsecGrid[p_idx_min,t_idx_min]
-        q_12 = self.xsecGrid[p_idx_min,t_idx_max]
-        q_21 = self.xsecGrid[p_idx_max,t_idx_min]
-        q_22 = self.xsecGrid[p_idx_max,t_idx_max]
+        q_11 = self.xsecGrid[p_idx_min,t_idx_min,wngrid_filter]
+        q_12 = self.xsecGrid[p_idx_min,t_idx_max,wngrid_filter]
+        q_21 = self.xsecGrid[p_idx_max,t_idx_min,wngrid_filter]
+        q_22 = self.xsecGrid[p_idx_max,t_idx_max,wngrid_filter]
 
         Tmax = self.temperatureGrid[t_idx_max]
         Tmin = self.temperatureGrid[t_idx_min]
@@ -122,7 +129,7 @@ class InterpolatingOpacity(Opacity):
         else:
             raise ValueError('Unknown interpolation mode {}'.format(self._interp_mode))
 
-    def compute_opacity(self,temperature,pressure):
+    def compute_opacity(self,temperature,pressure,wngrid=None):
 
         return self.interp_bilinear_grid(temperature,pressure
-                    ,*self.find_closest_index(temperature,pressure)) / 10000
+                    ,*self.find_closest_index(temperature,pressure),wngrid) / 10000
