@@ -62,7 +62,7 @@ def main():
 
 
 
-    logging.info('TAUREX PROGRAM START AT %s', datetime.datetime.now())
+    print('TAUREX PROGRAM START AT %s', datetime.datetime.now())
 
     # Parse the input file
     pp = ParameterParser()
@@ -145,6 +145,7 @@ def main():
     solution = None
 
     if args.retrieval is True:
+        import time
         if observation is None:
             logging.critical('No spectrum is defined!!')
             quit()
@@ -176,12 +177,18 @@ def main():
             if mode:
                 optimizer.set_mode(key, mode.lower())
 
+        start_time = time.time()
         solution = optimizer.fit(output_size=output_size)
+
+        end_time = time.time()
+
+        print('Retrieval finish in {} seconds'.format(end_time-start_time))
+
 
         for _, optimized, _ in optimizer.get_solution():
             optimizer.update_model(optimized)
             break
-
+        
         result = model.model()
 
 
@@ -250,12 +257,12 @@ def main():
 
     wlgrid = 10000/wngrid
 #    wlgrid = 10000/wngrid
-    logging.info('TAUREX PROGRAM END AT %s', datetime.datetime.now())
+    print('TAUREX PROGRAM END AT ', datetime.datetime.now())
 
 
     if args.plot:
 
-        if get_rank() == 0 and nprocs() <= 1:
+        if get_rank() == 0: #and nprocs() <= 1:
             import matplotlib.pyplot as plt
             fig = plt.figure()
             ax = fig.add_subplot(1, 1, 1)
