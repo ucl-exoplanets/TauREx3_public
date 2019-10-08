@@ -497,11 +497,11 @@ class Optimizer(Logger):
 
         for parameters,weight in sample_list[rank::size]: #sample likelihood space and get their parameters
             self.update_model(parameters)
-
+            enableLogging()
             if rank ==0 and count % 10 ==0 and count >0:
-                enableLogging()
+
                 self.info('Progress {}%'.format(count*100.0        /(len(sample_list)/size)))
-                disableLogging()
+            disableLogging()
 
             count +=1
             weights.append(weight)
@@ -515,15 +515,15 @@ class Optimizer(Logger):
             native_spectrum.update(native,weight=weight)
 
         
-        if len(weights) == 0:
-            weight = 0.0
-            weights.append(0.0)
-            native_grid,native,tau,_ = self._model.model(wngrid=binning,cutoff_grid=False)
-            binned = self._binner.bindown(native_grid,native)[1]
-            #tau_profile.update(tau,weight=weight)
-            tp_profiles.update(self._model.temperatureProfile,weight=weight)
-            active_gases.update(self._model.chemistry.activeGasMixProfile,weight=weight)
-            inactive_gases.update(self._model.chemistry.inactiveGasMixProfile,weight=weight)
+        # if len(weights) == 0:
+        #     weight = 0.0
+        #     weights.append(0.0)
+        #     native_grid,native,tau,_ = self._model.model(wngrid=binning,cutoff_grid=False)
+        #     binned = self._binner.bindown(native_grid,native)[1]
+        #     #tau_profile.update(tau,weight=weight)
+        #     tp_profiles.update(self._model.temperatureProfile,weight=weight)
+        #     active_gases.update(self._model.chemistry.activeGasMixProfile,weight=weight)
+        #     inactive_gases.update(self._model.chemistry.inactiveGasMixProfile,weight=weight)
         enableLogging()
         tp_std = np.sqrt(tp_profiles.parallelVariance())
         active_std = np.sqrt(active_gases.parallelVariance())
