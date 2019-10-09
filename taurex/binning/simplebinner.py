@@ -25,5 +25,5 @@ class SimpleBinner(Binner):
         output['binned_wngrid'] = self._wngrid
         output['binned_wlgrid'] = 10000/self._wngrid
         output['binned_wnwidth'] = self._wn_width
-        output['binned_wlwidth'] = wnwidth_to_wlwidth(self._wn_width,self._wn_width)
+        output['binned_wlwidth'] = wnwidth_to_wlwidth(self._wngrid, self._wn_width)
         return output
