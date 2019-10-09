@@ -291,7 +291,7 @@ class MultiNestOptimizer(Optimizer):
                     'sigma_m' : q_50-q_16,
                     'sigma_p' : q_84-q_50,
                     'nest_map': NEST_stats['modes'][nmode]['maximum a posterior'][idx],
-                    'nest_mean': NEST_stats['modes'][nmode]['mean'][idx],
+                    'mean': NEST_stats['modes'][nmode]['mean'][idx],
                     'nest_sigma': NEST_stats['modes'][nmode]['sigma'][idx],
                     'trace': trace,
                 }
@@ -334,7 +334,7 @@ class MultiNestOptimizer(Optimizer):
                 if p_name in ('mu_derived',):
                     continue
                 idx = names.index(p_name)
-                opt_values[idx] = p_value['nest_map']
+                opt_values[idx] = p_value['mean']
             
             yield solution_idx,opt_values,[
                                 ('Statistics',{'local log-evidence': self._multinest_output['NEST_stats']['modes'][solution_idx]['local log-evidence'],

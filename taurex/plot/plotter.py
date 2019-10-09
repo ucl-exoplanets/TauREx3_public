@@ -60,14 +60,14 @@ class Plotter(object):
                 param_values = fit_params[fit_names]
                 sigma_m = param_values['sigma_m'][()]
                 sigma_p = param_values['sigma_p'][()]
-                val = param_values['value'][()]
+                val = param_values['mean'][()]
 
                 param_list.append([val,val- 5.0*sigma_m,val+5.0*sigma_p])
             
             if mu_derived is not None:
                 sigma_m = mu_derived['sigma_m'][()]
                 sigma_p = mu_derived['sigma_p'][()]
-                val = mu_derived['value'][()]     
+                val = mu_derived['mean'][()]     
                 param_list.append([val, val- 5.0*sigma_m,val+5.0*sigma_p])
             
             solution_ranges.append(param_list)

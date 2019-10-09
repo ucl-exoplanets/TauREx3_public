@@ -127,7 +127,7 @@ class NestleOptimizer(Optimizer):
             if k in ('mu_derived',):
                 continue
             idx = names.index(k)
-            opt_values[idx] = v['value']
+            opt_values[idx] = v['mean']
         
         yield 0,opt_values,[ ('Statistics', self._nestle_output['Stats']),
                             ('fit_params',self._nestle_output['solution']['fitparams']),

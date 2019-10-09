@@ -609,12 +609,16 @@ class Optimizer(Logger):
         q_16, q_50, q_84 = quantile_corner(np.array(mu_trace), [0.16, 0.5, 0.84],
                                            weights=np.array(weights))
 
+
+        mean = np.average(mu_trace, weights=weights,axis=0)
+
         #print(mu_trace)
         mu_derived = {
             'value' : q_50,
             'sigma_m' : q_50-q_16,
             'sigma_p' : q_84-q_50,
             'trace': mu_trace,
+            'mean' : mean
         }
         return mu_derived
 
