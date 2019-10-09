@@ -329,12 +329,16 @@ def create_model(config,gas,temperature,pressure,planet,star):
     return obj       
 
 def detect_and_return_klass(python_file,baseclass):
-    import ast
-    with open(python_file, "r") as source:
-        tree = ast.parse(source.read())
-    my_code = compile(tree,python_file,'exec')
-    gl= globals()
-    ll = locals()
-    exec_dict = exec(my_code,gl,ll)
-    print([(k,v) for k,v in ll.items() if isinstance(v,type) and issubclass(v,baseclass)])
-    return [(k,v) for k,v in ll.items() if isinstance(v,type) and issubclass(v,baseclass) and v.__module__.startswith('taurex.parameter.factory')][-1][-1]
+    import importlib.util 
+    import inspect
+    spec = importlib.util.spec_from_file_location("foo", python_file) 
+    foo = importlib.util.module_from_spec(spec) 
+    spec.loader.exec_module(foo) 
+    classes = [m[1] for m in inspect.getmembers(foo, inspect.isclass) if m[1] \
+               is not baseclass and issubclass(m[1],baseclass)]
+
+    if len(classes) == 0:
+        self.error('Could not find class of type %s in file %s',baseclass, python_file)
+        raise Exception(f'No class inheriting from {baseclass} in '
+                        f'{python_file}')
+    return classes[0]
