@@ -550,13 +550,12 @@ class Optimizer(Logger):
             #Include extra stuff we might want to store (provided by the child)
             for k,v in values:
                 sol_values[k] = v
-            
+
             self.update_model(optimized) #Update the model with optimized values
 
-  
+            opt_result = self._model.model() #Run the model
 
             sol_values['Profiles']=generate_profile_dict(self._model)
-            opt_result = self._model.model(wngrid=self._observed.wavenumberGrid,cutoff_grid=False) #Run the model
 
             sol_values['Spectra'] = self._binner.generate_spectrum_output(opt_result,output_size=output_size)
 

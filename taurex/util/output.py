@@ -116,7 +116,7 @@ def generate_profile_dict(model):
     out['pressure_profile']=model.pressure.profile[...]
     return out
 
-def generate_spectra_dict(result,contrib_result,native_grid,bin_grid=None):
+def generate_spectra_dict(result, contrib_result, native_grid, bin_grid=None):
     from taurex.util import bindown
     out = {}
 
