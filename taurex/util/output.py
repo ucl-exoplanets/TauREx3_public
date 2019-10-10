@@ -106,14 +106,14 @@ def store_chemistry(output,model):
 
 def generate_profile_dict(model):
     out = {}
-    out['temp_profile']=model.temperatureProfile
-    out['active_mix_profile']=model.chemistry.activeGasMixProfile
-    out['inactive_mix_profile']=model.chemistry.inactiveGasMixProfile
-    out['density_profile']=model.densityProfile
-    out['scaleheight_profile']=model.scaleheight_profile
-    out['altitude_profile']=model.altitudeProfile
-    out['gravity_profile']=model.gravity_profile
-    out['pressure_profile']=model.pressure.profile
+    out['temp_profile']=model.temperatureProfile[...]
+    out['active_mix_profile']=model.chemistry.activeGasMixProfile[...]
+    out['inactive_mix_profile']=model.chemistry.inactiveGasMixProfile[...]
+    out['density_profile']=model.densityProfile[...]
+    out['scaleheight_profile']=model.scaleheight_profile[...]
+    out['altitude_profile']=model.altitudeProfile[...]
+    out['gravity_profile']=model.gravity_profile[...]
+    out['pressure_profile']=model.pressure.profile[...]
     return out
 
 def generate_spectra_dict(result,contrib_result,native_grid,bin_grid=None):
