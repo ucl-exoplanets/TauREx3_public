@@ -328,7 +328,7 @@ def create_model(config,gas,temperature,pressure,planet,star):
 
     return obj       
 
-def detect_and_return_klass(python_file,baseclass):
+def detect_and_return_klass(python_file, baseclass):
     import importlib.util 
     import inspect
     spec = importlib.util.spec_from_file_location("foo", python_file) 
