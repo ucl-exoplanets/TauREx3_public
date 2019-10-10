@@ -334,7 +334,7 @@ class MultiNestOptimizer(Optimizer):
                 if p_name in ('mu_derived',):
                     continue
                 idx = names.index(p_name)
-                opt_values[idx] = p_value['mean']
+                opt_values[idx] = p_value['value']
             
             yield solution_idx,opt_values,[
                                 ('Statistics',{'local log-evidence': self._multinest_output['NEST_stats']['modes'][solution_idx]['local log-evidence'],
