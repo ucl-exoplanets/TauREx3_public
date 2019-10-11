@@ -327,6 +327,7 @@ class MultiNestOptimizer(Optimizer):
     def get_solution(self):
         names = self.fit_names
         opt_values = self.fit_values
+        opt_map = self.fit_values
         solutions = [ (k,v) for k,v in self._multinest_output['solutions'].items() if 'solution' in k]
         for k,v in solutions:
             solution_idx = int(k[8:])
@@ -334,9 +335,10 @@ class MultiNestOptimizer(Optimizer):
                 if p_name in ('mu_derived',):
                     continue
                 idx = names.index(p_name)
+                opt_map[idx] = p_value['nest_map']
                 opt_values[idx] = p_value['value']
             
-            yield solution_idx,opt_values,[
+            yield solution_idx,opt_map,opt_values,[
                                 ('Statistics',{'local log-evidence': self._multinest_output['NEST_stats']['modes'][solution_idx]['local log-evidence'],
                                               'local log-evidence error': self._multinest_output['NEST_stats']['modes'][solution_idx]['local log-evidence error']}),
                                 ('fit_params',v['fit_params']),

@@ -542,7 +542,7 @@ class Optimizer(Logger):
         solution_dict = {}
         self.info('Generating spectra and profiles')
         #Loop through each solution, grab optimized parameters and anything else we want to store 
-        for solution,optimized,values in self.get_solution(): 
+        for solution,optimized_map,optimized_median,values in self.get_solution(): 
             
             self.info('Computing solution %s',solution)
             sol_values = {}
@@ -551,7 +551,7 @@ class Optimizer(Logger):
             for k,v in values:
                 sol_values[k] = v
 
-            self.update_model(optimized) #Update the model with optimized values
+            self.update_model(optimized_map) #Update the model with optimized map values
 
             opt_result = self._model.model() #Run the model
 
@@ -561,7 +561,9 @@ class Optimizer(Logger):
 
 
             sol_values['Spectra']['Contributions'] = store_contributions(self._binner,self._model,output_size=output_size-3)
+            self.update_model(optimized_median) #Update with the optimized median
 
+            self._model.model()
 
             #Store profiles here
             tp_std,active_std,inactive_std,tau_std,binned_std,native_std= self.generate_profiles(solution,self._observed.wavenumberGrid)
@@ -580,7 +582,7 @@ class Optimizer(Logger):
 
             solution_dict['solution{}'.format(solution)] = sol_values
 
-        for solution,optimized,values in self.get_solution(): 
+        for solution,optimized_map,optimized_median,values in self.get_solution(): 
             mu = self.compute_mu_derived_trace(solution)
             solution_dict['solution{}'.format(solution)]['fit_params']['mu_derived'] = mu
 

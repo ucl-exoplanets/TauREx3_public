@@ -121,15 +121,16 @@ class NestleOptimizer(Optimizer):
 
     def get_solution(self):
         names = self.fit_names
+        opt_map = self.fit_values
         opt_values = self.fit_values
-
         for k,v in self._nestle_output['solution']['fitparams'].items():
             if k in ('mu_derived',):
                 continue
             idx = names.index(k)
+            opt_map[idx] = v['map']
             opt_values[idx] = v['value']
         
-        yield 0,opt_values,[ ('Statistics', self._nestle_output['Stats']),
+        yield 0,opt_map,opt_values,[ ('Statistics', self._nestle_output['Stats']),
                             ('fit_params',self._nestle_output['solution']['fitparams']),
                             ('tracedata',self._nestle_output['solution']['samples']),
                             ('weights',self._nestle_output['solution']['weights'])]
@@ -194,6 +195,8 @@ class NestleOptimizer(Optimizer):
         nestle_output['solution']['covariance'] = cov
         nestle_output['solution']['fitparams'] = {}
 
+        max_weight = weights.argmax()
+
         table_data = []
 
         for idx,param_name in enumerate(fit_param):
@@ -205,7 +208,9 @@ class NestleOptimizer(Optimizer):
                         weights=np.asarray(weights))
             param['value']= q_50
             param['sigma_m']= q_50-q_16
-            param['sigma_p']= q_84-q_50          
+            param['sigma_p']= q_84-q_50         
+            param['trace'] = trace
+            param['map'] = trace[max_weight]  
             table_data.append((param_name,q_50,q_50-q_16))
 
             nestle_output['solution']['fitparams'][param_name]= param

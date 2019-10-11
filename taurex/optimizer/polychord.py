@@ -283,6 +283,7 @@ class PolyChordOptimizer(Optimizer):
     def get_solution(self):
         names = self.fit_names
         opt_values = self.fit_values
+        opt_map = self.fit_values
         solutions = [ (k,v) for k,v in self._polychord_output['solutions'].items() if 'solution' in k]
 
         for k,v in solutions:
@@ -291,9 +292,10 @@ class PolyChordOptimizer(Optimizer):
                 if p_name in ('mu_derived',):
                     continue
                 idx = names.index(p_name)
+                opt_map[idx] = p_value['nest_map']
                 opt_values[idx] = p_value['value']
             
-            yield solution_idx,opt_values,[
+            yield solution_idx, opt_map, opt_values,[
                                 ('fit_params',v['fit_params']),
                                 ('tracedata',v['tracedata']),
                                 ('weights',v['weights'])]
