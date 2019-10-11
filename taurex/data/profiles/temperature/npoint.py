@@ -163,11 +163,11 @@ class NPoint(TemperatureProfile):
         Tnodes = [self._T_surface,*self._t_points,self._T_top]
         
         Psurface = self._P_surface
-        if Psurface is None:
+        if Psurface is None or Psurface < 0:
             Psurface = self.pressure_profile[0]
         
         Ptop = self._P_top
-        if Ptop is None:
+        if Ptop is None or Ptop < 0:
             Ptop = self.pressure_profile[-1] 
         
         Pnodes = [Psurface,*self._p_points,Ptop]
