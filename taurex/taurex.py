@@ -185,7 +185,7 @@ def main():
         print('Retrieval finish in {} seconds'.format(end_time-start_time))
 
 
-        for _, optimized, _ in optimizer.get_solution():
+        for _, optimized,_, _ in optimizer.get_solution():
             optimizer.update_model(optimized)
             break
         
