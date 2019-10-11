@@ -598,12 +598,16 @@ class Optimizer(Logger):
         self._sigma_fraction = 1.0
         mu_trace = []
         weights = []
+        self.info('Computing derived mu......')
+        disableLogging()
         for parameters,weight in self.sample_parameters(solution):
             self.update_model(parameters)   
             self._model.initialize_profiles()
             mu_trace.append(self._model.chemistry.muProfile[0]/AMU)
             weights.append(weight)
+        enableLogging()
 
+        self.info('Done!')
 
 
         self._sigma_fraction = sigma_frac
