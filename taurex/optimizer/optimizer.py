@@ -555,7 +555,7 @@ class Optimizer(Logger):
 
             opt_result = self._model.model() #Run the model
 
-            sol_values['Profiles']=generate_profile_dict(self._model)
+
 
             sol_values['Spectra'] = self._binner.generate_spectrum_output(opt_result,output_size=output_size)
 
@@ -566,6 +566,7 @@ class Optimizer(Logger):
             self._model.model()
 
             #Store profiles here
+            sol_values['Profiles']=generate_profile_dict(self._model)
             tp_std,active_std,inactive_std,tau_std,binned_std,native_std= self.generate_profiles(solution,self._observed.wavenumberGrid)
             
 
