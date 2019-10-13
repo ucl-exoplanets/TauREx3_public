@@ -493,3 +493,24 @@ def class_for_name(module_name, class_name):
     # get the class, will raise AttributeError if class cannot be found
     c = getattr(m, class_name)
     return c
+
+def create_grid_res(resolution, wave_min, wave_max):
+    #
+    # R = l/Dl
+    # l = (l-1)+Dl/2 + (Dl-1)/2
+    #
+    # --> (R - 1/2)*Dl = (l-1) + (Dl-1)/2
+    #
+    # 
+    wave_list = []
+    width_list = []
+    wave = wave_min
+    width = wave/resolution    
+    
+    while wave < wave_max:
+        width = wave / (resolution - 0.5) + width/2/(resolution - 0.5)
+        wave = resolution * width 
+        width_list.append(width)
+        wave_list.append(wave)
+
+    return np.array((wave_list ,width_list)).T
