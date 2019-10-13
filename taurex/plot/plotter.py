@@ -366,39 +366,63 @@ class Plotter(object):
             bin_widths = self.fd['Observed']['binwidths'][:]        
             
             plt.errorbar(wlgrid,obs_spectrum, error, lw=1, color='black', alpha=0.4, ls='none', zorder=0, label='Observed')
-            if full:
-                self.full_contrib_plot(solution_val['Spectra'],wlgrid)
-            else:
-                self.simple_contrib_plot(solution_val['Spectra'],wlgrid)
+            self._plot_contrib(solution_val,wlgrid,ax,full=full,resolution=resolution)
 
-            plt.xlim(np.min(wlgrid)-0.05*np.min(wlgrid), np.max(wlgrid)+0.05*np.max(wlgrid))
-            # plt.ylim(0.0,0.006)
-            plt.xlabel('Wavelength ($\mu$m)')
-            plt.ylabel(self.modelAxis[self.modelType])
 
-            if np.max(wlgrid) - np.min(wlgrid) > 5:
-                plt.xscale('log')
-                plt.tick_params(axis='x', which='minor')
-                #ax.xaxis.set_minor_formatter(mpl.ticker.FormatStrFormatter("%i"))
-                #ax.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter("%i"))
-            #plt.legend(loc='best', ncol=2, frameon=False, prop={'size':11})
-            box = ax.get_position()
-            ax.set_position([box.x0, box.y0 + box.height * 0.1,
-                            box.width, box.height * 0.9])
-
-            # Put a legend below current axis
-            ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.08),
-                    fancybox=True, shadow=True, ncol=5)
-            if self.title:
-                plt.title(self.title, fontsize=14)
             #plt.tight_layout()
             plt.savefig(os.path.join(self.out_folder, '%s_spectrum_contrib_sol%i.pdf'  % (self.prefix,solution_idx)))
             plt.close()
 
         plt.close('all')
 
+    def plot_forward_contrib(self,full=False,resolution=None):
+        fig=plt.figure(figsize=(5.3*2, 3.5*2))
+        ax = fig.add_subplot(111)
 
-    def full_contrib_plot(self,spectra,wlgrid):
+
+        fm_output = self.forward_output()
+        try:
+            wlgrid = fm_output['Spectra']['binned_wlgrid']
+        except KeyError:
+            wlgrid = fm_output['Spectra']['native_wlgrid']
+
+        self._plot_contrib(self.forward_output(),wlgrid,ax,full=full,resolution=resolution)
+
+
+        #plt.tight_layout()
+        plt.savefig(os.path.join(self.out_folder, '%s_spectrum_contrib_forward.pdf'  % (self.prefix)))
+        plt.close()
+
+
+    def _plot_contrib(self,output,wlgrid,ax,full=False,resolution=None):
+
+
+        if full:
+            self.full_contrib_plot(output['Spectra'],wlgrid)
+        else:
+            self.simple_contrib_plot(output['Spectra'],wlgrid)
+
+        #plt.xlim(np.min(wlgrid)-0.05*np.min(wlgrid), np.max(wlgrid)+0.05*np.max(wlgrid))
+        # plt.ylim(0.0,0.006)
+        plt.xlabel('Wavelength ($\mu$m)')
+        plt.ylabel(self.modelAxis[self.modelType])
+
+        if np.max(wlgrid) - np.min(wlgrid) > 5:
+            plt.xscale('log')
+            plt.tick_params(axis='x', which='minor')
+            #ax.xaxis.set_minor_formatter(mpl.ticker.FormatStrFormatter("%i"))
+            #ax.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter("%i"))
+        #plt.legend(loc='best', ncol=2, frameon=False, prop={'size':11})
+        box = ax.get_position()
+        ax.set_position([box.x0, box.y0 + box.height * 0.1,
+                        box.width, box.height * 0.9])
+        # Put a legend below current axis
+        ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.08),
+                fancybox=True, shadow=True, ncol=5)
+        if self.title:
+            plt.title(self.title, fontsize=14)
+
+    def full_contrib_plot(self,spectra,wlgrid,resolution=None):
         for contrib_name,contrib_dict in spectra['Contributions'].items():
 
             first_name = contrib_name
@@ -410,13 +434,16 @@ class Plotter(object):
                 try:
                     binned_contrib = component_value['binned_spectrum']
                 except KeyError:
-                    binned_contrib = component_value['bin_spectrum']
+                    try:
+                        binned_contrib = component_value['bin_spectrum']
+                    except KeyError:
+                        binned_contrib = component_value['native_spectrum']
+                
                 plt.plot(wlgrid, binned_contrib, label=total_label)
 
-    def simple_contrib_plot(self,spectra,wlgrid):
+    def simple_contrib_plot(self,spectra,wlgrid,resolution=None):
         
         for contrib_name,contrib_dict in spectra['Contributions'].items():
-
             first_name = contrib_name
             if first_name == 'Absorption':
                 for component_name,component_value in contrib_dict.items():
@@ -426,11 +453,21 @@ class Plotter(object):
                     try:
                         binned_contrib = component_value['binned_spectrum']
                     except KeyError:
-                        binned_contrib = component_value['bin_spectrum']
+                        try:
+                            binned_contrib = component_value['bin_spectrum']
+                        except KeyError:
+                            binned_contrib = component_value['native_spectrum']
+                    
                     plt.plot(wlgrid, binned_contrib, label=total_label)
             else:
-                
-                plt.plot(wlgrid, contrib_dict['binned'], label=first_name)                
+                try:
+                    binned_contrib = contrib_dict['binned_spectrum']
+                except KeyError:
+                    try:
+                        binned_contrib = contrib_dict['bin_spectrum']
+                    except KeyError:
+                        binned_contrib = contrib_dict['native_spectrum']
+                plt.plot(wlgrid, binned_contrib, label=first_name)                
 
     def plot_forward_tau(self):
 
@@ -611,6 +648,8 @@ def main():
     if plot_contrib:
         if plot.is_retrieval:
             plot.plot_fitted_contrib(full=plot_fullcontrib)
+        else:
+            plot.plot_forward_contrib(full=plot_fullcontrib)
 
     if plot_tau:
         if plot.is_retrieval:
