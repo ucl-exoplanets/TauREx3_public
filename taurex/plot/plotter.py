@@ -347,7 +347,7 @@ class Plotter(object):
         plt.savefig(os.path.join(self.out_folder, '%s_spectrum.pdf'  % (self.prefix)))
         plt.close()
 
-    def plot_fitted_contrib(self,full=False):
+    def plot_fitted_contrib(self,full=False,resolution=None):
         # fitted model
 
 
@@ -366,9 +366,9 @@ class Plotter(object):
             
             plt.errorbar(wlgrid,obs_spectrum, error, lw=1, color='black', alpha=0.4, ls='none', zorder=0, label='Observed')
             if full:
-                self.full_contrib_plot(solution_val,wlgrid)
+                self.full_contrib_plot(solution_val['Spectra'],wlgrid)
             else:
-                self.simple_contrib_plot(solution_val,wlgrid)
+                self.simple_contrib_plot(solution_val['Spectra'],wlgrid)
 
             plt.xlim(np.min(wlgrid)-0.05*np.min(wlgrid), np.max(wlgrid)+0.05*np.max(wlgrid))
             # plt.ylim(0.0,0.006)
@@ -397,11 +397,8 @@ class Plotter(object):
         plt.close('all')
 
 
-
-
-
-    def full_contrib_plot(self,solution_val,wlgrid):
-        for contrib_name,contrib_dict in solution_val['Spectra']['Contributions'].items():
+    def full_contrib_plot(self,spectra,wlgrid):
+        for contrib_name,contrib_dict in spectra['Contributions'].items():
 
             first_name = contrib_name
 
@@ -415,9 +412,9 @@ class Plotter(object):
                     binned_contrib = component_value['bin_spectrum']
                 plt.plot(wlgrid, binned_contrib, label=total_label)
 
-    def simple_contrib_plot(self,solution_val,wlgrid):
+    def simple_contrib_plot(self,spectra,wlgrid):
         
-        for contrib_name,contrib_dict in solution_val['Spectra']['Contributions'].items():
+        for contrib_name,contrib_dict in spectra['Contributions'].items():
 
             first_name = contrib_name
             if first_name == 'Absorption':
@@ -446,58 +443,60 @@ class Plotter(object):
             pressure = solution_val['Profiles']['pressure_profile'][:]
             wavelength = solution_val['Spectra']['native_wlgrid'][:]
 
-
-            grid = plt.GridSpec(1, 4, wspace=0.4, hspace=0.3)
-            fig = plt.figure('Contribution function')
-            ax1 = plt.subplot(grid[0, :3])
-            plt.imshow(contribution, aspect='auto')
-
-            ### mapping of the pressure array onto the ticks:
-            y_labels = np.array([pow(10, 6), pow(10, 4), pow(10, 2), pow(10, 0), pow(10, -2), pow(10, -4)])
-            y_ticks = np.zeros(len(y_labels))
-            for i in range(len(y_ticks)):
-                y_ticks[i] = (np.abs(pressure - y_labels[i])).argmin()  ## To find the corresponding index
-            plt.yticks(y_ticks, ['$10^{%.f}$' % y for y in np.log10(y_labels) - 5])
-
-            ### mapping of the wavelength array onto the ticks:
-            x_label0 = np.ceil(np.min(wavelength) * 10) / 10.
-            x_label5 = np.round(np.max(wavelength) * 10) / 10.
-            x_label1 = np.round(
-                pow(10, (np.log10(x_label5) - np.log10(x_label0)) * 1 / 5. + np.log10(x_label0)) * 10) / 10.0
-            x_label2 = np.round(
-                pow(10, (np.log10(x_label5) - np.log10(x_label0)) * 2 / 5. + np.log10(x_label0)) * 10) / 10.0
-            x_label3 = np.round(
-                pow(10, (np.log10(x_label5) - np.log10(x_label0)) * 3 / 5. + np.log10(x_label0)) * 10) / 10.
-            x_label4 = np.round(
-                pow(10, (np.log10(x_label5) - np.log10(x_label0)) * 4 / 5. + np.log10(x_label0)) * 10) / 10.
-
-            x_labels = np.array([x_label0, x_label1, x_label2, x_label3, x_label4, x_label5])
-            x_ticks = np.zeros(len(x_labels))
-            for i in range(len(x_ticks)):
-                x_ticks[i] = (np.abs(wavelength - x_labels[i])).argmin()  ## To find the corresponding index
-            plt.xticks(x_ticks, x_labels)
-            plt.gca().invert_yaxis()
-            plt.gca().invert_xaxis()
-            plt.xlabel("Wavelength ($\mu m$)")
-            plt.ylabel("Pressure (Bar)")
-
-            ax2 = plt.subplot(grid[0, 3])
-
-            contribution_collapsed = np.average(contribution, axis=1)
-            # contribution_collapsed = np.amax(contribution_hr, axis=1) ## good for emission
-            contribution_sum = np.zeros(len(contribution_collapsed))
-            for i in range(len(contribution_collapsed) - 1):
-                contribution_sum[i + 1] = contribution_sum[i] + contribution_collapsed[i + 1]
-            plt.plot(contribution_collapsed, pressure * pow(10, -5))
-
-            plt.yscale('log')
-            plt.gca().invert_yaxis()
-            plt.gca().yaxis.tick_right()
-            plt.xlabel("Contribution")
+            self._plot_contribution(contribution,pressure,wavelength)
 
             plt.savefig(os.path.join(self.out_folder, '%s_tau_sol%i.pdf' % (self.prefix,solution_idx)))
 
             plt.close()
+
+    def _plot_contribution(self,contribution,pressure,wavelength):
+        grid = plt.GridSpec(1, 4, wspace=0.4, hspace=0.3)
+        fig = plt.figure('Contribution function')
+        ax1 = plt.subplot(grid[0, :3])
+        plt.imshow(contribution, aspect='auto')
+
+        ### mapping of the pressure array onto the ticks:
+        y_labels = np.array([pow(10, 6), pow(10, 4), pow(10, 2), pow(10, 0), pow(10, -2), pow(10, -4)])
+        y_ticks = np.zeros(len(y_labels))
+        for i in range(len(y_ticks)):
+            y_ticks[i] = (np.abs(pressure - y_labels[i])).argmin()  ## To find the corresponding index
+        plt.yticks(y_ticks, ['$10^{%.f}$' % y for y in np.log10(y_labels) - 5])
+
+        ### mapping of the wavelength array onto the ticks:
+        x_label0 = np.ceil(np.min(wavelength) * 10) / 10.
+        x_label5 = np.round(np.max(wavelength) * 10) / 10.
+        x_label1 = np.round(
+            pow(10, (np.log10(x_label5) - np.log10(x_label0)) * 1 / 5. + np.log10(x_label0)) * 10) / 10.0
+        x_label2 = np.round(
+            pow(10, (np.log10(x_label5) - np.log10(x_label0)) * 2 / 5. + np.log10(x_label0)) * 10) / 10.0
+        x_label3 = np.round(
+            pow(10, (np.log10(x_label5) - np.log10(x_label0)) * 3 / 5. + np.log10(x_label0)) * 10) / 10.
+        x_label4 = np.round(
+            pow(10, (np.log10(x_label5) - np.log10(x_label0)) * 4 / 5. + np.log10(x_label0)) * 10) / 10.
+
+        x_labels = np.array([x_label0, x_label1, x_label2, x_label3, x_label4, x_label5])
+        x_ticks = np.zeros(len(x_labels))
+        for i in range(len(x_ticks)):
+            x_ticks[i] = (np.abs(wavelength - x_labels[i])).argmin()  ## To find the corresponding index
+        plt.xticks(x_ticks, x_labels)
+        plt.gca().invert_yaxis()
+        plt.gca().invert_xaxis()
+        plt.xlabel("Wavelength ($\mu m$)")
+        plt.ylabel("Pressure (Bar)")
+
+        ax2 = plt.subplot(grid[0, 3])
+
+        contribution_collapsed = np.average(contribution, axis=1)
+        # contribution_collapsed = np.amax(contribution_hr, axis=1) ## good for emission
+        contribution_sum = np.zeros(len(contribution_collapsed))
+        for i in range(len(contribution_collapsed) - 1):
+            contribution_sum[i + 1] = contribution_sum[i] + contribution_collapsed[i + 1]
+        plt.plot(contribution_collapsed, pressure * pow(10, -5))
+
+        plt.yscale('log')
+        plt.gca().invert_yaxis()
+        plt.gca().yaxis.tick_right()
+        plt.xlabel("Contribution")
 
 
     @property
@@ -562,6 +561,7 @@ def main():
     parser.add_argument("-o","--output-dir",dest="output_dir",type=str,required=True,help="output directory to store plots")
     parser.add_argument("-p","--prefix",dest="prefix",type=str,help="File prefix for outputs")
     parser.add_argument("-m","--color-map",dest="cmap",type=str,default="Paired",help="Matplotlib colormap to use")
+    parser.add_argument("-R","--resolution",dest="resolution",type=float,default=None,help="Resolution to bin spectra to")
     args=parser.parse_args()
 
     plot_xprofile = args.xprofile or args.all
