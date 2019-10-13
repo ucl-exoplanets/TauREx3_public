@@ -38,6 +38,8 @@ class Plotter(object):
         for idx,solution in [(int(k[8:]),v) for k,v in self.fd[fd_position]['Solutions'].items() if 'solution' in k]:
             yield idx,solution
 
+    def forward_output(self):
+        return self.fd['Output']
 
     def compute_ranges(self):
 
@@ -350,7 +352,6 @@ class Plotter(object):
     def plot_fitted_contrib(self,full=False,resolution=None):
         # fitted model
 
-
         N = self.num_solutions
         for solution_idx, solution_val in self.solution_iter():
 
@@ -431,9 +432,24 @@ class Plotter(object):
                 
                 plt.plot(wlgrid, contrib_dict['binned'], label=first_name)                
 
+    def plot_forward_tau(self):
+
+        forward_output =self.forward_output()
+
+        contribution = forward_output['Spectra']['native_tau']
+        #contribution = self.pickle_file['solutions'][solution_idx]['contrib_func']
+
+        pressure = forward_output['Profiles']['pressure_profile'][:]
+        wavelength = forward_output['Spectra']['native_wlgrid'][:]
+
+        self._plot_tau(contribution,pressure,wavelength)
+
+        plt.savefig(os.path.join(self.out_folder, '%s_tau_forward.pdf' % (self.prefix)))
+
+        plt.close()
 
 
-    def plot_tau(self):
+    def plot_fitted_tau(self):
         N = self.num_solutions
         for solution_idx, solution_val in self.solution_iter():
 
@@ -443,13 +459,13 @@ class Plotter(object):
             pressure = solution_val['Profiles']['pressure_profile'][:]
             wavelength = solution_val['Spectra']['native_wlgrid'][:]
 
-            self._plot_contribution(contribution,pressure,wavelength)
+            self._plot_tau(contribution,pressure,wavelength)
 
             plt.savefig(os.path.join(self.out_folder, '%s_tau_sol%i.pdf' % (self.prefix,solution_idx)))
 
             plt.close()
 
-    def _plot_contribution(self,contribution,pressure,wavelength):
+    def _plot_tau(self,contribution,pressure,wavelength):
         grid = plt.GridSpec(1, 4, wspace=0.4, hspace=0.3)
         fig = plt.figure('Contribution function')
         ax1 = plt.subplot(grid[0, :3])
@@ -553,6 +569,7 @@ def main():
     parser.add_argument("-P","--plot-posteriors",dest="posterior",default=False,help="Plot fitting posteriors",action='store_true')
     parser.add_argument("-x","--plot-xprofile",dest="xprofile",default=False,help="Plot molecular profiles",action='store_true')
     parser.add_argument("-t","--plot-tpprofile",dest="tpprofile",default=False,help="Plot Temperature profiles",action='store_true')
+    parser.add_argument("-d","--plot-tau",dest="tau",default=False,help="Plot optical depth contribution",action="store_true")
     parser.add_argument("-s","--plot-spectrum",dest="spectrum",default=False,help="Plot spectrum",action='store_true')
     parser.add_argument("-c","--plot-contrib",dest="contrib",default=False,help="Plot contrib",action='store_true')
     parser.add_argument("-C","--full-contrib",dest="full_contrib",default=False,help="Plot detailed contribs",action="store_true")
@@ -570,7 +587,7 @@ def main():
     plot_contrib = args.contrib or args.all
     plot_fullcontrib = args.full_contrib or args.all
     plot_posteriors = args.posterior or args.all
-    plot_tau = args.all
+    plot_tau = args.tau or args.all
 
     plot=Plotter(args.input_file,cmap=args.cmap,
                     title=args.title,prefix=args.prefix,out_folder=args.output_dir)
@@ -597,7 +614,9 @@ def main():
 
     if plot_tau:
         if plot.is_retrieval:
-            plot.plot_tau()
+            plot.plot_fitted_tau()
+        else:
+            plot.plot_forward_tau()
     
 if __name__ == "__main__":
     main()
