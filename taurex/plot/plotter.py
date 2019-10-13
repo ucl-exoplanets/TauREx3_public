@@ -167,6 +167,50 @@ class Plotter(object):
         plt.savefig(os.path.join(self.out_folder, '%s_fit_mixratio.pdf' % (self.prefix)))
         plt.close('all')
 
+    def plot_forward_xprofile(self):
+        fig = plt.figure(figsize=(7,7/self.phi))
+        ax = fig.add_subplot(111)
+        num_moles = len(self.activeGases+self.inactiveGases)
+
+        solution_val = self.forward_output()
+
+        profiles = solution_val['Profiles']
+        pressure_profile = profiles['pressure_profile'][:]/1e5
+        active_profile = profiles['active_mix_profile'][...]
+
+        inactive_profile = profiles['inactive_mix_profile'][...]
+
+        cols_mol = {}
+        for mol_idx,mol_name in enumerate(self.activeGases):
+            cols_mol[mol_name] = self.cmap(mol_idx/num_moles)
+
+            prof = active_profile[mol_idx]
+
+            plt.plot(prof,pressure_profile,color=cols_mol[mol_name], label=mol_name)
+
+        for mol_idx,mol_name in enumerate(self.inactiveGases):
+            inactive_idx = len(self.activeGases) + mol_idx
+            cols_mol[mol_name] = self.cmap(inactive_idx/num_moles)
+
+            
+            prof = inactive_profile[mol_idx]
+
+            plt.plot(prof,pressure_profile,color=cols_mol[mol_name], label=mol_name)
+
+        plt.yscale('log')
+        plt.gca().invert_yaxis()
+        plt.xscale('log')
+        plt.xlim(1e-12, 3)
+        plt.xlabel('Mixing ratio')
+        plt.ylabel('Pressure (bar)')
+        plt.tight_layout()
+        box = ax.get_position()
+        ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+        ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), ncol=1, prop={'size':11}, frameon=False)
+        if self.title:
+            plt.title(self.title, fontsize=14)
+        plt.savefig(os.path.join(self.out_folder, '%s_fit_mixratio.pdf' % (self.prefix)))
+        plt.close('all')
 
     def plot_fitted_tp(self):
 
@@ -184,6 +228,32 @@ class Plotter(object):
             pres_prof = solution_val['Profiles']['pressure_profile'][:]/1e5
             plt.plot(temp_prof, pres_prof, color=self.cmap(float(solution_idx)/self.num_solutions), label=label)
             plt.fill_betweenx(pres_prof,  temp_prof-temp_prof_std,  temp_prof+temp_prof_std, color=self.cmap(float(solution_idx)/self.num_solutions), alpha=0.5)
+
+        plt.yscale('log')
+        plt.gca().invert_yaxis()
+        plt.xlabel('Temperature (K)')
+        plt.ylabel('Pressure (bar)')
+        plt.tight_layout()
+        legend = plt.legend(loc='upper left', ncol=1, prop={'size':11})
+        legend.get_frame().set_facecolor('white')
+        legend.get_frame().set_edgecolor('white')
+
+        legend.get_frame().set_alpha(0.8)
+        if self.title:
+            plt.title(self.title, fontsize=14)
+        plt.savefig(os.path.join(self.out_folder, '%s_tp_profile.pdf' % (self.prefix)))
+        plt.close()
+
+    def plot_forward_tp(self):
+
+        fig = plt.figure(figsize=(5,3.5))
+        ax = fig.add_subplot(111)
+        
+        solution_val = self.forward_output()
+
+        temp_prof = solution_val['Profiles']['temp_profile'][:]
+        pres_prof = solution_val['Profiles']['pressure_profile'][:]/1e5
+        plt.plot(temp_prof, pres_prof)
 
         plt.yscale('log')
         plt.gca().invert_yaxis()
@@ -284,11 +354,12 @@ class Plotter(object):
         pass
 
 
+    
 
-    def plot_fitted_spectrum(self, plot_contrib=True):
+    def plot_fitted_spectrum(self, resolution=None):
 
         # fitted model
-        fig = plt.figure(figsize=(5.3, 3.5))
+        fig = plt.figure(figsize=(10.6, 7.0))
         #ax = fig.add_subplot(111)
 
         
@@ -312,26 +383,14 @@ class Plotter(object):
             except KeyError:
                 binned_grid = solution_val['Spectra']['bin_wlgrid'][:]
             
-            try:
-                binned_spectrum = solution_val['Spectra']['binned_spectrum'][:]
-            except KeyError:
-                binned_spectrum = solution_val['Spectra']['bin_spectrum'][:]
-                
-            binned_std = solution_val['Spectra']['binned_std'][:]
+            native_grid = solution_val['Spectra']['native_wngrid']
 
-            plt.plot(binned_grid, binned_spectrum, zorder=2,color=self.cmap(float(solution_idx)/N), label=label,alpha=0.8)
+
             plt.scatter(wlgrid, obs_spectrum, marker='d',zorder=1,**{'s': 10, 'edgecolors': 'grey','c' : self.cmap(float(solution_idx)/N) })
 
-            plt.fill_between(binned_grid, binned_spectrum-binned_std,
-                                binned_spectrum+binned_std,
-                                alpha=0.5, zorder=-2, color=self.cmap(float(solution_idx)/N), edgecolor='none')
+            self._generic_plot(binned_grid,native_grid,solution_val['Spectra'],resolution=resolution,color=self.cmap(float(solution_idx)/N),label=label)
 
-            # 2 sigma
-            plt.fill_between(binned_grid, binned_spectrum-2*binned_std,
-                                binned_spectrum+2*binned_std,
-                                alpha=0.2, zorder=-3, color=self.cmap(float(solution_idx)/N), edgecolor='none')
 
-            
         plt.xlim(np.min(wlgrid)-0.05*np.min(wlgrid), np.max(wlgrid)+0.05*np.max(wlgrid))
         # plt.ylim(0.0,0.006)
         plt.xlabel(r'Wavelength ($\mu$m)')
@@ -349,6 +408,39 @@ class Plotter(object):
         plt.savefig(os.path.join(self.out_folder, '%s_spectrum.pdf'  % (self.prefix)))
         plt.close()
 
+
+
+    def plot_forward_spectrum(self,resolution=None):
+        fig = plt.figure(figsize=(5.3, 3.5))
+
+        spectra_out = self.forward_output()['Spectra']
+
+        native_grid = spectra_out['native_wngrid'][...]
+
+        try:
+            wlgrid = spectra_out['binned_wlgrid'][...]
+        except KeyError:
+            wlgrid = spectra_out['native_wlgrid'][...]
+        
+    
+        self._generic_plot(wlgrid,native_grid,spectra_out,resolution=resolution,alpha=1)
+        plt.xlim(np.min(wlgrid)-0.05*np.min(wlgrid), np.max(wlgrid)+0.05*np.max(wlgrid))
+        # plt.ylim(0.0,0.006)
+        plt.xlabel(r'Wavelength ($\mu$m)')
+        plt.ylabel(self.modelAxis[self.modelType])
+
+        if np.max(wlgrid) - np.min(wlgrid) > 5:
+            plt.xscale('log')
+            plt.tick_params(axis='x', which='minor')
+            #ax.xaxis.set_minor_formatter(mpl.ticker.FormatStrFormatter("%i"))
+            #ax.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter("%i"))
+        plt.legend(loc='best', ncol=2, frameon=False, prop={'size':11})
+        if self.title:
+            plt.title(self.title, fontsize=14)
+        plt.tight_layout()
+        plt.savefig(os.path.join(self.out_folder, '%s_forward_spectrum.pdf'  % (self.prefix)))
+        plt.close()
+
     def plot_fitted_contrib(self,full=False,resolution=None):
         # fitted model
 
@@ -362,7 +454,8 @@ class Plotter(object):
 
             obs_spectrum = self.fd['Observed']['spectrum'][:]
             error = self.fd['Observed']['errorbars']
-            wlgrid = self.fd['Observed']['wlgrid']
+            wlgrid = self.fd['Observed']['wlgrid'][...]
+            plot_wlgrid = wlgrid
             bin_widths = self.fd['Observed']['binwidths'][:]        
             
             plt.errorbar(wlgrid,obs_spectrum, error, lw=1, color='black', alpha=0.4, ls='none', zorder=0, label='Observed')
@@ -380,12 +473,16 @@ class Plotter(object):
         ax = fig.add_subplot(111)
 
 
-        fm_output = self.forward_output()
-        try:
-            wlgrid = fm_output['Spectra']['binned_wlgrid']
-        except KeyError:
-            wlgrid = fm_output['Spectra']['native_wlgrid']
+        spectra_out = self.forward_output()['Spectra']
 
+        native_grid = spectra_out['native_wngrid'][...]
+
+        try:
+            wlgrid = spectra_out['binned_wlgrid'][...]
+        except KeyError:
+            wlgrid = spectra_out['native_wlgrid'][...]
+
+        self._generic_plot(wlgrid,native_grid,spectra_out,resolution=resolution,alpha=0.5)
         self._plot_contrib(self.forward_output(),wlgrid,ax,full=full,resolution=resolution)
 
 
@@ -398,11 +495,11 @@ class Plotter(object):
 
 
         if full:
-            self.full_contrib_plot(output['Spectra'],wlgrid)
+            wlgrid = self.full_contrib_plot(output['Spectra'],wlgrid,resolution=resolution)
         else:
-            self.simple_contrib_plot(output['Spectra'],wlgrid)
+            wlgrid = self.simple_contrib_plot(output['Spectra'],wlgrid,resolution=resolution)
 
-        #plt.xlim(np.min(wlgrid)-0.05*np.min(wlgrid), np.max(wlgrid)+0.05*np.max(wlgrid))
+        plt.xlim(np.min(wlgrid)-0.05*np.min(wlgrid), np.max(wlgrid)+0.05*np.max(wlgrid))
         # plt.ylim(0.0,0.006)
         plt.xlabel('Wavelength ($\mu$m)')
         plt.ylabel(self.modelAxis[self.modelType])
@@ -423,6 +520,7 @@ class Plotter(object):
             plt.title(self.title, fontsize=14)
 
     def full_contrib_plot(self,spectra,wlgrid,resolution=None):
+        native_grid = spectra['native_wngrid']
         for contrib_name,contrib_dict in spectra['Contributions'].items():
 
             first_name = contrib_name
@@ -431,18 +529,15 @@ class Plotter(object):
                 if isinstance(component_value,h5py.Dataset):
                         continue
                 total_label = '{}-{}'.format(contrib_name,component_name)
-                try:
-                    binned_contrib = component_value['binned_spectrum']
-                except KeyError:
-                    try:
-                        binned_contrib = component_value['bin_spectrum']
-                    except KeyError:
-                        binned_contrib = component_value['native_spectrum']
-                
-                plt.plot(wlgrid, binned_contrib, label=total_label)
-
+                self._generic_plot(wlgrid,native_grid,component_value,resolution,label=total_label)
+        return wlgrid
     def simple_contrib_plot(self,spectra,wlgrid,resolution=None):
-        
+
+
+        binner = None
+        native_grid = spectra['native_wngrid']
+
+
         for contrib_name,contrib_dict in spectra['Contributions'].items():
             first_name = contrib_name
             if first_name == 'Absorption':
@@ -450,24 +545,65 @@ class Plotter(object):
                     if isinstance(component_value,h5py.Dataset):
                         continue
                     total_label = '{}-{}'.format(contrib_name,component_name)
-                    try:
-                        binned_contrib = component_value['binned_spectrum']
-                    except KeyError:
-                        try:
-                            binned_contrib = component_value['bin_spectrum']
-                        except KeyError:
-                            binned_contrib = component_value['native_spectrum']
-                    
-                    plt.plot(wlgrid, binned_contrib, label=total_label)
+                    self._generic_plot(wlgrid,native_grid,component_value,resolution,label=total_label)
             else:
+                self._generic_plot(wlgrid,native_grid,contrib_dict,resolution)
+      
+        return wlgrid
+
+
+    def _generic_plot(self,wlgrid,native_grid,spectra,resolution,color=None,error=False,alpha=1.0,label=None):
+
+        
+        binned_error = None
+        if resolution is not None:
+            from taurex.binning import SimpleBinner
+            from taurex.util.util import create_grid_res,wnwidth_to_wlwidth
+            _grid = create_grid_res(resolution,wlgrid.min()*0.9,wlgrid.max()*1.1)
+            bin_wlgrid = _grid[:,0]
+
+            bin_wngrid = 10000/_grid[:,0]
+
+            bin_sort = bin_wngrid.argsort()
+
+            bin_wlgrid = bin_wlgrid[bin_sort]
+            bin_wngrid = bin_wngrid[bin_sort]
+
+            bin_wnwidth = wnwidth_to_wlwidth(bin_wlgrid,_grid[bin_sort,1])
+            wlgrid = _grid[bin_sort,0]
+            binner = SimpleBinner(bin_wngrid,bin_wnwidth)
+            native_spectra = spectra['native_spectrum'][...]
+            binned_spectrum = binner.bindown(native_grid,native_spectra)[1]
+            try:
+                native_error = spectra['native_std']
+            except KeyError:
+                native_error = None
+            if native_error is not None:
+                binned_error = binner.bindown(native_grid,native_error)[1]
+
+        else:
+            try:
+                binned_spectrum = spectra['binned_spectrum'][...]
+            except KeyError:
                 try:
-                    binned_contrib = contrib_dict['binned_spectrum']
+                    binned_spectrum = spectra['bin_spectrum'][...]
                 except KeyError:
-                    try:
-                        binned_contrib = contrib_dict['bin_spectrum']
-                    except KeyError:
-                        binned_contrib = contrib_dict['native_spectrum']
-                plt.plot(wlgrid, binned_contrib, label=first_name)                
+                    binned_spectrum = spectra['native_spectrum'][...]
+            try:
+                binned_error = spectra['binned_std'][...]
+            except KeyError:
+                binned_error = None
+        plt.plot(wlgrid, binned_spectrum, label=label,alpha=alpha)          
+        if binned_error is not None:
+            plt.fill_between(wlgrid, binned_spectrum-binned_error,
+                                binned_spectrum+binned_error,
+                                alpha=0.5, zorder=-2, color=color, edgecolor='none')
+
+            # 2 sigma
+            plt.fill_between(wlgrid, binned_spectrum-2*binned_error,
+                                binned_spectrum+2*binned_error,
+                                alpha=0.2, zorder=-3, color=color, edgecolor='none')
+        
 
     def plot_forward_tau(self):
 
@@ -636,20 +772,24 @@ def main():
     if plot_xprofile:
         if plot.is_retrieval:
             plot.plot_fit_xprofile()
-    
+        else:
+            plot.plot_forward_xprofile()
     if plot_spectrum:
         if plot.is_retrieval:
-            plot.plot_fitted_spectrum()
-    
+            plot.plot_fitted_spectrum(resolution=args.resolution)
+        else:
+            plot.plot_forward_spectrum(resolution=args.resolution)
     if plot_tp_profile:
         if plot.is_retrieval:
             plot.plot_fitted_tp()
+        else:
+            plot.plot_forward_tp()
 
     if plot_contrib:
         if plot.is_retrieval:
-            plot.plot_fitted_contrib(full=plot_fullcontrib)
+            plot.plot_fitted_contrib(full=plot_fullcontrib,resolution=args.resolution)
         else:
-            plot.plot_forward_contrib(full=plot_fullcontrib)
+            plot.plot_forward_contrib(full=plot_fullcontrib,resolution=args.resolution)
 
     if plot_tau:
         if plot.is_retrieval:
