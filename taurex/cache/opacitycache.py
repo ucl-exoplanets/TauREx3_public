@@ -58,7 +58,7 @@ class OpacityCache(Singleton):
         self.opacity_dict={}
         self._opacity_path = None
         self.log = Logger('OpacityCache')
-        self._default_interpolation = 'exp'
+        self._default_interpolation = 'linear'
         self._memory_mode = True
         self._radis = False
         self._radis_props = (600,30000,100000)

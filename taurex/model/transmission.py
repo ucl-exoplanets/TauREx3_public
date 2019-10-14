@@ -64,7 +64,6 @@ class TransmissionModel(SimpleForwardModel):
 
 
     def path_integral(self,wngrid,return_contrib):
-        import numexpr as ne
 
         dz=np.gradient(self.altitudeProfile)
         
@@ -112,10 +111,9 @@ class TransmissionModel(SimpleForwardModel):
         
 
     def compute_absorption(self,tau,dz):
-        import numexpr as ne
         #Inpreperation
         #tau[tau<0.0] = 0.0
-        tau = ne.evaluate('exp(-tau)')
+        tau = np.exp(-tau)
         ap = self.altitudeProfile[:,None]
         pradius = self._planet.fullRadius
         sradius = self._star.radius
@@ -123,7 +121,7 @@ class TransmissionModel(SimpleForwardModel):
         #integral = (self._planet.radius+self.altitudeProfile[:,None])*(1.0-tau)*dz[:,None]
         #integral*=2.0
         #integral = np.sum(integral,axis=0)
-        integral = ne.evaluate('sum((pradius+ap)*(1.0-tau)*_dz*2.0,axis=0)')
+        integral = np.sum((pradius+ap)*(1.0-tau)*_dz*2.0,axis=0)
         return ((pradius**2.0) + integral)/(sradius**2),tau
 
 

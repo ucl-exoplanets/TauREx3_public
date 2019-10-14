@@ -1,7 +1,6 @@
 from taurex.log import Logger
 import numpy as np
 from .opacity import Opacity
-import numexpr as ne
 from taurex.util.math import *
 
 
@@ -57,8 +56,7 @@ class InterpolatingOpacity(Opacity):
         return interp_lin_only(fx0,fx1,P,Pmin,Pmax)
 
 
-    def interp_bilinear_grid(self,T,P,t_idx_min,t_idx_max,p_idx_min,p_idx_max,wngrid_filter=None):
-        import numexpr as ne
+    def interp_bilinear_grid(self,T,P,t_idx_min,t_idx_max,p_idx_min,p_idx_max,wngrid_filter=None):        
         
 
         self.debug('Interpolating %s %s %s %s %s %s',T,P,t_idx_min,t_idx_max,p_idx_min,p_idx_max)

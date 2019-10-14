@@ -7,16 +7,15 @@ from scipy.stats.mstats_basic import tmean
 
 
 def black_body(lamb,temp):
-    import numexpr as ne
     h = 6.62606957e-34
     c = 299792458
     k = 1.3806488e-23
     pi= 3.14159265359
     
-    wl = ne.evaluate('10000*1e-6/lamb')
+    wl = 10000*1e-6/lamb
 
     #exponent = ne.evaluate('exp((h * c) / (wl*1e-6 * k * temp))')
-    BB = ne.evaluate('(pi* (2.0*h*c**2)/(wl)**5) * (1.0/(exp((h * c) / (wl * k * temp))-1))*1e-6')
+    BB = (pi* (2.0*h*c**2)/(wl)**5) * (1.0/(np.exp((h * c) / (wl * k * temp))-1))*1e-6
     return BB
 
 # def black_body(lamb, temp):

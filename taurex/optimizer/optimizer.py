@@ -339,7 +339,6 @@ class Optimizer(Logger):
 
         """
         from taurex.util import bindown
-        import numexpr as ne
         from taurex.exceptions import InvalidModelException
         self.update_model(fit_params)
 

@@ -23,7 +23,6 @@ from taurex.data.profiles.chemistry import TaurexChemistry,ConstantGas
 
 from taurex.contributions import CIAContribution,RayleighContribution,AbsorptionContribution
 import logging
-import numexpr as ne
 
 
 logging.basicConfig(level=logging.INFO)
