@@ -1,6 +1,7 @@
 from taurex.log import Logger
 import numpy as np
 import math
+import numexpr as ne
 from .simplemodel import SimpleForwardModel
 from taurex.contributions import AbsorptionContribution
 from taurex.constants import *
@@ -99,7 +100,7 @@ class EmissionModel(SimpleForwardModel):
         
         _mu = self._mu_quads[:,None]
         _w = self._wi_quads[:,None]
-        I =BB * ( np.exp(-surface_tau/_mu))
+        I =ne.evaluate('BB * ( exp(-surface_tau/_mu))')
 
         self.debug('I1_pre %s',I)
         #Loop upwards
@@ -110,7 +111,7 @@ class EmissionModel(SimpleForwardModel):
                 contrib.contribute(self,layer+1,total_layers,0,0,density,layer_tau,path_length=dz)  
                 contrib.contribute(self,layer,layer+1,0,0,density,dtau,path_length=dz)           
 
-            _tau = np.exp(-layer_tau) - np.exp(-dtau)
+            _tau = ne.evaluate('exp(-layer_tau) - exp(-dtau)')
 
             tau[layer] += _tau[0]
             #for contrib in self.contribution_list:
@@ -121,11 +122,11 @@ class EmissionModel(SimpleForwardModel):
             self.debug('dtau[%s]=%s',layer,dtau)
             BB = black_body(wngrid,temperature[layer])/PI
             self.debug('BB[%s]=%s,%s',layer,temperature[layer],BB)
-            I += BB * ( np.exp(-layer_tau/_mu) - np.exp(-dtau/_mu))
+            I += ne.evaluate('BB * ( exp(-layer_tau/_mu) - exp(-dtau/_mu))')
 
         self.debug('I: %s',I)
 
-        flux_total = 2.0*np.pi*np.sum(I*_mu*_w,axis=0)
+        flux_total = 2.0*np.pi*ne.evaluate('sum(I*_mu*_w,axis=0)')
         self.debug('flux_total %s',flux_total)
         
         return self.compute_final_flux(flux_total).flatten(),tau
