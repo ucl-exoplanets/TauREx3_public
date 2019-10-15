@@ -47,8 +47,8 @@ class Opacity(Logger):
             wngrid_filter = (self.wavenumberGrid >= wngrid.min()) & (self.wavenumberGrid <= wngrid.max())
 
         orig=np.nan_to_num(self.compute_opacity(temperature,pressure,wngrid_filter))
-
-        if wngrid is None:
+        mywngrid = self.wavenumberGrid[wngrid_filter]
+        if wngrid is None or np.array_equal(mywngrid,wngrid):
             return orig
         else:
             # min_max =  (self.wavenumberGrid <= wngrid.max() ) & (self.wavenumberGrid >= wngrid.min())
