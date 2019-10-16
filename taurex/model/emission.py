@@ -1,7 +1,7 @@
 from taurex.log import Logger
 import numpy as np
 import math
-import numexpr as ne
+
 from .simplemodel import SimpleForwardModel
 from taurex.contributions import AbsorptionContribution
 from taurex.constants import *
@@ -68,7 +68,7 @@ class EmissionModel(SimpleForwardModel):
 
 
     def path_integral(self,wngrid,return_contrib):
-
+        import numexpr as ne
         dz=np.gradient(self.altitudeProfile)
         
 

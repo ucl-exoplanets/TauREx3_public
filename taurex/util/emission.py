@@ -8,7 +8,7 @@ import numba
 import math
 from numba import vectorize, float64
 from taurex.constants import PI,PLANCK, SPDLIGT, KBOLTZ
-import numexpr as ne
+
 @numba.vectorize([float64(float64)],fastmath=True)
 def _convert_lamb(lamb):
     return 10000*1e-6/lamb
@@ -31,7 +31,7 @@ def black_body(lamb,temp):
 
 
 def black_body_numexpr(lamb, temp):
-    
+    import numexpr as ne
     wl = ne.evaluate('10000*1e-6/lamb')
     
     return ne.evaluate('(PI* (2.0*PLANCK*SPDLIGT**2)/(wl)**5) * (1.0/(exp((PLANCK * SPDLIGT) / (wl * KBOLTZ * temp))-1))*1e-6')

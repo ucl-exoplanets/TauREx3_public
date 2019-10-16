@@ -3,9 +3,9 @@
 def main():
     import argparse
     import datetime
-    import numexpr as ne
-    ne.set_num_threads(1)
-    ne.set_vml_num_threads(1)
+    #import numexpr as ne
+    #ne.set_num_threads(1)
+    #ne.set_vml_num_threads(1)
 
     import logging
     from taurex.mpi import get_rank, nprocs
