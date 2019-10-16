@@ -32,7 +32,7 @@ class HDF5Opacity(InterpolatingOpacity):
         import h5py
         import astropy.units as u
         #Load the pickle file
-        self.info('Loading opacity from {}'.format(filename))
+        self.debug('Loading opacity from {}'.format(filename))
         
         self._spec_dict = h5py.File(filename,'r')
         
