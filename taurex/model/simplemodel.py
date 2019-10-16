@@ -145,6 +145,9 @@ class SimpleForwardModel(ForwardModel):
 
         self.debug('Available Fitting params: %s',list(self._fitting_parameters.keys()))
     def build(self):
+
+        self.contribution_list.sort(key=lambda x: x.order)
+
         self.info('Building model........')
         self._compute_inital_mu()
         self.info('Collecting paramters')
