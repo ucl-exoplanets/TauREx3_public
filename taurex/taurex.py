@@ -3,11 +3,14 @@
 def main():
     import argparse
     import datetime
-
+    #import numexpr as ne
+    #ne.set_num_threads(1)
+    #ne.set_vml_num_threads(1)
 
     import logging
     from taurex.mpi import get_rank, nprocs
     from taurex.log import setLogLevel
+    from taurex.log.logger import root_logger
     from taurex.parameter import ParameterParser
     from taurex.output.hdf5 import HDF5Output
     from taurex.util.output import generate_profile_dict, store_contributions
@@ -62,7 +65,7 @@ def main():
 
 
 
-    print('TAUREX PROGRAM START AT %s', datetime.datetime.now())
+    root_logger.info('TAUREX PROGRAM START AT %s', datetime.datetime.now())
 
     # Parse the input file
     pp = ParameterParser()
@@ -182,7 +185,7 @@ def main():
 
         end_time = time.time()
 
-        print('Retrieval finish in {} seconds'.format(end_time-start_time))
+        root_logger.info('Total Retrieval finish in %s seconds',end_time-start_time)
 
 
         for _, optimized,_, _ in optimizer.get_solution():
@@ -257,7 +260,7 @@ def main():
 
     wlgrid = 10000/wngrid
 #    wlgrid = 10000/wngrid
-    print('TAUREX PROGRAM END AT ', datetime.datetime.now())
+    root_logger.info('TAUREX PROGRAM END AT %s s', datetime.datetime.now())
 
 
     if args.plot:

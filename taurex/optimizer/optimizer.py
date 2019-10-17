@@ -339,24 +339,24 @@ class Optimizer(Logger):
 
         """
         from taurex.util import bindown
-        import numexpr as ne
         from taurex.exceptions import InvalidModelException
         self.update_model(fit_params)
 
         obs_bins= self._observed.wavenumberGrid
 
-        
 
         try:
-            _,final_model,_,_ = self._binner.bin_model(self._model.model(obs_bins))
+            _,final_model,_,_ = self._binner.bin_model(self._model.model(wngrid=obs_bins))
         except InvalidModelException:
             return 1e100
+        
 
             
-        res = (data.flatten() - final_model.flatten()) / datastd.flatten()
+        res = (data.ravel() - final_model.ravel()) / datastd.ravel()
         res = np.nansum(res*res)
         if res == 0:
             res = np.nan
+
         return res
 
 
@@ -377,6 +377,7 @@ class Optimizer(Logger):
     def fit(self,output_size=OutputSize.heavy):
         from taurex.log import setLogLevel
         import logging
+        import time
         """
 
         Performs fit.
@@ -402,10 +403,12 @@ class Optimizer(Logger):
         output = tabulate(zip(fit_names,fit_values,fit_min,fit_max), headers=['Param', 'Value','Bound-min', 'Bound-max'])
         self.info('\n%s\n\n',output)
         self.info('')
-
+        start_time = time.time()
         disableLogging()
         self.compute_fit()
         enableLogging()
+        end_time = time.time()
+        self.info('Sampling time %s s',end_time-start_time)
         return  self.generate_solution(output_size=output_size)
 
 

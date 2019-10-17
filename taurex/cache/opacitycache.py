@@ -58,7 +58,7 @@ class OpacityCache(Singleton):
         self.opacity_dict={}
         self._opacity_path = None
         self.log = Logger('OpacityCache')
-        self._default_interpolation = 'exp'
+        self._default_interpolation = 'linear'
         self._memory_mode = True
         self._radis = False
         self._radis_props = (600,30000,100000)
@@ -129,7 +129,7 @@ class OpacityCache(Singleton):
         
 
         """
-
+        return
         self._default_interpolation = interpolation_mode
         for values in self.opacity_dict.values():
             values.set_interpolation_mode(self._default_interpolation)
@@ -297,7 +297,10 @@ class OpacityCache(Singleton):
                 if molecule_filter is not None:
                         if not op.moleculeName in molecule_filter:
                             continue
+                if op.moleculeName in self.opacity_dict.keys():
+                    continue
                 del op
+
                 op = HDF5Opacity(files,interpolation_mode=self._default_interpolation,in_memory=self._memory_mode)
 
             elif files.endswith('pickle'):
@@ -305,7 +308,8 @@ class OpacityCache(Singleton):
                 if molecule_filter is not None:
                         if not splits[0] in molecule_filter:
                             continue
-
+                if splits[0] in self.opacity_dict.keys():
+                    continue
                 op = PickleOpacity(files,interpolation_mode=self._default_interpolation)
                 op._molecule_name = splits[0]
             if op is not None:

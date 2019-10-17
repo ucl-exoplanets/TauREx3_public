@@ -68,6 +68,12 @@ class Contribution(Fittable,Logger,Writeable):
         self._total_contribution = None
         self._enabled = True
         self.sigma_xsec = None
+
+    @property
+    def order(self):
+        return 5
+
+
     @property
     def name(self):
         return self._name

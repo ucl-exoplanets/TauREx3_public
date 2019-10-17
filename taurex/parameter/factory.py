@@ -301,7 +301,7 @@ def generate_contributions(config):
     
 def create_model(config,gas,temperature,pressure,planet,star):
     from taurex.model import ForwardModel
-    print(config)
+    log.debug(config)
     config, klass = determine_klass(config, 'model_type', model_factory,
                                     ForwardModel)
 

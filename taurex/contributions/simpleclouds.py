@@ -10,6 +10,11 @@ class SimpleCloudsContribution(Contribution):
         super().__init__('SimpleClouds')
         self._cloud_pressure = clouds_pressure
 
+
+    @property
+    def order(self):
+        return 3
+
     def contribute(self,model,start_horz_layer,end_horz_layer,density_offset,layer,density,tau,path_length=None):
 
         tau[layer]+=self._contrib[layer,:]

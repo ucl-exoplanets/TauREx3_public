@@ -1,7 +1,6 @@
 from taurex.log import Logger
 import numpy as np
 from .opacity import Opacity
-import numexpr as ne
 from taurex.util.math import *
 
 
@@ -57,12 +56,11 @@ class InterpolatingOpacity(Opacity):
         return interp_lin_only(fx0,fx1,P,Pmin,Pmax)
 
 
-    def interp_bilinear_grid(self,T,P,t_idx_min,t_idx_max,p_idx_min,p_idx_max,wngrid_filter=None):
-        import numexpr as ne
+    def interp_bilinear_grid(self,T,P,t_idx_min,t_idx_max,p_idx_min,p_idx_max,wngrid_filter=None):        
         
 
         self.debug('Interpolating %s %s %s %s %s %s',T,P,t_idx_min,t_idx_max,p_idx_min,p_idx_max)
-
+        
         if p_idx_max == 0 and t_idx_max == 0:
 
             return np.zeros_like(self.xsecGrid[0,0,wngrid_filter])
@@ -75,9 +73,7 @@ class InterpolatingOpacity(Opacity):
 
         check_pressure_min = P < self._min_pressure
         check_temperature_min = T < self._min_temperature
-        if wngrid_filter is None:
-            wngrid_filter = slice(None)
-        
+
 
 
 
@@ -110,11 +106,11 @@ class InterpolatingOpacity(Opacity):
             return self.interp_pressure_only(P,p_idx_min,p_idx_max,0, wngrid_filter)  
 
         
+        q_11 = self.xsecGrid[p_idx_min,t_idx_min][wngrid_filter]
+        q_12 = self.xsecGrid[p_idx_min,t_idx_max][wngrid_filter]
+        q_21 = self.xsecGrid[p_idx_max,t_idx_min][wngrid_filter]
+        q_22 = self.xsecGrid[p_idx_max,t_idx_max][wngrid_filter]
 
-        q_11 = self.xsecGrid[p_idx_min,t_idx_min,wngrid_filter]
-        q_12 = self.xsecGrid[p_idx_min,t_idx_max,wngrid_filter]
-        q_21 = self.xsecGrid[p_idx_max,t_idx_min,wngrid_filter]
-        q_22 = self.xsecGrid[p_idx_max,t_idx_max,wngrid_filter]
 
         Tmax = self.temperatureGrid[t_idx_max]
         Tmin = self.temperatureGrid[t_idx_min]

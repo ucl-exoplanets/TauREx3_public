@@ -1,11 +1,45 @@
 """Optimized Math functions used in taurex"""
 
-import numexpr as ne
+import numba
 import numpy as np
 
+from numba import vectorize, float64
+import math
 
+@numba.vectorize([float64(float64,float64,float64, float64)])
+def _expstage0(x1,x2, x11, x21):
+    return x1*x11 - x2*(x11-x21)
+@numba.vectorize([float64(float64,float64)],fastmath=True)
+def _expstage1(x1, x2):
+    return math.log(x1/x2)
 
+@numba.vectorize([float64(float64,float64)],fastmath=True)
+def _expstage2(C,x):
+    return C*x
+
+@numba.vectorize([float64(float64,float64,float64)],fastmath=True)
+def _expstage3(C,x1,x2):
+    return C*x1*x2
+
+@numba.njit(nogil=True,fastmath=True,cache=True)
 def interp_exp_and_lin(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax):
+    res = np.zeros_like(x11)
+    x0 = -Pmin
+    x1 = Pmax + x0
+    x2 = P + x0
+    factor1 = 1.0/(T*(Tmax - Tmin))
+    factor2 = 1.0/x1
+    x3 = _expstage0(x1,x2,x11,x21)
+    x4 = _expstage0(x1,x2,x12,x22)
+    x5 = _expstage1(x3,x4)
+    x6 = _expstage2(Tmax*(-T + Tmin)*factor1,x5)
+    x7 = _expstage3(factor2,x3,x6)
+    for i in range(x11.shape[0]):
+        res[i] = x7[i]*math.exp(x6[i])
+    return res 
+
+
+def interp_exp_and_lin_old(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax):
         """
         2D interpolation
 
@@ -50,14 +84,14 @@ def interp_exp_and_lin(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax):
 
 
 def interp_exp_only(x11,x12,T,Tmin,Tmax):
-    return ne.evaluate('x11*exp(Tmax*(-T + Tmin)*log(x11/x12)/(T*(Tmax - Tmin)))')
+    return x11*np.exp(Tmax*(-T + Tmin)*np.log(x11/x12)/(T*(Tmax - Tmin)))
 
 def interp_lin_only(x11,x12,P,Pmin,Pmax):
-    return ne.evaluate('(x11*(Pmax - Pmin) - (P - Pmin)*(x11 - x12))/(Pmax - Pmin)')
+    return (x11*(Pmax - Pmin) - (P - Pmin)*(x11 - x12))/(Pmax - Pmin)
 
 
-def intepr_bilin(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax):
-    return ne.evaluate('(x11*(Pmax - Pmin)*(Tmax - Tmin) - (P - Pmin)*(Tmax - Tmin)*(x11 - x21) - (T - Tmin)*(-(P - Pmin)*(x11 - x21) + (P - Pmin)*(x12 - x22) + (Pmax - Pmin)*(x11 - x12)))/((Pmax - Pmin)*(Tmax - Tmin))')
+def intepr_bilin_old(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax):
+    return (x11*(Pmax - Pmin)*(Tmax - Tmin) - (P - Pmin)*(Tmax - Tmin)*(x11 - x21) - (T - Tmin)*(-(P - Pmin)*(x11 - x21) + (P - Pmin)*(x12 - x22) + (Pmax - Pmin)*(x11 - x12)))/((Pmax - Pmin)*(Tmax - Tmin))
 
 
 def compute_rayleigh_cross_section(wngrid,n,n_air = 2.6867805e25,king=1.0):
@@ -74,7 +108,30 @@ def test_nan(val):
         return np.isnan(val).any()
     else:
         return val != val
-        
+
+
+@numba.vectorize([float64(float64,float64,float64)],fastmath=True)
+def _linstage0(x11,x21,x):
+    return x*(x11-x21)
+
+@numba.njit(nogil=True,fastmath=True,cache=True)
+def intepr_bilin(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax):
+    x0 = -Pmin    
+    x1 = Pmax + x0
+    x2 = -Tmin    
+    x3 = Tmax + x2
+    x4 = P + x0    
+    
+    factor = 1.0/(x1*x3)
+    
+    x5 = _linstage0(x11,x21,x4)
+    x6 = _linstage0(x11,x12,x1)
+    x7 = _linstage0(x12,x22,x4)
+    res = np.zeros_like(x11)
+    for i in range(x11.shape[0]):
+        res[i] = (x1*x11[i]*x3 - x3*x5[i] - (T + x2)*(x6[i] + x7[i] - x5[i]))*factor
+    
+    return res
 
 
 class OnlineVariance(object):
