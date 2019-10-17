@@ -90,10 +90,9 @@ class TransmissionModel(SimpleForwardModel):
 
             for contrib in self.contribution_list:
                 if tau[layer].min() > 10:
-                    continue
+                    break
                 self.debug('Adding contribution from %s',contrib.name)
                 contrib.contribute(self,0,endK,layer,layer,density_profile,tau,path_length=dl)
-
         #all_contrib = [c.totalContribution for c in self.contribution_list]
 
         #self.debug('Contributionlist %s',all_contrib)
