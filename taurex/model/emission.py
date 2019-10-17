@@ -98,9 +98,9 @@ class EmissionModel(SimpleForwardModel):
         
         _temp_surf = surface_tau
         
-        _mu = self._mu_quads[:,None]
+        _mu = 1.0/self._mu_quads[:,None]
         _w = self._wi_quads[:,None]
-        I =ne.evaluate('BB * ( exp(-surface_tau/_mu))')
+        I =BB * ( np.exp(-surface_tau*_mu))
 
         self.debug('I1_pre %s',I)
         #Loop upwards
@@ -111,7 +111,7 @@ class EmissionModel(SimpleForwardModel):
                 contrib.contribute(self,layer+1,total_layers,0,0,density,layer_tau,path_length=dz)  
                 contrib.contribute(self,layer,layer+1,0,0,density,dtau,path_length=dz)           
 
-            _tau = ne.evaluate('exp(-layer_tau) - exp(-dtau)')
+            _tau = np.exp(-layer_tau) - np.exp(-dtau)
 
             tau[layer] += _tau[0]
             #for contrib in self.contribution_list:
@@ -122,11 +122,11 @@ class EmissionModel(SimpleForwardModel):
             self.debug('dtau[%s]=%s',layer,dtau)
             BB = black_body(wngrid,temperature[layer])/PI
             self.debug('BB[%s]=%s,%s',layer,temperature[layer],BB)
-            I += ne.evaluate('BB * ( exp(-layer_tau/_mu) - exp(-dtau/_mu))')
+            I += BB * ( np.exp(-layer_tau*_mu) - np.exp(-dtau*_mu))
 
         self.debug('I: %s',I)
 
-        flux_total = 2.0*np.pi*ne.evaluate('sum(I*_mu*_w,axis=0)')
+        flux_total = 2.0*np.pi*sum(I*(_w/_mu))
         self.debug('flux_total %s',flux_total)
         
         return self.compute_final_flux(flux_total).flatten(),tau
