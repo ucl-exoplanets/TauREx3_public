@@ -80,6 +80,7 @@ class HDF5Output(Output):
         return fd
 
     def close(self):
+        self.fd.flush()
         self.fd.close()
     
 
