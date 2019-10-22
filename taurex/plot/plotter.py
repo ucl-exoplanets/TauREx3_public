@@ -8,6 +8,16 @@ import matplotlib as mpl
 from taurex.util.util import decode_string_array
 import os
 
+from matplotlib import rc
+
+# some global matplotlib vars
+mpl.rcParams['axes.linewidth'] = 1  #set the value globally
+mpl.rcParams['text.antialiased'] = True
+mpl.rcParams['errorbar.capsize'] = 2
+
+# rc('text', usetex=True) # use tex in plots
+#rc('font', **{ 'family' : 'serif','serif':['Palatino'], 'size'   : 11})
+
 class Plotter(object):
     phi = 1.618
 
