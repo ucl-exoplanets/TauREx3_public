@@ -192,7 +192,7 @@ def main():
             optimizer.update_model(optimized)
             break
         
-        result = model.model()
+    result = model.model()
 
 
     if args.save_spectrum is not None and get_rank()==0:
@@ -217,8 +217,6 @@ def main():
         np.savetxt(args.save_spectrum,
                    np.vstack((save_wl, save_model, save_error, 
                               save_wlwidth)).T)
-
-    result = model.model()
 
 
 
