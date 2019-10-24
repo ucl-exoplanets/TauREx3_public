@@ -295,6 +295,9 @@ def generate_contributions(config):
         elif key == 'LeeMie':
              from taurex.contributions import LeeMieContribution
              contributions.append(create_klass(config[key],LeeMieContribution))
+        elif key == 'FlatMie':
+             from taurex.contributions import FlatMieContribution
+             contributions.append(create_klass(config[key],FlatMieContribution))
 
     return contributions
 

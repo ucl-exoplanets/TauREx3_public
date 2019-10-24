@@ -22,7 +22,7 @@ def _expstage3(C,x1,x2):
     return C*x1*x2
 
 @numba.njit(nogil=True,fastmath=True,cache=True)
-def interp_exp_and_lin(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax):
+def interp_exp_and_lin_broken(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax):
     res = np.zeros_like(x11)
     x0 = -Pmin
     x1 = Pmax + x0
@@ -39,7 +39,7 @@ def interp_exp_and_lin(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax):
     return res 
 
 
-def interp_exp_and_lin_old(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax):
+def interp_exp_and_lin(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax):
         """
         2D interpolation
 
