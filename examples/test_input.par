@@ -46,26 +46,24 @@ model_type = transmission
     
     [[Rayleigh]]
 
-    #[[LeeMie]]
-    #mie_radius=0.1
-    #mie_mix_ratio=1e-5
-    #mie_Q=80
-    #mie_bottom_pressure=-1
-    #mie_top_pressure=1e3
+    [[FlatMie]]
+    flat_mix_ratio=1e-5
+    flat_bottomP=-1
+    flat_topP=1e3
 
 
 
 [Binning]
 bin_type = manual
-accurate = true
-log_wavelength_grid = 0.6,4.1,30
+accurate = False
+log_wavelength_grid = 0.6,4.1,300
 
-[Instrument]
-instrument = snr
-SNR = 1
+#[Instrument]
+#instrument = snr
+#SNR = 1
 
-[Observation]
-taurex_spectrum = self
+#[Observation]
+#taurex_spectrum = self
 #observed_spectrum = /Users/ahmed/Documents/taurex_files/taurex_cobweb/tests/test_0_transmission/SPECTRUM_fit.dat
 #observed_spectrum = /Users/ahmed/Documents/repos/TauREx3/test_spectrum.dat
 
