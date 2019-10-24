@@ -39,16 +39,6 @@ install_requires = ['numpy','cython',
 console_scripts = ['taurex=taurex.taurex:main','taurex-plot=taurex.plot.plotter:main [Plot]']
 
 
-def return_major_minor_python():
-
-    import sys
-
-    return str(sys.version_info[0])+"."+str(sys.version_info[1])
-
-
-def return_include_dir():
-    from distutils.util import get_platform
-    return get_platform()+'-'+return_major_minor_python()
 
 
 extensions = []
@@ -56,10 +46,6 @@ data_files = []
 
 def build_ace(parent_package='',top_path=None):
     from numpy.distutils.misc_util import Configuration
-    config = Configuration()
-
-    #config.add_data_dir('tests')
-
 
     ace_sources = ['taurex/external/ace.pyf',
     'src/ACE/Md_Types_Numeriques.f90',
@@ -72,11 +58,8 @@ def build_ace(parent_package='',top_path=None):
 
     return ext,data_files
 
-ext,dat = build_ace()
-
-extensions.append(ext)
-data_files.append(dat)
-extensions.append(Extension("taurex.external.mie",  # indicate where it should be available !
+def build_bhmie():
+    return Extension("taurex.external.mie",  # indicate where it should be available !
                         sources=["taurex/external/bh_mie.pyx",
                                 "src/MIE/bhmie_lib.c",
                                 "src/MIE/complex.c",
@@ -84,7 +67,14 @@ extensions.append(Extension("taurex.external.mie",  # indicate where it should b
                                 ],
                         #extra_compile_args = [],
                         extra_compile_args=["-I./src/MIE/"],
-                        language="c"))
+                        language="c")
+
+
+ext,dat = build_ace()
+
+extensions.append(ext)
+data_files.append(dat)
+extensions.append(build_bhmie())
 
 extensions = cythonize(extensions, language_level = 3)
 
