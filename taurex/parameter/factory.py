@@ -132,7 +132,12 @@ def create_chemistry(config):
 
     if chemistry in ('ace','equilibrium'):
         return create_ace(config)
-    elif chemistry in ('taurex', 'complex', 'custom', 'defined'):
+    elif chemistry in ('custom',):
+        from taurex.chemistry import Chemistry
+        config['chemistry_type'] = 'custom'
+        determine_klass(config, 'chemistry_type', None,
+                        Chemistry)
+    elif chemistry in ('taurex', 'complex', 'defined', 'free'):
         from taurex.data.profiles.chemistry import TaurexChemistry
         gases = []
         config_key=[]
