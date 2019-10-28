@@ -409,8 +409,19 @@ class Optimizer(Logger):
         enableLogging()
         end_time = time.time()
         self.info('Sampling time %s s',end_time-start_time)
-        return  self.generate_solution(output_size=output_size)
-
+        solution = self.generate_solution(output_size=output_size)
+        self.info('')
+        self.info('-------------------------------------')
+        self.info('------Final results------------------')
+        self.info('-------------------------------------')
+        self.info('')
+        self.info('Dimensionality of fit: %s',len(fit_names))
+        self.info('')
+        for idx,optimized_map,optimized_median,values in self.get_solution(): 
+            self.info('\n%s','---Solution {}------'.format(idx))
+            output = tabulate(zip(fit_names,optimized_map,optimized_median), headers=['Param', 'MAP','Median'])
+            self.info('\n%s\n\n',output)
+        return solution
 
 
     def write_optimizer(self,output):

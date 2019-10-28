@@ -215,13 +215,6 @@ class NestleOptimizer(Optimizer):
 
             nestle_output['solution']['fitparams'][param_name]= param
 
-        print()
-        print('------------------------------')
-        print('-------Retrieval output-------')
-        print('------------------------------')
-        print()
-        print(tabulate(table_data,headers=['Parameter','Value','Sigma']))
-        print()
         return nestle_output
     
 
