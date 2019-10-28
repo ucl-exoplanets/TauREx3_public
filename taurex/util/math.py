@@ -108,7 +108,7 @@ def test_nan(val):
         try:
             return np.isnan(val).any()
         except TypeError:
-            print(type(val))
+           # print(type(val))
             return True
     else:
         return val != val
