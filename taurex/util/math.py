@@ -105,7 +105,11 @@ def compute_rayleigh_cross_section(wngrid,n,n_air = 2.6867805e25,king=1.0):
 
 def test_nan(val):
     if hasattr(val,'__len__'):
-        return np.isnan(val).any()
+        try:
+            return np.isnan(val).any()
+        except TypeError:
+            print(type(val))
+            return True
     else:
         return val != val
 
