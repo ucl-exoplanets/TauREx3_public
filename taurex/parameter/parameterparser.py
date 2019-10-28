@@ -197,6 +197,11 @@ class ParameterParser(Logger):
             start = math.log10(start)
             end = math.log10(end)
             wngrid = np.sort(10000/np.logspace(start, end, int(size)))
+        elif 'wavelength_res' in config:
+            from taurex.util.util import create_grid_res
+            start, end, res = config['wavelength_res']
+            wlgrid = create_grid_res(res, start, end)[:, 0].flatten()
+            wngrid = 10000/wlgrid[::-1]
 
         if wngrid is None:
             self._logger.error('manual was selected and no grid was given.'
