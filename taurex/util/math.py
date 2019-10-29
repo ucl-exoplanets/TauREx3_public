@@ -185,39 +185,74 @@ class OnlineVariance(object):
             return self.M2/(self.wcount-1)
 
 
-    def combine_variance(self,averages, variances, counts):
-        good_idx = [idx for idx,a in enumerate(averages) if not test_nan(a)]
-        averages = [averages[idx] for idx in good_idx]
-        variances = [variances[idx] for idx in good_idx]
-        counts = [counts[idx] for idx in good_idx]
-        good_variance = None
-        if not test_nan(variances):
-            try:
-                good_variance = variances[np.where(~np.isnan(variances))[0][0]]*0.0
-            except IndexError:
-                good_variance = None
-        #print(good_idx,'Good',good_variance)
-        variances = [v if not test_nan(v) else good_variance for v in variances] 
-        #print('NEWAVERAGES',averages) 
-        #print('NEW WEIGHTS',counts)      
+    # def combine_variance(self,averages, variances, counts):
+    #     good_idx = [idx for idx,a in enumerate(averages) if not test_nan(a)]
+    #     averages = [averages[idx] for idx in good_idx]
+    #     variances = [variances[idx] for idx in good_idx]
+    #     counts = [counts[idx] for idx in good_idx]
+    #     good_variance = None
+    #     if not test_nan(variances):
+    #         try:
+    #             good_variance = variances[np.where(~np.isnan(variances))[0][0]]*0.0
+    #         except IndexError:
+    #             good_variance = None
+    #     #print(good_idx,'Good',good_variance)
+    #     variances = [v if not test_nan(v) else good_variance for v in variances] 
+    #     #print('NEWAVERAGES',averages) 
+    #     #print('NEW WEIGHTS',counts)      
         
-        average = np.average(averages, weights=counts,axis=0)
+    #     average = np.average(averages, weights=counts,axis=0)
         
-        #print('final average',average)
-        size = np.sum(counts)
+    #     #print('final average',average)
+    #     size = np.sum(counts)
         
-        counts = np.array(counts) * size/np.sum(counts)
-        if hasattr(average,'__len__'):
-            average = average[None,...]
-            for x in range(1,len(average.shape)):
-                counts = counts[:,None]
-        squares = 0.0
-        if good_variance is not None:
-            squares = counts*np.nan_to_num(variances)
-        #print(counts,variances,squares)
-        squares = squares + counts*(average - averages)**2
+    #     counts = np.array(counts) * size/np.sum(counts)
+    #     if hasattr(average,'__len__'):
+    #         average = average[None,...]
+    #         for x in range(1,len(average.shape)):
+    #             counts = counts[:,None]
+    #     squares = 0.0
+    #     if good_variance is not None:
+    #         squares = counts*np.nan_to_num(variances)
+    #     #print(counts,variances,squares)
+    #     squares = squares + counts*(average - averages)**2
 
-        return average,np.sum(squares,axis=0)/size
+    #     return average,np.sum(squares,axis=0)/size
+
+    def combine_variance(self, averages, variance, counts):
+        average = None
+        size = np.sum(counts)
+        for avg,cnt in zip(averages,counts):
+            if cnt == 0:
+                continue
+
+            #print('avg',avg)
+            if avg is not None and not avg is np.nan:
+                if average is None:
+                    average = avg*cnt
+                else:
+                    average += avg*cnt
+        average/=size
+        #print('AVERGAE',average)
+        counts = np.array(counts) * size/np.sum(counts)
+
+        squares = None
+
+        for avg,cnt,var in zip(averages,counts,variance):
+            #print('COUNT ',cnt)
+            if cnt == 0.0:
+                continue
+            if cnt > 0.0:
+                if squares is None:
+                    squares = cnt*(average - avg)**2
+                else:
+                    squares += cnt*(average - avg)**2
+            if var is not np.nan:
+                squares += cnt*var 
+        # squares = counts*variances
+        # squares += counts*(average - averages)**2
+
+        return average,squares/size
     def parallelVariance(self):
         from taurex import mpi
 
@@ -226,7 +261,7 @@ class OnlineVariance(object):
         mean = self.mean
         if mean is None:
             mean = np.nan
-	
+
 
         variances = mpi.allgather(variance)
 
