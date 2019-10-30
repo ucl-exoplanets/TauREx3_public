@@ -294,6 +294,14 @@ class LightCurveModel(ForwardModel):
 
         return wngrid,result,tau,[native_grid, model,binned_model,extra]
 
+    def compute_error(self, samples,wngrid = None, binner=None):
+        
+        wngrid = 10000 / self.lc_data['obs_spectrum'][:, 0]
+        binner = SimpleBinner(wngrid)
+
+        return self._forward_model.compute_error(samples, wngrid=wngrid, binner=binner)
+
+
     def model_contrib(self,wngrid=None,cutoff_grid=True):
         ## new
         wngrid = 10000 / self.lc_data['obs_spectrum'][:, 0]
