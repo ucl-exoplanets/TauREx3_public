@@ -64,6 +64,8 @@ class ForwardModel(Logger,Fittable,Writeable):
     def fittingParameters(self):
         return self._fitting_parameters
     
+    def compute_error(self,  samples, wngrid=None, binner=None):
+        return {}, {}
 
     def write(self,output):
         model = output.create_group('ModelParameters')
