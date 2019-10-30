@@ -228,7 +228,7 @@ class MultiNestOptimizer(Optimizer):
             mode['Strictly Local Log-Evidence'.lower()] = mode['Local Log-Evidence'.lower()]
             mode['Strictly Local Log-Evidence error'.lower()] = mode['Local Log-Evidence error'.lower()]
 
-            NEST_out['NEST_stats']['modes']=mode
+            NEST_out['NEST_stats']['modes']=[mode]
 
 
         modes = []
@@ -270,7 +270,6 @@ class MultiNestOptimizer(Optimizer):
             modes = [0]
 
         modes_weights = np.asarray(modes_weights)
-
         for nmode in range(len(modes)):
             self.debug('Nmode: {}'.format(nmode))
 
