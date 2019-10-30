@@ -34,7 +34,11 @@ class LightCurveModel(ForwardModel):
         self._load_instruments(instruments)
 
         self._initialize_lightcurves()
-            
+    
+
+    def initialize_profiles(self):
+        self._forward_model.initialize_profiles()
+
 
     def _load_file(self):
         # input data from lightcurve, not from spectrum.
@@ -45,22 +49,29 @@ class LightCurveModel(ForwardModel):
     def _load_orbital_profile(self):
         """Load orbital information"""
         self.info('Load lc information')
-        self.mid_time = self.lc_data['corr_orbital'][0]
-        self._inclination = self.lc_data['corr_orbital'][1]
-        self.period = self.lc_data['corr_orbital'][2]
-        self.periastron = self.lc_data['corr_orbital'][3]
-        self.sma_over_rs = self.lc_data['corr_orbital'][4]
-        self.ecc = self.lc_data['corr_orbital'][5]
+
+        ## new
+        self.mid_time = self.lc_data['orbital_info']['mt']
+        self._inclination = self.lc_data['orbital_info']['i']
+        self.period = self.lc_data['orbital_info']['period']
+        self.periastron = self.lc_data['orbital_info']['periastron']
+        self.sma_over_rs = self.lc_data['orbital_info']['sma_over_rs']
+        self.ecc = self.lc_data['orbital_info']['e']
 
     def _load_ldcoeff(self):
-        self.ld_coeff_file = self.lc_data['ld_coeff']
+        ## new
+        #!# need attention here.
+        self.ld_coeff_file = np.array([])
+        for i in LightCurveData.availableInstruments:
+            if i in self.lc_data.keys():
+                self.ld_coeff_file = np.append(self.ld_coeff_file,self.lc_data[i]['ld_coeff']).reshape(-1,4)
         assert np.shape(self.ld_coeff_file)[1] == 4, "please use 4 ldcoeff law."
 
 
     def _load_instruments(self,instruments):
         self._instruments = []
-
-        ins_keys = self.lc_data['data'].keys()
+        ## new
+        ins_keys = self.lc_data.keys()
         for ins in instruments:
             if ins in ins_keys:
                 self.info('Loading {} light curves'.format(ins))
@@ -268,7 +279,9 @@ class LightCurveModel(ForwardModel):
     def model(self,wngrid=None,cutoff_grid=True):
         """Computes the forward model for a wngrid"""
         if wngrid is None:
-            wngrid = 10000/self.lc_data['lc_info'][:,0]
+            ## new
+            wngrid = 10000 / self.lc_data['obs_spectrum'][:, 0]
+
         native_grid,model,tau,extra = self._forward_model.model(wngrid,cutoff_grid)
         binner = SimpleBinner(wngrid)
         
@@ -279,11 +292,11 @@ class LightCurveModel(ForwardModel):
         result = self.instrument_light_curve(binned_model,wlgrid)
 
 
-        return wngrid,result,tau,[model,binned_model,extra]
+        return wngrid,result,tau,[native_grid, model,binned_model,extra]
 
     def model_contrib(self,wngrid=None,cutoff_grid=True):
-        
-        wngrid = 10000/self.lc_data['lc_info'][:,0]
+        ## new
+        wngrid = 10000 / self.lc_data['obs_spectrum'][:, 0]
         native_grid,contribs = self._forward_model.model_contrib(wngrid,cutoff_grid)
         binner = SimpleBinner(wngrid)
         all_contrib_dict = {}
@@ -297,16 +310,16 @@ class LightCurveModel(ForwardModel):
             binned = binner.bindown(native_grid,model)[1]
 
             result = self.instrument_light_curve(binned,wlgrid)
-            all_contrib_dict[contrib_name] = (result,tau,[model,binned,extras])
+            all_contrib_dict[contrib_name] = (result,tau,[native_grid, model,binned,extras])
 
         return native_grid,all_contrib_dict
 
     def model_full_contrib(self,wngrid=None,cutoff_grid=True):
         """Computes the forward model for a wngrid for each contribution"""
-        
-        
 
-        wngrid = 10000/self.lc_data['lc_info'][:,0]
+        ## new
+        wngrid = 10000 / self.lc_data['obs_spectrum'][:, 0]
+
         native_grid,contrib_res = self._forward_model.model_full_contrib(wngrid,cutoff_grid)
         binner = SimpleBinner(wngrid)
 
@@ -324,7 +337,7 @@ class LightCurveModel(ForwardModel):
                 binned = binner.bindown(native_grid,native)[1]
                 result = self.instrument_light_curve(binned,wlgrid)
 
-                new_packed = name,result,tau,(native,binned,extra)
+                new_packed = name,result,tau,(native_grid, native,binned,extra)
 
                 lc_contrib_list.append(new_packed)
             

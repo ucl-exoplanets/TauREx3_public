@@ -15,9 +15,11 @@ class LightcurveBinner(Binner):
         output = {}
 
         wngrid, lightcurve, tau, extra = model_output
-        native, binned, extra = extra
-        output['native_wngrid'] = wngrid
-        output['native_wlgrid'] = 10000/wngrid
+        native_grid, native, binned, extra = extra
+        output['native_wngrid'] = native_grid
+        output['native_wlgrid'] = 10000/native_grid
+        output['binned_wngrid'] = wngrid
+        output['binned_wlgrid'] = 10000/wngrid
         output['lightcurve'] = lightcurve
         output['native_spectrum'] = native
         output['binned_spectrum'] = binned
