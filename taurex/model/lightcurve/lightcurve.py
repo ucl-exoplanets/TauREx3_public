@@ -295,11 +295,44 @@ class LightCurveModel(ForwardModel):
         return wngrid,result,tau,[native_grid, model,binned_model,extra]
 
     def compute_error(self, samples,wngrid = None, binner=None):
-        
-        #wngrid = 10000 / self.lc_data['obs_spectrum'][:, 0]
-        binner = SimpleBinner(wngrid)
+        from taurex.util.math import OnlineVariance
+        tp_profiles = OnlineVariance()
+        active_gases = OnlineVariance()
+        inactive_gases = OnlineVariance()
 
-        return self._forward_model.compute_error(samples, wngrid=wngrid, binner=binner)
+        lc_spectrum = OnlineVariance()
+        #tau_profile = OnlineVariance()
+        native_spectrum = OnlineVariance()
+        binned_spectrum = OnlineVariance()
+
+        for weight in samples():
+            
+            grid,lc,tau,extra = self.model(wngrid=wngrid, cutoff_grid=False)
+            native_grid, native, binned, _ = extra
+            #tau_profile.update(tau,weight=weight)
+            tp_profiles.update(self.temperatureProfile,weight=weight)
+            active_gases.update(self.chemistry.activeGasMixProfile,weight=weight)
+            inactive_gases.update(self.chemistry.inactiveGasMixProfile,weight=weight)
+
+            native_spectrum.update(native,weight=weight)
+            binned_spectrum.update(binned,weight=weight)
+            lc_spectrum.update(lc,weight=weight)
+        
+        profile_dict = {}
+        spectrum_dict = {}
+
+        tp_std = np.sqrt(tp_profiles.parallelVariance())
+        active_std = np.sqrt(active_gases.parallelVariance())
+        inactive_std = np.sqrt(inactive_gases.parallelVariance())
+
+        profile_dict['temp_profile_std']=tp_std
+        profile_dict['active_mix_profile_std']=active_std
+        profile_dict['inactive_mix_profile_std']=inactive_std
+
+        spectrum_dict['native_std'] = np.sqrt(native_spectrum.parallelVariance())
+        spectrum_dict['binned_std'] = np.sqrt(binned_spectrum.parallelVariance())
+        spectrum_dict['lightcurve_std'] = np.sqrt(lc_spectrum.parallelVariance())
+        return profile_dict, spectrum_dict
 
 
     def model_contrib(self,wngrid=None,cutoff_grid=True):
