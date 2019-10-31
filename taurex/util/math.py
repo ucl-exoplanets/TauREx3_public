@@ -118,7 +118,7 @@ def test_nan(val):
 def _linstage0(x11,x21,x):
     return x*(x11-x21)
 
-@numba.njit(nogil=True,fastmath=True,cache=True)
+@numba.njit(nogil=True,fastmath=True)
 def intepr_bilin(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax):
     x0 = -Pmin    
     x1 = Pmax + x0
