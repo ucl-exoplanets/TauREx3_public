@@ -137,18 +137,21 @@ def load_model_from_hdf5(loc, replacement_dict=None):
 
     for contrib in contrib_iterator(contribution_loc):
         model.add_contribution(load_contrib_from_hdf5(contribution_loc,
-                                                      contrib, replacement_dict=replacement_dict))
+                                                      contrib,
+                                                      replacement_dict=replacement_dict))
 
     return model
 
 
-def taurex_hdf5_to_model(filename):
+def taurex_hdf5_to_model(filename, replacement_dict=None):
 
     import h5py
     with h5py.File(filename, 'r') as f:
-        model = load_model_from_hdf5(f['ModelParameters'])
+        model = load_model_from_hdf5(f['ModelParameters'],
+                                     replacement_dict=replacement_dict)
 
     return model
+
 
 def taurex_hdf5_to_observation(filename):
 
