@@ -14,7 +14,8 @@ def get_klass_args(klass):
 
 
 def load_generic_profile_from_hdf5(loc, module, identifier, 
-                                   profile_type=None, premade_dict=None):
+                                   profile_type=None, premade_dict=None,
+                                   replacement_dict=None):
 
     if profile_type is None:
         profile_type = loc[identifier][()]
@@ -25,6 +26,7 @@ def load_generic_profile_from_hdf5(loc, module, identifier,
     klass_kwargs = get_klass_args(klass)
 
     args_dict = premade_dict or {}
+    repl_dict = replacement_dict or {}
 
     for kw in klass_kwargs:
 
@@ -33,46 +35,56 @@ def load_generic_profile_from_hdf5(loc, module, identifier,
             if isinstance(v, np.ndarray) and v.dtype.type is np.string_:
                 from taurex.util.util import decode_string_array
                 v = decode_string_array(v)
-            args_dict[kw] = v
+            if kw in repl_dict:
+                args_dict[kw] = repl_dict[kw]
+            else:
+                args_dict[kw] = v
+            
 
     return klass(**args_dict)
 
 
-def load_temperature_from_hdf5(loc):
+def load_temperature_from_hdf5(loc,replacement_dict=None):
     return load_generic_profile_from_hdf5(loc['Temperature'],
                                           'taurex.data.profiles.temperature',
-                                          'temperature_type')
+                                          'temperature_type',
+                                          replacement_dict=replacement_dict)
 
 
-def load_pressure_from_hdf5(loc):
+def load_pressure_from_hdf5(loc,replacement_dict=None):
     return load_generic_profile_from_hdf5(loc['Pressure'],
                                           'taurex.data.profiles.pressure',
-                                          'pressure_type')
+                                          'pressure_type',
+                                          replacement_dict=replacement_dict)
 
 
-def load_gas_from_hdf5(loc, molecule):
+def load_gas_from_hdf5(loc, molecule, replacement_dict=None):
     return load_generic_profile_from_hdf5(loc[molecule],
                                           'taurex.data.profiles.chemistry',
-                                          'gas_type')
+                                          'gas_type',
+                                          replacement_dict=replacement_dict)
 
 
-def load_planet_from_hdf5(loc):
+def load_planet_from_hdf5(loc,replacement_dict=None):
     return load_generic_profile_from_hdf5(loc['Planet'],
                                           'taurex.data.planet','planet_type',
-                                          'Planet')
+                                          profile_type='Planet',
+                                          replacement_dict=replacement_dict)
 
 
-def load_star_from_hdf5(loc):
+def load_star_from_hdf5(loc,replacement_dict=None):
     return load_generic_profile_from_hdf5(loc['Star'],
-                                          'taurex.data.stellar', 'star_type')
+                                          'taurex.data.stellar', 'star_type',
+                                          replacement_dict=replacement_dict)
 
 
-def load_chemistry_from_hdf5(loc):
+def load_chemistry_from_hdf5(loc,replacement_dict=None):
     from taurex.data.profiles.chemistry import TaurexChemistry
     from taurex.util.util import decode_string_array
     chemistry = load_generic_profile_from_hdf5(loc['Chemistry'],
                                                'taurex.data.profiles.chemistry',
-                                               'chemistry_type')
+                                               'chemistry_type',
+                                          replacement_dict=replacement_dict)
 
     if isinstance(chemistry, TaurexChemistry):
         for mol in decode_string_array(loc['Chemistry']['active_gases'][()]):
@@ -85,21 +97,22 @@ def load_chemistry_from_hdf5(loc):
     return chemistry
 
 
-def load_contrib_from_hdf5(loc, contribution):
+def load_contrib_from_hdf5(loc, contribution,replacement_dict=None):
     return load_generic_profile_from_hdf5(loc[contribution],
                                           'taurex.contributions',
                                           'contrib_type',
-                                          contribution)
+                                          profile_type=contribution,
+                                          replacement_dict=replacement_dict)
 
 
 
 
-def load_model_from_hdf5(loc):
-    chemistry = load_chemistry_from_hdf5(loc)
-    pressure = load_pressure_from_hdf5(loc)
-    temperature = load_temperature_from_hdf5(loc)
-    planet = load_planet_from_hdf5(loc)
-    star = load_star_from_hdf5(loc)
+def load_model_from_hdf5(loc, replacement_dict=None):
+    chemistry = load_chemistry_from_hdf5(loc, replacement_dict=replacement_dict)
+    pressure = load_pressure_from_hdf5(loc, replacement_dict=replacement_dict)
+    temperature = load_temperature_from_hdf5(loc, replacement_dict=replacement_dict)
+    planet = load_planet_from_hdf5(loc, replacement_dict=replacement_dict)
+    star = load_star_from_hdf5(loc, replacement_dict=replacement_dict)
 
     kwargs ={}
 
@@ -109,7 +122,9 @@ def load_model_from_hdf5(loc):
     kwargs['temperature_profile'] = temperature
     kwargs['pressure_profile'] = pressure
 
-    model = load_generic_profile_from_hdf5(loc,'taurex.model', 'model_type',premade_dict=kwargs)
+    model = load_generic_profile_from_hdf5(loc, 'taurex.model',  'model_type',
+                                           premade_dict=kwargs,
+                                           replacement_dict=replacement_dict)
 
     contribution_loc = loc['Contributions']
 
@@ -122,7 +137,7 @@ def load_model_from_hdf5(loc):
 
     for contrib in contrib_iterator(contribution_loc):
         model.add_contribution(load_contrib_from_hdf5(contribution_loc,
-                                                      contrib))
+                                                      contrib, replacement_dict=replacement_dict))
 
     return model
 
