@@ -21,7 +21,7 @@ def _expstage2(C,x):
 def _expstage3(C,x1,x2):
     return C*x1*x2
 
-@numba.njit(nogil=True,fastmath=True,cache=True)
+@numba.njit(nogil=True,fastmath=True)
 def interp_exp_and_lin_broken(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax):
     res = np.zeros_like(x11)
     x0 = -Pmin
@@ -118,7 +118,7 @@ def test_nan(val):
 def _linstage0(x11,x21,x):
     return x*(x11-x21)
 
-@numba.njit(nogil=True,fastmath=True,cache=True)
+@numba.njit(nogil=True,fastmath=True)
 def intepr_bilin(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax):
     x0 = -Pmin    
     x1 = Pmax + x0
