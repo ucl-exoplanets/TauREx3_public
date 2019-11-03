@@ -63,7 +63,7 @@ class InterpolatingOpacity(Opacity):
         
         if p_idx_max == 0 and t_idx_max == 0:
 
-            return np.zeros_like(self.xsecGrid[0,0,wngrid_filter])
+            return np.zeros_like(self.xsecGrid[0,0,wngrid_filter]).ravel() 
 
 
 
@@ -82,7 +82,7 @@ class InterpolatingOpacity(Opacity):
         #Are we both max?
         if check_pressure_max and check_temperature_max:
             self.debug('Maximum Temperature pressure reached. Using last')
-            return self.xsecGrid[-1,-1,wngrid_filter] 
+            return self.xsecGrid[-1,-1,wngrid_filter].ravel()  
 
         #Max pressure
         if check_pressure_max:
@@ -95,21 +95,21 @@ class InterpolatingOpacity(Opacity):
             return self.interp_pressure_only(P,p_idx_min,p_idx_max,-1, wngrid_filter)
 
         if check_pressure_min and check_temperature_min:
-            return self.xsecGrid[0,0,wngrid_filter]
+            return self.xsecGrid[0,0,wngrid_filter].ravel() 
         
         if check_pressure_min:
             self.debug('Min pressure reached. Interpolating temperature only')
-            return self.interp_temp_only(T,t_idx_min,t_idx_max,0, wngrid_filter)          
+            return self.interp_temp_only(T,t_idx_min,t_idx_max,0, wngrid_filter).ravel()      
 
         if check_temperature_min:
             self.debug('Min temeprature reached. Interpolating pressure only')
-            return self.interp_pressure_only(P,p_idx_min,p_idx_max,0, wngrid_filter)  
+            return self.interp_pressure_only(P,p_idx_min,p_idx_max,0, wngrid_filter).ravel() 
 
         
-        q_11 = self.xsecGrid[p_idx_min,t_idx_min][wngrid_filter]
-        q_12 = self.xsecGrid[p_idx_min,t_idx_max][wngrid_filter]
-        q_21 = self.xsecGrid[p_idx_max,t_idx_min][wngrid_filter]
-        q_22 = self.xsecGrid[p_idx_max,t_idx_max][wngrid_filter]
+        q_11 = self.xsecGrid[p_idx_min,t_idx_min][wngrid_filter].ravel()
+        q_12 = self.xsecGrid[p_idx_min,t_idx_max][wngrid_filter].ravel()
+        q_21 = self.xsecGrid[p_idx_max,t_idx_min][wngrid_filter].ravel()
+        q_22 = self.xsecGrid[p_idx_max,t_idx_max][wngrid_filter].ravel()
 
 
         Tmax = self.temperatureGrid[t_idx_max]

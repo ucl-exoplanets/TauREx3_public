@@ -91,6 +91,7 @@ class OpacityCache(Singleton):
         if not os.path.isdir(opacity_path):
             self.log.error('PATH: %s does not exist!!!',opacity_path)
             raise NotADirectoryError
+        self.log.debug('Path set to %s',opacity_path)
         self._opacity_path  = opacity_path
     
 
@@ -242,6 +243,14 @@ class OpacityCache(Singleton):
         
         return [pathlib.Path(f).stem.split('.')[0] for f in file_list ]
 
+    def search_exotransmit_molecules(self):
+        from glob import glob
+        import os    
+        glob_path = os.path.join(self._opacity_path,'*.dat')
+        file_list = [f for f in glob(glob_path)]
+        
+        return [pathlib.Path(f).stem[4:] for f in file_list ]
+
     def search_radis_molecules(self):
         trans = { '1':'H2O',    '2':'CO2',   '3':'O3',      '4':'N2O',   '5':'CO',    '6':'CH4',   '7':'O2',     
             '9':'SO2',   '10':'NO2',  '11':'NH3',    '12':'HNO3', '13':'OH',   '14':'HF',   '15':'HCl',   '16':'HBr',
@@ -259,11 +268,13 @@ class OpacityCache(Singleton):
         from taurex.opacity import PickleOpacity
         pickles = []
         hedef = []
+        exo = []
         if self._opacity_path is not None:
         
             pickles = self.search_pickle_molecules()
             hedef = self.search_hdf5_molecules()
-        return list(set(pickles+hedef+self.search_radis_molecules()))
+            exo = self.search_exotransmit_molecules()
+        return list(set(pickles+hedef+exo+self.search_radis_molecules()))
     def load_opacity_from_path(self,path,molecule_filter=None):
         """
         Searches path for molecular cross-section files, creates and loads them into the cache
@@ -285,8 +296,9 @@ class OpacityCache(Singleton):
         import os
         from taurex.opacity import PickleOpacity
         from taurex.opacity.hdf5opacity import HDF5Opacity
-        glob_path = [os.path.join(path,'*.h5'),os.path.join(path,'*.hdf5'),os.path.join(path,'*.pickle')]
-
+        from taurex.opacity.exotransmit import ExoTransmitOpacity
+        glob_path = [os.path.join(path,'*.h5'),os.path.join(path,'*.hdf5'),os.path.join(path,'*.pickle'),os.path.join(path,'*.dat')]
+    
         file_list = [f for glist in glob_path for f in glob(glist)]
         self.log.debug('File list %s',file_list)
         for files in file_list:
@@ -312,6 +324,14 @@ class OpacityCache(Singleton):
                     continue
                 op = PickleOpacity(files,interpolation_mode=self._default_interpolation)
                 op._molecule_name = splits[0]
+            elif files.endswith('dat'):
+                mol_name = pathlib.Path(files).stem[4:]
+                if molecule_filter is not None:
+                        if not mol_name in molecule_filter:
+                            continue
+                if mol_name in self.opacity_dict.keys():
+                    continue
+                op = ExoTransmitOpacity(files,interpolation_mode=self._default_interpolation)
             if op is not None:
                 self.add_opacity(op,molecule_filter=molecule_filter)
 

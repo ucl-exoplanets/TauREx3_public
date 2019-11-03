@@ -11,6 +11,7 @@ from .cia import CIAContribution
 from .rayleigh import RayleighContribution
 from .simpleclouds import SimpleCloudsContribution
 from .leemie import LeeMieContribution
+from .flatmie import FlatMieContribution
 try:
     from .bhmie import BHMieContribution
 except ImportError:

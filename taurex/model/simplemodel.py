@@ -326,8 +326,49 @@ class SimpleForwardModel(ForwardModel):
         return native_grid,result_dict
             
             
+    def compute_error(self, samples,wngrid = None, binner=None):
+        from taurex.util.math import OnlineVariance
+        tp_profiles = OnlineVariance()
+        active_gases = OnlineVariance()
+        inactive_gases = OnlineVariance()
+        #tau_profile = OnlineVariance()
+        if binner is not None:
+            binned_spectrum = OnlineVariance()
+        else:
+            binned_spectrum = None
+        native_spectrum = OnlineVariance()
 
+        for weight in samples():
 
+            native_grid,native,tau,_ = self.model(wngrid=wngrid, cutoff_grid=False)
+
+            #tau_profile.update(tau,weight=weight)
+            tp_profiles.update(self.temperatureProfile,weight=weight)
+            active_gases.update(self.chemistry.activeGasMixProfile,weight=weight)
+            inactive_gases.update(self.chemistry.inactiveGasMixProfile,weight=weight)
+
+            native_spectrum.update(native,weight=weight)
+
+            if binned_spectrum is not None:
+                binned = binner.bindown(native_grid,native)[1]
+                binned_spectrum.update(binned,weight=weight)
+        
+        profile_dict = {}
+        spectrum_dict = {}
+
+        tp_std = np.sqrt(tp_profiles.parallelVariance())
+        active_std = np.sqrt(active_gases.parallelVariance())
+        inactive_std = np.sqrt(inactive_gases.parallelVariance())
+
+        profile_dict['temp_profile_std']=tp_std
+        profile_dict['active_mix_profile_std']=active_std
+        profile_dict['inactive_mix_profile_std']=inactive_std
+
+        spectrum_dict['native_std'] = np.sqrt(native_spectrum.parallelVariance())
+        if binned_spectrum is not None:
+            spectrum_dict['binned_std'] = np.sqrt(binned_spectrum.parallelVariance())
+
+        return profile_dict, spectrum_dict
 
     def path_integral(self,wngrid,return_contrib):
         raise NotImplementedError

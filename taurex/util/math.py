@@ -21,8 +21,8 @@ def _expstage2(C,x):
 def _expstage3(C,x1,x2):
     return C*x1*x2
 
-@numba.njit(nogil=True,fastmath=True,cache=True)
-def interp_exp_and_lin(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax):
+@numba.njit(nogil=True,fastmath=True)
+def interp_exp_and_lin_broken(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax):
     res = np.zeros_like(x11)
     x0 = -Pmin
     x1 = Pmax + x0
@@ -39,7 +39,7 @@ def interp_exp_and_lin(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax):
     return res 
 
 
-def interp_exp_and_lin_old(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax):
+def interp_exp_and_lin(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax):
         """
         2D interpolation
 
@@ -105,7 +105,11 @@ def compute_rayleigh_cross_section(wngrid,n,n_air = 2.6867805e25,king=1.0):
 
 def test_nan(val):
     if hasattr(val,'__len__'):
-        return np.isnan(val).any()
+        try:
+            return np.isnan(val).any()
+        except TypeError:
+           # print(type(val))
+            return True
     else:
         return val != val
 
@@ -114,7 +118,7 @@ def test_nan(val):
 def _linstage0(x11,x21,x):
     return x*(x11-x21)
 
-@numba.njit(nogil=True,fastmath=True,cache=True)
+@numba.njit(nogil=True,fastmath=True)
 def intepr_bilin(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax):
     x0 = -Pmin    
     x1 = Pmax + x0
@@ -181,39 +185,74 @@ class OnlineVariance(object):
             return self.M2/(self.wcount-1)
 
 
-    def combine_variance(self,averages, variances, counts):
-        good_idx = [idx for idx,a in enumerate(averages) if not test_nan(a)]
-        averages = [averages[idx] for idx in good_idx]
-        variances = [variances[idx] for idx in good_idx]
-        counts = [counts[idx] for idx in good_idx]
-        good_variance = None
-        if not test_nan(variances):
-            try:
-                good_variance = variances[np.where(~np.isnan(variances))[0][0]]*0.0
-            except IndexError:
-                good_variance = None
-        #print(good_idx,'Good',good_variance)
-        variances = [v if not test_nan(v) else good_variance for v in variances] 
-        #print('NEWAVERAGES',averages) 
-        #print('NEW WEIGHTS',counts)      
+    # def combine_variance(self,averages, variances, counts):
+    #     good_idx = [idx for idx,a in enumerate(averages) if not test_nan(a)]
+    #     averages = [averages[idx] for idx in good_idx]
+    #     variances = [variances[idx] for idx in good_idx]
+    #     counts = [counts[idx] for idx in good_idx]
+    #     good_variance = None
+    #     if not test_nan(variances):
+    #         try:
+    #             good_variance = variances[np.where(~np.isnan(variances))[0][0]]*0.0
+    #         except IndexError:
+    #             good_variance = None
+    #     #print(good_idx,'Good',good_variance)
+    #     variances = [v if not test_nan(v) else good_variance for v in variances] 
+    #     #print('NEWAVERAGES',averages) 
+    #     #print('NEW WEIGHTS',counts)      
         
-        average = np.average(averages, weights=counts,axis=0)
+    #     average = np.average(averages, weights=counts,axis=0)
         
-        #print('final average',average)
-        size = np.sum(counts)
+    #     #print('final average',average)
+    #     size = np.sum(counts)
         
-        counts = np.array(counts) * size/np.sum(counts)
-        if hasattr(average,'__len__'):
-            average = average[None,...]
-            for x in range(1,len(average.shape)):
-                counts = counts[:,None]
-        squares = 0.0
-        if good_variance is not None:
-            squares = counts*np.nan_to_num(variances)
-        #print(counts,variances,squares)
-        squares = squares + counts*(average - averages)**2
+    #     counts = np.array(counts) * size/np.sum(counts)
+    #     if hasattr(average,'__len__'):
+    #         average = average[None,...]
+    #         for x in range(1,len(average.shape)):
+    #             counts = counts[:,None]
+    #     squares = 0.0
+    #     if good_variance is not None:
+    #         squares = counts*np.nan_to_num(variances)
+    #     #print(counts,variances,squares)
+    #     squares = squares + counts*(average - averages)**2
 
-        return average,np.sum(squares,axis=0)/size
+    #     return average,np.sum(squares,axis=0)/size
+
+    def combine_variance(self, averages, variance, counts):
+        average = None
+        size = np.sum(counts)
+        for avg,cnt in zip(averages,counts):
+            if cnt == 0:
+                continue
+
+            #print('avg',avg)
+            if avg is not None and not avg is np.nan:
+                if average is None:
+                    average = avg*cnt
+                else:
+                    average += avg*cnt
+        average/=size
+        #print('AVERGAE',average)
+        counts = np.array(counts) * size/np.sum(counts)
+
+        squares = None
+
+        for avg,cnt,var in zip(averages,counts,variance):
+            #print('COUNT ',cnt)
+            if cnt == 0.0:
+                continue
+            if cnt > 0.0:
+                if squares is None:
+                    squares = cnt*(average - avg)**2
+                else:
+                    squares += cnt*(average - avg)**2
+            if var is not np.nan:
+                squares += cnt*var 
+        # squares = counts*variances
+        # squares += counts*(average - averages)**2
+
+        return average,squares/size
     def parallelVariance(self):
         from taurex import mpi
 
@@ -222,7 +261,7 @@ class OnlineVariance(object):
         mean = self.mean
         if mean is None:
             mean = np.nan
-	
+
 
         variances = mpi.allgather(variance)
 

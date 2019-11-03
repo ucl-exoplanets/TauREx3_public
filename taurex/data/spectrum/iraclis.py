@@ -22,13 +22,16 @@ class IraclisSpectrum(ArraySpectrum):
 
     def __init__(self, filename):
         self._filename = filename
-
-        with open(filename, 'rb') as f:
-            database = pickle.load(f)
-            wl = database['spectrum']['wavelength']
-            td = database['spectrum']['depth']
-            err = database['spectrum']['error']
-            width = database['spectrum']['width']
+        try:
+            with open(filename, 'rb') as f:
+                database = pickle.load(f)
+        except UnicodeDecodeError:
+            with open(filename, 'rb') as f:
+                database = pickle.load(f,encoding='latin1')       
+        wl = database['spectrum']['wavelength']
+        td = database['spectrum']['depth']
+        err = database['spectrum']['error']
+        width = database['spectrum']['width']
 
         final_array = np.vstack((wl, td, err, width)).T
 
