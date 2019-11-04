@@ -1,8 +1,9 @@
 #!/usr/bin/env python
+import setuptools
 from setuptools import find_packages
 from numpy.distutils.core import setup
 from numpy.distutils.core import Extension
-from setuptools.command.build_ext import build_ext
+from numpy.distutils import log
 
 
 packages = find_packages(exclude=('tests', 'doc'))
@@ -53,44 +54,71 @@ def build_bhmie():
                         extra_compile_args=["-I./src/MIE/"],
                         language="c")
 
+def _have_fortran_compiler():
+    from numpy.distutils.fcompiler import available_fcompilers_for_platform, \
+                                            new_fcompiler, \
+                                            DistutilsModuleError, \
+                                            CompilerNotFound
+    from numpy.distutils import customized_fcompiler
+
+    log.info('---------Detecting FORTRAN compilers-------')
+    try:
+        c = customized_fcompiler()
+        v = c.get_version()
+        return True
+    except (DistutilsModuleError, CompilerNotFound) as e:
+        return False
+
+def _have_c_compiler():
+    from distutils.errors import DistutilsExecError, DistutilsModuleError, \
+                             DistutilsPlatformError, CompileError
+    from numpy.distutils import customized_ccompiler
+    log.info('---------Detecting C compilers-------')
+    try:
+        c = customized_ccompiler()
+        v = c.get_version()
+        return True
+    except (DistutilsModuleError, CompileError) as e:
+        return False
+
 def create_extensions():
     try:
         from Cython.Build import cythonize
     except ImportError:
-        print('Could not import cython, ACE chemistry')
-        print('and BH Mie will not be installed')
+        log.warning('Could not import cython, ACE chemistry')
+        log.warning('and BH Mie will not be installed')
         return [], []
 
     extensions = []
     data_files = []
-    ext, dat = build_ace()
-    extensions.append(ext)
-    data_files.append(dat)
-    extensions.append(build_bhmie())
+    if _have_fortran_compiler():
+        log.info('Detected FORTRAN compiler')
+        log.info('ACE chemistry will be installed')
 
-    extensions = cythonize(extensions, language_level=3)
+        ext, dat = build_ace()
+        extensions.append(ext)
+        data_files.append(dat)
+    else:
+        log.warning('No suitable FORTRAN compiler')
+        log.warning('ACE chemistry will not be installed')
+
+    if _have_c_compiler():
+        log.info('Detected C compiler')
+        log.info('BH Mie will be installed')
+        extensions.append(build_bhmie())
+    else:
+        log.warning('No suitable C compiler')
+        log.warning('BH Mie will not be installed')   
+
+    if len(extensions) > 0:
+        extensions = cythonize(extensions, language_level=3)
 
     return extensions, data_files
 
-def construct_build_ext():
-    class WrappedBuildExt(build_ext):
-        # This class allows C extension building to fail.
-        def run(self):
-            try:
-                build_ext.run(self)
-            except DistutilsPlatformError as x:
-                raise BuildFailed(x)
-
-        def build_extension(self, ext):
-            try:
-                build_ext.build_extension(self, ext)
-            except ext_errors as x:
-                raise BuildFailed(x)
-    return WrappedBuildExt
 
 extensions, data_files = create_extensions()
 
-entry_points = {'console_scripts': console_scripts,}
+entry_points = {'console_scripts': console_scripts, }
 
 classifiers = [
     'Development Status :: 4 - Beta',
