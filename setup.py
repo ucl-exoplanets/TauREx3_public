@@ -66,7 +66,7 @@ def _have_fortran_compiler():
         c = customized_fcompiler()
         v = c.get_version()
         return True
-    except (DistutilsModuleError, CompilerNotFound) as e:
+    except (DistutilsModuleError, CompilerNotFound, AttributeError) as e:
         return False
 
 def _have_c_compiler():
@@ -78,7 +78,7 @@ def _have_c_compiler():
         c = customized_ccompiler()
         v = c.get_version()
         return True
-    except (DistutilsModuleError, CompileError) as e:
+    except (DistutilsModuleError, CompileError, AttributeError) as e:
         return False
 
 def create_extensions():
