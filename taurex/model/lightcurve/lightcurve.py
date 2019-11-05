@@ -216,7 +216,11 @@ class LightCurveModel(ForwardModel):
             Nfactor = np.ones_like(wlgrid)
 
         result = []
-        for ins in self._instruments:
+
+        new_instrument_list = sorted(self._instruments,key=lambda x: x.wavelengthRegion[0], reverse=True)
+
+
+        for ins in new_instrument_list:
             min_wl,max_wl = ins.wavelengthRegion
             index = (wlgrid > min_wl) & (wlgrid < max_wl)
             lc = self.light_curve_chain(model[index], time_array=ins.timeSeries, period=self.period,
