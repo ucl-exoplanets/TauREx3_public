@@ -14,6 +14,7 @@ requires = []
 
 
 install_requires = ['numpy',
+                    'cython',
                     'configobj',
                     'scipy',
                     'numba',
@@ -85,8 +86,8 @@ def create_extensions():
     try:
         from Cython.Build import cythonize
     except ImportError:
-        log.warning('Could not import cython, ACE chemistry')
-        log.warning('and BH Mie will not be installed')
+        log.warn('Could not import cython, ACE chemistry')
+        log.warn('and BH Mie will not be installed')
         return [], []
 
     extensions = []
@@ -99,16 +100,16 @@ def create_extensions():
         extensions.append(ext)
         data_files.append(dat)
     else:
-        log.warning('No suitable FORTRAN compiler')
-        log.warning('ACE chemistry will not be installed')
+        log.warn('No suitable FORTRAN compiler')
+        log.warn('ACE chemistry will not be installed')
 
     if _have_c_compiler():
         log.info('Detected C compiler')
         log.info('BH Mie will be installed')
         extensions.append(build_bhmie())
     else:
-        log.warning('No suitable C compiler')
-        log.warning('BH Mie will not be installed')   
+        log.warn('No suitable C compiler')
+        log.warn('BH Mie will not be installed')   
 
     if len(extensions) > 0:
         extensions = cythonize(extensions, language_level=3)
