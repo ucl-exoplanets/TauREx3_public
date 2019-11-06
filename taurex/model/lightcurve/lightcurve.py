@@ -295,7 +295,7 @@ class LightCurveModel(ForwardModel):
         result = self.instrument_light_curve(binned_model[1],wlgrid)
 
 
-        return wngrid,result,tau,[native_grid, model,binned_model,extra]
+        return self._wngrid,result,tau,[native_grid, model,binned_model[1],extra]
 
     def compute_error(self, samples,wngrid = None, binner=None):
         from taurex.util.math import OnlineVariance
