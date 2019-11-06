@@ -61,7 +61,7 @@ class BHMieContribution(Contribution):
     def mieType(self):
         return self._mie_type
 
-    @fitparam(param_name='clouds_particle_size',param_latex='$R_\\mathrm{clouds}$',default_fit=False,default_bounds=[-10,1])
+    @fitparam(param_name='clouds_particle_size',param_latex='$R_\mathrm{clouds}$',default_fit=False,default_bounds=[-10,1])
     def particleSize(self):
         return self._mie_radius
     
@@ -70,7 +70,7 @@ class BHMieContribution(Contribution):
         self._mie_radius = value
     
 
-    @fitparam(param_name='clouds_topP',param_latex='$P_\\mathrm\{top\}$',default_fit=False,default_bounds=[-1,1])
+    @fitparam(param_name='clouds_topP',param_latex='$P_\mathrm{top}$',default_fit=False,default_bounds=[-1,1])
     def cloudTopPressure(self):
         return self._cloud_top_pressure
     
@@ -78,7 +78,7 @@ class BHMieContribution(Contribution):
     def cloudTopPressure(self, value):
         self._cloud_top_pressure = value
 
-    @fitparam(param_name='clouds_bottomP',param_latex='$P_\\mathrm\{bottom\}$',default_fit=False,default_bounds=[-1,1])
+    @fitparam(param_name='clouds_bottomP',param_latex='$P_\mathrm{bottom}$',default_fit=False,default_bounds=[-1,1])
     def cloudBottomPressure(self):
         return self._cloud_bottom_pressure
     
@@ -86,7 +86,7 @@ class BHMieContribution(Contribution):
     def cloudBottomPressure(self,value):
         self._cloud_bottom_pressure = value
 
-    @fitparam(param_name='cloud_mixing',param_latex='$\\chi_\\mathrm\{clouds\}$',default_fit=False,default_bounds=[-1,1])
+    @fitparam(param_name='cloud_mixing',param_latex='$\chi_\mathrm{clouds}$',default_fit=False,default_bounds=[-1,1])
     def cloudMixing(self):
         return math.log10(self._mix_cloud_mix)
     

@@ -19,7 +19,7 @@ class LeeMieContribution(Contribution):
         self._mie_bottom_pressure = mie_bottom_pressure
         self._mie_top_pressure = mie_top_pressure
 
-    @fitparam(param_name='mie_radius', param_latex='$R_\\mathrm{mie}$',
+    @fitparam(param_name='mie_radius', param_latex='$R_\mathrm{mie}$',
               default_fit=False, default_bounds=[0.01, 0.5])
     def mieRadius(self):
         return self._mie_radius
@@ -28,7 +28,7 @@ class LeeMieContribution(Contribution):
     def mieRadius(self, value):
         self._mie_radius = value
     
-    @fitparam(param_name='mie_q', param_latex='$Q_\\mathrm{ext}$', 
+    @fitparam(param_name='mie_q', param_latex='$Q_\mathrm{ext}$',
               default_fit=False, default_bounds=[-10, 1])
     def mieQ(self):
         return self._mie_q
@@ -37,7 +37,7 @@ class LeeMieContribution(Contribution):
     def mieQ(self, value):
         self._mie_q = value  
 
-    @fitparam(param_name='mie_topP',param_latex='$P^\{mie\}_\\mathrm\{top\}$',default_mode='log',default_fit=False,default_bounds=[-1,1])
+    @fitparam(param_name='mie_topP',param_latex='$P^{mie}_\mathrm{top}$',default_mode='log',default_fit=False,default_bounds=[-1,1])
     def mieTopPressure(self):
         return self._mie_top_pressure
     
@@ -45,7 +45,7 @@ class LeeMieContribution(Contribution):
     def mieTopPressure(self, value):
         self._mie_top_pressure = value
 
-    @fitparam(param_name='mie_bottomP',param_latex='$P^\{mie\}_\\mathrm\{bottom\}$',default_mode='log',default_fit=False,default_bounds=[-1,1])
+    @fitparam(param_name='mie_bottomP',param_latex='$P^{mie}_\mathrm{bottom}$',default_mode='log',default_fit=False,default_bounds=[-1,1])
     def mieBottomPressure(self):
         return self._mie_bottom_pressure
     
@@ -53,7 +53,7 @@ class LeeMieContribution(Contribution):
     def mieBottomPressure(self, value):
         self._mie_bottom_pressure = value
 
-    @fitparam(param_name='mie_mix_ratio',param_latex='$\\chi_\\mathrm\{mie\}$',default_mode='log',default_fit=False,default_bounds=[-1,1])
+    @fitparam(param_name='mie_mix_ratio',param_latex='$\chi_\mathrm{mie}$',default_mode='log',default_fit=False,default_bounds=[-1,1])
     def mieMixing(self):
         return self._mie_mix
     
