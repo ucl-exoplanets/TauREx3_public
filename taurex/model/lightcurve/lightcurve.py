@@ -22,7 +22,7 @@ class LightCurveModel(ForwardModel):
         self._forward_model = forward_model
         self.file_loc = file_loc
         self._load_file()
-        self._load_ldcoeff()
+        
         self._load_orbital_profile()
 
         if instruments is None:
@@ -32,10 +32,14 @@ class LightCurveModel(ForwardModel):
             instruments = LightCurveData.availableInstruments
 
         self._load_instruments(instruments)
-
+        self._load_ldcoeff()
         self._initialize_lightcurves()
-    
-
+        self.setup_binner()
+    def setup_binner(self):
+        from taurex.data.spectrum import ArraySpectrum
+        self._wngrid = 10000 / self.lc_data['obs_spectrum'][:, 0]
+        self._arr_spec = ArraySpectrum(self.lc_data['obs_spectrum'])
+        self._binner = self._arr_spec.create_binner()
     def initialize_profiles(self):
         self._forward_model.initialize_profiles()
 
@@ -62,9 +66,8 @@ class LightCurveModel(ForwardModel):
         ## new
         #!# need attention here.
         self.ld_coeff_file = np.array([])
-        for i in LightCurveData.availableInstruments:
-            if i in self.lc_data.keys():
-                self.ld_coeff_file = np.append(self.ld_coeff_file,self.lc_data[i]['ld_coeff']).reshape(-1,4)
+        for i in self._instruments:
+            self.ld_coeff_file = np.append(self.ld_coeff_file,self.lc_data[i.instrumentName]['ld_coeff']).reshape(-1,4)
         assert np.shape(self.ld_coeff_file)[1] == 4, "please use 4 ldcoeff law."
 
 
@@ -78,7 +81,8 @@ class LightCurveModel(ForwardModel):
                 self._instruments.append(LightCurveData.fromInstrumentName(ins,self.lc_data))
             else:
                 self.info('Could not find {} in instrument keys'.format(ins))
-
+        new_instrument_list = sorted(self._instruments,key=lambda x: x.wavelengthRegion[0], reverse=True)
+        self._instruments = new_instrument_list
     # def _load_data_file(self,instruments):
     #     """load data from different instruments."""
 
@@ -217,18 +221,17 @@ class LightCurveModel(ForwardModel):
 
         result = []
 
-        new_instrument_list = sorted(self._instruments,key=lambda x: x.wavelengthRegion[0], reverse=True)
-
-
-        for ins in new_instrument_list:
-            min_wl,max_wl = ins.wavelengthRegion
+        for ins in self._instruments:
+            min_wl, max_wl = ins.wavelengthRegion
             index = (wlgrid > min_wl) & (wlgrid < max_wl)
+
             lc = self.light_curve_chain(model[index], time_array=ins.timeSeries, period=self.period,
                                                         sma_over_rs=sma_over_rs_value, eccentricity=self.ecc,
                                                         inclination=inclination_value, periastron=self.periastron,
                                                         mid_time=mid_time_value, ldcoeff=self.ld_coeff_file[index],
                                                         Nfactor=Nfactor[index])
             result.append(lc)
+
 
         return np.concatenate(result)
 
@@ -281,19 +284,15 @@ class LightCurveModel(ForwardModel):
 
 
     def model(self,wngrid=None,cutoff_grid=True):
+        from taurex.util.util import wnwidth_to_wlwidth
         """Computes the forward model for a wngrid"""
-        if wngrid is None:
             ## new
-            wngrid = 10000 / self.lc_data['obs_spectrum'][:, 0]
 
-        native_grid,model,tau,extra = self._forward_model.model(wngrid,cutoff_grid)
-        binner = SimpleBinner(wngrid)
         
-        binned_model = binner.bindown(native_grid,model)[1]
-
-        wlgrid = 10000/wngrid
-
-        result = self.instrument_light_curve(binned_model,wlgrid)
+        native_grid,model,tau,extra = self._forward_model.model(self._wngrid,cutoff_grid)
+        binned_model = self._binner.bindown(native_grid,model)
+        wlgrid = 10000/self._wngrid
+        result = self.instrument_light_curve(binned_model[1],wlgrid)
 
 
         return wngrid,result,tau,[native_grid, model,binned_model,extra]

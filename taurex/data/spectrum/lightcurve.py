@@ -50,15 +50,16 @@ class ObservedLightCurve(BaseSpectrum):
 
         raw_data = []
         data_std = []
-
+        wngrid_min = []
         for i in LightCurveData.availableInstruments:
             ##new version
             # raw data includes data and datastd.
             if i in lc_data:
+                wngrid_min.append(lc_data[i]['wl_grid'].min())
                 raw_data.append(lc_data[i]['data'][:,:,0])
                 data_std.append(lc_data[i]['data'][:,:,1])
-        
-        return np.concatenate(raw_data),np.concatenate(data_std)
+        wngrid_min, raw_data, data_std = (list(t) for t in zip(*sorted(zip(wngrid_min, raw_data, data_std),key=lambda x: x[0], reverse=True)))
+        return np.concatenate(raw_data), np.concatenate(data_std)
 
 
     @property
