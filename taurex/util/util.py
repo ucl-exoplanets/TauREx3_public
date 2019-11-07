@@ -474,9 +474,10 @@ def clip_native_to_wngrid(native_grid, wngrid):
 
     min_wngrid = wngrid.min()
     max_wngrid = wngrid.max()
-
-    wn_min = max(min_wngrid-(wngrid[1]-min_wngrid)/2, 1)
-    wn_max = (max_wngrid-wngrid[-2])/2.0 + max_wngrid
+    #Compute the maximum width
+    wnwidths = compute_bin_edges(wngrid)[-1]
+    wn_min = min_wngrid - wnwidths.max()
+    wn_max = max_wngrid + wnwidths.max()
 
     native_filter = (native_grid >= wn_min) & (native_grid <= wn_max)
     return native_grid[native_filter]

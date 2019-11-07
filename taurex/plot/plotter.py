@@ -567,7 +567,7 @@ class Plotter(object):
         
         binned_error = None
         if resolution is not None:
-            from taurex.binning import SimpleBinner
+            from taurex.binning import FluxBinner
             from taurex.util.util import create_grid_res,wnwidth_to_wlwidth
             _grid = create_grid_res(resolution,wlgrid.min()*0.9,wlgrid.max()*1.1)
             bin_wlgrid = _grid[:,0]
@@ -581,7 +581,7 @@ class Plotter(object):
 
             bin_wnwidth = wnwidth_to_wlwidth(bin_wlgrid,_grid[bin_sort,1])
             wlgrid = _grid[bin_sort,0]
-            binner = SimpleBinner(bin_wngrid,bin_wnwidth)
+            binner = FluxBinner(bin_wngrid,bin_wnwidth)
             native_spectra = spectra['native_spectrum'][...]
             binned_spectrum = binner.bindown(native_grid,native_spectra)[1]
             try:
