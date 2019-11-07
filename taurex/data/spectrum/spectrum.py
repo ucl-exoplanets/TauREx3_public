@@ -31,7 +31,7 @@ class BaseSpectrum(Logger,Writeable):
         Creates the appropriate binning object
         """
 
-        return SimpleBinner(wngrid=self.wavenumberGrid,
+        return FluxBinner(wngrid=self.wavenumberGrid,
                           wngrid_width=self.binWidths)
 
     @property

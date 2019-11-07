@@ -19,7 +19,7 @@ class FlatMieContribution(Contribution):
 
 
 
-    @fitparam(param_name='flat_topP',param_latex='$P^\{mie\}_\\mathrm\{top\}$',default_mode='log',default_fit=False,default_bounds=[-1,1])
+    @fitparam(param_name='flat_topP',param_latex='$P^{mie}_\mathrm{top}$',default_mode='log',default_fit=False,default_bounds=[-1,1])
     def mieTopPressure(self):
         return self._mie_top_pressure
     
@@ -27,7 +27,7 @@ class FlatMieContribution(Contribution):
     def mieTopPressure(self, value):
         self._mie_top_pressure = value
 
-    @fitparam(param_name='flat_bottomP',param_latex='$P^\{mie\}_\\mathrm\{bottom\}$',default_mode='log',default_fit=False,default_bounds=[-1,1])
+    @fitparam(param_name='flat_bottomP',param_latex='$P^{mie}_\mathrm{bottom}$',default_mode='log',default_fit=False,default_bounds=[-1,1])
     def mieBottomPressure(self):
         return self._mie_bottom_pressure
     
@@ -35,7 +35,7 @@ class FlatMieContribution(Contribution):
     def mieBottomPressure(self, value):
         self._mie_bottom_pressure = value
 
-    @fitparam(param_name='flat_mix_ratio',param_latex='$\\chi_\\mathrm\{mie\}$',default_mode='log',default_fit=False,default_bounds=[-1,1])
+    @fitparam(param_name='flat_mix_ratio',param_latex='$\chi_\mathrm{mie}$',default_mode='log',default_fit=False,default_bounds=[-1,1])
     def mieMixing(self):
         return self._mie_mix
     

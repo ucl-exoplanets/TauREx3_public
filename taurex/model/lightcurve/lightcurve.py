@@ -6,7 +6,7 @@ import pickle
 import pylightcurve as plc
 from .lightcurvedata import LightCurveData
 from taurex.data.fittable import fitparam
-from taurex.binning import SimpleBinner
+from taurex.binning import SimpleBinner, FluxBinner
 class LightCurveModel(ForwardModel):
     """A base class for producing forward models"""
 
@@ -286,9 +286,8 @@ class LightCurveModel(ForwardModel):
     def model(self,wngrid=None,cutoff_grid=True):
         from taurex.util.util import wnwidth_to_wlwidth
         """Computes the forward model for a wngrid"""
-            ## new
+        ## new
 
-        
         native_grid,model,tau,extra = self._forward_model.model(self._wngrid,cutoff_grid)
         binned_model = self._binner.bindown(native_grid,model)
         wlgrid = 10000/self._wngrid
@@ -342,7 +341,7 @@ class LightCurveModel(ForwardModel):
         ## new
         wngrid = 10000 / self.lc_data['obs_spectrum'][:, 0]
         native_grid,contribs = self._forward_model.model_contrib(wngrid,cutoff_grid)
-        binner = SimpleBinner(wngrid)
+        binner = self._binner
         all_contrib_dict = {}
 
         wlgrid = 10000/wngrid
@@ -365,7 +364,7 @@ class LightCurveModel(ForwardModel):
         wngrid = 10000 / self.lc_data['obs_spectrum'][:, 0]
 
         native_grid,contrib_res = self._forward_model.model_full_contrib(wngrid,cutoff_grid)
-        binner = SimpleBinner(wngrid)
+        binner = self._binner
 
         self.info('Computing lightcurve contribution')
         wlgrid = 10000/wngrid
