@@ -393,7 +393,7 @@ class Plotter(object):
             except KeyError:
                 binned_grid = solution_val['Spectra']['bin_wlgrid'][:]
             
-            native_grid = solution_val['Spectra']['native_wngrid']
+            native_grid = solution_val['Spectra']['native_wngrid'][...]
 
 
             plt.scatter(wlgrid, obs_spectrum, marker='d',zorder=1,**{'s': 10, 'edgecolors': 'grey','c' : self.cmap(float(solution_idx)/N) })
