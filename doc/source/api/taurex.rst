@@ -6,7 +6,7 @@ Subpackages
 
 .. toctree::
    
-   
+   binning
    taurex.cache
    taurex.cia
    taurex.contributions
