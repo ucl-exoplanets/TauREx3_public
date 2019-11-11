@@ -22,7 +22,7 @@ class LightCurveModel(ForwardModel):
         self._forward_model = forward_model
         self.file_loc = file_loc
         self._load_file()
-        self._load_ldcoeff()
+        
         self._load_orbital_profile()
 
         if instruments is None:
@@ -32,9 +32,17 @@ class LightCurveModel(ForwardModel):
             instruments = LightCurveData.availableInstruments
 
         self._load_instruments(instruments)
-
+        self._load_ldcoeff()
         self._initialize_lightcurves()
-            
+        self.setup_binner()
+    def setup_binner(self):
+        from taurex.data.spectrum import ArraySpectrum
+        self._wngrid = 10000 / self.lc_data['obs_spectrum'][:, 0]
+        self._arr_spec = ArraySpectrum(self.lc_data['obs_spectrum'])
+        self._binner = self._arr_spec.create_binner()
+    def initialize_profiles(self):
+        self._forward_model.initialize_profiles()
+
 
     def _load_file(self):
         # input data from lightcurve, not from spectrum.
@@ -45,29 +53,36 @@ class LightCurveModel(ForwardModel):
     def _load_orbital_profile(self):
         """Load orbital information"""
         self.info('Load lc information')
-        self.mid_time = self.lc_data['corr_orbital'][0]
-        self._inclination = self.lc_data['corr_orbital'][1]
-        self.period = self.lc_data['corr_orbital'][2]
-        self.periastron = self.lc_data['corr_orbital'][3]
-        self.sma_over_rs = self.lc_data['corr_orbital'][4]
-        self.ecc = self.lc_data['corr_orbital'][5]
+
+        ## new
+        self.mid_time = self.lc_data['orbital_info']['mt']
+        self._inclination = self.lc_data['orbital_info']['i']
+        self.period = self.lc_data['orbital_info']['period']
+        self.periastron = self.lc_data['orbital_info']['periastron']
+        self.sma_over_rs = self.lc_data['orbital_info']['sma_over_rs']
+        self.ecc = self.lc_data['orbital_info']['e']
 
     def _load_ldcoeff(self):
-        self.ld_coeff_file = self.lc_data['ld_coeff']
+        ## new
+        #!# need attention here.
+        self.ld_coeff_file = np.array([])
+        for i in self._instruments:
+            self.ld_coeff_file = np.append(self.ld_coeff_file,self.lc_data[i.instrumentName]['ld_coeff']).reshape(-1,4)
         assert np.shape(self.ld_coeff_file)[1] == 4, "please use 4 ldcoeff law."
 
 
     def _load_instruments(self,instruments):
         self._instruments = []
-
-        ins_keys = self.lc_data['data'].keys()
+        ## new
+        ins_keys = self.lc_data.keys()
         for ins in instruments:
             if ins in ins_keys:
                 self.info('Loading {} light curves'.format(ins))
                 self._instruments.append(LightCurveData.fromInstrumentName(ins,self.lc_data))
             else:
                 self.info('Could not find {} in instrument keys'.format(ins))
-
+        new_instrument_list = sorted(self._instruments,key=lambda x: x.wavelengthRegion[0], reverse=True)
+        self._instruments = new_instrument_list
     # def _load_data_file(self,instruments):
     #     """load data from different instruments."""
 
@@ -205,15 +220,18 @@ class LightCurveModel(ForwardModel):
             Nfactor = np.ones_like(wlgrid)
 
         result = []
+
         for ins in self._instruments:
-            min_wl,max_wl = ins.wavelengthRegion
+            min_wl, max_wl = ins.wavelengthRegion
             index = (wlgrid > min_wl) & (wlgrid < max_wl)
+
             lc = self.light_curve_chain(model[index], time_array=ins.timeSeries, period=self.period,
                                                         sma_over_rs=sma_over_rs_value, eccentricity=self.ecc,
                                                         inclination=inclination_value, periastron=self.periastron,
                                                         mid_time=mid_time_value, ldcoeff=self.ld_coeff_file[index],
                                                         Nfactor=Nfactor[index])
             result.append(lc)
+
 
         return np.concatenate(result)
 
@@ -266,26 +284,64 @@ class LightCurveModel(ForwardModel):
 
 
     def model(self,wngrid=None,cutoff_grid=True):
+        from taurex.util.util import wnwidth_to_wlwidth
         """Computes the forward model for a wngrid"""
-        if wngrid is None:
-            wngrid = 10000/self.lc_data['lc_info'][:,0]
-        native_grid,model,tau,extra = self._forward_model.model(wngrid,cutoff_grid)
-        binner = FluxBinner(wngrid)
+        ## new
+
+        native_grid,model,tau,extra = self._forward_model.model(self._wngrid,cutoff_grid)
+        binned_model = self._binner.bindown(native_grid,model)
+        wlgrid = 10000/self._wngrid
+        result = self.instrument_light_curve(binned_model[1],wlgrid)
+
+
+        return self._wngrid,result,tau,[native_grid, model,binned_model[1],extra]
+
+    def compute_error(self, samples,wngrid = None, binner=None):
+        from taurex.util.math import OnlineVariance
+        tp_profiles = OnlineVariance()
+        active_gases = OnlineVariance()
+        inactive_gases = OnlineVariance()
+
+        lc_spectrum = OnlineVariance()
+        #tau_profile = OnlineVariance()
+        native_spectrum = OnlineVariance()
+        binned_spectrum = OnlineVariance()
+
+        for weight in samples():
+            
+            grid,lc,tau,extra = self.model(wngrid=wngrid, cutoff_grid=False)
+            native_grid, native, binned, _ = extra
+            #tau_profile.update(tau,weight=weight)
+            tp_profiles.update(self.temperatureProfile,weight=weight)
+            active_gases.update(self.chemistry.activeGasMixProfile,weight=weight)
+            inactive_gases.update(self.chemistry.inactiveGasMixProfile,weight=weight)
+
+            native_spectrum.update(native,weight=weight)
+            binned_spectrum.update(binned,weight=weight)
+            lc_spectrum.update(lc,weight=weight)
         
-        binned_model = binner.bindown(native_grid,model)[1]
+        profile_dict = {}
+        spectrum_dict = {}
 
-        wlgrid = 10000/wngrid
+        tp_std = np.sqrt(tp_profiles.parallelVariance())
+        active_std = np.sqrt(active_gases.parallelVariance())
+        inactive_std = np.sqrt(inactive_gases.parallelVariance())
 
-        result = self.instrument_light_curve(binned_model,wlgrid)
+        profile_dict['temp_profile_std']=tp_std
+        profile_dict['active_mix_profile_std']=active_std
+        profile_dict['inactive_mix_profile_std']=inactive_std
 
+        spectrum_dict['native_std'] = np.sqrt(native_spectrum.parallelVariance())
+        spectrum_dict['binned_std'] = np.sqrt(binned_spectrum.parallelVariance())
+        spectrum_dict['lightcurve_std'] = np.sqrt(lc_spectrum.parallelVariance())
+        return profile_dict, spectrum_dict
 
-        return wngrid,result,tau,[model,binned_model,extra]
 
     def model_contrib(self,wngrid=None,cutoff_grid=True):
-        
-        wngrid = 10000/self.lc_data['lc_info'][:,0]
+        ## new
+        wngrid = 10000 / self.lc_data['obs_spectrum'][:, 0]
         native_grid,contribs = self._forward_model.model_contrib(wngrid,cutoff_grid)
-        binner = FluxBinner(wngrid)
+        binner = self._binner
         all_contrib_dict = {}
 
         wlgrid = 10000/wngrid
@@ -297,18 +353,18 @@ class LightCurveModel(ForwardModel):
             binned = binner.bindown(native_grid,model)[1]
 
             result = self.instrument_light_curve(binned,wlgrid)
-            all_contrib_dict[contrib_name] = (result,tau,[model,binned,extras])
+            all_contrib_dict[contrib_name] = (result,tau,[native_grid, model,binned,extras])
 
         return native_grid,all_contrib_dict
 
     def model_full_contrib(self,wngrid=None,cutoff_grid=True):
         """Computes the forward model for a wngrid for each contribution"""
-        
-        
 
-        wngrid = 10000/self.lc_data['lc_info'][:,0]
+        ## new
+        wngrid = 10000 / self.lc_data['obs_spectrum'][:, 0]
+
         native_grid,contrib_res = self._forward_model.model_full_contrib(wngrid,cutoff_grid)
-        binner = FluxBinner(wngrid)
+        binner = self._binner
 
         self.info('Computing lightcurve contribution')
         wlgrid = 10000/wngrid
@@ -324,7 +380,7 @@ class LightCurveModel(ForwardModel):
                 binned = binner.bindown(native_grid,native)[1]
                 result = self.instrument_light_curve(binned,wlgrid)
 
-                new_packed = name,result,tau,(native,binned,extra)
+                new_packed = name,result,tau,(native_grid, native,binned,extra)
 
                 lc_contrib_list.append(new_packed)
             

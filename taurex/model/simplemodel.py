@@ -339,7 +339,7 @@ class SimpleForwardModel(ForwardModel):
         native_spectrum = OnlineVariance()
 
         for weight in samples():
-
+            
             native_grid,native,tau,_ = self.model(wngrid=wngrid, cutoff_grid=False)
 
             #tau_profile.update(tau,weight=weight)

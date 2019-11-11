@@ -23,12 +23,14 @@ class ObservedLightCurve(BaseSpectrum):
         import pickle
         with open(filename,'rb') as f:
             lc_data = pickle.load(f,encoding='latin1')
-            
-        self.obs_spectrum = np.empty(shape=(len(lc_data['lc_info'][:, 0]), 4))
-        self.obs_spectrum[:, 0] = lc_data['lc_info'][:, 0]
-        self.obs_spectrum[:, 1] = lc_data['lc_info'][:, 3]
-        self.obs_spectrum[:, 2] = lc_data['lc_info'][:, 1]
-        self.obs_spectrum[:, 3] = lc_data['lc_info'][:, 2]
+        ##new version
+        self.obs_spectrum = np.empty(shape=(len(lc_data['obs_spectrum'][:, 0]), 4))
+
+        ##new version
+        self.obs_spectrum[:, 0] = lc_data['obs_spectrum'][:, 0]
+        self.obs_spectrum[:, 1] = lc_data['obs_spectrum'][:, 1]
+        self.obs_spectrum[:, 2] = lc_data['obs_spectrum'][:, 2]
+        self.obs_spectrum[:, 3] = lc_data['obs_spectrum'][:, 3]
 
         self._spec,self._std = self._load_data_file(lc_data)
 
@@ -48,15 +50,16 @@ class ObservedLightCurve(BaseSpectrum):
 
         raw_data = []
         data_std = []
-
+        wngrid_min = []
         for i in LightCurveData.availableInstruments:
-
-            if i in lc_data['data']:
+            ##new version
             # raw data includes data and datastd.
-                raw_data.append(lc_data['data'][i][:len(lc_data['data'][i])//2])
-                data_std.append(lc_data['data'][i][len(lc_data['data'][i])//2:])
-        
-        return np.concatenate(raw_data),np.concatenate(data_std)
+            if i in lc_data:
+                wngrid_min.append(lc_data[i]['wl_grid'].min())
+                raw_data.append(lc_data[i]['data'][:,:,0])
+                data_std.append(lc_data[i]['data'][:,:,1])
+        wngrid_min, raw_data, data_std = (list(t) for t in zip(*sorted(zip(wngrid_min, raw_data, data_std),key=lambda x: x[0], reverse=True)))
+        return np.concatenate(raw_data), np.concatenate(data_std)
 
 
     @property
@@ -138,3 +141,14 @@ class ObservedLightCurve(BaseSpectrum):
         
         """
         return self._std
+
+    def write(self,output):
+        output.write_array('wlgrid',self.wavelengthGrid)
+        output.write_array('spectrum',self.obs_spectrum[:,1])
+        output.write_array('lightcurve',self.spectrum)
+        output.write_array('binedges',self.binEdges)
+        output.write_array('binwidths',self.binWidths)
+        output.write_array('errorbars',self.obs_spectrum[:,2])
+        output.write_array('lightcurve_errorbars', self.errorBar)
+
+        return output
