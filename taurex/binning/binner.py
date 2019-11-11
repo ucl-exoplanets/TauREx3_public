@@ -1,3 +1,5 @@
+"""Module for the base binning class"""
+
 from taurex.log import Logger
 from taurex import OutputSize
 from taurex.util.util import compute_bin_edges
@@ -82,7 +84,7 @@ class Binner(Logger):
 
         Parameters
         ----------
-        model_output: `obj`:tuple
+        model_output: obj:`tuple`
             Result from running a TauREx3 forward model
         
         Returns
@@ -95,10 +97,31 @@ class Binner(Logger):
 
     def generate_spectrum_output(self, model_output,
                                  output_size=OutputSize.heavy):
+        """
+        Given a forward model output, generate a dictionary
+        that can be used to store to file. This can include
+        storing the native and binned spectrum.
+        Not necessary for the function of the class but useful for 
+        full intergation into TauREx3, especially when storing results
+        from a retrieval. 
+        Can be overwritten to store more information.
+
+        Parameters
+        ----------
+        model_output: obj:`tuple`
+            Result from running a TauREx3 forward model
+
+        output_size: :class:`~taurex.taurexdefs.OutputSize`
+            Size of the output.
 
 
+        Returns
+        -------
+        :obj:`dict`:
+            Dictionary of spectra
 
-                
+
+        """
         output = {}
 
         wngrid, flux, tau, extra = model_output

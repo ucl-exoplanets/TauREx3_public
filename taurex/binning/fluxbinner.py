@@ -5,7 +5,26 @@ from taurex import OutputSize
 
 
 class FluxBinner(Binner):
+    """
+    Bins to a wavenumber grid given by ``wngrid`` using a
+    more accurate method that takes into account the amount
+    of contribution from each native bin. This method also
+    handles cases where bins are not continuous and/or
+    overlapping.
 
+    Parameters
+    ----------
+
+    wngrid: :obj:`array`
+        Wavenumber grid
+
+    wngrid_width: :obj:`array`, optional
+        Must have same shape as ``wngrid``
+        Full bin widths for each wavenumber grid point
+        given in ``wngrid``. If not provided then
+        this is automatically computed from ``wngrid``.
+
+    """
     def __init__(self, wngrid, wngrid_width=None):
         super().__init__()
 
@@ -26,6 +45,44 @@ class FluxBinner(Binner):
         self._wngrid_width = self._wngrid_width[self._wngrid.argsort()]
 
     def bindown(self, wngrid, spectrum, grid_width=None, error=None):
+        """
+
+        Bins down spectrum.
+
+        Parameters
+        ----------
+        wngrid : :obj:`array`
+            The wavenumber grid of the spectrum to be binned down.
+
+        spectrum: :obj:`array`
+            The spectra we wish to bin-down. Must be same shape as
+            ``wngrid``.
+
+        grid_width: :obj:`array`, optional
+            Wavenumber grid full-widths for the spectrum to be binned down.
+            Must be same shape as ``wngrid``.
+            Optional.
+
+        error: :obj:`array`, optional
+            Associated errors or noise of the spectrum. Must be same shape
+            as ``wngrid``.Optional parameter.
+
+        Returns
+        -------
+        binned_wngrid : :obj:`array`
+            New wavenumber grid
+
+        spectrum: :obj:`array`
+            Binned spectrum.
+
+        grid_width: :obj:`array`
+            New grid-widths
+
+        error: :obj:`array` or None
+            Binned error if given else ``None``
+
+        """
+
         sorted_input = wngrid.argsort()
         spectrum = spectrum[..., sorted_input]
         if error is not None:
@@ -71,25 +128,26 @@ class FluxBinner(Binner):
             sum_weight = 0
 
             save_start = np.searchsorted(old_spect_max, wn_min, side='right')
-            save_stop = np.searchsorted(old_spect_min[1:], wn_max, side='right')
-     
+            save_stop = np.searchsorted(old_spect_min[1:], wn_max,
+                                        side='right')
+
             save_stop = min(save_stop, old_spect_min.shape[0]-1)
             save_start = min(save_start, old_spect_min.shape[0]-1)
 
-            if not wn_min <= old_spect_max[save_start] or not old_spect_min[save_stop] <= wn_max:
+            if not wn_min <= old_spect_max[save_start] or not \
+                    old_spect_min[save_stop] <= wn_max:
                 continue
- 
+
             spect_min = old_spect_min[save_start:save_stop+1]
-            spect_max = old_spect_max[save_start:save_stop+1]           
+            spect_max = old_spect_max[save_start:save_stop+1]
 
-
-            weight = (np.minimum(wn_max, spect_max) - np.maximum(spect_min, wn_min))/(wn_max-wn_min)
+            weight = (np.minimum(wn_max, spect_max) - np.maximum(spect_min,
+                                                                 wn_min))/(wn_max-wn_min)
 
             sum_weight = np.sum(weight)
 
             sum_spectrum = np.sum(weight*old_spect_flux[..., save_start:save_stop+1],
                                   axis=-1)
-
 
             if error is not None:
                 sum_noise = np.sum(weight * weight *
@@ -98,7 +156,7 @@ class FluxBinner(Binner):
 
                 sum_noise = np.sqrt(sum_noise / sum_weight/sum_weight)
 
-            bin_spectrum[...,idx] = sum_spectrum
+            bin_spectrum[..., idx] = sum_spectrum
 
             if error is not None:
                 bin_error[idx] = sum_noise
