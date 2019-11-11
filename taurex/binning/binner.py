@@ -33,19 +33,19 @@ class Binner(Logger):
 
         spectrum: :obj:`array`
             The spectra we wish to bin-down. Must be same shape as
-            :obj:`wngrid`. 
+            ``wngrid``. 
         
         grid_width: :obj:`array`, optional
             Wavenumber grid full-widths for the spectrum to be binned down.
-            Must be same shape as :obj:`wngrid`.
+            Must be same shape as ``wngrid``.
             Optional, generally if you require this but the user does not pass
-            it then you must compute it yourself using :obj:`wngrid`. This can
+            it then you must compute it yourself using ``wngrid``. This can
             be done easily using the function
             func:`~taurex.util.util.compute_bin_edges`.
 
         error: :obj:`array`, optional
             Associated errors or noise of the spectrum. Must be same shape
-            as :obj:`wngrid`.Optional parameter, when implementing you must
+            as ``wngrid``.Optional parameter, when implementing you must
             deal with the cases where either the error is passed or not passed.
 
         Returns
