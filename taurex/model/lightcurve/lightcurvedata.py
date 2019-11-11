@@ -26,20 +26,24 @@ class LightCurveData(Logger,Writeable):
     def __init__(self,lc_data,instrument_name,wavelength_region):
         super().__init__(self.__class__.__name__)
         self._instrument_name = instrument_name
-        if self._instrument_name not in lc_data['data']:
+        ##new version
+        if self._instrument_name not in lc_data:
             self.error('Instrument with key {} not found in pickled lightcurve file'.format(self._instrument_name))
             raise KeyError()
-
 
         self._wavelength_region = wavelength_region
         self._load_data(lc_data)
 
 
     def _load_data(self,lc_data):
-        self._time_series = lc_data['time_series'][self._instrument_name]
-        
-        self._raw_data = lc_data['data'][self._instrument_name][:len(lc_data['data'][self._instrument_name]) //2]
-        self._data_std = lc_data['data'][self._instrument_name][len(lc_data['data'][self._instrument_name]) //2:]
+        ## new
+        self._time_series = lc_data[self._instrument_name]['time_series']
+
+
+        ## new
+        self._raw_data = lc_data[self._instrument_name]['data'][:,:,0]
+        self._data_std = lc_data[self._instrument_name]['data'][:,:,1]
+
         self._max_nfactor = np.max(self._raw_data, axis=1)
         self._min_nfactor = np.min(self._raw_data, axis=1)
         

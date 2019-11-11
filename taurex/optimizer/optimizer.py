@@ -533,7 +533,7 @@ class Optimizer(Logger):
 
             self.update_model(optimized_map) #Update the model with optimized map values
 
-            opt_result = self._model.model() #Run the model
+            opt_result = self._model.model(cutoff_grid=False) #Run the model
 
 
 
@@ -543,7 +543,7 @@ class Optimizer(Logger):
             sol_values['Spectra']['Contributions'] = store_contributions(self._binner,self._model,output_size=output_size-3)
             self.update_model(optimized_median) #Update with the optimized median
 
-            self._model.model()
+            self._model.model(cutoff_grid=False)
 
             #Store profiles here
             sol_values['Profiles']=generate_profile_dict(self._model)
