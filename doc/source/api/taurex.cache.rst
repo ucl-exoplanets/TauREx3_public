@@ -1,30 +1,32 @@
-taurex.cache package
-====================
+Caching Modules (``taurex.cache``)
+==================================
 
-Submodules
-----------
-
-taurex.cache.ciaacache module
------------------------------
-
-.. automodule:: taurex.cache.ciaacache
-   :members:
-   :undoc-members:
-   :show-inheritance:
-taurex.cache.opacitycache module
---------------------------------
-
-.. automodule:: taurex.cache.opacitycache
-   :members:
-   :undoc-members:
-   :show-inheritance:
-taurex.cache.singleton module
+Singleton
 -----------------------------
 
 .. automodule:: taurex.cache.singleton
    :members:
    :undoc-members:
    :show-inheritance:
+
+OpacityCache
+--------------------------------
+
+.. automodule:: taurex.cache.opacitycache
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+CIACache
+-----------------------------
+
+.. automodule:: taurex.cache.ciaacache
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
 
 
 Module contents

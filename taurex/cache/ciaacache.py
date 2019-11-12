@@ -16,7 +16,7 @@ class CIACache(Singleton):
     <taurex.cia.picklecia.PickleCIA at 0x107a60be0>
 
     Pickle ``.db`` and HITRAN ``.cia`` files are supported and automatically
-    loaded.
+    loaded. with priority given to ``.db`` files
 
 
 
