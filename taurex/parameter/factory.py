@@ -64,6 +64,9 @@ def gas_factory(profile_type):
     elif profile_type in ('twolayer','2layer',):
         from taurex.data.profiles.chemistry import TwoLayerGas
         return TwoLayerGas
+    elif profile_type in ('power','powerchemistry','parmentier','superpower'):
+        from taurex.data.profiles.chemistry import PowerGas
+        return PowerGas
     else:
         raise NotImplementedError('Gas profile {} not implemented'.format(profile_type))
 
