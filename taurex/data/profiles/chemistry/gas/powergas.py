@@ -5,37 +5,44 @@ import numpy as np
 class PowerGas(Gas):
     """
 
-    Two layer gas profile.
+    Gas profile in Power law.
 
-    A gas profile with two different mixing layers at the surface of the planet and
-    top of the atmosphere seperated at a defined
-    pressure point and smoothened.
-
-
+    This is a profile adapted for HJ (T > 2000 K) which takes into account upper atm mix reduction.
+    Laws taken from Parmentier (2018)
 
     Parameters
     -----------
     molecule_name : str
-        Name of molecule
+        Name of molecule (for the xsec)
 
-    mix_ratio_surface : float
+    profile_type : str , optional
+        name of the molecule to take the profile from: 'H2','H2O','TiO','VO', 'H-', 'Na', 'K'
+        by defaut it uses 'auto' to get the same profile as for molecule_name
+
+
+    mix_ratio_surface : float , optional
         Mixing ratio of the molecule on the planet surface
 
-    mix_ratio_top : float
-        Mixing ratio of the molecule at the top of the atmosphere
+    alpha : float , optional
+        pressure dependance coefficient approx 10^alpha
 
-    mix_ratio_P : float
-        Boundary Pressure point between the two layers 
+    beta : float , optional
+        temperature dependance coefficient approx 10^(beta/T)
 
-    mix_ratio_smoothing : float , optional
-        smoothing window 
+    gamma : float , optional
+        scale coefficient
 
     """
 
 
-    def __init__(self,molecule_name='H2O',mix_ratio_surface=False, alpha=False,
-                    beta= False, gamma= False):
+    def __init__(self,molecule_name='H2O',profile_type='auto',mix_ratio_surface=None, alpha=None,
+                    beta= None, gamma= None):
         super().__init__('PowerGas',molecule_name=molecule_name)
+
+        if profile_type == 'auto':
+            self._profile_type = molecule_name
+        else:
+            self._profile_type = profile_type
 
         self._mix_surface = mix_ratio_surface
         self._alpha = alpha
@@ -57,33 +64,33 @@ class PowerGas(Gas):
         return self._mix_surface
 
     @property
-    def mixRatioTop(self):
+    def alpha(self):
         """Abundance on the top of atmosphere"""
-        return self._mix_top
+        return self._alpha
 
     @property
-    def mixRatioPressure(self):
-        return self._mix_ratio_pressure
+    def beta(self):
+        return self._beta
     
     @property
-    def mixRatioSmoothing(self):
-        return self._mix_ratio_smoothing
+    def gamma(self):
+        return self._gamma
 
     @mixRatioSurface.setter
     def mixRatioSurface(self, value):
         self._mix_surface = value
 
-    @mixRatioTop.setter
-    def mixRatioTop(self, value):
-        self._mix_top = value
+    @alpha.setter
+    def alpha(self, value):
+        self._alpha = value
     
-    @mixRatioPressure.setter
-    def mixRatioPressure(self,value):
-        self._mix_pressure = value
+    @beta.setter
+    def beta(self,value):
+        self._beta = value
     
-    @mixRatioSmoothing.setter
-    def mixRatioSmoothing(self,value):
-        self._mix_smoothing = value
+    @gamma.setter
+    def gamma(self,value):
+        self._gamma = value
 
     def add_surface_param(self):
         mol_name = self.molecule
@@ -176,14 +183,17 @@ class PowerGas(Gas):
     def check_known(self, molecule_name ='H2O'):
 
         known_molecules = ['H2','H2O','TiO','VO', 'H-', 'Na', 'K']
+
         a = [1.,2.,1.6,1.5,0.6,0.6,0.6]
         b = [2.41,4.83,5.94,5.4,-0.14,1.89,1.28]
         g = [6.5,15.9,23.0,23.8,7.7,12.2,12.7]
-        g *= 1e4
         A = [-0.1,-3.3,-7.1,-9.2,-8.3,-5.5,-7.1]
+
+        b = [b[i] * 1e4 for i in range(len(b))]
         A = np.power(10, A)
         if molecule_name in known_molecules:
-            i = known_molecules.index()
+            i = known_molecules.index(molecule_name)
+            print(i, a[i], b[i], g[i], A[i])
             return a[i], b[i], g[i], A[i]
         else:
             return None, None, None, None
@@ -191,17 +201,19 @@ class PowerGas(Gas):
 
     
     def initialize_profile(self,nlayers,temperature_profile,pressure_profile,altitude_profile):
+
         self._mix_profile = np.zeros(nlayers)
-        molecule_name = self._molecule_name
+        molecule_name = self._profile_type
         coeffs = self.check_known(molecule_name=molecule_name)
         mix_surface = self._mix_surface
         alpha = self._alpha
         beta = self._beta
         gamma = self._gamma
+        Ad = []
 
         if self._mix_surface is None:
             if coeffs[3] is not None:
-                mix_surface =coeffs[3]
+                mix_surface = coeffs[3]
             else:
                 self.error('molecule %s has a missing power coefficient', molecule_name)
                 raise ValueError
@@ -223,16 +235,29 @@ class PowerGas(Gas):
             else:
                 self.error('molecule %s has a missing power coefficient', molecule_name)
                 raise ValueError
+        #print('coeffs: ', coeffs)
+        #print('a, b, g, minx_S: ', alpha, beta, gamma, mix_surface)
 
-        Ad = alpha*np.log10(pressure_profile)+beta/temperature_profile+gamma
-        self._mix_profile = 1/(mix_surface**(-0.5)+Ad**(-0.5))**2
+
+        #Ad = alpha * np.log10(pressure_profile) + beta / temperature_profile + gamma
+
+        pressure_profile *= 1e-5  ### convert pressure to bar
+        Ad = np.power(10, gamma*(-1)) * np.power(pressure_profile, alpha)* np.power(10, beta/temperature_profile)
+        mix = 1 / np.sqrt(mix_surface) + 1 / np.sqrt(Ad)
+        mix = np.power(1/mix,2)
+
+        pressure_profile *= 1e5
+
+        self._mix_profile = mix
+
+
 
 
     def write(self, output):
         gas_entry = super().write(output)
-        gas_entry.write_scalar('mix_ratio_top', self.mixRatioTop)
+        gas_entry.write_scalar('alpha', self.alpha)
         gas_entry.write_scalar('mix_ratio_surface', self.mixRatioSurface)
-        gas_entry.write_scalar('mix_ratio_P',self.mixRatioPressure)
-        gas_entry.write_scalar('mix_ratio_smoothing',self.mixRatioSmoothing)
+        gas_entry.write_scalar('beta',self.beta)
+        gas_entry.write_scalar('gamma',self.gamma)
 
         return gas_entry
