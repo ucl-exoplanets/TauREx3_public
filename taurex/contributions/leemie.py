@@ -117,10 +117,11 @@ class LeeMieContribution(Contribution):
         
         cloud_filter = (pressure_profile <= bottom_pressure) & (pressure_profile >= top_pressure)
 
-        sigma_xsec[cloud_filter, ...] = sigma_mie 
+        sigma_xsec[cloud_filter, ...] = sigma_mie* self.mieMixing 
 
-        self.sigma_xsec = sigma_xsec * self.mieMixing
+        self.sigma_xsec = sigma_xsec
 
+        
         self.debug('final xsec %s', self.sigma_xsec[:, :])
         self.debug('final xsec %s', self.sigma_xsec.max())
         
