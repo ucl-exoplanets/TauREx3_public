@@ -71,9 +71,9 @@ class FlatMieContribution(Contribution):
         cloud_filter = (pressure_profile <= bottom_pressure) & \
                        (pressure_profile >= top_pressure)
 
-        sigma_xsec[cloud_filter, ...] = np.ones(shape=wngrid.shape)
+        sigma_xsec[cloud_filter, ...] = np.ones(shape=wngrid.shape)* self.mieMixing
 
-        self.sigma_xsec = sigma_xsec * self.mieMixing
+        self.sigma_xsec = sigma_xsec 
 
         #self._total_contrib[...]=0.0
         yield 'Flat', sigma_xsec
