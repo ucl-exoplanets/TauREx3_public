@@ -374,10 +374,10 @@ class Plotter(object):
 
         
 
-        obs_spectrum = self.fd['Observed']['spectrum'][:]
-        error = self.fd['Observed']['errorbars'][:]
-        wlgrid = self.fd['Observed']['wlgrid'][:]
-        bin_widths = self.fd['Observed']['binwidths'][:]        
+        obs_spectrum = self.fd['Observed']['spectrum'][...]
+        error = self.fd['Observed']['errorbars'][...]
+        wlgrid = self.fd['Observed']['wlgrid'][...]
+        bin_widths = self.fd['Observed']['binwidths'][...]        
         
         plt.errorbar(wlgrid,obs_spectrum, error, lw=1, color='black', alpha=0.4, ls='none', zorder=0, label='Observed')
 
@@ -389,9 +389,9 @@ class Plotter(object):
                 label = 'Fitted model'
 
             try:
-                binned_grid = solution_val['Spectra']['binned_wlgrid'][:]
+                binned_grid = solution_val['Spectra']['binned_wlgrid'][...]
             except KeyError:
-                binned_grid = solution_val['Spectra']['bin_wlgrid'][:]
+                binned_grid = solution_val['Spectra']['bin_wlgrid'][...]
             
             native_grid = solution_val['Spectra']['native_wngrid'][...]
 
@@ -463,10 +463,10 @@ class Plotter(object):
             
 
             obs_spectrum = self.fd['Observed']['spectrum'][:]
-            error = self.fd['Observed']['errorbars']
+            error = self.fd['Observed']['errorbars'][...]
             wlgrid = self.fd['Observed']['wlgrid'][...]
             plot_wlgrid = wlgrid
-            bin_widths = self.fd['Observed']['binwidths'][:]        
+            bin_widths = self.fd['Observed']['binwidths'][...]       
             
             plt.errorbar(wlgrid,obs_spectrum, error, lw=1, color='black', alpha=0.4, ls='none', zorder=0, label='Observed')
             self._plot_contrib(solution_val,wlgrid,ax,full=full,resolution=resolution)
@@ -530,7 +530,7 @@ class Plotter(object):
             plt.title(self.title, fontsize=14)
 
     def full_contrib_plot(self,spectra,wlgrid,resolution=None):
-        native_grid = spectra['native_wngrid']
+        native_grid = spectra['native_wngrid'][...]
         for contrib_name,contrib_dict in spectra['Contributions'].items():
 
             first_name = contrib_name
@@ -545,7 +545,7 @@ class Plotter(object):
 
 
         binner = None
-        native_grid = spectra['native_wngrid']
+        native_grid = spectra['native_wngrid'][...]
 
 
         for contrib_name,contrib_dict in spectra['Contributions'].items():
@@ -619,7 +619,7 @@ class Plotter(object):
 
         forward_output =self.forward_output()
 
-        contribution = forward_output['Spectra']['native_tau']
+        contribution = forward_output['Spectra']['native_tau'][...]
         #contribution = self.pickle_file['solutions'][solution_idx]['contrib_func']
 
         pressure = forward_output['Profiles']['pressure_profile'][:]
@@ -636,7 +636,7 @@ class Plotter(object):
         N = self.num_solutions
         for solution_idx, solution_val in self.solution_iter():
 
-            contribution = solution_val['Spectra']['native_tau']
+            contribution = solution_val['Spectra']['native_tau'][...]
             #contribution = self.pickle_file['solutions'][solution_idx]['contrib_func']
 
             pressure = solution_val['Profiles']['pressure_profile'][:]

@@ -6,6 +6,13 @@ from taurex.data.fittable import fitparam
 
 
 class LeeMieContribution(Contribution):
+    '''
+    Mie approximation, replaces rayleigh scattering.
+    Formalism taken from: Lee et al. 2013, ApJ, 778, 97
+
+    mie_radius must be given in um.
+
+    '''
 
 
     def __init__(self, mie_radius=0.01, mie_Q=40,
@@ -95,6 +102,7 @@ class LeeMieContribution(Contribution):
 
         sigma_xsec = np.zeros(shape=(self._nlayers, wngrid.shape[0]))
 
+        ### This must transform um to the xsec format in TauREx (m2)
         am=a*1e-6
 
         sigma_mie = Qext * np.pi * (am**2.0)
@@ -109,10 +117,11 @@ class LeeMieContribution(Contribution):
         
         cloud_filter = (pressure_profile <= bottom_pressure) & (pressure_profile >= top_pressure)
 
-        sigma_xsec[cloud_filter, ...] = sigma_mie 
+        sigma_xsec[cloud_filter, ...] = sigma_mie* self.mieMixing 
 
-        self.sigma_xsec = sigma_xsec * self.mieMixing
+        self.sigma_xsec = sigma_xsec
 
+        
         self.debug('final xsec %s', self.sigma_xsec[:, :])
         self.debug('final xsec %s', self.sigma_xsec.max())
         

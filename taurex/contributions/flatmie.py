@@ -19,7 +19,7 @@ class FlatMieContribution(Contribution):
 
 
 
-    @fitparam(param_name='flat_topP',param_latex='$P^{mie}_\mathrm{top}$',default_mode='log',default_fit=False,default_bounds=[-1,1])
+    @fitparam(param_name='flat_topP',param_latex='$P^{mie}_\mathrm{top}$',default_mode='log',default_fit=False,default_bounds=[1e-20,1])
     def mieTopPressure(self):
         return self._mie_top_pressure
     
@@ -27,7 +27,7 @@ class FlatMieContribution(Contribution):
     def mieTopPressure(self, value):
         self._mie_top_pressure = value
 
-    @fitparam(param_name='flat_bottomP',param_latex='$P^{mie}_\mathrm{bottom}$',default_mode='log',default_fit=False,default_bounds=[-1,1])
+    @fitparam(param_name='flat_bottomP',param_latex='$P^{mie}_\mathrm{bottom}$',default_mode='log',default_fit=False,default_bounds=[1e-20,1])
     def mieBottomPressure(self):
         return self._mie_bottom_pressure
     
@@ -35,7 +35,7 @@ class FlatMieContribution(Contribution):
     def mieBottomPressure(self, value):
         self._mie_bottom_pressure = value
 
-    @fitparam(param_name='flat_mix_ratio',param_latex='$\chi_\mathrm{mie}$',default_mode='log',default_fit=False,default_bounds=[-1,1])
+    @fitparam(param_name='flat_mix_ratio',param_latex='$\chi_\mathrm{mie}$',default_mode='log',default_fit=False,default_bounds=[1e-20,1])
     def mieMixing(self):
         return self._mie_mix
     
@@ -71,9 +71,9 @@ class FlatMieContribution(Contribution):
         cloud_filter = (pressure_profile <= bottom_pressure) & \
                        (pressure_profile >= top_pressure)
 
-        sigma_xsec[cloud_filter, ...] = np.ones(shape=wngrid.shape)
+        sigma_xsec[cloud_filter, ...] = np.ones(shape=wngrid.shape)* self.mieMixing
 
-        self.sigma_xsec = sigma_xsec * self.mieMixing
+        self.sigma_xsec = sigma_xsec 
 
         #self._total_contrib[...]=0.0
         yield 'Flat', sigma_xsec
