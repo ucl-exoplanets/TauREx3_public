@@ -179,7 +179,7 @@ class Contribution(Fittable, Logger, Writeable):
         contribution. For cross-section based contributions,
         the components are each molecule
         Should yield the name of the component and the component itself
-        
+
         Parameters
         ----------
         model: :class:`~taurex.model.model.ForwardModel`
@@ -187,22 +187,23 @@ class Contribution(Fittable, Logger, Writeable):
 
         wngrid: :obj:`array`
             Wavenumber grid
-        
+
         Yields
         ------
-        component: :obj:`tuple` of :obj:`str` and component
+        component: :obj:`tuple` of type (str, :obj:`array`)
+            Name of component and component itself
 
         """
 
-
-        
         raise NotImplementedError
 
     def prepare(self, model, wngrid):
         """
+
         Used to prepare the contribution for the calculation.
-        Called before forward model performs the main optical depth
-        calculation.
+        Called before the forward model performs the main optical depth
+        calculation. Default behaviour is to loop through :func:`prepare_each`
+        and sum all results into a single cross-section.
 
         Parameters
         ----------
