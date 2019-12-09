@@ -317,11 +317,16 @@ def create_model(config,gas,temperature,pressure,planet,star):
     kwargs = get_keywordarg_dict(klass)
     log.debug('Model kwargs {}'.format(kwargs))
     log.debug('---------------{} {}--------------'.format(gas,gas.activeGases))
-    kwargs['planet'] = planet
-    kwargs['star'] = star
-    kwargs['chemistry'] = gas
-    kwargs['temperature_profile'] =temperature
-    kwargs['pressure_profile'] = pressure
+    if 'planet' in kwargs:
+        kwargs['planet'] = planet
+    if 'star' in kwargs:
+        kwargs['star'] = star
+    if 'chemistry' in kwargs:
+        kwargs['chemistry'] = gas
+    if 'temperature_profile' in kwargs:
+        kwargs['temperature_profile'] =temperature
+    if 'pressure_profile' in kwargs:
+        kwargs['pressure_profile'] = pressure
     log.debug('New Model kwargs {}'.format(kwargs))
     log.debug('Creating model---------------')
     
