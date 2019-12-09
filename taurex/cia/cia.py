@@ -9,6 +9,9 @@ import numpy as np
 
 class CIA(Logger):
     """
+
+    *Abstract class*
+
     This is the base class for collisionally induced absorption opacities.
     To function in Taurex3, it requires concrete implementations of:
         - :func:`wavenumberGrid`
@@ -23,7 +26,7 @@ class CIA(Logger):
         Name to use for logging
 
     pair_name : str
-        pair of molecules this class represents. e.g. 'H2-H2' or 'H2-HE'
+        pair of molecules this class represents. e.g. 'H2-H2' or 'H2-He'
 
     """
 
