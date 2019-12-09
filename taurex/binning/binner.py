@@ -33,8 +33,8 @@ class Binner(Logger):
 
         spectrum: :obj:`array`
             The spectra we wish to bin-down. Must be same shape as
-            ``wngrid``. 
-        
+            ``wngrid``.
+
         grid_width: :obj:`array`, optional
             Wavenumber grid full-widths for the spectrum to be binned down.
             Must be same shape as ``wngrid``.
@@ -55,7 +55,7 @@ class Binner(Logger):
 
         spectrum: :obj:`array`
             Binned spectrum.
-        
+
         grid_width: :obj:`array`
             New grid-widths
 
@@ -92,7 +92,7 @@ class Binner(Logger):
         See :func:`bindown`
 
 
-        """        
+        """
         return self.bindown(model_output[0], model_output[1])
 
     def generate_spectrum_output(self, model_output,
@@ -101,7 +101,7 @@ class Binner(Logger):
         Given a forward model output, generate a dictionary
         that can be used to store to file. This can include
         storing the native and binned spectrum.
-        Not necessary for the function of the class but useful for 
+        Not necessary for the function of the class but useful for
         full intergation into TauREx3, especially when storing results
         from a retrieval. 
         Can be overwritten to store more information.

@@ -75,7 +75,7 @@ class SimpleBinner(Binner):
 
         """
         return self._wngrid, bindown(wngrid, spectrum, self._wngrid), \
-               None, self._wn_width
+            None, self._wn_width
 
     def generate_spectrum_output(self, model_output,
                                  output_size=OutputSize.heavy):

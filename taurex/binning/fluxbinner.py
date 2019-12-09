@@ -141,12 +141,13 @@ class FluxBinner(Binner):
             spect_min = old_spect_min[save_start:save_stop+1]
             spect_max = old_spect_max[save_start:save_stop+1]
 
-            weight = (np.minimum(wn_max, spect_max) - np.maximum(spect_min,
-                                                                 wn_min))/(wn_max-wn_min)
+            weight = (np.minimum(wn_max, spect_max) -
+                      np.maximum(spect_min, wn_min))/(wn_max-wn_min)
 
             sum_weight = np.sum(weight)
 
-            sum_spectrum = np.sum(weight*old_spect_flux[..., save_start:save_stop+1],
+            sum_spectrum = np.sum(weight *
+                                  old_spect_flux[..., save_start:save_stop+1],
                                   axis=-1)
 
             if error is not None:
