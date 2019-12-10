@@ -14,7 +14,6 @@ class TemperatureArray(TemperatureProfile):
 
         self._tp_profile = np.array(tp_array)
 
-
     @property
     def profile(self):
 
