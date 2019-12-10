@@ -72,12 +72,17 @@ def contribute_tau(startK, endK, density_offset, sigma, density, path, nlayers,
 
 class Contribution(Fittable, Logger, Writeable):
     """
+
+    *Abstract class*
+
     The base class for modelling contributions to the optical depth.
     By default this handles contributions from cross-sections.
     If the type of contribution being implemented is a `sigma`-type
-    like the form given in :func:`contribute_tau` then all you need
-    to do it implement :func:`prepare_each` in order to make this
-    functional. Otherwise different forms require reimplementing
+    like the form given in :func:`contribute_tau` then
+    To function in Taurex3, it only requires the concrete implementation of:
+    - :func:`prepare_each`
+
+    Different forms may require reimplementing
     :func:`contribute` as well as :func:`prepare`
 
     Parameters
@@ -118,8 +123,6 @@ class Contribution(Fittable, Logger, Writeable):
                    density_offset, layer, density, tau, path_length=None):
         """
         Computes an integral for a single layer for the optical depth.
-        Uses :func:`~taurex.contributions.contribution.contribute_tau` to
-        perform the integration
 
         Parameters
         ----------
@@ -240,5 +243,12 @@ class Contribution(Fittable, Logger, Writeable):
         return self.sigma_xsec
 
     def write(self, output):
+        """
+        Writes contribution to file
+
+        Parameters
+        ----------
+        output: :class:`~taurex.output.output.Output`
+        """
         contrib = output.create_group(self.__class__.__name__)
         return contrib
