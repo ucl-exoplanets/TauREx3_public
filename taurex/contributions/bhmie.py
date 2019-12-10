@@ -1,6 +1,5 @@
 from .contribution import Contribution, contribute_tau
 import numpy as np
-import math
 from taurex.data.fittable import fitparam
 from taurex.external.mie import bh_mie
 
@@ -141,8 +140,8 @@ class BHMieContribution(Contribution):
     def contribute(self, model, start_layer, end_layer, density_offset,
                    layer, density, tau, path_length=None):
         """
-        Contributes to optical depth between cloud pressures: ``bh_clouds_topP``
-        and ``bh_clouds_bottomP``
+        Contributes to optical depth between cloud pressures:
+        ``bh_clouds_topP`` and ``bh_clouds_bottomP``
 
         """
         if model.pressureProfile[layer] <= self._cloud_bottom_pressure and \

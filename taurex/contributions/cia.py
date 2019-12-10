@@ -14,7 +14,8 @@ def contribute_cia(startK, endK, density_offset, sigma, density, path, nlayers,
 
     .. math::
 
-        \\tau_{\\lambda}(z) = \\int_{z_{0}}^{z_{1}} \\sigma(z') \\rho(z')^{2} dz',
+        \\tau_{\\lambda}(z) = \\int_{z_{0}}^{z_{1}}
+            \\sigma(z') \\rho(z')^{2} dz',
 
     where :math:`z` is the layer, :math:`z_0` and :math:`z_1` are ``startK``
     and ``endK`` respectively. :math:`\\sigma` is the weighted
