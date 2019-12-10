@@ -315,7 +315,7 @@ class SimpleForwardModel(ForwardModel):
             contrib_name = contrib.name
             contrib_res_list = []
             
-            for name,sig in contrib.prepare_each(self,native_grid):
+            for name,__ in contrib.prepare_each(self,native_grid):
                 self.info('\t%s---%s contribtuion',contrib_name,name)
                 absorp,tau = self.path_integral(native_grid,False)
                 contrib_res_list.append((name,absorp,tau,None))
