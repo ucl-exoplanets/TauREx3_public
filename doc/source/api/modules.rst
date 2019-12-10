@@ -4,4 +4,16 @@ Taurex API Documentation
 .. toctree::
    :maxdepth: 4
 
-   taurex
+   taurex.binning
+   taurex.cache
+   taurex.cia
+   taurex.contributions
+   taurex.chemistry
+   taurex.pressure
+   taurex.log
+   taurex.model
+   taurex.opacity
+   taurex.optimizer
+   taurex.output
+   taurex.parameter
+   taurex.util

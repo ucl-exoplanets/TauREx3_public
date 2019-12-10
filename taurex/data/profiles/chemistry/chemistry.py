@@ -7,6 +7,8 @@ from taurex.output.writeable import Writeable
 
 class Chemistry(Fittable, Logger, Writeable):
     """
+    *Abstract Class*
+
     Skeleton for defining chemistry. Must implement
     methods:
 
