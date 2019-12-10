@@ -16,7 +16,7 @@ class AbsorptionContribution(Contribution):
 
     def prepare_each(self, model, wngrid):
         """
-        Prepares each molecular cross-section by weighting them
+        Prepares each molecular opacity by weighting them
         by their mixing ratio in the atmosphere
 
         Parameters
@@ -30,7 +30,7 @@ class AbsorptionContribution(Contribution):
         Yields
         ------
         component: :obj:`tuple` of type (str, :obj:`array`)
-            Name of molecule and weighted cross-section
+            Name of molecule and weighted opacity
 
         """
 
