@@ -4,7 +4,7 @@ from taurex.data.fittable import fitparam,Fittable
 import numpy as np
 from taurex.util.emission import black_body
 from taurex.output.writeable import Writeable
-class BlackbodyStar(Fittable,Logger,Writeable):
+class Star(Fittable, Logger, Writeable):
     """
     A base class that holds information on the star in the model.
     Its implementation is a star that has a blackbody spectrum.
@@ -79,7 +79,7 @@ class BlackbodyStar(Fittable,Logger,Writeable):
             Wavenumber grid cm-1 to compute black body spectrum
         
         """
-        self.sed = black_body(wngrid,self.temperature)
+        self.sed = black_body(wngrid, self.temperature)
     
 
     @property
@@ -107,3 +107,7 @@ class BlackbodyStar(Fittable,Logger,Writeable):
         star.write_scalar('mass_kg', self._mass)
         return star
 
+
+class BlackbodyStar(Star):
+    pass
+"""Alias for the base star type"""
