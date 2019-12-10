@@ -109,5 +109,5 @@ class Star(Fittable, Logger, Writeable):
 
 
 class BlackbodyStar(Star):
+    """Alias for the base star type"""
     pass
-"""Alias for the base star type"""
