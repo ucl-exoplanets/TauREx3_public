@@ -20,7 +20,7 @@ class PressureProfile(Fittable, Logger, Writeable):
 
     name: str
         Name used in logging
-    
+
     nlayers: int
         Number of layers in atmosphere
 

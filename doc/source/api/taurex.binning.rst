@@ -1,7 +1,7 @@
 Binning Module (``taurex.binning``)
 ===================================
 
-The classes here deal with binning spectra down to different resolutions. 
+The classes here deal with binning spectra down to different resolutions.
 These exist within the ``taurex.binning`` namespace
 
 

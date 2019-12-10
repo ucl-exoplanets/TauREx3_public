@@ -279,7 +279,6 @@ class ACEChemistry(Chemistry):
     def aceCORatio(self, value):
         self.ace_co = value
 
-
     def write(self, output):
 
         gas_entry = super().write(output)
@@ -292,13 +291,13 @@ class ACEChemistry(Chemistry):
 
         return gas_entry
 
-
-
-    def compute_mu_profile(self,nlayers):
-        self.mu_profile= np.zeros(shape=(nlayers,))
+    def compute_mu_profile(self, nlayers):
+        self.mu_profile = np.zeros(shape=(nlayers,))
         if self.activeGasMixProfile is not None:
             for idx, gasname in enumerate(self.activeGases):
-                self.mu_profile += self.activeGasMixProfile[idx,:]*self._molecule_weight[gasname]
+                self.mu_profile += self.activeGasMixProfile[idx, :] * \
+                    self._molecule_weight[gasname]
         if self.inactiveGasMixProfile is not None:
             for idx, gasname in enumerate(self.inactiveGases):
-                self.mu_profile += self.inactiveGasMixProfile[idx,:]*self._molecule_weight[gasname]
+                self.mu_profile += self.inactiveGasMixProfile[idx, :] * \
+                    self._molecule_weight[gasname]

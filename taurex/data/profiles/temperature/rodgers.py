@@ -67,7 +67,7 @@ class Rodgers2000(TemperatureProfile):
         Correlation length in scale heights
         """
         return self._tp_corr_length
-    
+
     @correlationLength.setter
     def correlationLength(self, value):
         self._tp_corr_length = value

@@ -7,7 +7,7 @@ class Guillot2010(TemperatureProfile):
     """
 
     TP profile from Guillot 2010, A&A, 520, A27 (equation 49)
-    Using modified 2stream approx. 
+    Using modified 2stream approx.
     from Line et al. 2012, ApJ, 749,93 (equation 19)
 
 
@@ -27,8 +27,7 @@ class Guillot2010(TemperatureProfile):
 
     """
 
-
-    def __init__(self, T_irr=1500, kappa_irr=0.01, kappa_v1=0.005, 
+    def __init__(self, T_irr=1500, kappa_irr=0.01, kappa_v1=0.005,
                  kappa_v2=0.005, alpha=0.5):
         super().__init__('Guillot')
 
@@ -88,7 +87,6 @@ class Guillot2010(TemperatureProfile):
 
     @meanOpticalOpacity2.setter
     def meanOpticalOpacity2(self, value):
-        #self.kappa_v2 = np.power(10,value)
         self.kappa_v2 = value
 
     @fitparam(param_name='alpha', param_latex='$\\alpha$',
@@ -104,7 +102,7 @@ class Guillot2010(TemperatureProfile):
     @property
     def profile(self):
         """
-        
+
         Returns a guillot temperature temperature profile
 
         Returns
@@ -143,9 +141,9 @@ class Guillot2010(TemperatureProfile):
 
     def write(self, output):
         temperature = super().write(output)
-        temperature.write_scalar('T_irr',self.T_irr)
-        temperature.write_scalar('kappa_irr',self.kappa_ir)
-        temperature.write_scalar('kappa_v1',self.kappa_v1)
-        temperature.write_scalar('kappa_v2',self.kappa_v2)
-        temperature.write_scalar('alpha',self.alpha)
+        temperature.write_scalar('T_irr', self.T_irr)
+        temperature.write_scalar('kappa_irr', self.kappa_ir)
+        temperature.write_scalar('kappa_v1', self.kappa_v1)
+        temperature.write_scalar('kappa_v2', self.kappa_v2)
+        temperature.write_scalar('alpha', self.alpha)
         return temperature

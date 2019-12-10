@@ -1,38 +1,7 @@
-taurex.data.profiles.temperature package
-========================================
+Temperature (``taurex.temperature``)
+====================================
 
-Submodules
-----------
-
-taurex.data.profiles.temperature.guillot module
------------------------------------------------
-
-.. automodule:: taurex.data.profiles.temperature.guillot
-   :members:
-   :undoc-members:
-   :show-inheritance:
-taurex.data.profiles.temperature.isothermal module
---------------------------------------------------
-
-.. automodule:: taurex.data.profiles.temperature.isothermal
-   :members:
-   :undoc-members:
-   :show-inheritance:
-taurex.data.profiles.temperature.npoint module
-----------------------------------------------
-
-.. automodule:: taurex.data.profiles.temperature.npoint
-   :members:
-   :undoc-members:
-   :show-inheritance:
-taurex.data.profiles.temperature.rodgers module
------------------------------------------------
-
-.. automodule:: taurex.data.profiles.temperature.rodgers
-   :members:
-   :undoc-members:
-   :show-inheritance:
-taurex.data.profiles.temperature.tprofile module
+Base
 ------------------------------------------------
 
 .. automodule:: taurex.data.profiles.temperature.tprofile
@@ -41,10 +10,50 @@ taurex.data.profiles.temperature.tprofile module
    :show-inheritance:
 
 
-Module contents
----------------
+Isothermal
+--------------------------------------------------
 
-.. automodule:: taurex.data.profiles.temperature
+.. automodule:: taurex.data.profiles.temperature.isothermal
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Two-stream approximation (Guillot)
+-----------------------------------------------
+
+.. automodule:: taurex.data.profiles.temperature.guillot
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Multi Point
+----------------------------------------------
+
+.. automodule:: taurex.data.profiles.temperature.npoint
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Rodgers
+-----------------------------------------------
+
+.. automodule:: taurex.data.profiles.temperature.rodgers
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Array
+-----------------------------------------------
+
+.. automodule:: taurex.data.profiles.temperature.temparray
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+File
+-----------------------------------------------
+
+.. automodule:: taurex.data.profiles.temperature.file
    :members:
    :undoc-members:
    :show-inheritance:

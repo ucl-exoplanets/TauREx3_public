@@ -9,7 +9,7 @@ class Isothermal(TemperatureProfile):
     Parameters
     ----------
 
-    iso_temp : float
+    T : float
         Isothermal Temperature to set
 
     """
@@ -18,7 +18,6 @@ class Isothermal(TemperatureProfile):
         super().__init__('Isothermal')
 
         self._iso_temp = T
-
 
     @fitparam(param_name='T',
               param_latex='$T$',

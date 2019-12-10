@@ -9,6 +9,7 @@ Taurex API Documentation
    taurex.cia
    taurex.contributions
    taurex.chemistry
+   taurex.temperature
    taurex.pressure
    taurex.log
    taurex.model

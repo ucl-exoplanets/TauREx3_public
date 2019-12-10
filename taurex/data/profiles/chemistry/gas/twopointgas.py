@@ -2,15 +2,15 @@ from .gas import Gas
 from taurex.util import molecule_texlabel
 import math
 import numpy as np
+
+
 class TwoPointGas(Gas):
     """
 
     Two point gas profile.
 
-    A gas profile with two different mixing layers at the surface of the planet and
-    top of the atmosphere and interpolated between the two
-
-
+    A gas profile with two different mixing layers at the surface of the
+    planet and top of the atmosphere and interpolated between the two
 
     Parameters
     -----------
@@ -56,7 +56,6 @@ class TwoPointGas(Gas):
         """Abundance on the top of atmosphere"""
         return self._mix_top
 
-
     @mixRatioSurface.setter
     def mixRatioSurface(self, value):
         self._mix_surface = value
@@ -86,7 +85,7 @@ class TwoPointGas(Gas):
 
         default_fit = False
         self.add_fittable_param(param_surface, param_surf_tex, fget_surf,
-                                fset_surf, 'log',default_fit, bounds)
+                                fset_surf, 'log', default_fit, bounds)
 
     def add_top_param(self):
 

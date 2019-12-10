@@ -35,10 +35,10 @@ class ChemistryFile(Chemistry):
         for i, g in enumerate(self._gases):
             if g in self.molecules_i_have:
                 active.append(g)
-                active_profile.append(self._mix_ratios[i,:])
+                active_profile.append(self._mix_ratios[i, :])
             else:
                 inactive.append(g)
-                inactive_profile.append(self._mix_ratios[i,:])
+                inactive_profile.append(self._mix_ratios[i, :])
 
         self.active_gases = active
         self.inactive_gases = inactive

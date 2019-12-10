@@ -112,7 +112,7 @@ class Chemistry(Fittable, Logger, Writeable):
         """
         **Requires implementation**
 
-        Should return profiles of shape ``(ninactivegases,nlayers)``. 
+        Should return profiles of shape ``(ninactivegases,nlayers)``.
         These general refer to gases: ``H2``, ``He`` and ``N2``
 
 
