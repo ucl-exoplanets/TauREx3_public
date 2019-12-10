@@ -89,6 +89,12 @@ class FlatMieContribution(Contribution):
         wngrid: :obj:`array`
             Wavenumber grid
 
+        Yields
+        ------
+        component: :obj:`tuple` of type (str, :obj:`array`)
+            ``Flat`` and the weighted mie opacity.
+
+
         """
         self._nlayers = model.nLayers
         self._ngrid = wngrid.shape[0]
@@ -101,7 +107,7 @@ class FlatMieContribution(Contribution):
 
         top_pressure = self.mieTopPressure
         if top_pressure < 0:
-            top_pressure = pressure_profile[-1]   
+            top_pressure = pressure_profile[-1]
 
         sigma_xsec = np.zeros(shape=(self._nlayers, wngrid.shape[0]))
 

@@ -122,6 +122,12 @@ class CIAContribution(Contribution):
         wngrid: :obj:`array`
             Wavenumber grid
 
+
+        Yields
+        ------
+        component: :obj:`tuple` of type (str, :obj:`array`)
+            Molecular pair and the weighted cia opacity.
+
         """
 
         self._total_cia = len(self.ciaPairs)

@@ -104,7 +104,7 @@ class BHMieContribution(Contribution):
         Pressure at top of cloud deck in Pa
         """
         return self._cloud_top_pressure
-    
+
     @cloudTopPressure.setter
     def cloudTopPressure(self, value):
         self._cloud_top_pressure = value
@@ -194,7 +194,7 @@ class BHMieContribution(Contribution):
     def prepare_each(self, model, wngrid):
         """
         Interpolates the precomputed mie scattering opacity to the desired
-        wavelength grid
+        wavelength grid. Yields only once
 
         Parameters
         ----------
@@ -204,6 +204,11 @@ class BHMieContribution(Contribution):
         wngrid: :obj:`array`
             Wavenumber grid
 
+        Yields
+        ------
+        component: :obj:`tuple` of type (str, :obj:`array`)
+            ``BH`` and the weighted mie opacity.
+
         """
         self._nlayers = model.nLayers
         self._ngrid = wngrid.shape[0]
@@ -211,7 +216,7 @@ class BHMieContribution(Contribution):
         self.sigma_mie = np.interp(wngrid, self.wavenumberGrid,
                                    self._sig_out_aver)*self._mix_cloud_mix
 
-        yield 'Mie', self.sigma_mie
+        yield 'BH', self.sigma_mie
 
     def write(self, output):
         contrib = super().write(output)

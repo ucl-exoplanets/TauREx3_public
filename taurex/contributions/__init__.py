@@ -1,10 +1,6 @@
 """
 Modules that deal with computing contributions to optical depth
 """
-
-
-
-
 from .contribution import Contribution, contribute_tau
 from .absorption import AbsorptionContribution
 from .cia import CIAContribution, contribute_cia
