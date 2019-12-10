@@ -81,6 +81,7 @@ class Contribution(Fittable, Logger, Writeable):
     If the type of contribution being implemented is a `sigma`-type
     like the form given in :func:`contribute_tau` then
     To function in Taurex3, it only requires the concrete implementation of:
+
     - :func:`prepare_each`
 
     Different forms may require reimplementing
