@@ -4,10 +4,14 @@ from taurex.data.fittable import fitparam
 import numpy as np
 import math
 from taurex.cache import OpacityCache
+
+
 class ACEChemistry(Chemistry):
     """
     Equilibrium chemistry
-    Computes chemical profile using the Aerotherm Chemical Equilibrium (ACE) Fortran code
+    Computes chemical profile using the Aerotherm Chemical Equilibrium (ACE)
+    Fortran code by 
+    Agúndez, M., Venot, O., Iro, N., et al. 2012, AandA, 548,A73
 
     Parameters
     ----------
