@@ -11,8 +11,9 @@ class Gas(Fittable, Logger, Writeable):
     :class:`~taurex.data.profile.chemistry.taurexchemistry.TaurexChemistry`
     is used to build a chemical profile of the planets atmosphere.
     Requires implementation of:
-        - func:`~mixProfile`
-    
+
+    - func:`~mixProfile`
+
 
     Parameters
     -----------

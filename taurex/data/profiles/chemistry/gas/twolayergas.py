@@ -1,7 +1,8 @@
 from .gas import Gas
-from taurex.util import molecule_texlabel,movingaverage
-import math
+from taurex.util import movingaverage, molecule_texlabel
 import numpy as np
+
+
 class TwoLayerGas(Gas):
     """
 
@@ -50,8 +51,8 @@ class TwoLayerGas(Gas):
 
         Returns
         -------
-        mix_ratio: :obj:`array`
-            Mix ratio for every layer
+        mix: :obj:`array`
+            Mix ratio for molecule at each layer
 
         """
         return self._mix_profile
@@ -113,7 +114,7 @@ class TwoLayerGas(Gas):
         bounds = [1.0e-12, 0.1]
 
         default_fit = False
-        self.add_fittable_param(param_surface, param_surf_tex, fget_surf, 
+        self.add_fittable_param(param_surface, param_surf_tex, fget_surf,
                                 fset_surf, 'log', default_fit, bounds)
 
     def add_top_param(self):
@@ -176,6 +177,7 @@ class TwoLayerGas(Gas):
         P_layer = np.abs(pressure_profile - self._mix_ratio_pressure).argmin()
 
         start_layer = max(int(P_layer-smooth_window/2), 0)
+
         end_layer = min(int(P_layer+smooth_window/2), nlayers-1)
 
         Pnodes = [pressure_profile[0], pressure_profile[start_layer],
@@ -189,11 +191,16 @@ class TwoLayerGas(Gas):
                                     np.log10(Cnodes[::-1]))
 
         wsize = nlayers * (smooth_window / 100.0)
+
         if (wsize % 2 == 0):
             wsize += 1
+
         C_smooth = 10**movingaverage(np.log10(chemprofile), int(wsize))
+
         border = np.int((len(chemprofile) - len(C_smooth)) / 2)
+
         self._mix_profile = chemprofile[::-1]
+
         self._mix_profile[border:-border] = C_smooth[::-1]
 
     def write(self, output):

@@ -1,7 +1,8 @@
 from .chemistry import Chemistry
 import numpy as np
-import math
 from taurex.cache import OpacityCache
+
+
 class ChemistryFile(Chemistry):
     """
     Chemistry profile read from file
@@ -9,18 +10,16 @@ class ChemistryFile(Chemistry):
     Parameters
     ----------
 
-    
     gases : :obj:`list`
         Gases in file
-    
+
     filename : str
         filename for mix ratios
 
 
     """
 
-
-    def __init__(self,gases=None,filename=None):
+    def __init__(self, gases=None, filename=None):
         super().__init__(self.__class__.__name__)
 
         self._gases = gases
@@ -33,7 +32,7 @@ class ChemistryFile(Chemistry):
         inactive = []
         inactive_profile = []
 
-        for i,g in enumerate(self._gases):
+        for i, g in enumerate(self._gases):
             if g in self.molecules_i_have:
                 active.append(g)
                 active_profile.append(self._mix_ratios[i,:])
@@ -47,10 +46,6 @@ class ChemistryFile(Chemistry):
         self.active_mixratio_profile = np.array(active_profile)
         self.inactive_mixratio_profile = np.array(inactive_profile)
 
-
-
-
-
     @property
     def activeGases(self):
         """Returns names of actively absorbing molecules
@@ -59,11 +54,11 @@ class ChemistryFile(Chemistry):
         -------
 
         active : :obj:`list` of str
-            List of molecules    
+            List of molecules
 
         """
         return self.active_gases
-    
+
     @property
     def inactiveGases(self):
         """Returns names of molecules not actively absorbing
@@ -72,11 +67,11 @@ class ChemistryFile(Chemistry):
         -------
 
         inactive : :obj:`list` of str
-            List of molecules    
+            List of molecules
 
         """
         return self.inactive_gases
-    
+
     @property
     def activeGasMixProfile(self):
         """
@@ -87,7 +82,7 @@ class ChemistryFile(Chemistry):
 
         mix_profile :  :obj:`array`
             Array of shape ``(nactivegases,nlayers)``
-        
+
 
         """
         return self.active_mixratio_profile
@@ -102,17 +97,13 @@ class ChemistryFile(Chemistry):
 
         mix_profile :  :obj:`array`
             Array of shape ``(ninactivegases,nlayers)``
-        
-        
+
         """
         return self.inactive_mixratio_profile
 
-
-
-    def write(self,output):
-
+    def write(self, output):
         gas_entry = super().write(output)
-        gas_entry.write_scalar('metallicity',self.ace_metallicity)
-        gas_entry.write_scalar('co_ratio',self.ace_co)
+        gas_entry.write_scalar('metallicity', self.ace_metallicity)
+        gas_entry.write_scalar('co_ratio', self.ace_co)
 
         return gas_entry
