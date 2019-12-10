@@ -44,14 +44,6 @@ class FlatMieContribution(Contribution):
         self._mie_mix = value
 
 
-
-    def build(self, model):
-        pass
-    
-
-    def finalize(self, model):
-        raise NotImplementedError
-
     def prepare_each(self, model, wngrid):
         self._nlayers = model.nLayers
         self._ngrid = wngrid.shape[0]
