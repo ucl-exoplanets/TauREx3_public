@@ -2,30 +2,34 @@ from .tprofile import TemperatureProfile
 import numpy as np
 from taurex.data.fittable import fitparam
 
+
 class Guillot2010(TemperatureProfile):
     """
 
     TP profile from Guillot 2010, A&A, 520, A27 (equation 49)
-    Using modified 2stream approx. from Line et al. 2012, ApJ, 749,93 (equation 19)
+    Using modified 2stream approx. 
+    from Line et al. 2012, ApJ, 749,93 (equation 19)
 
 
     Parameters
     -----------
-        T_irr: :obj:`float` 
-            planet equilibrium temperature (Line fixes this but we keep as free parameter)
-        kappa_ir: :obj:`float`
+        T_irr: float
+            planet equilibrium temperature
+            (Line fixes this but we keep as free parameter)
+        kappa_ir: float
             mean infra-red opacity
-        kappa_v1: :obj:`float` 
+        kappa_v1: float
             mean optical opacity one
-        kappa_v2: :obj:`float` 
+        kappa_v2: float
             mean optical opacity two
-        alpha: :obj:`float` 
+        alpha: float
             ratio between kappa_v1 and kappa_v2 downwards radiation stream
 
     """
 
 
-    def __init__(self,T_irr=1500,kappa_irr=0.01,kappa_v1=0.005,kappa_v2=0.005,alpha=0.5):
+    def __init__(self, T_irr=1500, kappa_irr=0.01, kappa_v1=0.005, 
+                 kappa_v2=0.005, alpha=0.5):
         super().__init__('Guillot')
 
         self.T_irr = T_irr
