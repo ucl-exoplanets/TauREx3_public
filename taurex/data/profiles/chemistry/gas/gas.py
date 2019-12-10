@@ -1,10 +1,13 @@
 from taurex.log import Logger
-from taurex.data.fittable import Fittable,fitparam
+from taurex.data.fittable import Fittable
 from taurex.output.writeable import Writeable
 
 
 class Gas(Fittable, Logger, Writeable):
     """
+
+    *Abstract Class*
+
     This class is a base for a single molecule or gas.
     Its used to describe how it mixes at each layer and combined
     with
