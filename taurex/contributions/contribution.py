@@ -245,7 +245,7 @@ class Contribution(Fittable, Logger, Writeable):
 
     def write(self, output):
         """
-        Writes contribution to file
+        Writes contribution class and arguments to file
 
         Parameters
         ----------

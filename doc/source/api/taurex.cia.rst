@@ -1,24 +1,24 @@
-taurex.cia package
-==================
+CIA (``taurex.cia``)
+====================
 
-Submodules
-----------
-
-taurex.cia.cia module
+Base Class
 ---------------------
 
 .. automodule:: taurex.cia.cia
    :members:
    :undoc-members:
    :show-inheritance:
-taurex.cia.hitrancia module
+
+HITRAN CIA (``.cia``)
 ---------------------------
 
 .. automodule:: taurex.cia.hitrancia
    :members:
    :undoc-members:
    :show-inheritance:
-taurex.cia.picklecia module
+
+
+Pickle CIA (``.db``)
 ---------------------------
 
 .. automodule:: taurex.cia.picklecia
@@ -26,11 +26,3 @@ taurex.cia.picklecia module
    :undoc-members:
    :show-inheritance:
 
-
-Module contents
----------------
-
-.. automodule:: taurex.cia
-   :members:
-   :undoc-members:
-   :show-inheritance:

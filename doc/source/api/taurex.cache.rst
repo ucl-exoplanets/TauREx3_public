@@ -25,14 +25,3 @@ CIACache
    :members:
    :undoc-members:
    :show-inheritance:
-
-
-
-
-Module contents
----------------
-
-.. automodule:: taurex.cache
-   :members:
-   :undoc-members:
-   :show-inheritance:
