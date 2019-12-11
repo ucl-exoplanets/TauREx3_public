@@ -1,6 +1,6 @@
 from .array import ArraySpectrum
 import numpy as np
-from taurex.util.util import wnwidth_to_wlwidth 
+from taurex.util.util import wnwidth_to_wlwidth
 
 
 class TaurexSpectrum(ArraySpectrum):

@@ -1,5 +1,5 @@
-from taurex.log import Logger
 import logging
+from taurex.log import Logger
 import numpy as np
 from taurex.output.writeable import Writeable
 
@@ -21,7 +21,8 @@ class LightCurveData(Logger, Writeable):
             return cls(lc_data, 'twinkle', (0.4, 4.5))
         else:
             log.error(
-                'LightCurve of instrument {} not recognized or implemented'.format(name))
+                'LightCurve of instrument %s not recognized'
+                ' or implemented', name)
             raise KeyError
 
     def __init__(self, lc_data, instrument_name, wavelength_region):
@@ -29,8 +30,8 @@ class LightCurveData(Logger, Writeable):
         self._instrument_name = instrument_name
         # new version
         if self._instrument_name not in lc_data:
-            self.error('Instrument with key {} not found in pickled lightcurve file'.format(
-                self._instrument_name))
+            self.error('Instrument with key %s not found in pickled lightcurve'
+                       ' file', self._instrument_name)
             raise KeyError()
 
         self._wavelength_region = wavelength_region

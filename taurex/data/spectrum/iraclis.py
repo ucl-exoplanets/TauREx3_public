@@ -21,7 +21,7 @@ class IraclisSpectrum(ArraySpectrum):
                 database = pickle.load(f)
         except UnicodeDecodeError:
             with open(filename, 'rb') as f:
-                database = pickle.load(f, encoding='latin1')    
+                database = pickle.load(f, encoding='latin1')
 
         wl = database['spectrum']['wavelength']
         td = database['spectrum']['depth']

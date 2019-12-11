@@ -81,7 +81,7 @@ class BaseSpectrum(Logger, Writeable):
 
         """
         raise NotImplementedError
-    
+
     @property
     def wavenumberGrid(self):
         """
@@ -123,7 +123,6 @@ class BaseSpectrum(Logger, Writeable):
 
         """
         raise NotImplementedError
-
 
     @property
     def errorBar(self):
