@@ -5,11 +5,9 @@ import numpy as np
 import logging
 
 
-
 class ObsLightCurveTest(unittest.TestCase):
 
-
-    def create_instrument(self,num_elems,instruments):
+    def create_instrument(self, num_elems, instruments):
         import pickle
 
         inst_dict = {
@@ -20,101 +18,96 @@ class ObsLightCurveTest(unittest.TestCase):
         }
 
         lc_dict = {}
-        lc_dict['obs_spectrum'] = np.random.rand(num_elems,10)
+        lc_dict['obs_spectrum'] = np.random.rand(num_elems, 10)
         for ins in instruments:
             lc_dict[ins] = {}
-            lc_dict[ins]['data'] = np.random.rand(num_elems,num_elems,4)
-            lc_dict[ins]['wl_grid'] = inst_dict.get(ins,np.random.rand(num_elems))
-        return lc_dict,pickle.dumps(lc_dict)
-
-    
+            lc_dict[ins]['data'] = np.random.rand(num_elems, num_elems, 4)
+            lc_dict[ins]['wl_grid'] = inst_dict.get(
+                ins, np.random.rand(num_elems))
+        return lc_dict, pickle.dumps(lc_dict)
 
     def test_init(self):
-        
-        data,pickled = self.create_instrument(40,['wfc3'])
 
-        
+        data, pickled = self.create_instrument(40, ['wfc3'])
+
         with patch("builtins.open", mock_open(read_data=pickled)) as mock_file:
             obs = ObservedLightCurve('testdata')
-        
-
 
     def test_instruments(self):
-        
-        data,pickled = self.create_instrument(40,['wfc3'])
 
-        
+        data, pickled = self.create_instrument(40, ['wfc3'])
+
         with patch("builtins.open", mock_open(read_data=pickled)) as mock_file:
             obs = ObservedLightCurve('testdata')
-        
-        self.assertEqual(obs.spectrum.shape[0],40)
 
-        self.assertEqual(obs.errorBar.shape[0],40)
+        self.assertEqual(obs.spectrum.shape[0], 40)
 
+        self.assertEqual(obs.errorBar.shape[0], 40)
 
-        data,pickled = self.create_instrument(40,['wfc3','spitzer'])
+        data, pickled = self.create_instrument(40, ['wfc3', 'spitzer'])
 
-        
         with patch("builtins.open", mock_open(read_data=pickled)) as mock_file:
-            obs = ObservedLightCurve('testdata')        
+            obs = ObservedLightCurve('testdata')
 
-        self.assertEqual(obs.spectrum.shape[0],80)
+        self.assertEqual(obs.spectrum.shape[0], 80)
 
-        data,pickled = self.create_instrument(40,['wfc3','spitzer','stis'])
+        data, pickled = self.create_instrument(40, ['wfc3', 'spitzer', 'stis'])
 
-        
         with patch("builtins.open", mock_open(read_data=pickled)) as mock_file:
-            obs = ObservedLightCurve('testdata')        
+            obs = ObservedLightCurve('testdata')
 
-        self.assertEqual(obs.spectrum.shape[0],120)
+        self.assertEqual(obs.spectrum.shape[0], 120)
 
+        data, pickled = self.create_instrument(
+            40, ['wfc3', 'spitzer', 'stis', 'unknown'])
 
-        data,pickled = self.create_instrument(40,['wfc3','spitzer','stis','unknown'])
-
-        
         with patch("builtins.open", mock_open(read_data=pickled)) as mock_file:
-            obs = ObservedLightCurve('testdata')        
+            obs = ObservedLightCurve('testdata')
 
-        self.assertEqual(obs.spectrum.shape[0],120)
+        self.assertEqual(obs.spectrum.shape[0], 120)
 
-    
     def test_ordering(self):
-        
-        data,pickled = self.create_instrument(40,['wfc3'])
+
+        data, pickled = self.create_instrument(40, ['wfc3'])
         with patch("builtins.open", mock_open(read_data=pickled)) as mock_file:
-            obs = ObservedLightCurve('testdata')     
+            obs = ObservedLightCurve('testdata')
 
-        np.testing.assert_equal(data['wfc3']['data'][:40,:,0],obs.spectrum)
+        np.testing.assert_equal(data['wfc3']['data'][:40, :, 0], obs.spectrum)
 
-        data,pickled = self.create_instrument(40,['wfc3','spitzer'])
+        data, pickled = self.create_instrument(40, ['wfc3', 'spitzer'])
         with patch("builtins.open", mock_open(read_data=pickled)) as mock_file:
-            obs = ObservedLightCurve('testdata')     
+            obs = ObservedLightCurve('testdata')
 
-        np.testing.assert_equal(data['wfc3']['data'][:40,:,0],obs.spectrum[40:])
-        np.testing.assert_equal(data['spitzer']['data'][:40,:,0],obs.spectrum[:40])
+        np.testing.assert_equal(
+            data['wfc3']['data'][:40, :, 0], obs.spectrum[40:])
+        np.testing.assert_equal(
+            data['spitzer']['data'][:40, :, 0], obs.spectrum[:40])
 
-
-
-        data,pickled = self.create_instrument(40,['wfc3','spitzer','stis'])
+        data, pickled = self.create_instrument(40, ['wfc3', 'spitzer', 'stis'])
         with patch("builtins.open", mock_open(read_data=pickled)) as mock_file:
-            obs = ObservedLightCurve('testdata')     
+            obs = ObservedLightCurve('testdata')
 
+        np.testing.assert_equal(
+            data['stis']['data'][:40, :, 0], obs.spectrum[80:])
+        np.testing.assert_equal(
+            data['spitzer']['data'][:40, :, 0], obs.spectrum[:40])
+        np.testing.assert_equal(
+            data['wfc3']['data'][:40, :, 0], obs.spectrum[40:80])
 
-
-        np.testing.assert_equal(data['stis']['data'][:40,:,0],obs.spectrum[80:])
-        np.testing.assert_equal(data['spitzer']['data'][:40,:,0],obs.spectrum[:40])
-        np.testing.assert_equal(data['wfc3']['data'][:40,:,0],obs.spectrum[40:80])
-
-        data,pickled = self.create_instrument(40,['spitzer','stis'])
+        data, pickled = self.create_instrument(40, ['spitzer', 'stis'])
         with patch("builtins.open", mock_open(read_data=pickled)) as mock_file:
-            obs = ObservedLightCurve('testdata')     
+            obs = ObservedLightCurve('testdata')
 
-        np.testing.assert_equal(data['spitzer']['data'][:40,:,0],obs.spectrum[0:40])
-        np.testing.assert_equal(data['stis']['data'][:40,:,0],obs.spectrum[40:])
+        np.testing.assert_equal(
+            data['spitzer']['data'][:40, :, 0], obs.spectrum[0:40])
+        np.testing.assert_equal(
+            data['stis']['data'][:40, :, 0], obs.spectrum[40:])
 
-        data,pickled = self.create_instrument(40,['wfc3','stis'])
+        data, pickled = self.create_instrument(40, ['wfc3', 'stis'])
         with patch("builtins.open", mock_open(read_data=pickled)) as mock_file:
-            obs = ObservedLightCurve('testdata')     
+            obs = ObservedLightCurve('testdata')
 
-        np.testing.assert_equal(data['wfc3']['data'][:40,:,0],obs.spectrum[0:40])
-        np.testing.assert_equal(data['stis']['data'][:40,:,0],obs.spectrum[40:])
+        np.testing.assert_equal(
+            data['wfc3']['data'][:40, :, 0], obs.spectrum[0:40])
+        np.testing.assert_equal(
+            data['stis']['data'][:40, :, 0], obs.spectrum[40:])

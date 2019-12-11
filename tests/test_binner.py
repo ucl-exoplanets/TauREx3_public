@@ -62,8 +62,6 @@ class FluxBinnerTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             fb = FluxBinner(np.linspace(300.0, 30000.0, 500), np.ones(450)*0.5)
 
-
-
     def test_binning(self):
 
         fake_bins = np.array([[1.5, 0.1], [3.0, 0.1], [4.5, 0.1]])
@@ -76,16 +74,13 @@ class FluxBinnerTest(unittest.TestCase):
         fb_small = FluxBinner(fake_bins[:, 0], fake_bins[:, 1])
         fb_big = FluxBinner(spaced_fake_bins[:], 0.1)
 
-
         res_small = fb_small.bindown(fake_spectra[:, 0], fake_spectra[:, 1],
-                         error=fake_spectra[:, 2])
+                                     error=fake_spectra[:, 2])
         res_big = fb_big.bindown(fake_spectra[:, 0], fake_spectra[:, 1],
-                         error=fake_spectra[:, 2])
+                                 error=fake_spectra[:, 2])
 
         for val in res_small[1]:
             self.assertIn(val, res_big[1])
-
-
 
     def test_binning_2d(self):
 
@@ -96,14 +91,11 @@ class FluxBinnerTest(unittest.TestCase):
 
         fake_spectra[:, 0] = np.linspace(0.5, 50, 1000)
 
-        spectra2d = np.random.rand(2000).reshape(2,1000)
-
+        spectra2d = np.random.rand(2000).reshape(2, 1000)
 
         fb_small = FluxBinner(fake_bins[:, 0], fake_bins[:, 1])
 
-        res = fb_small.bindown(fake_spectra[:,0],spectra2d)
+        res = fb_small.bindown(fake_spectra[:, 0], spectra2d)
 
-        self.assertEqual(res[1].shape[0],2)
-        self.assertEqual(res[1].shape[-1],fake_bins.shape[0])
-
-        
+        self.assertEqual(res[1].shape[0], 2)
+        self.assertEqual(res[1].shape[-1], fake_bins.shape[0])
