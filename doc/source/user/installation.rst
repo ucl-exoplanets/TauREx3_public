@@ -2,8 +2,6 @@
 
 .. _installation:
 
-
-
 ============
 Installation
 ============
@@ -57,8 +55,6 @@ To build documentation do::
     python setup.py build_sphinx
 
 The output can be found in the ``doc/build`` directory
-
-
 
 Dependencies
 ------------

@@ -34,8 +34,15 @@ For developers, TauREx3 provides a rich library of classes to
 build your own programs and any new atmospheric parameters you
 create can be used in the standalone program like it was always there!
 
-
 If you use TauREx 3 in you work, please see the guide to :ref:`Citations`.
+
+-----------------------------------
+
+Want to install it? Head here: :ref:`installation`
+
+Want to jump into the ``taurex`` program? Head here: :ref:`quickstart`
+
+Want to try out the library? Try here: :ref:`library`
 
 
 .. |image1| image::  _static/taurex_logo.png

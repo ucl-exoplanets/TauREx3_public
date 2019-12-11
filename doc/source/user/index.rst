@@ -1,8 +1,10 @@
 
-===========
-User Guide
-===========
+===========================
+TauREx |version| User Guide
+===========================
 
+This guide covers general installation, using
+the standalone ``taurex`` program and the library
 
 .. toctree::
     :maxdepth: 6
