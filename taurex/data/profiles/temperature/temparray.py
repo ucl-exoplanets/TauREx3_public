@@ -16,7 +16,6 @@ class TemperatureArray(TemperatureProfile):
 
     @property
     def profile(self):
-
         """Returns an isothermal temperature profile
 
         Returns: :obj:np.array(float)

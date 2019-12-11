@@ -98,6 +98,7 @@ class SimplePressureProfile(PressureProfile):
         maximum pressure in Pascal (surface of planet)
 
     """
+
     def __init__(self, nlayers=100,
                  atm_min_pressure=1e-4,
                  atm_max_pressure=1e6):

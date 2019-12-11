@@ -119,7 +119,7 @@ class ACEChemistry(Chemistry):
         import taurex.external
 
         path_to_files = os.path.join(os.path.abspath(
-                        os.path.dirname(taurex.external.__file__)), 'ACE')
+            os.path.dirname(taurex.external.__file__)), 'ACE')
         self._specfile = spec_file
         self._thermfile = therm_file
         if self._specfile is None:
@@ -221,7 +221,6 @@ class ACEChemistry(Chemistry):
 
     def initialize_chemistry(self, nlayers=100, temperature_profile=None,
                              pressure_profile=None, altitude_profile=None):
-
         """
         Sets up and and constructs chemical profiles. Called by forward
         model before path calculation

@@ -59,6 +59,7 @@ class TaurexChemistry(Chemistry):
 
 
     """
+
     def __init__(self, fill_gases=['H2', 'He'], ratio=0.17567):
         super().__init__('ChemistryModel')
 

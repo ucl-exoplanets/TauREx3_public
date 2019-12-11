@@ -13,12 +13,25 @@ class Star(Fittable, Logger, Writeable):
 
 
     Parameters
-    -----------
-    temperature : float
-        Blackbody temperature in Kelvin
+    ----------
 
-    radius : float
-        Stellar radius in terms of Solar radius
+    temperature: float, optional
+        Stellar temperature in Kelvin
+
+    radius: float, optional
+        Stellar radius in Solar radius
+
+    metallicity: float, optional
+        Metallicity in solar values
+
+    mass: float, optional
+        Stellar mass in solar mass
+
+    distance: float, optional
+        Distance from Earth in pc
+
+    magnitudeK: float, optional
+        Maginitude in K band
 
 
     """
@@ -44,7 +57,7 @@ class Star(Fittable, Logger, Writeable):
 
         Returns
         -------
-        R : float
+        R: float
 
         """
         return self._radius
@@ -56,7 +69,7 @@ class Star(Fittable, Logger, Writeable):
 
         Returns
         -------
-        T : float
+        T: float
 
         """
         return self._temperature
@@ -75,7 +88,7 @@ class Star(Fittable, Logger, Writeable):
 
         Parameters
         ----------
-        wngrid : :obj:`array`
+        wngrid: :obj:`array`
             Wavenumber grid cm-1 to compute black body spectrum
 
         """
@@ -88,7 +101,7 @@ class Star(Fittable, Logger, Writeable):
 
         Returns
         -------
-        sed : :obj:`array`
+        sed: :obj:`array`
         """
         return self.sed
 

@@ -11,12 +11,15 @@ class PhoenixStar(BlackbodyStar):
     A star that uses the `PHOENIX <https://www.aanda.org/articles/aa/abs/2013/05/aa19058-12/aa19058-12.html>`_
     synthetic stellar atmosphere spectrums.
 
-    These spectrums are read from ``.fmt`` files in a directory given by
+    These spectrums are read from ``.gits.gz`` files in a directory given by
     ``phoenix_path``
     Each file must contain the spectrum for one temperature
 
     Parameters
     ----------
+
+    phoenix_path: str, **required**
+        Path to folder containing phoenix ``fits.gz`` files
 
     temperature: float, optional
         Stellar temperature in Kelvin
@@ -33,8 +36,8 @@ class PhoenixStar(BlackbodyStar):
     distance: float, optional
         Distance from Earth in pc
 
-    phoenix_path : str
-        Path to folder containing phoenix ``fits.gz`` files
+    magnitudeK: float, optional
+        Maginitude in K band
 
 
     Raises
