@@ -8,4 +8,3 @@ Developers guide
 
     Overview <overview>
     Guidelines <guidelines>
-    Temperature Profiles
