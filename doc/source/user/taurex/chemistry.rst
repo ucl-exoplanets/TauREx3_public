@@ -12,29 +12,47 @@ The available ``chemistry_type`` are:
     - ``ace``
         - ACE equlibrium chemistry
         - Class: :class:`~taurex.data.profiles.chemistry.acechemistry.ACEChemistry`
-        - Alt: ``equilibrium``
+
     - ``taurex``
-        - Custom chemistry
+        - Free chemistry
         - Class: :class:`~taurex.data.profiles.chemistry.taurexchemistry.TaurexChemistry`
+    
+    - ``custom``
+        - User-provided chemistry
 
 
-
+========================
 ACE Equlibrium Chemistry
 ========================
 ``chemistry_type = ace``
-
+``chemistry_type = equilibrium``
 
 Equilibrium chemistry using the ACE FORTRAN program.
 
-The variables available are:
-    - ``metallicity``
-        - float
-        - Stellar metallicity in solar units
-        - Default: ``metallicity = 1.0``
-    - ``co_ratio``
-        - float
-        - C/O ratio
-        - Default: ``co_ratio=0.54951``
+--------
+Keywords
+--------
+
++-----------------+--------------+------------------------------------+---------------+
+| Variable        | Type         | Description                        | Default Value |
++-----------------+--------------+------------------------------------+---------------+
+| ``metallicity`` | :obj:`float` | Stellar metallicity in solar units | 1.0           |
++-----------------+--------------+------------------------------------+---------------+
+| ``co_ratio``    | :obj:`float` | C/O ratio                          | 0.54951       |
++-----------------+--------------+------------------------------------+---------------+
+
+
+------------------
+Fitting Parameters
+------------------
+
++---------------------+--------------+------------------------------------+
+| Parameter           | Type         | Description                        |
++---------------------+--------------+------------------------------------+
+| ``ace_metallicity`` | :obj:`float` | Stellar metallicity in solar units |
++---------------------+--------------+------------------------------------+
+| ``ace_co``          | :obj:`float` | C/O ratio                          |
++---------------------+--------------+------------------------------------+
 
 Taurex Chemistry
 ===========================

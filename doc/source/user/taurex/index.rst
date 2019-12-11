@@ -19,6 +19,7 @@ a help can be accessed by doing::
 
     quickstart
     inputfile
+    custom
     global
     chemistry
     temperature

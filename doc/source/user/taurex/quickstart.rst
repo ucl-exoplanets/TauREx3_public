@@ -157,7 +157,7 @@ using the ``-o`` output argument::
     taurex -i quickstart.par --plot -c -o myfile.hdf5
 
 ``HDF5`` has many viewers such as HDFView_ or HDFCompass_ and APIs such as Cpp_, FORTRAN_ and Python_.
-Pick your poison.
+Pick your poison. We can put these
 
 
 Retrieval
