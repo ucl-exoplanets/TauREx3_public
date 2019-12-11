@@ -9,4 +9,4 @@ scripts!
 .. toctree::
     :maxdepth: 3
 
-    Example <example>
+    Quickstart <quickstart>
