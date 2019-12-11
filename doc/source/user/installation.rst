@@ -10,30 +10,29 @@ Installation
 
 TauREx3 only works with Python 3. If you need to use Python 2.7 consider using TauREx2_.
 
-
 Prerequisites
 ~~~~~~~~~~~~~
 
-- numpy_
-
-    - Specifically ``numpy.f2py`` to compile Fortran extensions
-
-- cython_
-
-    - Required to compile C++ extensions
-
-- Fortran and C++ compilers
-
-    - For Windows this can be easily achieved using Anaconda3 and doing ``conda install libpython m2w64-toolchain``
-
+The only prerequisite is numpy_.
 All other prerequisites are downloaded and installed automatically.
+
+Installing from PyPi
+~~~~~~~~~~~~~~~~~~~~
+
+Simply do::
+
+    pip install taurex
+
+To test for correct setup you can do::
+
+    python -c "import taurex"
 
 Installing from git source directly (platform-independent)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 You can clone TauREx3 from our main git repository::
 
-    git clone https://github.com/ucl-exoplanets/TauREx3.git
+    git clone https://github.com/ucl-exoplanets/Taurex3_public.git
 
 Move into the TauREx3 folder::
 
@@ -41,19 +40,20 @@ Move into the TauREx3 folder::
 
 Then, just do::
 
-    pip install -e .
+    pip install .
 
 To test for correct setup you can do::
 
     python -c "import taurex"
 
-If no errors appeared then it was successfuly installed. Additionally the ``taurex`` program 
-should now be available in the command line::
+If no errors appeared then it was successfuly installed.
+Additionally the ``taurex`` program should now be available
+in the command line::
 
     taurex
 
 To build documentation do::
-    
+
     python setup.py build_sphinx
 
 The output can be found in the ``doc/build`` directory
@@ -63,7 +63,7 @@ The output can be found in the ``doc/build`` directory
 Dependencies
 ------------
 
-numpy_ and cython_ are the bare minimum required to install TauREx3.
+numpy_ is the bare minimum required to install TauREx3.
 Additionally these packages are also download and installed during setup:
 
 - numba_
@@ -72,12 +72,12 @@ Additionally these packages are also download and installed during setup:
 - nestle_ for basic retrieval
 - h5py_ for output
 
-TauREx3 also includes 'extras' that can be enabled by installing 
-additional dependancies:
+TauREx3 also includes 'extras' that can be enabled by
+installing additional dependancies:
 
 - Lightcurve modelling requires pylightcurve_
 
-- Plotting using ``taurex --plot`` requires matplotlib_
+- Plotting using ``taurex-plot`` requires matplotlib_
 
 - Retrieval using Multinest_ requires pymultinest_
 
@@ -85,7 +85,13 @@ additional dependancies:
 
     - The dynamic version requires dypolychord_ as well
 
+Other extras (like equilibrium chemistry)
+use external FORTRAN and C++ code. They
+require cython_ before installation to compile. Additionally
+a FORTRAN compiler and/or C++ compiler must be installed.
 
+.. tip::
+    For Windows this can be easily achieved using Anaconda3 and doing ``conda install libpython m2w64-toolchain``
 
 
 .. _numpy: http://numpy.org/
