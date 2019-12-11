@@ -14,14 +14,23 @@ class LightCurveDataTest(unittest.TestCase):
     def create_instrument(self,instruments,num_elems,num_timeseries):
         import pickle
 
+        inst_dict = {
+            'wfc3': np.linspace(1.1, 1.8, num_elems),
+            'spitzer': np.linspace(3.4, 8.2, num_elems),
+            'stis': np.linspace(0.3, 1.0, num_elems),
+            'twinkle': np.linspace(0.4, 4.5, num_elems),
+        }
+
         lc_dict = {}
-        lc_dict['time_series'] = {}
-        lc_dict['data']={}
+        lc_dict['obs_spectrum'] = np.random.rand(num_elems,10)
         for ins in instruments:
-            lc_dict['time_series'][ins] = np.random.rand(num_timeseries)
-            lc_dict['data'][ins] = np.random.rand(num_elems*2,num_timeseries)
-        
-        return lc_dict,pickle.dumps(lc_dict)    
+            lc_dict[ins] = {}
+            lc_dict[ins]['time_series'] = np.random.rand(num_timeseries)
+            lc_dict[ins]['data'] = np.random.rand(num_elems,num_elems,4)
+            lc_dict[ins]['wl_grid'] = inst_dict.get(ins,np.random.rand(num_elems))
+        return lc_dict, pickle.dumps(lc_dict)
+
+
 
     
     def test_init(self):
@@ -69,15 +78,29 @@ class LightCurveTest(unittest.TestCase):
     def create_lc_pickle(self,instruments,num_elems,num_timeseries):
         import pickle
 
+        inst_dict = {
+            'wfc3': np.linspace(1.1, 1.8, num_elems),
+            'spitzer': np.linspace(3.4, 8.2, num_elems),
+            'stis': np.linspace(0.3, 1.0, num_elems),
+            'twinkle': np.linspace(0.4, 4.5, num_elems),
+        }
+
         lc_dict = {}
-        lc_dict['time_series'] = {}
-        lc_dict['data']={}
+        lc_dict['obs_spectrum'] = np.random.rand(num_elems,10)
         for ins in instruments:
-            lc_dict['time_series'][ins] = np.random.rand(num_timeseries)
-            lc_dict['data'][ins] = np.random.rand(num_elems*2,num_timeseries)
-        lc_dict['ld_coeff'] = np.random.rand(num_elems,4)
-        lc_dict['corr_orbital'] = np.random.rand(6)
-        return lc_dict,pickle.dumps(lc_dict)    
+            lc_dict[ins] = {}
+            lc_dict[ins]['time_series'] = np.random.rand(num_timeseries)
+            lc_dict[ins]['data'] = np.random.rand(num_elems,num_elems,4)
+            lc_dict[ins]['wl_grid'] = inst_dict.get(ins,np.random.rand(num_elems))
+            lc_dict[ins]['ld_coeff'] = np.random.rand(num_elems,4)
+        lc_dict['orbital_info'] = {}
+        lc_dict['orbital_info']['mt'] = 1.0
+        lc_dict['orbital_info']['i'] = 1.0
+        lc_dict['orbital_info']['period'] = 1.0
+        lc_dict['orbital_info']['periastron'] = 1.0
+        lc_dict['orbital_info']['sma_over_rs'] = 1.0
+        lc_dict['orbital_info']['e'] = 1.0
+        return lc_dict, pickle.dumps(lc_dict)    
 
     def create_lightcurve(self,pickled):
         tm = TransmissionModel()
