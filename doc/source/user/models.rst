@@ -12,16 +12,6 @@ There are only four distinct forward ``model_type``:
         - Emission forward model
     - ``directimage``
         - Direct-image forward model
-    - ``mars``
-        - Mars forward model
-
-
-
-Mars
-----
-
-.. warning::
-    This will be completed once the current Mars branch is finished.
 
 
 
