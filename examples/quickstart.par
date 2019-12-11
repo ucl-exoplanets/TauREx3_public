@@ -1,6 +1,6 @@
 [Global]
-xsec_path = /Users/quentinc/Documents/UCL/TauREx3-master/TauREx3/Input/xsec/TauRex_sampled_xsecs_R10000_0.3-15
-cia_path = /Users/quentinc/Documents/UCL/TauREx3-master/TauREx3/Input/cia/HITRAN
+xsec_path = /path/to/xsec
+cia_path = /path/to/cia
 
 
 [Chemistry]
@@ -17,7 +17,7 @@ ratio = 4.8962e-2
     mix_ratio = 3.00739e-9
 
 [Temperature]
-profile_type = Isothermal
+profile_type = isothermal
 iso_temp = 1265.97764826
 
 [Pressure]
@@ -40,8 +40,6 @@ model_type = transmission
 
     [[Absorption]]
 
-[Spectrum]
-grid_type = native
 
 
 [Optimizer]
