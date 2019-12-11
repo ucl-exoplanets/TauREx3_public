@@ -15,6 +15,7 @@ Taurex API Documentation
    taurex.model
    taurex.opacity
    taurex.optimizer
+   taurex.spectrum
    taurex.output
    taurex.parameter
    taurex.util
