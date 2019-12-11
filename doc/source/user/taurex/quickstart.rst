@@ -40,24 +40,15 @@ And we should get:
 
    Our first forward model
 
-Lets try plotting it against our observation. Under the ``[Spectrum]`` header
+Lets try plotting it against our observation. Under the ``[Observation]`` header
 we can add in the ``observed_spectrum`` keyword and point it to our ``test_data.dat`` file like so::
 
-    [Spectrum]
+    [Observation]
     observed_spectrum = /path/to/test_data.dat
-    grid_type = observed
 
-The ``grid_type`` dictates which grid the forward model is binned on. The ``native`` keyword uses the
-most precise grid and wavenumber range from our cross-sections and ``observed`` uses the binning and range
-from our observed spectrum.
+Now the spectrum will be binned to our observation:
 
-.. list-table:: 
-
-    * - .. figure::  _static/fm_and_obs.png
-
-           ``grid_type = native``
-
-      - .. figure:: _static/fm_obs_bin.png
+.. figure:: _static/fm_obs_bin.png
 
            ``grid_type = observed``
 

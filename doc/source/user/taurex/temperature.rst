@@ -1,8 +1,8 @@
 .. _temperature:
 
-=================
+*****************
 ``[Temperature]``
-=================
+*****************
 
 This header is used to define temperature profiles for the atmosphere.
 The type of temperature profile is defined by the ``profile_type`` variable
@@ -25,8 +25,9 @@ The available ``profile_type`` are:
         - Class: :class:`~taurex.data.profiles.temperature.rodgers.Rodgers2000`
     
 
+
 Isothermal Profile
-------------------
+==================
 
 Constant temperature throughout atmosphere
 
@@ -35,7 +36,7 @@ Constant temperature throughout atmosphere
    :width: 80%
 
 Variables
-~~~~~~~~~
+---------
 
     - ``T``
         - float
@@ -43,14 +44,14 @@ Variables
         - Default: ``iso_temp = 1500.0``
 
 Fitting Parameters
-~~~~~~~~~~~~~~~~~~
+------------------
 
     - ``T``
         - float
         - Temperature in Kelvin
 
 Examples
-~~~~~~~~
+--------
 
 A basic isothermal profile::
 

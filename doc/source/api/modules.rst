@@ -2,7 +2,7 @@ Taurex API Documentation
 ========================
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 6
 
    taurex.binning
    taurex.cache
@@ -11,11 +11,6 @@ Taurex API Documentation
    taurex.chemistry
    taurex.temperature
    taurex.pressure
-   taurex.log
-   taurex.model
-   taurex.opacity
-   taurex.optimizer
+   taurex.stellar
    taurex.spectrum
-   taurex.output
-   taurex.parameter
-   taurex.util
+   taurex.model

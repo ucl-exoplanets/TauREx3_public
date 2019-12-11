@@ -12,18 +12,18 @@ a help can be accessed by doing::
 
     taurex --help
 
-.. toctree::
-    :maxdepth: 3
+------------------------------
 
-    Quickstart Guide <quickstart>
-    Input File <inputfile>
-    Global Settings <global>
-    Chemistry <chemistry>
-    Temperature <temperature>
-    Pressure <pressure>
-    Planet <planet>
-    Star <star>
-    Models <models>
-    Lightcurves <lightcurve>
-    Retrieval <retrieval>
-    Cheatsheet <cheatsheet>
+.. toctree::
+    :maxdepth: 6
+
+    quickstart
+    inputfile
+    global
+    chemistry
+    temperature
+    pressure
+    planet
+    star
+    models
+

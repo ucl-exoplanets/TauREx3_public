@@ -1,11 +1,11 @@
 
-==============================
+===========
 User Guide
-==============================
+===========
 
 
 .. toctree::
-    :maxdepth: 4
+    :maxdepth: 6
 
     Introduction <introduction>
     Installation <installation>
@@ -13,6 +13,4 @@ User Guide
     taurex program <taurex/index>
     Library <library/index>
 
-
-
-
+* :ref:`genindex`

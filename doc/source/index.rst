@@ -1,7 +1,7 @@
 .. toctree::
     :hidden:
     :titlesonly:
-    :maxdepth: 4
+    :maxdepth: 6
     :caption: Contents:
 
     User Guide <user/index>
