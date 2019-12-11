@@ -5,7 +5,7 @@ User Guide
 
 
 .. toctree::
-    :maxdepth: 3
+    :maxdepth: 4
 
     Introduction <introduction>
     Installation <installation>

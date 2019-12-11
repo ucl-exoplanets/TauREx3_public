@@ -37,10 +37,17 @@ Constant temperature throughout atmosphere
 Variables
 ~~~~~~~~~
 
-    - ``iso_temp``
+    - ``T``
         - float
         - Temperature in Kelvin
         - Default: ``iso_temp = 1500.0``
+
+Fitting Parameters
+~~~~~~~~~~~~~~~~~~
+
+    - ``T``
+        - float
+        - Temperature in Kelvin
 
 Examples
 ~~~~~~~~
@@ -49,7 +56,7 @@ A basic isothermal profile::
 
     [Temperature]
     profile_type = isothermal
-    iso_temp = 1500
+    T = 1500
 
 
 
@@ -63,7 +70,28 @@ Using modified 2stream approx. from Line et al. 2012, ApJ, 749,93 (equation 19)
    :align:   left
    :width: 80%
 
-Variables are:
+Variables
+~~~~~~~~~
+
+    - ``T_irr``
+        - float
+        - Planet equilibrium temperature
+    - ``kappa_ir``
+        - float
+        - mean infra-red opacity
+    - ``kappa_v1``
+        - float
+        - mean optical opacity one
+    - ``kappa_v2``
+        - float
+        - mean optical opacity two
+    - ``alpha``
+        - float
+        - ratio between kappa_v1 and kappa_v2 downwards radiation stream
+
+Fitting Parameters
+~~~~~~~~~~~~~~~~~~
+
     - ``T_irr``
         - float
         - Planet equilibrium temperature
