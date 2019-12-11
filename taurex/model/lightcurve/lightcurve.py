@@ -1,12 +1,10 @@
 from taurex.model import ForwardModel
 import numpy as np
-import math
-import pathlib
+
 import pickle
 import pylightcurve as plc
 from .lightcurvedata import LightCurveData
 from taurex.data.fittable import fitparam
-from taurex.binning import SimpleBinner, FluxBinner
 
 
 class LightCurveModel(ForwardModel):
@@ -66,11 +64,12 @@ class LightCurveModel(ForwardModel):
 
     def _load_ldcoeff(self):
         # new
-        #!# need attention here.
+
         self.ld_coeff_file = np.array([])
         for i in self._instruments:
             self.ld_coeff_file = np.append(
-                self.ld_coeff_file, self.lc_data[i.instrumentName]['ld_coeff']).reshape(-1, 4)
+                self.ld_coeff_file,
+                self.lc_data[i.instrumentName]['ld_coeff']).reshape(-1, 4)
         assert np.shape(self.ld_coeff_file)[
             1] == 4, "please use 4 ldcoeff law."
 
@@ -86,18 +85,9 @@ class LightCurveModel(ForwardModel):
             else:
                 self.info('Could not find {} in instrument keys'.format(ins))
         new_instrument_list = sorted(
-            self._instruments, key=lambda x: x.wavelengthRegion[0], reverse=True)
+            self._instruments, key=lambda x: x.wavelengthRegion[0],
+            reverse=True)
         self._instruments = new_instrument_list
-    # def _load_data_file(self,instruments):
-    #     """load data from different instruments."""
-
-    #     raw_data = []
-    #     data_std = []
-
-    #     for i in self.lc_data['data']:
-    #         # raw data includes data and datastd.
-    #         raw_data.append(self.lc_data['data'][i][:len(self.lc_data['data'][i])//2])
-    #         data_std.append(self.lc_data['data'][i][len(self.lc_data['data'][i])//2:])
 
     def _initialize_lightcurves(self):
 
@@ -127,7 +117,8 @@ class LightCurveModel(ForwardModel):
         self.modify_bounds('mid_transit_time', [min_time, max_time])
 
     @fitparam(param_name='sma_over_rs', param_latex='sma_over_rs',
-              default_mode='linear', default_fit=False, default_bounds=[1.001, 60.0])
+              default_mode='linear', default_fit=False,
+              default_bounds=[1.001, 60.0])
     def semiMajorAxisOverRs(self):
         return self.sma_over_rs
 
@@ -136,7 +127,8 @@ class LightCurveModel(ForwardModel):
         self.sma_over_rs = value
 
     @fitparam(param_name='mid_transit_time', param_latex='mid_transit_time',
-              default_mode='linear', default_fit=False, default_bounds=[1.001, 2.0])
+              default_mode='linear', default_fit=False,
+              default_bounds=[1.001, 2.0])
     def midTransitTime(self):
         return self.mid_time
 
@@ -145,7 +137,8 @@ class LightCurveModel(ForwardModel):
         self.mid_time = value
 
     @fitparam(param_name='inclination', param_latex='inclination',
-              default_mode='linear', default_fit=False, default_bounds=[40.0, 90.0])
+              default_mode='linear', default_fit=False,
+              default_bounds=[40.0, 90.0])
     def inclination(self):
         return self._inclination
 
@@ -189,9 +182,13 @@ class LightCurveModel(ForwardModel):
         import itertools
 
         ins_name = list(itertools.chain(
-            *tuple([[ins.instrumentName]*ins.minNFactors.shape[0] for ins in self._instruments])))
+            *tuple([[ins.instrumentName]*ins.minNFactors.shape[0]
+                    for ins in self._instruments])))
+
         ins_number = list(itertools.chain(
-            *tuple([list(range(ins.minNFactors.shape[0])) for ins in self._instruments])))
+            *tuple([list(range(ins.minNFactors.shape[0]))
+                   for ins in self._instruments])))
+
         for idx, val in enumerate(zip(ins_name, ins_number)):
             name, no = val
             param_name = 'Nfactor_{}'.format(idx)
@@ -208,7 +205,8 @@ class LightCurveModel(ForwardModel):
                 self._nfactor[idx] = value
 
             self.add_fittable_param(
-                param_name, param_latex, readN, writeN, default_mode, default_fit, default_bounds)
+                param_name, param_latex, readN, writeN, default_mode,
+                default_fit, default_bounds)
 
     def instrument_light_curve(self, model, wlgrid):
         """Combine light-curves from different instrucments together."""
@@ -227,10 +225,15 @@ class LightCurveModel(ForwardModel):
             min_wl, max_wl = ins.wavelengthRegion
             index = (wlgrid > min_wl) & (wlgrid < max_wl)
 
-            lc = self.light_curve_chain(model[index], time_array=ins.timeSeries, period=self.period,
-                                        sma_over_rs=sma_over_rs_value, eccentricity=self.ecc,
-                                        inclination=inclination_value, periastron=self.periastron,
-                                        mid_time=mid_time_value, ldcoeff=self.ld_coeff_file[index],
+            lc = self.light_curve_chain(model[index],
+                                        time_array=ins.timeSeries,
+                                        period=self.period,
+                                        sma_over_rs=sma_over_rs_value,
+                                        eccentricity=self.ecc,
+                                        inclination=inclination_value,
+                                        periastron=self.periastron,
+                                        mid_time=mid_time_value,
+                                        ldcoeff=self.ld_coeff_file[index],
                                         Nfactor=Nfactor[index])
             result.append(lc)
 
@@ -249,7 +252,8 @@ class LightCurveModel(ForwardModel):
                 self.debug('Using Transit')
                 transit_light_curve = plc.transit('claret', ldcoeff[n],
                                                   sqrt_model[n], period,
-                                                  sma_over_rs, eccentricity, inclination, periastron,
+                                                  sma_over_rs, eccentricity,
+                                                  inclination, periastron,
                                                   mid_time, time_array)
                 result.append(transit_light_curve * Nfactor[n])
             elif isinstance(self._forward_model, EmissionModel):
@@ -259,13 +263,14 @@ class LightCurveModel(ForwardModel):
                 self.debug('rp_over_rs %s', rp_over_rs)
                 self.debug('fp_over_fs %s', sqrt_model)
 
-                eclipse_light_curve = plc.eclipse(sqrt_model[n], rp_over_rs, period,
-                                                  sma_over_rs, eccentricity, inclination, periastron,
+                eclipse_light_curve = plc.eclipse(sqrt_model[n], rp_over_rs,
+                                                  period,
+                                                  sma_over_rs, eccentricity,
+                                                  inclination, periastron,
                                                   mid_time, time_array)
                 result.append(eclipse_light_curve * Nfactor[n])
 
         self.debug('Result %s', result)
-        # quit()
         return np.concatenate(result)
 
     def build(self):
@@ -281,7 +286,6 @@ class LightCurveModel(ForwardModel):
         return self._forward_model.nativeWavenumberGrid
 
     def model(self, wngrid=None, cutoff_grid=True):
-        from taurex.util.util import wnwidth_to_wlwidth
         """Computes the forward model for a wngrid"""
         # new
 
@@ -291,7 +295,8 @@ class LightCurveModel(ForwardModel):
         wlgrid = 10000/self._wngrid
         result = self.instrument_light_curve(binned_model[1], wlgrid)
 
-        return self._wngrid, result, tau, [native_grid, model, binned_model[1], extra]
+        return self._wngrid, result, tau, \
+            [native_grid, model, binned_model[1], extra]
 
     def compute_error(self, samples, wngrid=None, binner=None):
         from taurex.util.math import OnlineVariance
@@ -300,7 +305,7 @@ class LightCurveModel(ForwardModel):
         inactive_gases = OnlineVariance()
 
         lc_spectrum = OnlineVariance()
-        #tau_profile = OnlineVariance()
+
         native_spectrum = OnlineVariance()
         binned_spectrum = OnlineVariance()
 
@@ -308,7 +313,7 @@ class LightCurveModel(ForwardModel):
 
             grid, lc, tau, extra = self.model(wngrid=wngrid, cutoff_grid=False)
             native_grid, native, binned, _ = extra
-            # tau_profile.update(tau,weight=weight)
+
             tp_profiles.update(self.temperatureProfile, weight=weight)
             active_gases.update(
                 self.chemistry.activeGasMixProfile, weight=weight)
@@ -373,7 +378,8 @@ class LightCurveModel(ForwardModel):
         wlgrid = 10000/wngrid
         lc_contrib_res = {}
 
-        for contrib_name, contrib_list in contrib_res.items():  # Loop through each contribtuion
+        # Loop through each contribtuion
+        for contrib_name, contrib_list in contrib_res.items():
 
             lc_contrib_list = []
 
