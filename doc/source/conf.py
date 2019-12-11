@@ -19,7 +19,7 @@ import sys
 
 # -- Project information -----------------------------------------------------
 
-project = 'taurex'
+project = 'TauREx'
 copyright = '2019, Ahmed Al-Refaie, Quentin Changeat, Ingo Waldmann, Giovanna Tinneti'
 author = 'Ahmed Al-Refaie'
 
@@ -27,7 +27,7 @@ author = 'Ahmed Al-Refaie'
 version = ''
 sys.path.insert(0, os.path.abspath('../../'))
 # The full version, including alpha/beta/rc tags
-release = '3.0'
+release = '3.0.0-alpha'
 
 
 # -- General configuration ---------------------------------------------------
