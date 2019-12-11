@@ -1,12 +1,11 @@
 from taurex.log import Logger
 from taurex.constants import G, RJUP, MJUP, AU
 from .fittable import fitparam, Fittable
-import numpy as np
 from taurex.output.writeable import Writeable
 
 
 class Planet(Fittable, Logger, Writeable):
-    """Holds information on a planet and its properties and 
+    """Holds information on a planet and its properties and
     derived properties
 
     Parameters

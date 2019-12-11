@@ -187,7 +187,7 @@ class LightCurveModel(ForwardModel):
 
         ins_number = list(itertools.chain(
             *tuple([list(range(ins.minNFactors.shape[0]))
-                   for ins in self._instruments])))
+                    for ins in self._instruments])))
 
         for idx, val in enumerate(zip(ins_name, ins_number)):
             name, no = val

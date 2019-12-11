@@ -46,6 +46,7 @@ class SimpleForwardModel(ForwardModel):
         Pressure at BOA. Used if ``pressure_profile`` is not defined.
 
     """
+
     def __init__(self, name,
                  planet=None,
                  star=None,
@@ -494,9 +495,8 @@ class SimpleForwardModel(ForwardModel):
 
         for weight in samples():
 
-            native_grid, native, tau, _ = self.model(wngrid=wngrid, 
+            native_grid, native, tau, _ = self.model(wngrid=wngrid,
                                                      cutoff_grid=False)
-
 
             tp_profiles.update(self.temperatureProfile, weight=weight)
             active_gases.update(self.chemistry.activeGasMixProfile,

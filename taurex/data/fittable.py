@@ -149,7 +149,8 @@ class Fittable(object):
             Nicer name of the parameter. Referenced by the optimizer.
 
         param_latex: str
-            Latex version of the parameter name, useful in plotting and making figures
+            Latex version of the parameter name, useful in plotting and making
+            figures
 
         fget: function
             a function that returns the value of the parameter
@@ -161,7 +162,7 @@ class Fittable(object):
             Defines how the optimizer should read and write the parameter.
             ``linear`` reads/write everything as is.
             ``log`` informs the optimizer to transform from native->log space
-            when read and to transfrom log->native when writing. This also 
+            when read and to transfrom log->native when writing. This also
             applies to the boundaries
 
         default_fit: bool
@@ -215,9 +216,13 @@ class Fittable(object):
             New minimum and maximum fitting boundaries.
 
         """
-        name, latex, fget, fset, mode, to_fit, bounds = self._param_dict[parameter]
+        name, latex, fget, fset, mode, to_fit, bounds = \
+            self._param_dict[parameter]
+
         bounds = new_bounds
-        self._param_dict[parameter] = name, latex, fget, fset, mode, to_fit, bounds
+
+        self._param_dict[parameter] = \
+            name, latex, fget, fset, mode, to_fit, bounds
 
     def __getitem__(self, key):
         param = self._param_dict[key]
@@ -228,7 +233,7 @@ class Fittable(object):
         return self._param_dict[key][3](value)
 
     def find_fitparams(self):
-        """ 
+        """
         Finds and returns fitting parameters
 
         Yields
@@ -253,7 +258,8 @@ class Fittable(object):
         Returns
         -------
         params : :obj:`dict`
-            Dictionary with key as the parameter name (``param_name``) and value as a tuple with:
+            Dictionary with key as the parameter name (``param_name``) 
+            and value as a tuple with:
                 * parameter name
                 * parameter name in Latex form
                 * get function

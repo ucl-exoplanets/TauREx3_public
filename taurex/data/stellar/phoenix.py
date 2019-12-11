@@ -163,7 +163,8 @@ class PhoenixStar(BlackbodyStar):
         self._Z_list = np.array(
             [np.float(os.path.basename(k)[13:16]) for k in files])
         self._index_finder = NearestNDInterpolator(
-            (self._T_list, self._Logg_list, self._Z_list), np.arange(0, self._T_list.shape[0]))
+            (self._T_list, self._Logg_list, self._Z_list),
+            np.arange(0, self._T_list.shape[0]))
 
     # def preload_phoenix_spectra(self):
 
