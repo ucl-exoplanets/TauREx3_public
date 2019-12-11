@@ -20,8 +20,8 @@ The available ``chemistry_type`` are:
     - ``custom``
         - User-provided chemistry
 
+------------------------------------
 
-========================
 ACE Equlibrium Chemistry
 ========================
 ``chemistry_type = ace``
@@ -54,25 +54,54 @@ Fitting Parameters
 | ``ace_co``          | :obj:`float` | C/O ratio                          |
 +---------------------+--------------+------------------------------------+
 
+--------------------------------------
+
 Taurex Chemistry
 ===========================
 ``chemistry_type = taurex``
-
+``chemistry_type = free``
 
 This chemistry type allows you to define individual
 abundance profiles for each molecule. Molecules are either active or inactive depending on
 whats available. If no cross-sections are available then the moelcule is not actively absorbing.
 
-On its own it has the variables:
-    - ``fill_gases``
-        - str or :obj:`list`
-        - Gas or gases to fill the atmosphere with
-        - Default: ``fill_gases = H2,He,``
+--------
+Keywords
+--------
 
-    - ``ratio``
-        - float
-        - If a pair of fill gases are defined, then this is the ratio between the two
-        - Default: ``ratio = 0.17647``
++----------------+-----------------------------+---------------------------+---------+
+| Variable       | Type                        | Description               | Default |
++----------------+-----------------------------+---------------------------+---------+
+|                |                             | Gas or gases to fill the  | H2,He,  |
+| ``fill_gases`` | :obj:`str` or :obj:`list`   | atmosphere with           |         |
++----------------+-----------------------------+---------------------------+---------+
+|                |                             | Ratio between first fill  | 0.749   |
+| ``ratio``      | :obj:`float` or :obj:`list` | gas and every other fill  |         |
+|                |                             | gas                       |         |
++----------------+-----------------------------+---------------------------+---------+
+
+------------------
+Fitting Parameters
+------------------
+
+On its own, this chemistry model provides fitting parameters relating to the fill gases used.
+These are only created when more than one fill gas is defined.
+Here, we use ``[Gas-0]`` to designate the first gas defined in the fill gas list and
+``[Gas-(number)]`` to designate the nth gas after the main gas. If we have a
+gas list like::
+
+    fill_gases = H2,He,CO2,
+
+then ``[Gas-1]_[Gas-0] == He_H2``
+
++-----------------------+-----------------------------+---------------------------+
+| Parameter             | Type                        | Description               |
++-----------------------+-----------------------------+---------------------------+
+|                       |                             |                           |
+| ``[Gas-(n)]_[Gas-0]`` | :obj:`float`                | Ratio of nth fill gas     |
+|                       |                             | vs first fill gas         |
++-----------------------+-----------------------------+---------------------------+
+
 
 However molecules are defined as *subheaders* with the subheader being the name of the molecule.
 Each molecule can be assigned an abundance profile through the ``gas_type`` variable.
@@ -81,6 +110,7 @@ is simply done like so::
 
     [Chemistry]
     chemistry_type = taurex
+    fill_gases = H2,He,
     ratio = 0.1524
 
         [[H2O]]
@@ -100,9 +130,24 @@ For each molecule, the available ``gas_type`` are:
         - Two layer abundance profile
         - Class: :class:`~taurex.data.profiles.chemistry.gas.twolayergas.TwoLayerGas`
 
+-----------------------------------------
+
+
+Gas Profiles
+============
+
+For these profiles, the fitting parameters generated have
+the name associated with the name of the molecule. For example:
+``H2O_P``, ``CH4_S`` etc. Because of this, we will use the moniker:
+``[Mol]``. Replacing this with the appropriate molecule will give you
+the correct fitting parameter name.
+e.g. ``[Mol]_surface`` in a should be ``H2O_surface`` for water etc.
+
+
 
 Constant Profile
-----------------
+================
+
 ``gas_type = constant``
 
 An abundance profile that is constant with height of the atmosphere
@@ -111,34 +156,30 @@ An abundance profile that is constant with height of the atmosphere
    :align:   left
    :width: 80%
 
-Variables are:
-    - ``mix_ratio``
-        - float
-        - The abundance for every layer in the atmosphere
 
-Two Point Profile
------------------
-``gas_type = twopoint``
+--------
+Keywords
+--------
++---------------+-----------------------------+---------------------------+---------+
+| Variable      | Type                        | Description               | Default |
++---------------+-----------------------------+---------------------------+---------+
+| ``mix_ratio`` | :obj:`float`                | Mixing ratio of molecule  | 1e-4    |
++---------------+-----------------------------+---------------------------+---------+
 
-An abundance profile where abundance is defined on the planet surface and top of
-the atmosphere and interpolated
+------------------
+Fitting Parameters
+------------------
 
-.. figure::  _static/twopointgas.png
-   :align:   left
-   :width: 80%
++-----------+-----------------------------+---------------------------+
+| Parameter | Type                        | Description               |
++-----------+-----------------------------+---------------------------+
+| ``[Mol]`` | :obj:`float`                | Mixing ratio of molecule  |
++-----------+-----------------------------+---------------------------+
 
-Variables are:
-    - ``mix_ratio_surface``
-        - float
-        - Abundance on the planet surface
-    - ``mix_ratio_top``
-        - float
-        - Abundance on the top of that atmosphere
-
-
+--------------------------------------
 
 Two Layer Profile
------------------
+=================
 ``gas_type = twolayer``
 
 An abundance profile where abundance is defined on the planet surface and top of
@@ -149,16 +190,64 @@ Smoothing is applied.
    :align:   left
    :width: 80%
 
-Variables are:
-    - ``mix_ratio_surface``
-        - float
-        - Abundance on the planet surface
-    - ``mix_ratio_top``
-        - float
-        - Abundance on the top of that atmosphere
-    - ``mix_ratio_P``
-        - float
-        - Pressure point that seperates the top and surface
-    - ``mix_ratio_smoothing``
-        - int
-        - Smoothing window
+
+--------
+Keywords
+--------
+
++-------------------------+--------------+------------------------+---------+
+| Variable                | Type         | Description            | Default |
++-------------------------+--------------+------------------------+---------+
+| ``mix_ratio_surface``   | :obj:`float` | Mixing ratio at BOA    | 1e-4    |
++-------------------------+--------------+------------------------+---------+
+| ``mix_ratio_top``       |              | Mixing ratio at TOA    | 1e-8    |
+|                         | :obj:`float` |                        |         |
++-------------------------+--------------+------------------------+---------+
+| ``mix_ratio_P``         | :obj:`float` | Pressure boundary (Pa) | 1e3     |
++-------------------------+--------------+------------------------+---------+
+| ``mix_ratio_smoothing`` | :obj:`int`   | Smoothing window       | 10      |
++-------------------------+--------------+------------------------+---------+
+
+------------------
+Fitting Parameters
+------------------
+
++-------------------+--------------+------------------------+
+| Parameter         | Type         | Description            |
++-------------------+--------------+------------------------+
+| ``[Mol]_surface`` | :obj:`float` | Mixing ratio at BOA    |
++-------------------+--------------+------------------------+
+| ``[Mol]_top``     | :obj:`float` | Mixing ratio at TOA    |
++-------------------+--------------+------------------------+
+| ``[Mol]_P``       | :obj:`float` | Pressure boundary (Pa) |
++-------------------+--------------+------------------------+
+
+.. Two Point Profile
+.. =================
+.. ``gas_type = twopoint``
+
+.. An abundance profile where abundance is defined on the planet surface and top of
+.. the atmosphere and interpolated
+
+.. .. figure::  _static/twopointgas.png
+..    :align:   left
+..    :width: 80%
+
+.. Variables are:
+..     - ``mix_ratio_surface``
+..         - float
+..         - Abundance on the planet surface
+..     - ``mix_ratio_top``
+..         - float
+..         - Abundance on the top of that atmosphere
+
+.. --------
+.. Keywords
+.. --------
+
+
+.. ------------------
+.. Fitting Parameters
+.. ------------------
+
+

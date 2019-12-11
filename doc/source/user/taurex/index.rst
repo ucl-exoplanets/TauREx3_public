@@ -15,16 +15,16 @@ a help can be accessed by doing::
 ------------------------------
 
 .. toctree::
-    :maxdepth: 6
+    :maxdepth: 4
 
-    quickstart
-    inputfile
-    custom
-    global
-    chemistry
-    temperature
-    pressure
-    planet
-    star
-    models
+    Quickstart <quickstart>
+    Input File Format <inputfile>
+    Custom Models <custom>
+    Global Settings <global>
+    Chemistry <chemistry>
+    Temperature <temperature>
+    Pressure <pressure>
+    Planet <planet>
+    Star <star>
+    Forward Models <models>
 
