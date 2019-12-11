@@ -10,18 +10,8 @@ User Guide
     Introduction <introduction>
     Installation <installation>
     Supported Data Formats <support_data_formats>
-    Quickstart Guide <quickstart>
-    Input File <inputfile>
-    Global Settings <global>
-    Chemistry <chemistry>
-    Temperature <temperature>
-    Pressure <pressure>
-    Planet <planet>
-    Star <star>
-    Models <models>
-    Lightcurves <lightcurve>
-    Retrieval <retrieval>
-    Cheatsheet <cheatsheet>
+    taurex program <taurex/index>
+    Library <library/index>
 
 
 
