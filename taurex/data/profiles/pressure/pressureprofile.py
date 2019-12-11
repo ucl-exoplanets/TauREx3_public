@@ -116,7 +116,7 @@ class SimplePressureProfile(PressureProfile):
         # set pressure profile of layer boundaries
         press_exp = np.linspace(np.log(self._atm_min_pressure),
                                 np.log(self._atm_max_pressure),
-                                self._nlevels)
+                                self.nLevels)
         self.pressure_profile_levels = np.exp(press_exp)[::-1]
 
         # get mid point pressure between levels (i.e. get layer pressure)
