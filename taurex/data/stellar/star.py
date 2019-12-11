@@ -1,9 +1,11 @@
 from taurex.log import Logger
-from taurex.constants import G,RJUP,MJUP,RSOL,MSOL
-from taurex.data.fittable import fitparam,Fittable
+from taurex.constants import G, RJUP, MJUP, RSOL, MSOL
+from taurex.data.fittable import fitparam, Fittable
 import numpy as np
 from taurex.util.emission import black_body
 from taurex.output.writeable import Writeable
+
+
 class Star(Fittable, Logger, Writeable):
     """
     A base class that holds information on the star in the model.
@@ -14,7 +16,7 @@ class Star(Fittable, Logger, Writeable):
     -----------
     temperature : float
         Blackbody temperature in Kelvin
-    
+
     radius : float
         Stellar radius in terms of Solar radius
 
@@ -46,7 +48,7 @@ class Star(Fittable, Logger, Writeable):
 
         """
         return self._radius
-    
+
     @property
     def temperature(self):
         """
@@ -63,13 +65,11 @@ class Star(Fittable, Logger, Writeable):
     def temperature(self, value):
         self._temperature = value
 
-
-
     @property
     def mass(self):
         return self._mass
 
-    def initialize(self,wngrid):
+    def initialize(self, wngrid):
         """
         Initializes the blackbody spectrum on the given wavenumber grid
 
@@ -77,10 +77,9 @@ class Star(Fittable, Logger, Writeable):
         ----------
         wngrid : :obj:`array`
             Wavenumber grid cm-1 to compute black body spectrum
-        
+
         """
         self.sed = black_body(wngrid, self.temperature)
-    
 
     @property
     def spectralEmissionDensity(self):
