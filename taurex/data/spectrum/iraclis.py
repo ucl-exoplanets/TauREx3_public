@@ -2,21 +2,15 @@ from .array import ArraySpectrum
 import numpy as np
 import pickle
 
+
 class IraclisSpectrum(ArraySpectrum):
     """
-    Loads an observed spectrum from a text file and computes bin
-    edges and bin widths. Spectrum must be 3-4 columns with ordering:
-        1. wavelength
-        2. spectral data
-        3. error
-        4. (optional) bin width
-    
-    If no bin width is present then they are computed.
+    Loads an observation from Iraclis pickle data
 
     Parameters
     -----------
     filename: string
-        Path to observed spectrum file. 
+        Path to observed spectrum file.
 
     """
 
@@ -27,7 +21,8 @@ class IraclisSpectrum(ArraySpectrum):
                 database = pickle.load(f)
         except UnicodeDecodeError:
             with open(filename, 'rb') as f:
-                database = pickle.load(f,encoding='latin1')       
+                database = pickle.load(f, encoding='latin1')    
+
         wl = database['spectrum']['wavelength']
         td = database['spectrum']['depth']
         err = database['spectrum']['error']

@@ -1,11 +1,15 @@
 from .spectrum import BaseSpectrum
 import numpy as np
 from taurex.util.util import wnwidth_to_wlwidth
+
+
 class ArraySpectrum(BaseSpectrum):
+
     """
     Loads an observed spectrum from an array and computes bin
-    edges and bin widths. Spectrum shape(nbins, 3-4) with 3-4 columns with ordering:
-        1. wavelength
+    edges and bin widths. Spectrum shape(nbins, 3-4) with 3-4 columns with
+    ordering:
+        1. wavelength (um)
         2. spectral data
         3. error
         4. (optional) bin width
@@ -31,13 +35,15 @@ class ArraySpectrum(BaseSpectrum):
 
         self._wnwidths = wnwidth_to_wlwidth(self.wavelengthGrid,
                                             self._bin_widths)
+
     def _sort_spectrum(self):
-        self._obs_spectrum = self._obs_spectrum[self._obs_spectrum[:, 0].argsort(axis=0)[::-1]]
+        self._obs_spectrum = \
+            self._obs_spectrum[self._obs_spectrum[:, 0].argsort(axis=0)[::-1]]
 
     def _process_spectrum(self):
         """
         Seperates out the observed data, error, grid and binwidths
-        from raw file array. If bin widths are not present then they are
+        from array. If bin widths are not present then they are
         calculated here
         """
         if self.rawData.shape[1] == 4:
@@ -54,7 +60,6 @@ class ArraySpectrum(BaseSpectrum):
             self._bin_edges = bin_edges[::-1]
         else:
             self.manual_binning()
-
 
     @property
     def rawData(self):
@@ -80,6 +85,7 @@ class ArraySpectrum(BaseSpectrum):
     def binEdges(self):
         """ Bin edges"""
         return 10000/self._bin_edges
+
     @property
     def binWidths(self):
         """bin widths"""
@@ -95,4 +101,5 @@ class ArraySpectrum(BaseSpectrum):
         """
         Performs the calculation of bin edges when none are present
         """
-        self._bin_edges, self._bin_widths = compute_bin_edges(self.wavelengthGrid)
+        self._bin_edges, self._bin_widths = \
+            compute_bin_edges(self.wavelengthGrid)
