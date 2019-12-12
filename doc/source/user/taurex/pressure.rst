@@ -8,16 +8,41 @@ The header describes pressure profiles for the atmosphere.
 Currently only one type of profile is supported, so ``profile_type=simple`` must be included.
 The :class:`~taures.data.profiles.pressure.pressureprofile.SimplePressureProfile` profile.
 
-Variables
----------
 
-    - ``atm_min_pressure``
-        - Minimum pressure of atmosphere in Pascal (Top)
-    - ``atm_max_pressure``
-        - Maximum pressure of atmosphere in Pascal (Surface)
-    - ``nlayers``
-        - Number of layers in atmosphere.
-    
+--------
+Keywords
+--------
+
++----------------------+--------------+-------------------------+---------+
+| Variable             | Type         | Description             | Default |
++----------------------+--------------+-------------------------+---------+
+| ``atm_min_pressure`` | :obj:`float` | Pressure in Pa at TOA   | 1e0     |
++----------------------+--------------+-------------------------+---------+
+| ``atm_max_pressure`` | :obj:`float` | Pressure in Pa at BOA   | 1e6     |
++----------------------+--------------+-------------------------+---------+
+| ``nlayers``          | :obj:`int`   | Number of layers        | 100     |
++----------------------+--------------+-------------------------+---------+
+
+
+------------------
+Fitting Parameters
+------------------
+
+.. warning::
+
+    Whilst included of completeness it is generally not a good idea
+    to fit these parameters as it can drastically alter the scale of
+    the atmosphere.
+
++----------------------+--------------+-------------------------+
+| Variable             | Type         | Description             |
++----------------------+--------------+-------------------------+
+| ``atm_min_pressure`` | :obj:`float` | Pressure in Pa at TOA   |
++----------------------+--------------+-------------------------+
+| ``atm_max_pressure`` | :obj:`float` | Pressure in Pa at BOA   |
++----------------------+--------------+-------------------------+
+| ``nlayers``          | :obj:`int`   | Number of layers        |
++----------------------+--------------+-------------------------+
 
 Examples
 --------
