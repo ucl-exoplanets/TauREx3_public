@@ -182,7 +182,7 @@ def model_factory(model_type):
 
 
 def planet_factory(planet_type):
-    if planet_type in ('simple', 'planet', 'basic','meme',):
+    if planet_type in ('simple', 'planet', 'basic', 'meme',):
         from taurex.data import Planet
         return Planet
     else:
@@ -288,15 +288,6 @@ def generate_contributions(config):
             contributions.append(create_klass(config[key],CIAContribution))
         elif key == 'Rayleigh':
             contributions.append(create_klass(config[key],RayleighContribution))
-        elif key == 'AbsorptionCUDA':
-            from taurex.contributions.cuda.absorption import GPUAbsorptionContribution
-            contributions.append(create_klass(config[key],GPUAbsorptionContribution))
-        elif key == 'CIACUDA':
-            from taurex.contributions.cuda.cia import GPUCIAContribution
-            contributions.append(create_klass(config[key],GPUCIAContribution))
-        elif key == 'RayleighCUDA':
-            from taurex.contributions.cuda.rayleigh import GPURayleighContribution
-            contributions.append(create_klass(config[key],GPURayleighContribution))
         elif key == 'SimpleClouds':
              from taurex.contributions import SimpleCloudsContribution
              contributions.append(create_klass(config[key],SimpleCloudsContribution))
