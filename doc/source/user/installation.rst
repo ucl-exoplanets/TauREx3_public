@@ -23,14 +23,18 @@ Simply do::
 
 To test for correct setup you can do::
 
-    python -c "import taurex"
+    python -c "import taurex; print(taurex.__version__)"
 
 Installing from git source directly (platform-independent)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You can clone TauREx3 from our main git repository::
+You can directly get the most cutting-edge release from the repo::
 
-    git clone https://github.com/ucl-exoplanets/Taurex3_public.git
+    pip install git+https://github.com/ucl-exoplanets/TauREx3_public.git
+
+You can also clone TauREx3 from our main git repository::
+
+    git clone https://github.com/ucl-exoplanets/TauREx3_public.git
 
 Move into the TauREx3 folder::
 
@@ -42,7 +46,7 @@ Then, just do::
 
 To test for correct setup you can do::
 
-    python -c "import taurex"
+    python -c "import taurex; print(taurex.__version__)"
 
 If no errors appeared then it was successfuly installed.
 Additionally the ``taurex`` program should now be available

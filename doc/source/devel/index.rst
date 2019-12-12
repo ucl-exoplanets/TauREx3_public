@@ -1,4 +1,4 @@
-.. _Developer:
+.. _Developers:
 
 ================
 Developers guide

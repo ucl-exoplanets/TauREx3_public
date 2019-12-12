@@ -141,7 +141,7 @@ the name associated with the name of the molecule. For example:
 ``H2O_P``, ``CH4_S`` etc. Because of this, we will use the moniker:
 ``[Mol]``. Replacing this with the appropriate molecule will give you
 the correct fitting parameter name.
-e.g. ``[Mol]_surface`` in a should be ``H2O_surface`` for water etc.
+e.g. ``[Mol]_surface`` should be ``H2O_surface`` for water etc.
 
 
 

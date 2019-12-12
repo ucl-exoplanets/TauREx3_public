@@ -19,7 +19,7 @@ a help can be accessed by doing::
 
     Quickstart <quickstart>
     Input File Format <inputfile>
-    Custom Models <custom>
+    Custom Types <custom>
     Global Settings <global>
     Chemistry <chemistry>
     Temperature <temperature>

@@ -9,7 +9,7 @@
     Development Guide <devel/index>
     Full API <api/modules>
     Citation <citation>
-    Project Page <https://github.com/ucl-exoplanets/Taurex3_public/>
+    Project Page <https://github.com/ucl-exoplanets/TauREx3_public/>
 
 
 TauREx3 - Next generation exoplanetary retrievals!
