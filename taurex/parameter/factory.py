@@ -82,6 +82,9 @@ def temp_factory(profile_type):
     elif profile_type in ('rodgers','rodgers2010',):
         from taurex.data.profiles.temperature import Rodgers2000
         return Rodgers2000
+    elif profile_type in ('file',):
+        from taurex.data.profiles.temperature import TemperatureFile
+        return TemperatureFile
     else:
         raise NotImplementedError('Temperature profile {} not implemented'.format(profile_type))
 
@@ -132,6 +135,9 @@ def create_chemistry(config):
 
     if chemistry in ('ace','equilibrium'):
         return create_ace(config)
+    elif chemistry in ('file', ):
+        from taurex.chemistry import ChemistryFile
+        return create_klass(config, ChemistryFile)
     elif chemistry in ('custom',):
         from taurex.chemistry import Chemistry
         config['chemistry_type'] = 'custom'

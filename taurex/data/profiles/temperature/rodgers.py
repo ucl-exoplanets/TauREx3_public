@@ -58,7 +58,7 @@ class Rodgers2000(TemperatureProfile):
 
         return self.correlate_temp(cov_mat)
 
-    @fitparam(param_name='corr_length',
+    @fitparam(param_name='correlation_length',
               param_latex='$C_{L}$',
               default_fit=False,
               default_bounds=[1.0, 10.0])

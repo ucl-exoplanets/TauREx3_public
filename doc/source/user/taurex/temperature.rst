@@ -23,11 +23,16 @@ The available ``profile_type`` are:
     - ``rodgers``
         - Layer-by-layer temperature - pressure profile
         - Class: :class:`~taurex.data.profiles.temperature.rodgers.Rodgers2000`
-    
 
+    - ``file``
+        - Temperature profile from file
+        - Class: :class:`~taurex.data.profiles.temperature.file.TemperatureFile`
+
+----------------------------
 
 Isothermal Profile
 ==================
+``profile_type = isothermal``
 
 Constant temperature throughout atmosphere
 
@@ -70,6 +75,7 @@ Example isothermal profile::
 
 Guillot 2010 Profile
 ====================
+``profile_type = guillot``
 
 TP profile from Guillot 2010, A&A, 520, A27 (equation 49)
 Using modified 2stream approx. from Line et al. 2012, ApJ, 749,93 (equation 19)
@@ -104,7 +110,7 @@ Fitting Parameters
 +--------------+--------------+---------------------------------------------+
 | Parameter    | Type         | Description                                 |
 +--------------+--------------+---------------------------------------------+
-| ``T``        | :obj:`float` | Temperature in Kelvin                       |
+| ``T_irr``    | :obj:`float` | Planet equilibrium temperature (K)          |
 +--------------+--------------+---------------------------------------------+
 | ``kappa_ir`` | :obj:`float` | mean infra-red opacity                      |
 +--------------+--------------+---------------------------------------------+
@@ -134,6 +140,7 @@ Example Guillot profile::
 
 N-Point Profile
 ===============
+``profile_type = npoint``
 
 Temperature defined at various heights in the atmosphere. Smoothing is then applied.
 If no temperature and pressure points are defined, it is equivalent to a 2-point
@@ -153,7 +160,7 @@ Keywords
 +------------------------+--------------+-----------------------------------------------------+---------+
 | ``T_surface``          | :obj:`float` | Temperature at ``P_surface`` in K                   | 1500    |
 +------------------------+--------------+-----------------------------------------------------+---------+
-| ``T_top``              | :obj:`float` | Temperature at TOA in K                             | 200     |
+| ``T_top``              | :obj:`float` | Temperature at ``P_top`` in K                       | 200     |
 +------------------------+--------------+-----------------------------------------------------+---------+
 | ``P_surface``          | :obj:`float` | Pressure at ``T_surface`` in Pa. Set to -1 for BOA  | -1      |
 +------------------------+--------------+-----------------------------------------------------+---------+
@@ -182,7 +189,7 @@ and ``pressure_point`` defined. They start from 1 and have the form
 +----------------------+--------------+--------------------------------------+
 | ``T_surface``        | :obj:`float` | Temperature at ``P_surface`` in K    |
 +----------------------+--------------+--------------------------------------+
-| ``T_top``            | :obj:`float` | Temperature at TOA in K              |
+| ``T_top``            | :obj:`float` | Temperature at ``P_top`` in K        |
 +----------------------+--------------+--------------------------------------+
 | ``P_surface``        | :obj:`float` | Pressure at ``T_surface`` in Pa.     |
 +----------------------+--------------+--------------------------------------+
@@ -193,10 +200,11 @@ and ``pressure_point`` defined. They start from 1 and have the form
 | ``P_point(n)``       | :obj:`float` | Pressure point (n). Starts from 1    |
 +----------------------+--------------+--------------------------------------+
 
-
+-----------------------------
 
 Rodgers 2000 Profile
---------------------
+====================
+``profile_type = rodgers``
 
 Layer-by-layer temperature - pressure profile retrieval using dampening factor
 Introduced in Rodgers (2000): Inverse Methods for Atmospheric Sounding (equation 3.26)
@@ -205,14 +213,52 @@ Introduced in Rodgers (2000): Inverse Methods for Atmospheric Sounding (equation
    :align:   left
    :width: 80%
 
-Variables are:
+--------
+Keywords
+--------
 
-    - ``temperature_layers``
-        - list of floats
-        - Temperature in Kelvin for each layer
++------------------------+--------------+--------------------------------------+---------+
+| Variable               | Type         | Description                          | Default |
++------------------------+--------------+--------------------------------------+---------+
+| ``temperature_layers`` | :obj:`list`  | Temperature in Kelvin for each layer | None    |
++------------------------+--------------+--------------------------------------+---------+
+| ``correlation_length`` | :obj:`float` | Correlation length                   | 5.0     |
++------------------------+--------------+--------------------------------------+---------+
 
-    - ``correlation_length``
-        - float
-        - In scaleheights, Line et al. 2013 sets this to 7, Irwin et al sets this to 1.5
-          may be left as free and Pressure dependent parameter later.
+------------------
+Fitting Parameters
+------------------
 
+.. warning::
+
+    For a 100 layer atmosphere, this will create 100
+    fitting parameters for ``T_(n)`` which might be 
+    very unwieldly to use and fitting them all could lead
+    to a very long sample time.
+
++-----------------+--------------+---------------------------+
+| Parameter       | Type         | Description               |
++-----------------+--------------+---------------------------+
+| ``T_(n)``       | :obj:`float` | Temperature for layer (n) |
++-----------------+--------------+---------------------------+
+| ``corr_length`` | :obj:`float` | Correlation length        |
++-----------------+--------------+---------------------------+
+
+-------------------------------------------
+
+Temperature File
+==================
+``profile_type = file``
+
+Reads a single column text file. Order must be
+from BOA to TOA
+
+--------
+Keywords
+--------
+
++--------------+--------------+--------------------------+---------+
+| Variable     | Type         | Description              | Default |
++--------------+--------------+--------------------------+---------+
+| ``filename`` | :obj:`str`   | Path to temperature file | None    |
++--------------+--------------+--------------------------+---------+
