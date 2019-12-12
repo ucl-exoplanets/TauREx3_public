@@ -3,6 +3,7 @@ from taurex.util import get_molecular_weight
 from taurex.data.fittable import Fittable
 import numpy as np
 from taurex.output.writeable import Writeable
+from taurex.cache import OpacityCache
 
 
 class Chemistry(Fittable, Logger, Writeable):
@@ -37,6 +38,20 @@ class Chemistry(Fittable, Logger, Writeable):
         Fittable.__init__(self)
 
         self.mu_profile = None
+        self._avail_active = OpacityCache().find_list_of_molecules()
+
+    @property
+    def availableActive(self):
+        """
+        Returns a list of available
+        actively absorbing molecules
+
+        Returns
+        -------
+        molecules: :obj:`list`
+            Actively absorbing molecules
+        """
+        return self._avail_active
 
     @property
     def activeGases(self):
