@@ -12,7 +12,7 @@
     Project Page <https://github.com/ucl-exoplanets/TauREx3_public/>
 
 
-TauREx3 - Next generation exoplanetary retrievals!
+TauREx |version| - Next generation exoplanetary retrievals!
 ==================================================
 
     |image1|
@@ -45,6 +45,9 @@ Want to jump into the ``taurex`` program? Head here: :ref:`quickstart`
 
 Want to try out the library? Try here: :ref:`library`
 
+----------------------------------
+
+:Release: |release|
 
 .. |image1| image::  _static/taurex_logo.png
     :align: middle
