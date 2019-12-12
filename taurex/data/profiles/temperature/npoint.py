@@ -51,7 +51,7 @@ class NPoint(TemperatureProfile):
 
     """
 
-    def __init__(self, T_surface=100.0, T_top=20.0, P_surface=None,
+    def __init__(self, T_surface=1500.0, T_top=200.0, P_surface=None,
                  P_top=None, temperature_points=[], pressure_points=[],
                  smoothing_window=10):
         super().__init__('{}Point'.format(len(temperature_points)+2))
