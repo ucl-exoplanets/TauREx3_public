@@ -24,7 +24,7 @@ copyright = '2019, Ahmed Al-Refaie, Quentin Changeat, Ingo Waldmann, Giovanna Ti
 author = 'Ahmed Al-Refaie'
 
 # The short X.Y version
-version = ''
+version = '3.0'
 sys.path.insert(0, os.path.abspath('../../'))
 # The full version, including alpha/beta/rc tags
 release = '3.0.0-alpha'
