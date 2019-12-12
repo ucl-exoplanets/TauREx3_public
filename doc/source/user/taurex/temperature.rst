@@ -28,6 +28,8 @@ The available ``profile_type`` are:
         - Temperature profile from file
         - Class: :class:`~taurex.data.profiles.temperature.file.TemperatureFile`
 
+    - ``custom``
+        - User-type temperature. See :ref:`customtypes`
 ----------------------------
 
 Isothermal Profile

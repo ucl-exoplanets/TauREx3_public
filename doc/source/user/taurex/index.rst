@@ -27,4 +27,5 @@ a help can be accessed by doing::
     Planet <planet>
     Star <star>
     Forward Models <models>
+    Observation <observation>
 

@@ -7,13 +7,15 @@
 This header describes the parent star of the exo-planet.
 The ``star_type`` informs the type of spectral emission density (SED) used in the emission and direct image forward model.
 The ``star_type`` available are:
+
     - ``blackbody``
         - Star with a blackbody SED
         - Class :class:`~taurex.data.stellar.star.BlackbodyStar`
     - ``phoenix``
         - Uses the PHOENIX_ library for the SED
         - :class:`~taurex.data.stellar.phoenix.PhoenixStar`
-
+    - ``custom``
+        - User-provided star model. See :ref:`customtypes`
 
 -------------------------------------
 

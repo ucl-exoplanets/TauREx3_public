@@ -5,8 +5,9 @@
 ============
 
 This header is used to define planetary properties. Currently, only ``planet_type = simple``
-is supported and must be included.
+is supported and must be included. ``planet_type = custom`` is also valid, See :ref:`customtypes` 
 
+:Class: :class:`~taurex.data.planet.Planet`
 
 --------
 Keywords

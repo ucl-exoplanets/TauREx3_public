@@ -18,7 +18,7 @@ The available ``chemistry_type`` are:
         - Class: :class:`~taurex.data.profiles.chemistry.taurexchemistry.TaurexChemistry`
     
     - ``custom``
-        - User-provided chemistry
+        - User-type chemistry. See :ref:`customtypes`
 
 ------------------------------------
 
