@@ -15,7 +15,7 @@ The available ``profile_type`` are:
     - ``guillot2010``
         - TP profile from Guillot 2010, A&A, 520, A27
         - Class: :class:`~taurex.data.profiles.temperature.guillot.Guillot2010`
-    
+
     - ``npoint``
         - N-point temperature profile
         - Class: :class:`~taurex.data.profiles.temperature.npoint.NPoint`
@@ -35,34 +35,41 @@ Constant temperature throughout atmosphere
    :align:   left
    :width: 80%
 
-Variables
----------
 
-    - ``T``
-        - float
-        - Temperature in Kelvin
-        - Default: ``iso_temp = 1500.0``
+--------
+Keywords
+--------
 
++----------+--------------+-----------------------+---------+
+| Variable | Type         | Description           | Default |
++----------+--------------+-----------------------+---------+
+| ``T``    | :obj:`float` | Temperature in Kelvin | 1500    |
++----------+--------------+-----------------------+---------+
+
+------------------
 Fitting Parameters
 ------------------
 
-    - ``T``
-        - float
-        - Temperature in Kelvin
++-----------+--------------+-----------------------+
+| Parameter | Type         | Description           |
++-----------+--------------+-----------------------+
+| ``T``     | :obj:`float` | Temperature in Kelvin |
++-----------+--------------+-----------------------+
 
+--------
 Examples
 --------
 
-A basic isothermal profile::
+Example isothermal profile::
 
     [Temperature]
     profile_type = isothermal
     T = 1500
 
-
+------------------------------------------
 
 Guillot 2010 Profile
---------------------
+====================
 
 TP profile from Guillot 2010, A&A, 520, A27 (equation 49)
 Using modified 2stream approx. from Line et al. 2012, ApJ, 749,93 (equation 19)
@@ -71,73 +78,120 @@ Using modified 2stream approx. from Line et al. 2012, ApJ, 749,93 (equation 19)
    :align:   left
    :width: 80%
 
-Variables
-~~~~~~~~~
 
-    - ``T_irr``
-        - float
-        - Planet equilibrium temperature
-    - ``kappa_ir``
-        - float
-        - mean infra-red opacity
-    - ``kappa_v1``
-        - float
-        - mean optical opacity one
-    - ``kappa_v2``
-        - float
-        - mean optical opacity two
-    - ``alpha``
-        - float
-        - ratio between kappa_v1 and kappa_v2 downwards radiation stream
+--------
+Keywords
+--------
 
++--------------+--------------+---------------------------------------------+---------+
+| Variable     | Type         | Description                                 | Default |
++--------------+--------------+---------------------------------------------+---------+
+| ``T_irr``    | :obj:`float` | Planet equilibrium temperature (K)          | 1500    |
++--------------+--------------+---------------------------------------------+---------+
+| ``kappa_ir`` | :obj:`float` | mean infra-red opacity                      | 0.01    |
++--------------+--------------+---------------------------------------------+---------+
+| ``kappa_v1`` | :obj:`float` | mean optical opacity one                    | 0.005   |
++--------------+--------------+---------------------------------------------+---------+
+| ``kappa_v2`` | :obj:`float` | mean optical opacity two                    | 0.005   |
++--------------+--------------+---------------------------------------------+---------+
+| ``alpha``    | :obj:`float` | ratio between ``kappa_v1`` and ``kappa_v2`` | 0.5     |
++--------------+--------------+---------------------------------------------+---------+
+
+------------------
 Fitting Parameters
-~~~~~~~~~~~~~~~~~~
+------------------
 
-    - ``T_irr``
-        - float
-        - Planet equilibrium temperature
-    - ``kappa_ir``
-        - float
-        - mean infra-red opacity
-    - ``kappa_v1``
-        - float
-        - mean optical opacity one
-    - ``kappa_v2``
-        - float
-        - mean optical opacity two
-    - ``alpha``
-        - float
-        - ratio between kappa_v1 and kappa_v2 downwards radiation stream
++--------------+--------------+---------------------------------------------+
+| Parameter    | Type         | Description                                 |
++--------------+--------------+---------------------------------------------+
+| ``T``        | :obj:`float` | Temperature in Kelvin                       |
++--------------+--------------+---------------------------------------------+
+| ``kappa_ir`` | :obj:`float` | mean infra-red opacity                      |
++--------------+--------------+---------------------------------------------+
+| ``kappa_v1`` | :obj:`float` | mean optical opacity one                    |
++--------------+--------------+---------------------------------------------+
+| ``kappa_v2`` | :obj:`float` | mean optical opacity two                    |
++--------------+--------------+---------------------------------------------+
+| ``alpha``    | :obj:`float` | ratio between ``kappa_v1`` and ``kappa_v2`` |
++--------------+--------------+---------------------------------------------+
+
+--------
+Examples
+--------
+
+Example Guillot profile::
+
+    [Temperature]
+    profile_type = guillot
+    T_irr = 1500
+    kappa_ir = 0.01
+    kappa_v1 = 0.002
+    kappa_v2 = 0.003
+    alpha = 0.3
+
+
+---------------------------------
 
 N-Point Profile
----------------
+===============
 
 Temperature defined at various heights in the atmosphere. Smoothing is then applied.
+If no temperature and pressure points are defined, it is equivalent to a 2-point
+profile. Including 1 makes it a 3-point and so on.
+Each temperature point must have an associated pressure point and vica versa.
 
 .. figure::  _static/npoint.png
    :align:   left
    :width: 80%
 
-Variables are:
+--------
+Keywords
+--------
 
-    - ``T_surface``
-        - float
-        - Temperature at the planets surface in Kelvin
++------------------------+--------------+-----------------------------------------------------+---------+
+| Variable               | Type         | Description                                         | Default |
++------------------------+--------------+-----------------------------------------------------+---------+
+| ``T_surface``          | :obj:`float` | Temperature at ``P_surface`` in K                   | 1500    |
++------------------------+--------------+-----------------------------------------------------+---------+
+| ``T_top``              | :obj:`float` | Temperature at TOA in K                             | 200     |
++------------------------+--------------+-----------------------------------------------------+---------+
+| ``P_surface``          | :obj:`float` | Pressure at ``T_surface`` in Pa. Set to -1 for BOA  | -1      |
++------------------------+--------------+-----------------------------------------------------+---------+
+| ``P_top``              | :obj:`float` | Pressure at ``T_top`` in Pa. Set to -1 for TOA      | -1      |
++------------------------+--------------+-----------------------------------------------------+---------+
+| ``temperature_points`` | :obj:`list`  | Temperature points between BOA and TOA              |         |
++------------------------+--------------+-----------------------------------------------------+---------+
+| ``pressure_points``    | :obj:`list`  | Pressure in Pa for each temperature point           |         |
++------------------------+--------------+-----------------------------------------------------+---------+
+| ``smoothing_window``   | :obj:`int`   | Smoothing width                                     | 10      |
++------------------------+--------------+-----------------------------------------------------+---------+
 
-    - ``T_top``
-        - Temperature at the top of the atmosphere in Kelvin
 
-    - ``temperature_points`` 
-        - list of floats
-        - temperature points between ``T_top`` and ``T_surface``
 
-    - ``pressure_points``
-        - list of floats
-        - Pressure points that the each temperature in ``temperature_points`` lie on
+------------------
+Fitting Parameters
+------------------
 
-    - ``smoothing_window``
-        - int
-        - Smoothing width in atmospherice layers
+Fitting parameters are generated for each ``temperature_point``
+and ``pressure_point`` defined. They start from 1 and have the form
+``T_point1``, ``P_point1``, ``T_point2``, ``P_point2`` etc.
+
+
++----------------------+--------------+--------------------------------------+
+| Variable             | Type         | Description                          |
++----------------------+--------------+--------------------------------------+
+| ``T_surface``        | :obj:`float` | Temperature at ``P_surface`` in K    |
++----------------------+--------------+--------------------------------------+
+| ``T_top``            | :obj:`float` | Temperature at TOA in K              |
++----------------------+--------------+--------------------------------------+
+| ``P_surface``        | :obj:`float` | Pressure at ``T_surface`` in Pa.     |
++----------------------+--------------+--------------------------------------+
+| ``P_top``            | :obj:`float` | Pressure at ``T_top`` in Pa.         |
++----------------------+--------------+--------------------------------------+
+| ``T_point(n)``       | :obj:`float` | Temperature point (n). Starts from 1 |
++----------------------+--------------+--------------------------------------+
+| ``P_point(n)``       | :obj:`float` | Pressure point (n). Starts from 1    |
++----------------------+--------------+--------------------------------------+
 
 
 

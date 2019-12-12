@@ -57,7 +57,7 @@ Fitting Parameters
 --------------------------------------
 
 Taurex Chemistry
-===========================
+================
 ``chemistry_type = taurex``
 ``chemistry_type = free``
 
