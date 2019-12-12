@@ -7,7 +7,8 @@ from functools import partial
 
 
 def fitparam(f=None, param_name=None, param_latex=None,
-             default_mode='linear', default_fit=False, default_bounds=None):
+             default_mode='linear', default_fit=False, 
+             default_bounds=[0.0, 1.0]):
     """
     A decorator used in conjunction with :class:`Fittable` to inform which
     parameters can be fit and its properties. On its own it acts like the
