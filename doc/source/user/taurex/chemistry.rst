@@ -222,6 +222,27 @@ Fitting Parameters
 | ``[Mol]_P``       | :obj:`float` | Pressure boundary (Pa) |
 +-------------------+--------------+------------------------+
 
+
+Chemsitry File
+==============
+``profile_type = file``
+
+Reads a multi-column text file. Order must be
+from BOA to TOA. Each column must represent a unique
+molecule.
+
+--------
+Keywords
+--------
+
++--------------+--------------+--------------------------+---------+
+| Variable     | Type         | Description              | Default |
++--------------+--------------+--------------------------+---------+
+| ``filename`` | :obj:`str`   | Path to chemistry file   | None    |
++--------------+--------------+--------------------------+---------+
+| ``gases``    | :obj:`list`  | List of all molecules in | None    |
+|              |              | column order             |         |
++--------------+--------------+--------------------------+---------+
 .. Two Point Profile
 .. =================
 .. ``gas_type = twopoint``
