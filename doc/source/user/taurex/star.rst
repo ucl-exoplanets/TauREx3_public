@@ -15,27 +15,37 @@ The ``star_type`` available are:
         - :class:`~taurex.data.stellar.phoenix.PhoenixStar`
 
 
+-------------------------------------
 
 Blackbody
----------
+=========
 ``star_type = blackbody``
 
 Star is considered a blackbody.
 
-Variables
-~~~~~~~~~
+--------
+Keywords
+--------
 
-    - ``radius``
-        - float
-        - Radius in Solar radii
-        - Default: ``radius = 1.0``
-    - ``temperature``
-        - float
-        - Temperature in Kelvin
-        - Default ``temperature = 5800``
++------------------+--------------+----------------------------+---------+
+| Variable         | Type         | Description                | Default |
++------------------+--------------+----------------------------+---------+
+| ``temperature``  | :obj:`float` | Effective temperature in K | 5000    |
++------------------+--------------+----------------------------+---------+
+| ``radius``       | :obj:`float` | Radius in solar radius     | 1.0     |
++------------------+--------------+----------------------------+---------+
+| ``mass``         | :obj:`float` | Mass in solar mass         | 1.0     |
++------------------+--------------+----------------------------+---------+
+| ``distance``     | :obj:`float` | Distance from Earth in pc  | 1.0     |
++------------------+--------------+----------------------------+---------+
+| ``metallicity``  | :obj:`float` | Metallicity in solar units | 1.0     |
++------------------+--------------+----------------------------+---------+
+| ``magnitudeK``   | :obj:`float` | Magnitude in K-band        | 10.0    |
++------------------+--------------+----------------------------+---------+
 
+--------
 Examples
-~~~~~~~~
+--------
 
 A Sun like star as a black body::
 
@@ -44,9 +54,10 @@ A Sun like star as a black body::
     radius = 1.0
     temperature = 5800
 
+-----------------------------------
 
 PHOENIX
--------
+========
 ``star_type = phoenix``
 
 Stellar emission spectrum is read from the PHOENIX_ library ``.fits.gz`` files and interpolated to the correct temperature.
@@ -57,25 +68,31 @@ in terms of numbers so any text can be included in the beginning of the file nam
     abunchofothertext-andanother-here05660-0.4_0.5.0.8.fits.gz #5660 Kelvin
     5700-056-034-0434.fits.gz #5700 Kelvin
 
-Variables
-~~~~~~~~~
+--------
+Keywords
+--------
 
-    - ``radius``
-        - float
-        - Radius in Solar radii
-        - Default: ``radius = 1.0``
-    - ``temperature``
-        - float
-        - Temperature in Kelvin
-        - Default ``temperature = 5800``
-    - ``phoenix_path``
-        - str
-        - Path to ``.fits.gz`` files
-        - **Required**
++------------------+--------------+----------------------------+--------------+
+| Variable         | Type         | Description                | Default      |
++------------------+--------------+----------------------------+--------------+
+| ``phoenix_path`` | :obj:`str`   | Path to ``.fits.gz`` files | **Required** |
++------------------+--------------+----------------------------+--------------+
+| ``temperature``  | :obj:`float` | Effective temperature in K | 5000         |
++------------------+--------------+----------------------------+--------------+
+| ``radius``       | :obj:`float` | Radius in solar radius     | 1.0          |
++------------------+--------------+----------------------------+--------------+
+| ``mass``         | :obj:`float` | Mass in solar mass         | 1.0          |
++------------------+--------------+----------------------------+--------------+
+| ``distance``     | :obj:`float` | Distance from Earth in pc  | 1.0          |
++------------------+--------------+----------------------------+--------------+
+| ``metallicity``  | :obj:`float` | Metallicity in solar units | 1.0          |
++------------------+--------------+----------------------------+--------------+
+| ``magnitudeK``   | :obj:`float` | Magnitude in K-band        | 10.0         |
++------------------+--------------+----------------------------+--------------+
 
-
+--------
 Examples
-~~~~~~~~
+--------
 
 A Sun like star using PHOENIX spectra::
 
@@ -83,7 +100,7 @@ A Sun like star using PHOENIX spectra::
     star_type = phoenix
     radius = 1.0
     temperature = 5800
-    phoenix_path = /mypath/to/fmtfiles/
+    phoenix_path = /mypath/to/fitsfiles/
 
 
 
