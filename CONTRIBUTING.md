@@ -1,7 +1,3 @@
----
-title: Taurex 3 development guidelines
----
-
 Overview
 ========
 
@@ -39,7 +35,7 @@ to easily test against.
 Some rules:
 
 -   Tests must be quick (in the order of seconds)
--   No [extra]{.title-ref} files should be included. Instead have the
+-   No extra files should be included. Instead have the
     unit test generate them on the spot.
 
 Coding conventions
