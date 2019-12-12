@@ -250,7 +250,7 @@ class PhoenixStar(BlackbodyStar):
     #         Path to directory containing PHOENIX data
 
     #     """
-    #     files = glob.glob(os.path.join(self._phoenix_path,'*.fmt'))
+    #     files = glob.glob(os.path.join(self._phoenix_path,'*.fits.gz'))
     #     files.sort()
 
     #     temp_list = []

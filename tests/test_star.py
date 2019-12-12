@@ -23,7 +23,7 @@ class TestPhoenixStar(unittest.TestCase):
 
     def gen_temps(self, temperatures):
         self.temps_names = [path.join(
-            self.test_dir, 'lte{}-jsadhfaksjdf.fmt'.format(int(x))) for x in temperatures]
+            self.test_dir, 'lte{}-jsadhfaksjdf.fits.gz'.format(int(x))) for x in temperatures]
         self.temps_list = []
         for t_name in self.temps_names:
             arr = np.random.rand(1000, 3)
