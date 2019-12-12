@@ -1,9 +1,10 @@
 .. toctree::
     :hidden:
     :titlesonly:
-    :maxdepth: 6
+    :maxdepth: 4
     :caption: Contents:
 
+    Home <self>
     User Guide <user/index>
     Development Guide <devel/index>
     Full API <api/modules>
