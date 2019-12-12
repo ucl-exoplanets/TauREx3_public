@@ -94,6 +94,9 @@ def main():
         if observation is None:
             binning = model.defaultBinner()
             wngrid = model.nativeWavenumberGrid
+        elif observation == 'self':
+            binning = model.defaultBinner()
+            wngrid = observation.wavenumberGrid
         else:
             binning = observation.create_binner()
             wngrid = observation.wavenumberGrid
@@ -135,6 +138,7 @@ def main():
         observation = ArraySpectrum(
             np.vstack([inst_wlgrid, inst_spectrum,
                        inst_noise, inst_wlwidth]).T)
+        binning = observation.create_binner()
 
     # Handle outputs
     if args.output_file:
