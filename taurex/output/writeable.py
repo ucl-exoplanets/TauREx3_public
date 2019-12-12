@@ -2,6 +2,5 @@
 
 class Writeable(object):
 
-    def write(self,output):
+    def write(self, output):
         pass
-    

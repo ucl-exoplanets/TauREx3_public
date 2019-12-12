@@ -1,3 +1,4 @@
+from .logger import Logger
 import logging
 
 last_log = logging.INFO
