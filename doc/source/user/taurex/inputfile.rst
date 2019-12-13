@@ -35,7 +35,10 @@ Of course comments are handled with ``#``
     - :ref:`userfitting`
 
 Not all of these headers are required in an input file. Some will generate
-default profiles when not present. 
+default profiles when not present. To perform retrievals, 
+:ref:`userobservation`, :ref:`useroptimizer` and :ref:`userfitting` *MUST*
+be present
+
 
 Some of these may define additional *subheaders* given by the ``[[Name]]`` notation::
 

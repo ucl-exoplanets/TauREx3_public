@@ -37,11 +37,11 @@ An example of loading an ascii data-set::
 
 .. _taurexspectrum:
 
-TauREx spectrum
+TauREx Spectrum
 ---------------
 
 The ``taurex_spectrum`` has two different modes. The first mode is specifing a filename path of a
-a TauREx3 HDF5 output. This output must have been run with some form of instrument function (such as SNR),
+a TauREx3 HDF5 output. This output must have been run with some form of instrument function (see :ref:`userinstrument`),
 for it to be useable as an observation.
 Another is to set ``taurex_spectrum = self``, this will set the current forward model + instrument function
 as the observation. This type observation is valid of the fitting procedure making it possible to do *self-retrievals*.

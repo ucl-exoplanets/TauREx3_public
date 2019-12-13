@@ -71,5 +71,8 @@ Or::
 Now re-run the test. If you get the correct result. Horray! If not,
 its best to ask your administrator.
 
+Once you have this installed, you can install pymultinest_ here.
+
 
 .. _mpi4py: https://mpi4py.readthedocs.io/en/stable/index.html
+.. _pymultinest: https://johannesbuchner.github.io/PyMultiNest/install.html

@@ -25,6 +25,8 @@ The available ``bin_type`` are:
     - ``manual``
         - Manually defined resample grid
 
+.. _manualbinning:
+
 Manual binning
 ==============
 ``bin_type = manual``

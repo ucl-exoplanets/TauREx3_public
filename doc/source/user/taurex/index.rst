@@ -3,7 +3,7 @@ The ``taurex`` program
 =======================
 
 This section of the documentation deals with 
-using the main ``taurex`` program accessed simply
+using the main ``taurex`` program is accessed simply
 by running in the command line::
 
     taurex
@@ -11,6 +11,9 @@ by running in the command line::
 a help can be accessed by doing::
 
     taurex --help
+
+
+
 
 ------------------------------
 
@@ -29,6 +32,7 @@ a help can be accessed by doing::
     Forward Models <models>
     Observation <observation>
     Binning <binning>
+    Instrument <instrument>
     Fitting <fitting>
     Optimizer <optimizer>
 
