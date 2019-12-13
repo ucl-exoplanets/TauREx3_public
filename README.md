@@ -16,7 +16,7 @@ Current build: 3.0.0-beta
 Clone the directory using:
 
 ```
-git clone https://github.com/ucl-exoplanets/TauREx3.git
+git clone https://github.com/ucl-exoplanets/TauREx3_public.git
 ```
 
 Move into the TauREx3 folder
