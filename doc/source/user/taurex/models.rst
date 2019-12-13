@@ -132,7 +132,7 @@ Fitting Parameters
 
 Mie scattering (Lee)
 ======================
-``[LeeMie]]``
+``[[LeeMie]]``
 
 Computes Mie scattering contribution to optical depth
 Formalism taken from: Lee et al. 2013, ApJ, 778, 97
@@ -177,7 +177,7 @@ Fitting Parameters
 
 Mie scattering (BH)
 ======================
-``[BHMie]]``
+``[[BHMie]]``
 
 Computes a Mie scattering contribution using method given by
 Bohren & Huffman 2007
@@ -223,7 +223,7 @@ Fitting Parameters
 
 Mie scattering (Flat)
 ======================
-``[FlatMie]]``
+``[[FlatMie]]``
 
 Computes a flat absorbing region of the atmosphere
 across all wavelengths
