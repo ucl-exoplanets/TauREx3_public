@@ -19,16 +19,15 @@ import sys
 
 # -- Project information -----------------------------------------------------
 
-project = 'taurex'
-copyright = '2019, Ahmed Al-Refaie'
+project = 'TauREx'
+copyright = '2019, Ahmed Al-Refaie, Quentin Changeat, Ingo Waldmann, Giovanna Tinneti'
 author = 'Ahmed Al-Refaie'
 
 # The short X.Y version
-version = ''
 sys.path.insert(0, os.path.abspath('../../'))
 # The full version, including alpha/beta/rc tags
-release = '3.0'
-
+release = '3.0.0-alpha'
+version = '.'.join(release.split('.')[:2])
 
 # -- General configuration ---------------------------------------------------
 
@@ -48,6 +47,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
+    'nbsphinx',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -72,7 +72,7 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = []
+exclude_patterns = ['_build', '**.ipynb_checkpoints']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = None
@@ -89,7 +89,13 @@ html_theme = 'sphinx_rtd_theme'
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-# html_theme_options = {}
+html_theme_options = {
+    'collapse_navigation': False,
+    'sticky_navigation': True,
+    'navigation_depth': 4,
+    'includehidden': True,
+    'titles_only': False
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -147,7 +153,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'taurex', 'taurex Documentation',
+    (master_doc, 'TauREx 3', 'TauREx 3 Documentation',
      [author], 1)
 ]
 
@@ -188,3 +194,7 @@ epub_exclude_files = ['search.html']
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
+
+add_module_names = False
+
+nbsphinx_execute = 'never'

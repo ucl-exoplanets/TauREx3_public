@@ -46,7 +46,7 @@ python setup.py build_sphinx
 Try importing taurex:
 
 ```
-python -c "import taurex"
+python -c "import taurex; print(taurex.__version__)"
 ```
 
 Or running taurex itself

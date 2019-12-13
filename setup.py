@@ -4,7 +4,7 @@ from setuptools import find_packages
 from numpy.distutils.core import setup
 from numpy.distutils.core import Extension
 from numpy.distutils import log
-
+import re, os
 
 packages = find_packages(exclude=('tests', 'doc'))
 provides = ['taurex', ]
@@ -124,11 +124,10 @@ entry_points = {'console_scripts': console_scripts, }
 classifiers = [
     'Development Status :: 4 - Beta',
     'Environment :: Console',
-    'Environment :: No Input/Output (Daemon)',
     'Environment :: Win32 (MS Windows)',
     'Intended Audience :: Developers',
     'Intended Audience :: Science/Research',
-    'License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)',
+    'License :: OSI Approved :: BSD License',
     'Operating System :: Microsoft :: Windows',
     'Operating System :: POSIX',
     'Operating System :: POSIX :: Linux',
@@ -139,12 +138,15 @@ classifiers = [
     'Topic :: Software Development :: Libraries',
 ]
 
+# Handle versioning
+version = '3.0.0-alpha'
+
 
 setup(name='taurex',
       author='Foo',
       author_email='bar',
       maintainer='Foo',
-      version='3.0',
+      version=version,
       description='Bar',
       classifiers=classifiers,
       packages=packages,
@@ -154,7 +156,7 @@ setup(name='taurex',
       requires=requires,
       install_requires=install_requires,
       extras_require={
-        'Plot':  ["matplotlib"],},
+        'Plot':  ["matplotlib"], },
       data_files=data_files,
       ext_modules=extensions
       )

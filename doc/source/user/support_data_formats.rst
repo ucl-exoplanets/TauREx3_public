@@ -4,26 +4,39 @@
 Supported Data Formats
 ======================
 
-.. image:: _static/bubboz.jpg
-
-.. DANGER::
-   All of these pickle formats will be replaced with better formats in the future. Seriously this
-   was done because most of the data files I had were pickles so I had to work with that.
-   NOTE THAT YOUR INPUTS MAY NOT WORK IN THE FUTURE AS WE MAKE YOUR LIFE LESS SHIT
-
 
 Cross-sections
 ~~~~~~~~~~~~~~
 
-Cross sections take the form of python ``pickle`` files. Get your shit together Katy
+k-tables are *no longer supported*.
+Only molecular cross-sections are supported
 
+Supported formats are:
 
-Lightcurve Data
-~~~~~~~~~~~~~~~
+- ``.pickle`` *Taurex2* pickle format
+- ``.hdf5``, ``.h5`` New HDF5 format
+- ``.dat``,  ExoTransmit_ format
 
-``pickle`` files.
+Observation
+~~~~~~~~~~~
+
+For observations, the following formats supported
+are:
+
+- Text based 3/4-column data
+- ``.pickle`` Outputs from Iraclis_
+
 
 Collisionally Induced Absorption
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Either ``pickle`` files or HITRAN ``cia`` files are supported
+Only a few formats are supported
+
+- ``.db`` *Taurex2* CIA pickle files
+- ``.cia`` HITRAN_ cia files
+
+.. _HITRAN: https://hitran.org/cia/
+
+.. _ExoTransmit: https://github.com/elizakempton/Exo_Transmit/tree/master/Opac
+
+.. _Iraclis: https://github.com/ucl-exoplanets/Iraclis

@@ -1,23 +1,23 @@
 """The main taurex program"""
 
+
 def main():
     import argparse
     import datetime
-    #import numexpr as ne
-    #ne.set_num_threads(1)
-    #ne.set_vml_num_threads(1)
 
     import logging
-    from taurex.mpi import get_rank, nprocs
+    from taurex.mpi import get_rank
     from taurex.log import setLogLevel
     from taurex.log.logger import root_logger
     from taurex.parameter import ParameterParser
     from taurex.output.hdf5 import HDF5Output
     from taurex.util.output import generate_profile_dict, store_contributions
     from .taurexdefs import OutputSize
+    from . import __version__ as version
+
     import numpy as np
 
-    parser = argparse.ArgumentParser(description='Taurex')
+    parser = argparse.ArgumentParser(description='TauREx {}'.format(version))
 
     parser.add_argument("-i", "--input", dest='input_file', type=str,
                         required=True, help="Input par file to pass")
@@ -48,24 +48,24 @@ def main():
 
     parser.add_argument("-o", "--output_file", dest='output_file', type=str)
 
-    parser.add_argument("-S", "--save-spectrum", dest='save_spectrum', type=str)
+    parser.add_argument("-S", "--save-spectrum",
+                        dest='save_spectrum', type=str)
     args = parser.parse_args()
-
 
     output_size = OutputSize.heavy
 
     if args.light:
         output_size = OutputSize.light
-    
+
     if args.lighter:
         output_size = OutputSize.lighter
 
     if args.debug:
         setLogLevel(logging.DEBUG)
 
+    root_logger.info('TauREx %s', version)
 
-
-    root_logger.info('TAUREX PROGRAM START AT %s', datetime.datetime.now())
+    root_logger.info('TauREx PROGRAM START AT %s', datetime.datetime.now())
 
     # Parse the input file
     pp = ParameterParser()
@@ -75,9 +75,6 @@ def main():
     pp.setup_globals()
     # Generate a model from the input
     model = pp.generate_appropriate_model()
-    
-
-
 
     # build the model
     model.build()
@@ -89,7 +86,6 @@ def main():
 
     wngrid = None
 
-
     if binning == 'observed' and observation is None:
         logging.critical('Binning selected from Observation yet None provided')
         quit()
@@ -98,14 +94,17 @@ def main():
         if observation is None:
             binning = model.defaultBinner()
             wngrid = model.nativeWavenumberGrid
+        elif observation == 'self':
+            binning = model.defaultBinner()
+            wngrid = observation.wavenumberGrid
         else:
             binning = observation.create_binner()
             wngrid = observation.wavenumberGrid
     else:
-        if binning is 'native':
+        if binning == 'native':
             binning = model.defaultBinner()
             wngrid = model.nativeWavenumberGrid
-        elif binning is 'observed':
+        elif binning == 'observed':
             binning = observation.create_binner()
             wngrid = observation.wavenumberGrid
         else:
@@ -113,18 +112,19 @@ def main():
 
     instrument = pp.generate_instrument(binner=binning)
 
-    num_obs=1
+    num_obs = 1
     if instrument is not None:
-        instrument,num_obs = instrument
+        instrument, num_obs = instrument
 
     if observation == 'self' and instrument is None:
-        logging.getLogger('taurex').critical('Instrument nust be specified when using self option')
+        logging.getLogger('taurex').critical(
+            'Instrument nust be specified when using self option')
         raise ValueError('No instruemnt specified for self option')
 
     inst_result = None
     if instrument is not None:
-        inst_result = instrument.model_noise(model, model_res=model.model(), num_observations=num_obs)
-
+        inst_result = instrument.model_noise(
+            model, model_res=model.model(), num_observations=num_obs)
 
     # Observation on self
     if observation == 'self':
@@ -135,13 +135,15 @@ def main():
         inst_wlgrid = 10000/inst_wngrid
 
         inst_wlwidth = wnwidth_to_wlwidth(inst_wngrid, inst_width)
-        observation = ArraySpectrum(np.vstack([inst_wlgrid,inst_spectrum,inst_noise,inst_wlwidth]).T)
+        observation = ArraySpectrum(
+            np.vstack([inst_wlgrid, inst_spectrum,
+                       inst_noise, inst_wlwidth]).T)
+        binning = observation.create_binner()
 
     # Handle outputs
-    if args.output_file and get_rank() == 0:
+    if args.output_file:
         # Output taurex data
         with HDF5Output(args.output_file) as o:
-
             model.write(o)
 
     optimizer = None
@@ -185,23 +187,22 @@ def main():
 
         end_time = time.time()
 
-        root_logger.info('Total Retrieval finish in %s seconds',end_time-start_time)
+        root_logger.info(
+            'Total Retrieval finish in %s seconds', end_time-start_time)
 
-
-        for _, optimized,_, _ in optimizer.get_solution():
+        for _, optimized, _, _ in optimizer.get_solution():
             optimizer.update_model(optimized)
             break
-        
+
     result = model.model()
 
+    if args.save_spectrum is not None:
 
-    if args.save_spectrum is not None and get_rank()==0:
-
-        #with open(args.save_spectrum, 'w') as f:
-        from taurex.util.util import wnwidth_to_wlwidth,compute_bin_edges
+        # with open(args.save_spectrum, 'w') as f:
+        from taurex.util.util import wnwidth_to_wlwidth, compute_bin_edges
         save_wnwidth = compute_bin_edges(wngrid)[1]
         save_wl = 10000/wngrid
-        save_wlwidth = wnwidth_to_wlwidth(wngrid,save_wnwidth)
+        save_wlwidth = wnwidth_to_wlwidth(wngrid, save_wnwidth)
         save_model = binning.bin_model(result)[1]
         save_error = np.zeros_like(save_wl)
         if inst_result is not None:
@@ -215,12 +216,10 @@ def main():
             save_error = inst_noise
 
         np.savetxt(args.save_spectrum,
-                   np.vstack((save_wl, save_model, save_error, 
+                   np.vstack((save_wl, save_model, save_error,
                               save_wlwidth)).T)
 
-
-
-    if args.output_file and get_rank() == 0:
+    if args.output_file:
 
         # Output taurex data
         with HDF5Output(args.output_file, append=True) as o:
@@ -231,8 +230,9 @@ def main():
                 observation.write(obs)
 
             profiles = generate_profile_dict(model)
-            spectrum = binning.generate_spectrum_output(result,
-                                                        output_size=output_size)
+            spectrum = \
+                binning.generate_spectrum_output(result,
+                                                 output_size=output_size)
 
             if inst_result is not None:
                 spectrum['instrument_wngrid'] = inst_result[0]
@@ -241,8 +241,8 @@ def main():
                 spectrum['instrument_spectrum'] = inst_result[1]
                 spectrum['instrument_noise'] = inst_result[2]
 
-            spectrum['Contributions'] = store_contributions(binning, model, 
-                                                            output_size=output_size-3)
+            spectrum['Contributions'] = \
+                store_contributions(binning, model, output_size=output_size-3)
             if solution is not None:
                 out.store_dictionary(solution, group_name='Solutions')
                 priors = {}
@@ -256,18 +256,15 @@ def main():
             if optimizer:
                 optimizer.write(o)
 
-    wlgrid = 10000/wngrid
-#    wlgrid = 10000/wngrid
-    root_logger.info('TAUREX PROGRAM END AT %s s', datetime.datetime.now())
-
+    root_logger.info('TauREx PROGRAM END AT %s s', datetime.datetime.now())
 
     if args.plot:
-
-        if get_rank() == 0: #and nprocs() <= 1:
+        wlgrid = 10000/wngrid
+        if get_rank() == 0:
             import matplotlib.pyplot as plt
             fig = plt.figure()
             ax = fig.add_subplot(1, 1, 1)
-            
+
             ax.set_xlabel(r'Wavelength $(\mu m)$')
             ax.set_ylabel(r'$(R_p/R_s)^2$')
             is_lightcurve = False
@@ -284,38 +281,35 @@ def main():
                             label='observation')
                 else:
                     ax.errorbar(observation.wavelengthGrid,
-                                observation.spectrum, observation.errorBar,fmt='.',
+                                observation.spectrum, observation.errorBar,
+                                fmt='.',
                                 label='observation')
 
             if is_lightcurve:
                 ax.plot(result[1], label='forward model')
             else:
-                
+
                 if inst_result is not None:
                     from taurex.util.util import wnwidth_to_wlwidth
-                    inst_wngrid, inst_spectrum, inst_noise, inst_width = inst_result
+                    inst_wngrid, inst_spectrum, \
+                        inst_noise, inst_width = inst_result
 
                     inst_wlgrid = 10000/inst_wngrid
 
                     inst_wlwidth = wnwidth_to_wlwidth(inst_wngrid, inst_width)
 
-                    
-                    #ax.plot(wlgrid, binning.bin_model(result)[1], label='forward model')
                     ax.errorbar(inst_wlgrid, inst_spectrum, inst_noise,
                                 inst_wlwidth/2, '.', label='Instrument')
 
-                    #ax.plot(inst_wlgrid, inst_spectrum, label='forward model')
-                    #ax.plot(10000/inst_result[0], inst_result[1],'.')
-                    #ax.plot((10000/inst_result[0],10000/inst_result[0]), (inst_result[1]+inst_result[2],inst_result[1]-inst_result[2]),'-')
-                    #ax.plot((10000/inst_result[0]-10000/inst_result[3]/2,10000/inst_result[0]+10000/inst_result[3]/2), (inst_result[1],inst_result[1]),'-')
                 else:
-                    ax.plot(wlgrid, binning.bin_model(result)[1], label='forward model')
-                
+                    ax.plot(wlgrid, binning.bin_model(
+                        result)[1], label='forward model')
+
                 ax.set_xscale('log')
-                    
 
             if args.contrib:
-                native_grid, contrib_result = model.model_contrib(wngrid=wngrid)
+                native_grid, contrib_result = model.model_contrib(
+                    wngrid=wngrid)
 
                 for contrib_name, contrib in contrib_result.items():
 
@@ -328,7 +322,8 @@ def main():
                         ax.plot(wlgrid, binned[1], label=contrib_name)
 
             if args.full_contrib:
-                native_grid, contrib_result = model.model_full_contrib(wngrid=wngrid)
+                native_grid, contrib_result = model.model_full_contrib(
+                    wngrid=wngrid)
 
                 for contrib_name, contrib in contrib_result.items():
 
@@ -342,13 +337,11 @@ def main():
                         else:
                             ax.plot(wlgrid, binned[1], label=label)
 
-
             plt.legend()
             plt.show()
         else:
-            logging.getLogger('taurex').warning('Number of processes > 1 so not plotting')
-    
-
+            logging.getLogger('taurex').warning(
+                'Number of processes > 1 so not plotting')
 
 
 if __name__ == "__main__":
