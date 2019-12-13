@@ -3,7 +3,7 @@ TauREx 3 is the newest version of the TauREx retrieval code.
 
 Documentation can be found [here](https://taurex3-public.readthedocs.io/en/latest/)
 
-Current build: 3.0.0-beta
+Current build: 3.0.1-alpha
 
 ## Prerequisites
 
