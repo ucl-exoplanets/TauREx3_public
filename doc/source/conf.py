@@ -20,7 +20,7 @@ import sys
 # -- Project information -----------------------------------------------------
 
 project = 'TauREx'
-copyright = '2019, Ahmed Al-Refaie, Quentin Changeat, Ingo Waldmann, Giovanna Tinneti'
+copyright = '2019, Ahmed Al-Refaie, Quentin Changeat, Ingo Waldmann, Giovanna Tinetti'
 author = 'Ahmed Al-Refaie'
 
 # The short X.Y version
