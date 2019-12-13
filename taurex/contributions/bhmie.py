@@ -20,7 +20,7 @@ class BHMieContribution(Contribution):
     bh_particle_radius: float
         Radius of scattering particles in um
 
-    bh_cloud_mix: float
+    bh_clouds_mix: float
         Mix ratio in atmosphere
 
     bh_clouds_bottomP: float
@@ -32,7 +32,7 @@ class BHMieContribution(Contribution):
 
     """
     def __init__(self, mie_path=None, mie_type='cloud', bh_particle_radius=1.0,
-                 bh_cloud_mix=1.0, bh_clouds_bottomP=1e-2,
+                 bh_clouds_mix=1e-6, bh_clouds_bottomP=1e0,
                  bh_clouds_topP=1e-3):
         super().__init__('Mie')
         self._mie_path = mie_path
@@ -81,7 +81,7 @@ class BHMieContribution(Contribution):
     def mieType(self):
         return self._mie_type
 
-    @fitparam(param_name='bh_clouds_particle_size',
+    @fitparam(param_name='bh_particle_radius',
               param_latex='$R^{bh}_\mathrm{clouds}$',
               default_fit=False,
               default_bounds=[-10, 1])
@@ -123,7 +123,7 @@ class BHMieContribution(Contribution):
     def cloudBottomPressure(self, value):
         self._cloud_bottom_pressure = value
 
-    @fitparam(param_name='bh_cloud_mixing',
+    @fitparam(param_name='bh_clouds_mix',
               param_latex='$\chi^{bh}_\mathrm{clouds}$',
               default_fit=False,
               default_bounds=[-1, 1])
