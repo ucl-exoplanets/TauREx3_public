@@ -9,7 +9,7 @@ for retrievals or plotting.
 Keywords
 --------
 
-Only one of these is required.
+Only one of these is required. All accept a string path to a file
 
 +-------------------------+---------------------------------------------------------------------+
 | Variable                | Data format                                                         |
@@ -20,12 +20,28 @@ Only one of these is required.
 +-------------------------+---------------------------------------------------------------------+
 | ``iraclis_spectrum``    | Iraclis output pickle data                                          |
 +-------------------------+---------------------------------------------------------------------+
-| ``taurex_spectrum``     | See taurexspectrum_                                                 |
+| ``taurex_spectrum``     | TauREX HDF5 output or ``self`` See taurexspectrum_                  |
 +-------------------------+---------------------------------------------------------------------+
 
+-------
+Example
+-------
+
+An example of loading an ascii data-set::
+
+    [Observation]
+    observed_spectrum = /path/to/data.dat
 
 
 .. _taurexspectrum:
 
 TauREx spectrum
 ---------------
+
+The ``taurex_spectrum`` has two different modes. The first mode is specifing a filename path of a
+a TauREx3 HDF5 output. This output must have been run with some form of instrument function (such as SNR),
+for it to be useable as an observation.
+Another is to set ``taurex_spectrum = self``, this will set the current forward model + instrument function
+as the observation. This type observation is valid of the fitting procedure making it possible to do *self-retrievals*.
+
+

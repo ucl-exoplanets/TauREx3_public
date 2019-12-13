@@ -1,7 +1,6 @@
 .. toctree::
     :hidden:
-    :titlesonly:
-    :maxdepth: 4
+    :maxdepth: 2
     :caption: Contents:
 
     Home <self>
@@ -12,8 +11,8 @@
     Project Page <https://github.com/ucl-exoplanets/TauREx3_public/>
 
 
-TauREx |version| - Next generation exoplanetary retrievals!
-==================================================
+TauREx |version| - A true exoplanet retrieval framework
+=======================================================
 
     |image1|
 

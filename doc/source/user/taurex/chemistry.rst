@@ -27,7 +27,7 @@ ACE Equlibrium Chemistry
 ``chemistry_type = ace``
 ``chemistry_type = equilibrium``
 
-Equilibrium chemistry using the ACE FORTRAN program.
+Equilibrium chemistry using the ACE FORTRAN program. *Fortran compiler required*
 
 --------
 Keywords

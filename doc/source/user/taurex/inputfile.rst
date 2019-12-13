@@ -35,6 +35,9 @@ Of course comments are handled with ``#``
     - ``[Optimizer]``
     - ``[Fitting]``
 
+Not all of these headers are required in an input file. Some will generate
+default profiles when not present. 
+
 Some of these may define additional *subheaders* given by the ``[[Name]]`` notation::
 
     [Header]
