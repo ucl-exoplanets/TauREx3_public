@@ -1,18 +1,11 @@
 # TauREx3
 
-TauREx3 is the newest version of the TauREx retrieval code that was created by a disturbed man.
+TauREx3 is the newest version of the TauREx retrieval code.
 
 ## Prerequisites
 
 * numpy
     - Specifically **numpy.f2py** to compile Fortran extensions
-
-* cython
-    * Required to compile C++ extensions
-
-* Fortran and C++ compilers
-    * For Windows this can be easily achieved using Anaconda3 and doing:
-        `conda install libpython m2w64-toolchain`
 
 
 
