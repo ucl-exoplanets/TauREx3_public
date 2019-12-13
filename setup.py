@@ -42,7 +42,7 @@ def build_ace(parent_package='',top_path=None):
     data_files = ('taurex/external/ACE', ['src/ACE/Data/NASA.therm', 'src/ACE/Data/composes.dat'])
     ext = Extension(name='taurex.external.ace', sources=ace_sources)
 
-    return ext,data_files
+    return ext, data_files
 
 def build_bhmie():
     return Extension("taurex.external.mie",  
@@ -141,15 +141,22 @@ classifiers = [
 # Handle versioning
 version = '3.0.0-beta'
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
 
 setup(name='taurex',
-      author='Foo',
-      author_email='bar',
-      maintainer='Foo',
+      author='Ahmed Faris Al-Refaie',
+      author_email='ahmed.al-refaie.12@ucl.ac.uk',
+      license="BSD",
       version=version,
-      description='Bar',
+      description='TauREx 3 retrieval framework',
       classifiers=classifiers,
       packages=packages,
+      long_description=long_description,
+      url='https://github.com/ucl-exoplanets/TauREx3_public/',
+      long_description_content_type="text/markdown",
+      keywords = ['exoplanet','retrieval','taurex','taurex3','atmosphere','atmospheric'],
       include_package_data=True,
       entry_points=entry_points,
       provides=provides,
