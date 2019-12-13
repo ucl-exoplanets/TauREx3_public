@@ -139,7 +139,7 @@ classifiers = [
 ]
 
 # Handle versioning
-version = '3.0.0-alpha'
+version = '3.0.0-beta'
 
 
 setup(name='taurex',
