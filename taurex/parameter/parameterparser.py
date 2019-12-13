@@ -21,7 +21,7 @@ class ParameterParser(Logger):
         elif isinstance(val, (str)):
             if val.lower() in ['true',  'yes', 'yeah', 'yup', 'certainly', 'uh-huh',]:
                 newval = True
-            elif val.lower() in ['false',  'no', 'nope', 'no-way', 'hell-no', 'fuck-off']:
+            elif val.lower() in ['false',  'no', 'nope', 'no-way', 'hell-no',]:
                 newval = False
             else:
                 try:
