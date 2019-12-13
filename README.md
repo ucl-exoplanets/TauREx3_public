@@ -11,7 +11,18 @@ Current build: 3.0.1-alpha
 
 
 
-## Installing
+## Installing from PyPi
+
+
+You can install it by doing
+
+```
+pip install taurex
+```
+
+
+## Installing from source
+
 
 Clone the directory using:
 
