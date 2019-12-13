@@ -21,19 +21,18 @@ The input is defined in various *headers*, with each header having variables tha
 Of course comments are handled with ``#``
 
  The available headers are:
-    - ``[Global]``
-    - ``[Chemistry]``
-    - ``[Temperature]``
-    - ``[Pressure]``
-    - ``[Planet]``
-    - ``[Star]``
-    - ``[Model]``
-    - ``[Lightcurve]``
-    - ``[Observation]``
-    - ``[Binning]``
-    - ``[Instrument]``
-    - ``[Optimizer]``
-    - ``[Fitting]``
+    - :ref:`userglobal`
+    - :ref:`userchemistry`
+    - :ref:`usertemperature`
+    - :ref:`userpressure`
+    - :ref:`userplanet`
+    - :ref:`userstar`
+    - :ref:`usermodel`
+    - :ref:`userobservation`
+    - :ref:`userbinning`
+    - :ref:`userinstrument`
+    - :ref:`useroptimizer`
+    - :ref:`userfitting`
 
 Not all of these headers are required in an input file. Some will generate
 default profiles when not present. 

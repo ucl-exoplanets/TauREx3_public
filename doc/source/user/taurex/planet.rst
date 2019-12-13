@@ -1,4 +1,4 @@
-.. _planet:
+.. _userplanet:
 
 ============
 ``[Planet]``

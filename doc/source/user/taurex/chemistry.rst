@@ -1,4 +1,4 @@
-.. _chemistry:
+.. _userchemistry:
 
 ===============
 ``[Chemistry]``

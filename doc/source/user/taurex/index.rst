@@ -28,5 +28,7 @@ a help can be accessed by doing::
     Star <star>
     Forward Models <models>
     Observation <observation>
+    Binning <binning>
     Fitting <fitting>
+    Optimizer <optimizer>
 

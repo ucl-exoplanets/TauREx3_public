@@ -1,4 +1,4 @@
-.. _temperature:
+.. _usertemperature:
 
 *****************
 ``[Temperature]``

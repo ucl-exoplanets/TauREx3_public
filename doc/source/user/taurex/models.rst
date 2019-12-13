@@ -1,4 +1,4 @@
-.. _model:
+.. _usermodel:
 
 ===========
 ``[Model]``

@@ -1,7 +1,10 @@
+.. _userfitting:
 
 =============
 ``[Fitting]``
 =============
+
+This header deals with controlling the fitting procedure.
 
 The format for altering and controlling fitting parameters is of the form::
 

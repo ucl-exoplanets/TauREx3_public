@@ -1,8 +1,10 @@
+.. _userobservation:
+
 =================
 ``[Observation]``
 =================
 
-This section deals with loading in spectral data
+This header deals with loading in spectral data
 for retrievals or plotting.
 
 --------
