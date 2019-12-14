@@ -12,5 +12,6 @@ Taurex API Documentation
    taurex.temperature
    taurex.pressure
    taurex.stellar
+   taurex.instrument
    taurex.spectrum
    taurex.model
