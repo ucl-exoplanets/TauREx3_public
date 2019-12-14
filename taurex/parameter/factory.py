@@ -141,8 +141,10 @@ def create_chemistry(config):
     elif chemistry in ('custom',):
         from taurex.chemistry import Chemistry
         config['chemistry_type'] = 'custom'
-        determine_klass(config, 'chemistry_type', None,
+        config, klass = determine_klass(config, 'chemistry_type', None,
                         Chemistry)
+        obj = klass(**config)
+        return obj
     elif chemistry in ('taurex', 'complex', 'defined', 'free'):
         from taurex.data.profiles.chemistry import TaurexChemistry
         gases = []
