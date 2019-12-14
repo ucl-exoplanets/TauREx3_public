@@ -1,6 +1,5 @@
 from .instrument import Instrument
 import numpy as np
-from taurex.binning import FluxBinner
 import math
 
 
