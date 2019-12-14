@@ -1,0 +1,7 @@
+[Global]
+xsec_path = /path/to/xsec
+cia_path = /path/to/cia
+
+[Chemistry]
+chemistry_type = free
+
