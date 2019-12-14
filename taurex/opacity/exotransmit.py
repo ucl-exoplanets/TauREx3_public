@@ -6,7 +6,9 @@ import numpy as np
 class ExoTransmitOpacity(InterpolatingOpacity):
 
     def __init__(self, filename, interpolation_mode='linear', in_memory=False):
-        super().__init__('ExoOpacity:{}'.format(pathlib.Path(filename).stem[4:]),
+
+        super().__init__('ExoOpacity:{}'.format(
+                            pathlib.Path(filename).stem[4:]),
                          interpolation_mode=interpolation_mode)
 
         self._filename = filename
