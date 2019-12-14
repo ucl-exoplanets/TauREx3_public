@@ -5,14 +5,15 @@ Quickstart
 ==========
 
 
-To get quickly up to speed lets try an example run using TauREx3. We will be using the ``examples/quickstart.par``
-file as a starting point and ``examples/test_data.dat`` as our observation
+To get quickly up to speed lets try an example run using TauREx3. We will be using the ``examples/parfiles/quickstart.par``
+file as a starting point and ``examples/parfiles/quickstart.dat`` as our observation. Copy these to a new folder somewhere.
 
 Prerequisites
 -------------
 
-Before reading this you should have a few things on hand. Firstly ``H2O`` and ``CH4`` absorption cross sections in a python
-pickle format are required. Secondly some collisionally induced absorption (CIA) cross sections are also
+Before reading this you should have a few things on hand. Firstly ``H2O`` and ``CO2`` absorption cross sections
+in one of the :ref:`supported_data_formats` is required. This example assumes cross-sections at *R=10000*.
+Secondly some collisionally induced absorption (CIA) cross sections are also
 required for a later part for ``H2-He`` and ``H2-H2``, you can get these from the HITRAN_ site. 
 
 Setup
@@ -41,16 +42,17 @@ And we should get:
    Our first forward model
 
 Lets try plotting it against our observation. Under the ``[Observation]`` header
-we can add in the ``observed_spectrum`` keyword and point it to our ``test_data.dat`` file like so::
+we can add in the ``observed_spectrum`` keyword and point it to our ``quickstart.dat`` file like so::
 
     [Observation]
-    observed_spectrum = /path/to/test_data.dat
+    observed_spectrum = /path/to/quickstart.dat
 
 Now the spectrum will be binned to our observation:
 
 .. figure:: _static/fm_obs_bin.png
+   :align: center
 
-           ``grid_type = observed``
+   Our binned observation
 
 
 You may notice that general structure and peaks don't seem to match up with observation.
@@ -60,7 +62,7 @@ Our model doesn't seem to do the job and it may be the fault of our choice of mo
 Chemistry
 ---------
 
-As we've seen, ``CH4`` doesn't fit the observation very well, we should try adding in another molecule.
+As we've seen, ``CO2`` doesn't fit the observation very well, we should try adding in another molecule.
 Underneath the ``[Chemistry]`` section we can add another sub-header with the name of our molecule, for this 
 example we will use a ``constant`` gas profile which keeps it abundance constant throughout the atmosphere,
 there are other more complex profiles but for now we'll keep it simple::
@@ -74,7 +76,7 @@ there are other more complex profiles but for now we'll keep it simple::
         gas_type = constant
         mix_ratio=1.1185e-4
 
-        [[CH4]]
+        [[CO2]]
         gas_type=constant
         mix_ratio=1.1185e-4
 
@@ -84,9 +86,9 @@ there are other more complex profiles but for now we'll keep it simple::
 
 Plotting it gives:
 
-.. image::  _static/ch4_and_h2o.png
+.. image::  _static/co2_and_h2o.png
 
-We're getting there. It looks like H2O is definately there but maybe ``CH4`` isn't? Lets try it
+We're getting there. It looks like H2O is definately there but maybe ``CO2`` isn't? Lets try it
 by commenting it out::
 
     [Chemistry]
@@ -98,7 +100,7 @@ by commenting it out::
         gas_type = constant
         mix_ratio=1.1185e-4
 
-        #[[CH4]]
+        #[[CO2]]
         #gas_type=constant
         #mix_ratio=1.1185e-4
 
@@ -154,11 +156,39 @@ Storage
 ``Taurex3`` uses the HDF5_ format to store its state and results. We can accomplish this by 
 using the ``-o`` output argument::
 
-    taurex -i quickstart.par --plot -c -o myfile.hdf5
+    taurex -i quickstart.par -o myfile.hdf5
+
+We can use this output to plot profiles spectra and even the optical depth!
+Try::
+
+    taurex-plot -i myfile.h5 -o fm_plots/ --all
+
+To plot everything:
+
+.. list-table::
+
+    * - .. figure:: _static/fm_plots/fm_plots-0.png
+            :align: center
+
+            Chemistry
+
+      - .. figure:: _static/fm_plots/fm_plots-1.png
+            :align: center
+
+            Spectrum
+
+    * - .. figure:: _static/fm_plots/fm_plots-2.png
+            :align: center
+
+            Contributions
+
+      - .. figure:: _static/fm_plots/fm_plots-3.png
+            :align: center
+
+            Optical depth
 
 ``HDF5`` has many viewers such as HDFView_ or HDFCompass_ and APIs such as Cpp_, FORTRAN_ and Python_.
-Pick your poison. We can put these
-
+Pick your poison. 
 
 Retrieval
 ---------
@@ -192,41 +222,57 @@ abundances fit in log space by default.
 Running taurex like before will just plot our forward model. To run the retrieval we simply add
 the ``--retrieval`` keyword like so::
 
-    taurex -i quickstart.par --plot -o myfile.hdf5 --retrieval
+    taurex -i quickstart.par --plot -o myfile_retrieval.hdf5 --retrieval
 
 We should now see something like this pop up::
 
-    -------------------------------------
-    ------Retrieval Parameters-----------
-    -------------------------------------
-
-    Dimensionality of fit: 1
-
+    taurex.Nestle - INFO - -------------------------------------
+    taurex.Nestle - INFO - ------Retrieval Parameters-----------
+    taurex.Nestle - INFO - -------------------------------------
+    taurex.Nestle - INFO - 
+    taurex.Nestle - INFO - Dimensionality of fit: 1
+    taurex.Nestle - INFO - 
+    taurex.Nestle - INFO - 
     Param      Value    Bound-min    Bound-max
     -------  -------  -----------  -----------
     T        1265.98         1200         1400
 
-    taurex.Nestle - WARNING - Beginning fit......
-    WARNING:taurex.Nestle:Beginning fit......
-    it=   125 logz=1838.310559
+
+    taurex.Nestle - INFO - 
+    it=   393 logz=1872.153686niter: 394
+
 
 It should only take a few minutes to run. Once done we should get an output like this::
 
-    ------------------------------
-    -------Retrieval output-------
-    ------------------------------
+    ---Solution 0------
+    taurex.Nestle - INFO - 
+    Param        MAP    Median
+    -------  -------  --------
+    T        1375.97   1371.71
 
-    Parameter      Value    Sigma
-    -----------  -------  -------
-    T            1360.31  3.55803
+So the temperature should have been around *1370 K*, huh, and lets see how it looks. Lets plot the output::
 
-So the temperature should have been *1360 K*, huh, and lets see how it looks:
+    taurex-plot -i myfile_retrieval.hdf5 -o retrieval_plots/ --all
 
-.. image::  _static/retrieval.png
+Our final spectrum looks like:
 
-.. image:: _static/delicious.jpg
+.. figure:: _static/retrieval_plots/retrieval_plots-2.png
+    :align: center
+    
+    Final result
 
-Oh and its saved to our HDF5 file under the ``Fit`` header with all the weights, traces and results.
+We can then see the posteriors:
+
+.. figure:: _static/retrieval_plots/retrieval_plots-1.png
+    :align: center
+    
+    Posteriors
+
+
+Thats the basics of playing around with TauREx 3. You can
+try modifying the quickstart to do other things! Take a look at
+:ref:`inputfile` to see a list of parameters you can change!
+
 
 
 
