@@ -12,7 +12,7 @@ class ExampleChemistry(Chemistry):
 
 
     Here we'll create a chemistry profile
-    that will fill the atmosphere with them
+    that will fill the atmosphere with molecules
     based on their occupancy.
 
     Here, all the ratios are normalized
