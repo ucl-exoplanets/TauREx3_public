@@ -28,21 +28,20 @@ class FluxBinner(Binner):
     def __init__(self, wngrid, wngrid_width=None):
         super().__init__()
 
-        self._wngrid = wngrid
+        sort_grid = wngrid.argsort()
+        self._wngrid = wngrid[sort_grid]
         self._wngrid_width = wngrid_width
 
         if self._wngrid_width is None:
             self._wngrid_width = compute_bin_edges(self._wngrid)[-1]
+        elif hasattr(self._wngrid_width, '__len__'):
+            if len(self._wngrid_width) != len(self._wngrid):
+                raise ValueError('Wavenumber width should be signel value or '
+                                 'same shape as wavenumber grid')
+            self._wngrid_width = wngrid_width[sort_grid]
 
         if not hasattr(self._wngrid_width, '__len__'):
             self._wngrid_width = np.ones_like(self._wngrid)*self._wngrid_width
-
-        if self._wngrid_width.shape != self._wngrid.shape:
-            raise ValueError('Wavenumber width should be signel value or '
-                             'same shape as wavenumber grid')
-
-        self._wngrid = self._wngrid[self._wngrid.argsort()]
-        self._wngrid_width = self._wngrid_width[self._wngrid.argsort()]
 
     def bindown(self, wngrid, spectrum, grid_width=None, error=None):
         """
