@@ -9,10 +9,10 @@ class ParameterParser(Logger):
         self._read = False
     
 
-    def transform(self,section,key):
+    def transform(self, section, key):
         val = section[key]
         newval = val
-        if isinstance(val,list):
+        if isinstance(val, list):
             try:
                 newval = list(map(float,val))
 
@@ -267,14 +267,21 @@ class ParameterParser(Logger):
     #             else:
     #                 return observed,None
 
-    def generate_model(self):
+    def generate_model(self, chemistry=None, pressure=None,
+                       temperature=None, planet=None,
+                       star=None):
         config = self._raw_config.dict()
         if 'Model' in config:
-            chemistry = self.generate_chemistry_profile()
-            pressure = self.generate_pressure_profile()
-            temperature = self.generate_temperature_profile()
-            planet = self.generate_planet()
-            star = self.generate_star()
+            if chemistry is None:
+                chemistry = self.generate_chemistry_profile()
+            if pressure is None:
+                pressure = self.generate_pressure_profile()
+            if temperature is None:
+                temperature = self.generate_temperature_profile()
+            if planet is None:
+                planet = self.generate_planet()
+            if star is None:
+                star = self.generate_star()
             model= create_model(config['Model'],chemistry,temperature,pressure,planet,star)
         else:
             return None
@@ -329,7 +336,7 @@ class ParameterParser(Logger):
                 if not fit_param in fitting_params:
                     fitting_params[fit_param] = {'fit':None,'bounds':None,'mode':None,'factor':None}
                 fitting_params[fit_param][fit_type]=value
-        
+
         return fitting_params
 
 
