@@ -1,35 +1,35 @@
 from .polychord import PolyChordOptimizer
 import numpy as np
 import os
-import dyPolyChord.python_likelihoods as likelihoods  # Import some example python likelihoods
+# Import some example python likelihoods
+import dyPolyChord.python_likelihoods as likelihoods
 import dyPolyChord.python_priors as priors  # Import some example python priors
 import dyPolyChord.pypolychord_utils
 import dyPolyChord
 import time
+
+
 class dyPolyChordOptimizer(PolyChordOptimizer):
 
-
-    def __init__(self,polychord_path=None,observed=None,model=None,
-                num_live_points=1500,
-                max_iterations=0,
-                maximum_modes=100,
-                cluster=True,
-                evidence_tolerance=0.5,
-                mode_tolerance=-1e90,
-                resume=False,
-                verbosity=1,sigma_fraction=0.1):
+    def __init__(self, polychord_path=None, observed=None, model=None,
+                 num_live_points=1500,
+                 max_iterations=0,
+                 maximum_modes=100,
+                 cluster=True,
+                 evidence_tolerance=0.5,
+                 mode_tolerance=-1e90,
+                 resume=False,
+                 verbosity=1, sigma_fraction=0.1):
         super().__init__(
-            polychord_path=polychord_path,observed=observed,model=model,
-                num_live_points=num_live_points,
-                max_iterations=max_iterations,
-                maximum_modes=maximum_modes,
-                cluster=cluster,
-                evidence_tolerance=evidence_tolerance,
-                mode_tolerance=mode_tolerance,
-                resume=resume,
-                verbosity=verbosity,sigma_fraction=sigma_fraction)
-
-
+            polychord_path=polychord_path, observed=observed, model=model,
+            num_live_points=num_live_points,
+            max_iterations=max_iterations,
+            maximum_modes=maximum_modes,
+            cluster=cluster,
+            evidence_tolerance=evidence_tolerance,
+            mode_tolerance=mode_tolerance,
+            resume=resume,
+            verbosity=verbosity, sigma_fraction=sigma_fraction)
 
     def compute_fit(self):
         self._polychord_output = None
@@ -38,39 +38,37 @@ class dyPolyChordOptimizer(PolyChordOptimizer):
         sqrtpi = np.sqrt(2*np.pi)
 
         ndim = len(self.fitting_parameters)
+
         def polychord_loglike(cube):
             # log-likelihood function called by polychord
-            fit_params_container = np.array([cube[i] for i in range(len(self.fitting_parameters))])
+            fit_params_container = np.array(
+                [cube[i] for i in range(len(self.fitting_parameters))])
             chi_t = self.chisq_trans(fit_params_container, data, datastd)
-            
-            #print('---------START---------')
-            #print('chi_t',chi_t)
-            #print('LOG',loglike)
+
+            # print('---------START---------')
+            # print('chi_t',chi_t)
+            # print('LOG',loglike)
             loglike = -np.sum(np.log(datastd*sqrtpi)) - 0.5 * chi_t
-            return loglike,[0.0]
+            return loglike, [0.0]
 
         def polychord_uniform_prior(hypercube):
             # prior distributions called by polychord. Implements a uniform prior
             # converting parameters from normalised grid to uniform prior
-            #print(type(cube))
+            # print(type(cube))
             cube = [0.0]*ndim
 
-            for idx,bounds in enumerate(self.fit_boundaries):
+            for idx, bounds in enumerate(self.fit_boundaries):
                 # print(idx,self.fitting_parameters[idx])
-                bound_min,bound_max = bounds
-                cube[idx] = (hypercube[idx] * (bound_max-bound_min)) + bound_min
+                bound_min, bound_max = bounds
+                cube[idx] = (hypercube[idx] *
+                             (bound_max-bound_min)) + bound_min
                 #print('CUBE idx',cube[idx])
-            #print('-----------')
+            # print('-----------')
             return cube
         status = None
 
-        
-
-
-
-
         datastd_mean = np.mean(datastd)
-        
+
         likelihood = polychord_loglike
         prior = polychord_uniform_prior
 
@@ -79,19 +77,21 @@ class dyPolyChordOptimizer(PolyChordOptimizer):
             likelihood, prior, ndim)
 
         # Specify sampler settings (see run_dynamic_ns.py documentation for more details)
-        dynamic_goal = 1.0  # whether to maximise parameter estimation or evidence accuracy.
-        ninit =   ndim*5       # number of live points to use in initial exploratory run.
-        nlive_const = ndim * 25   # total computational budget is the same as standard nested sampling with nlive_const live points.
+        # whether to maximise parameter estimation or evidence accuracy.
+        dynamic_goal = 1.0
+        # number of live points to use in initial exploratory run.
+        ninit = ndim*5
+        # total computational budget is the same as standard nested sampling with nlive_const live points.
+        nlive_const = ndim * 25
         settings_dict = {
             'num_repeats': ndim * 5,
             'do_clustering': self.do_clustering,
-            'num_repeats':ndim,
+            'num_repeats': ndim,
             'precision_criterion': self.evidence_tolerance,
             'logzero': -1e70,
             'read_resume': self.resume,
             'base_dir': self.dir_polychord,
             'file_root': '1-'}
-
 
         try:
             from mpi4py import MPI
@@ -99,12 +99,10 @@ class dyPolyChordOptimizer(PolyChordOptimizer):
 
             # Run dyPolyChord
             dyPolyChord.run_dypolychord(my_callable, dynamic_goal, settings_dict,
-                                        ninit=ninit,nlive_const=nlive_const,comm=comm)
+                                        ninit=ninit, nlive_const=nlive_const, comm=comm)
         except ImportError:
             dyPolyChord.run_dypolychord(my_callable, dynamic_goal, settings_dict,
-                                        ninit=ninit,nlive_const=nlive_const)            
-
-
+                                        ninit=ninit, nlive_const=nlive_const)
 
         time.sleep(2.0)
 
