@@ -8,7 +8,7 @@ chemistry_type = taurex
 fill_gases = H2,He
 ratio = 4.8962e-2
 
-    [[CH4]]
+    [[CO2]]
     gas_type = constant
     mix_ratio=1.1185e-4
 
