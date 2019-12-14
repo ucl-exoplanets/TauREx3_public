@@ -52,7 +52,6 @@ model_type = transmission
 observed_spectrum = path/to/spectra/here.dat
 
 
-
 [Optimizer]
 optimizer = nestle
 num_live_points = 200
@@ -63,3 +62,6 @@ planet_radius:fit = True
 CH4_CO2:fit = True
 CH4_CO2:bounds = 0.04,0.5
 CH4_CO2:mode = linear
+
+lee_mie_topP:fit = True
+lee_mie_topP:bounds = 1e3,1e-2
