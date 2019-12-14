@@ -59,7 +59,7 @@ class ExoTransmitOpacity(InterpolatingOpacity):
                 self._xsec_grid[pressure_count,:,lambda_count] = arr[1:] + 1e-60
                 pressure_count +=1
         
-        self._xsec_grid = self._xsec_grid[:,:,grid_sort]*1000
+        self._xsec_grid = self._xsec_grid[:,:,grid_sort]*10000
         
         
     @property
