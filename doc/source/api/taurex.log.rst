@@ -1,11 +1,8 @@
-taurex.log package
-==================
+Logging (``taurex.log``)
+========================
 
-Submodules
-----------
-
-taurex.log.logger module
-------------------------
+Logger
+------
 
 .. automodule:: taurex.log.logger
    :members:

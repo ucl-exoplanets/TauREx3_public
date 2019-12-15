@@ -1,4 +1,4 @@
-taurex.util package
+Utilities
 ===================
 
 Submodules

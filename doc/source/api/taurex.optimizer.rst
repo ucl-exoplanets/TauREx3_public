@@ -1,50 +1,40 @@
-taurex.optimizer package
-========================
+Optimizers (``taurex.optimizer``)
+=================================
 
-Submodules
-----------
 
-taurex.optimizer.dypolychord module
------------------------------------
-
-.. automodule:: taurex.optimizer.dypolychord
-   :members:
-   :undoc-members:
-   :show-inheritance:
-taurex.optimizer.multinest module
----------------------------------
-
-.. automodule:: taurex.optimizer.multinest
-   :members:
-   :undoc-members:
-   :show-inheritance:
-taurex.optimizer.nestle module
-------------------------------
-
-.. automodule:: taurex.optimizer.nestle
-   :members:
-   :undoc-members:
-   :show-inheritance:
-taurex.optimizer.optimizer module
----------------------------------
+Base
+----
 
 .. automodule:: taurex.optimizer.optimizer
    :members:
    :undoc-members:
    :show-inheritance:
-taurex.optimizer.polychord module
----------------------------------
 
-.. automodule:: taurex.optimizer.polychord
+Nestle (``taurex.optimizer.nestle``)
+------------------------------------
+
+.. automodule:: taurex.optimizer.nestle
    :members:
    :undoc-members:
    :show-inheritance:
 
+MultiNest (``taurex.optimizer.multinest``)
+------------------------------------------
 
-Module contents
----------------
-
-.. automodule:: taurex.optimizer
+.. automodule:: taurex.optimizer.multinest
    :members:
-   :undoc-members:
+   :show-inheritance:
+
+PolyChord (``taurex.optimizer.polychord``)
+------------------------------------------
+
+.. automodule:: taurex.optimizer.polychord
+   :members:
+   :show-inheritance:
+
+dyPolyChord (``taurex.optimizer.dypolychord``)
+----------------------------------------------
+
+.. automodule:: taurex.optimizer.dypolychord
+   :members:
    :show-inheritance:

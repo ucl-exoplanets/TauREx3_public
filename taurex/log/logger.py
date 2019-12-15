@@ -45,7 +45,8 @@ root_logger.setLevel(logging.INFO)
 
 
 class Logger:
-    """Standard logging using logger library
+    """
+    Standard logging using logger library
 
     Parameters
     -----------

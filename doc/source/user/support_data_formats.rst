@@ -17,6 +17,12 @@ Supported formats are:
 - ``.hdf5``, ``.h5`` New HDF5 format
 - ``.dat``,  ExoTransmit_ format
 
+.. tip::
+
+    For opacities we recommend using hi-res cross-sections (R>7000)
+    from a high temperature linelist. Our recommendation are
+    linelists from the ExoMol_ project.
+
 Observation
 ~~~~~~~~~~~
 
@@ -40,3 +46,5 @@ Only a few formats are supported
 .. _ExoTransmit: https://github.com/elizakempton/Exo_Transmit/tree/master/Opac
 
 .. _Iraclis: https://github.com/ucl-exoplanets/Iraclis
+
+.. _ExoMol: http://www.exomol.com

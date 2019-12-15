@@ -35,4 +35,5 @@ a help can be accessed by doing::
     Instrument <instrument>
     Fitting <fitting>
     Optimizer <optimizer>
+    Plotting <plotting>
 

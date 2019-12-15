@@ -8,7 +8,7 @@ chemistry_type = taurex
 fill_gases = H2,He
 ratio = 4.8962e-2
 
-    [[CH4]]
+    [[CO2]]
     gas_type = constant
     mix_ratio=1.1185e-4
 
@@ -18,7 +18,7 @@ ratio = 4.8962e-2
 
 [Temperature]
 profile_type = isothermal
-iso_temp = 1265.97764826
+T = 1265.97764826
 
 [Pressure]
 profile_type = Simple
@@ -28,8 +28,8 @@ nlayers = 30
 
 [Planet]
 planet_type = Simple
-mass = 1.0
-radius = 0.999430455828
+planet_mass = 1.0
+planet_radius = 0.999430455828
 
 [Star]
 star_type = blackbody
