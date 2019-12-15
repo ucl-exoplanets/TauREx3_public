@@ -9,7 +9,7 @@ class ExampleTemperature(TemperatureProfile):
 
     Here we will compute a temperaurate like so:
 
-        T(layer) = Ae^{damping*P(layer)}
+        T(layer) = Ae^{damping*log(P(layer))}
 
     This is completely arbitrary and has no physical
     meaning but serves as an example of how one could implement it
@@ -58,7 +58,7 @@ class ExampleTemperature(TemperatureProfile):
 
         # Now we perform our computation
         self._temperature_array = \
-            self._A_param * np.exp(self._damping * pressure_profile)
+            self._A_param * np.exp(self._damping * np.log10(pressure_profile))
 
     @property
     def profile(self):
