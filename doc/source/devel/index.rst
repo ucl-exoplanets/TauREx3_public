@@ -10,3 +10,5 @@ Developers guide
 
     Overview <overview>
     Guidelines <guidelines>
+    Fitting Parameters <fittingparameters>
+    Writing Temperature <temperature>
