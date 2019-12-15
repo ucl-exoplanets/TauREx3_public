@@ -91,12 +91,9 @@ def main():
         quit()
 
     if binning is None:
-        if observation is None:
+        if observation is None or observation == 'self':
             binning = model.defaultBinner()
             wngrid = model.nativeWavenumberGrid
-        elif observation == 'self':
-            binning = model.defaultBinner()
-            wngrid = observation.wavenumberGrid
         else:
             binning = observation.create_binner()
             wngrid = observation.wavenumberGrid
