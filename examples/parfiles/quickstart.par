@@ -1,0 +1,51 @@
+[Global]
+xsec_path = /path/to/xsec
+cia_path = /path/to/cia
+
+
+[Chemistry]
+chemistry_type = taurex
+fill_gases = H2,He
+ratio = 4.8962e-2
+
+    [[CO2]]
+    gas_type = constant
+    mix_ratio=1.1185e-4
+
+    [[N2]]
+    gas_type = constant
+    mix_ratio = 3.00739e-9
+
+[Temperature]
+profile_type = isothermal
+T = 1265.97764826
+
+[Pressure]
+profile_type = Simple
+atm_min_pressure = 1e-0
+atm_max_pressure = 1e6
+nlayers = 30
+
+[Planet]
+planet_type = Simple
+planet_mass = 1.0
+planet_radius = 0.999430455828
+
+[Star]
+star_type = blackbody
+temperature = 5800
+
+[Model]
+model_type = transmission
+
+    [[Absorption]]
+
+
+
+[Optimizer]
+optimizer = nestle
+num_live_points=100
+method = single
+
+
+

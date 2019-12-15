@@ -4,7 +4,7 @@ from setuptools import find_packages
 from numpy.distutils.core import setup
 from numpy.distutils.core import Extension
 from numpy.distutils import log
-
+import re, os
 
 packages = find_packages(exclude=('tests', 'doc'))
 provides = ['taurex', ]
@@ -42,7 +42,7 @@ def build_ace(parent_package='',top_path=None):
     data_files = ('taurex/external/ACE', ['src/ACE/Data/NASA.therm', 'src/ACE/Data/composes.dat'])
     ext = Extension(name='taurex.external.ace', sources=ace_sources)
 
-    return ext,data_files
+    return ext, data_files
 
 def build_bhmie():
     return Extension("taurex.external.mie",  
@@ -124,11 +124,10 @@ entry_points = {'console_scripts': console_scripts, }
 classifiers = [
     'Development Status :: 4 - Beta',
     'Environment :: Console',
-    'Environment :: No Input/Output (Daemon)',
     'Environment :: Win32 (MS Windows)',
     'Intended Audience :: Developers',
     'Intended Audience :: Science/Research',
-    'License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)',
+    'License :: OSI Approved :: BSD License',
     'Operating System :: Microsoft :: Windows',
     'Operating System :: POSIX',
     'Operating System :: POSIX :: Linux',
@@ -139,22 +138,32 @@ classifiers = [
     'Topic :: Software Development :: Libraries',
 ]
 
+# Handle versioning
+version = '3.0.2-beta'
+
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
 
 setup(name='taurex',
-      author='Foo',
-      author_email='bar',
-      maintainer='Foo',
-      version='3.0',
-      description='Bar',
+      author='Ahmed Faris Al-Refaie',
+      author_email='ahmed.al-refaie.12@ucl.ac.uk',
+      license="BSD",
+      version=version,
+      description='TauREx 3 retrieval framework',
       classifiers=classifiers,
       packages=packages,
+      long_description=long_description,
+      url='https://github.com/ucl-exoplanets/TauREx3_public/',
+      long_description_content_type="text/markdown",
+      keywords = ['exoplanet','retrieval','taurex','taurex3','atmosphere','atmospheric'],
       include_package_data=True,
       entry_points=entry_points,
       provides=provides,
       requires=requires,
       install_requires=install_requires,
       extras_require={
-        'Plot':  ["matplotlib"],},
+        'Plot':  ["matplotlib"], },
       data_files=data_files,
       ext_modules=extensions
       )

@@ -1,11 +1,18 @@
-"""Contains the abstract class used by all collisionally induced absorption objects."""
+"""
+Contains the abstract class used by all collisionally induced absorption
+objects.
+"""
 
 from taurex.log import Logger
 import numpy as np
 
+
 class CIA(Logger):
     """
-    This is the base class for collisionally induced absorption opacities. 
+
+    *Abstract class*
+
+    This is the base class for collisionally induced absorption opacities.
     To function in Taurex3, it requires concrete implementations of:
         - :func:`wavenumberGrid`
         - :func:`compute_cia`
@@ -17,18 +24,17 @@ class CIA(Logger):
     ----------
     name : str
         Name to use for logging
-    
+
     pair_name : str
-        pair of molecules this class represents. e.g. 'H2-H2' or 'H2-HE'
+        pair of molecules this class represents. e.g. 'H2-H2' or 'H2-He'
 
     """
-    
-    def __init__(self,name,pair_name):
+
+    def __init__(self, name, pair_name):
         super().__init__(name)
 
         self._pair_name = pair_name
 
-    
     @property
     def pairName(self):
         """
@@ -51,8 +57,8 @@ class CIA(Logger):
         Returns
         -------
         str
-            First molecule in the pair  
-            
+            First molecule in the pair
+
         """
 
         return self._pair_name.split('-')[0]
@@ -65,12 +71,13 @@ class CIA(Logger):
         Returns
         -------
         str
-            Second molecule in the pair  
-            
+            Second molecule in the pair
+
         """
 
         return self._pair_name.split('-')[-1]
-    def compute_cia(self,temperature):
+
+    def compute_cia(self, temperature):
         """
         Computes the collisionaly induced cross-section for a given temeprature
 
@@ -87,25 +94,24 @@ class CIA(Logger):
         ----------
         temperature : float
             Temeprature in Kelvin
-        
+
         Returns
         -------
         :obj:`array`
             CIA cross section at desired temeprature on its native grid
-        
+
         Raises
         ------
         NotImplementedError
             Only if derived class does not implement this
-            
+
         """
         raise NotImplementedError
-
 
     @property
     def wavenumberGrid(self):
         """
-        The native wavenumber grid (cm-1) of the CIA. Must be implemented in 
+        The native wavenumber grid (cm-1) of the CIA. Must be implemented in
         derived classes
 
         Returns
@@ -117,7 +123,7 @@ class CIA(Logger):
         ------
         NotImplementedError
             Only if derived class does not implement this
-           
+
         """
         raise NotImplementedError
 
@@ -136,23 +142,23 @@ class CIA(Logger):
         ------
         NotImplementedError
             Only if derived class does not implement this
-           
+
         """
-        
+
         raise NotImplementedError
 
-
-    def cia(self,temperature,wngrid=None):
+    def cia(self, temperature, wngrid=None):
         """
         For a given temperature, computes the appropriate cross section.
-        If wavenumber grid ( :obj:`wngrid` ) is provided then the cross-section is interpolated
+        If wavenumber grid ( :obj:`wngrid` ) is provided then the
+        cross-section is interpolated
         to it.
 
         Parameters
         ----------
         temperature : float
             Temeprature in Kelvin
-        
+
         wngrid : :obj:`array` , optional
             Wavenumber grid to interpolate to
 
@@ -160,14 +166,13 @@ class CIA(Logger):
         Returns
         -------
         :obj:`array`
-            CIA cross section at desired temeprature on either its native grid or 
-            interpolated on :obj:`wngrid` if supplied
-        
-        """
+            CIA cross section at desired temeprature on either its native grid
+            or interpolated on :obj:`wngrid` if supplied
 
+        """
 
         orig = self.compute_cia(temperature)
         if wngrid is None:
             return orig
         else:
-            return np.interp(wngrid,self.wavenumberGrid,orig)
+            return np.interp(wngrid, self.wavenumberGrid, orig)

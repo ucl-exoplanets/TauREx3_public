@@ -42,40 +42,35 @@ class OpacityCache(Singleton):
     >>> h2o_b = opt['H2O']
     >>> h2o_a == h2o_b
     True
-    
-    Lastly if you've got a hot new opacity format that doesn't suck balls you can try out
-    this shit by manually adding it into the cache:
-    
+
+    Lastly if you've got a hot new opacity format, you can try out
+    by manually adding it into the cache:
+
     >>> new_h2o = MyNewOpacityFormat()
     >>> opt.add_opacity(new_h2o)
     >>> opt['H2O]
     <MyNewOpacityFormat at 0x107a60be0>
 
-    Now Taurex will use it instead in all calculations!
+    Now TauREx3 will use it instead in all calculations!
 
     """
     def init(self):
-        self.opacity_dict={}
+        self.opacity_dict = {}
         self._opacity_path = None
         self.log = Logger('OpacityCache')
         self._default_interpolation = 'linear'
         self._memory_mode = True
         self._radis = False
-        self._radis_props = (600,30000,100000)
-    def set_opacity_path(self,opacity_path):
+        self._radis_props = (600, 30000, 10000)
+    
+    def set_opacity_path(self, opacity_path):
         """
-        Set the path(s) that will be searched for cross-sections. Cross-section in this path
-        must be *.pickle* files and must have names of the form:
+        Set the path(s) that will be searched for opacities.
+        Opacities in this path must be of supported types:
 
-        - ``Molecule Name``.Whatever.pickle
-
-        For H2O:
-
-            - ``H2O.R1000.pickle``
-            - ``H2O.pickle``
-            - ``H2O.R1000.xxx420summergirllovesgreenday420xxx.pickle``
-        
-        Are all valid
+            - HDF5 opacities
+            - ``.pickle`` opacities
+            - ExoTransmit opacities.
 
         Parameters
         ----------
@@ -83,29 +78,57 @@ class OpacityCache(Singleton):
         opacity_path : str or :obj:`list` of str, optional
             search path(s) to look for molecular opacities
 
-
-
         """
-        
+
         import os
         if not os.path.isdir(opacity_path):
-            self.log.error('PATH: %s does not exist!!!',opacity_path)
+            self.log.error('PATH: %s does not exist!!!', opacity_path)
             raise NotADirectoryError
-        self.log.debug('Path set to %s',opacity_path)
-        self._opacity_path  = opacity_path
-    
+        self.log.debug('Path set to %s', opacity_path)
+        self._opacity_path = opacity_path
 
-    def enable_radis(self,enable):
+    def enable_radis(self, enable):
+        """
+        Enables/Disables use of RADIS to fill in missing molecules
+        using HITRAN.
+
+        .. warning::
+            This is extremely unstable and crashes frequently.
+            It is also very slow as it requires
+            the computation of the Voigt profile for every temperature.
+            We recommend leaving it as False unless necessary.
+
+        Parameters
+        ----------
+        enable: bool
+            Whether to enable RADIS functionality (default = False)
+
+        """
+
         self._radis = enable
-    
-    def set_radis_wavenumber(self,wn_start,wn_end,wn_points):
-        self._radis_props = (wn_start,wn_end,wn_points)
+
+    def set_radis_wavenumber(self, wn_start, wn_end, wn_points):
+        self._radis_props = (wn_start, wn_end, wn_points)
 
         
 
         self.clear_cache()
     
     def set_memory_mode(self,in_memory):
+        """
+        If using the HDF5 opacities, whether to stream
+        opacities from file (slower, less memory) or load
+        them into memory (faster, more memory)
+
+        Parameters
+        ----------
+        in_memory: bool
+            Whether HDF5 files should be streamed (False)
+            or loaded into memory (True, default)
+
+
+        """
+
         self._memory_mode = in_memory
         self.clear_cache()
 
@@ -227,6 +250,15 @@ class OpacityCache(Singleton):
 
 
     def search_hdf5_molecules(self):
+        """
+        Find molecules with HDF5 opacities in set path
+
+        Returns
+        -------
+        molecules: :obj`list`
+            List of molecules with HDF5 opacities
+        
+        """
         from glob import glob
         import os    
         from taurex.opacity.hdf5opacity import HDF5Opacity
@@ -236,6 +268,16 @@ class OpacityCache(Singleton):
         return [HDF5Opacity(f,interpolation_mode=self._default_interpolation,in_memory=False).moleculeName for f in file_list ]
 
     def search_pickle_molecules(self):
+        """
+        Find molecules with ``.pickle`` opacities in set path
+
+        Returns
+        -------
+        molecules: :obj`list`
+            List of molecules with ``.pickle`` opacities
+        
+        """
+
         from glob import glob
         import os    
         glob_path = os.path.join(self._opacity_path,'*.pickle')
@@ -244,6 +286,16 @@ class OpacityCache(Singleton):
         return [pathlib.Path(f).stem.split('.')[0] for f in file_list ]
 
     def search_exotransmit_molecules(self):
+        """
+        Find molecules with Exo-Transmit opacities in set path
+
+        Returns
+        -------
+        molecules: :obj`list`
+            List of molecules with ExoTransmit opacities
+        
+        """
+
         from glob import glob
         import os    
         glob_path = os.path.join(self._opacity_path,'*.dat')
@@ -252,6 +304,16 @@ class OpacityCache(Singleton):
         return [pathlib.Path(f).stem[4:] for f in file_list ]
 
     def search_radis_molecules(self):
+        """
+        Searches for molecules in HITRAN
+
+        Returns
+        -------
+        molecules: :obj`list`
+            List of molecules available in HITRAN, if radis is enabled,
+            otherwise an empty list
+
+        """
         trans = { '1':'H2O',    '2':'CO2',   '3':'O3',      '4':'N2O',   '5':'CO',    '6':'CH4',   '7':'O2',     
             '9':'SO2',   '10':'NO2',  '11':'NH3',    '12':'HNO3', '13':'OH',   '14':'HF',   '15':'HCl',   '16':'HBr',
             '17':'HI',    '18':'ClO',  '19':'OCS',    '20':'H2CO', '21':'HOCl',    '23':'HCN',   '24':'CH3Cl',

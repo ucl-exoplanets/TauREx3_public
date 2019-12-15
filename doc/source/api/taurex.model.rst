@@ -1,45 +1,23 @@
-taurex.model package
-====================
+Forward Models (``taurex.model``)
+==================================
 
-Subpackages
------------
-
-.. toctree::
-
-   taurex.model.lightcurve
-
-Submodules
-----------
-
-taurex.model.directimage module
--------------------------------
-
-.. automodule:: taurex.model.directimage
-   :members:
-   :undoc-members:
-   :show-inheritance:
-taurex.model.emission module
-----------------------------
-
-.. automodule:: taurex.model.emission
-   :members:
-   :undoc-members:
-   :show-inheritance:
-taurex.model.model module
+Base
 -------------------------
 
 .. automodule:: taurex.model.model
    :members:
    :undoc-members:
    :show-inheritance:
-taurex.model.simplemodel module
+
+Basic Model
 -------------------------------
 
 .. automodule:: taurex.model.simplemodel
    :members:
    :undoc-members:
    :show-inheritance:
-taurex.model.transmission module
+
+Transmission
 --------------------------------
 
 .. automodule:: taurex.model.transmission
@@ -47,11 +25,20 @@ taurex.model.transmission module
    :undoc-members:
    :show-inheritance:
 
+Emission
+----------------------------
 
-Module contents
----------------
-
-.. automodule:: taurex.model
+.. automodule:: taurex.model.emission
    :members:
    :undoc-members:
    :show-inheritance:
+
+Direct Image
+-------------------------------
+
+.. automodule:: taurex.model.directimage
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+

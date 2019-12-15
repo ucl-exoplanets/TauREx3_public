@@ -1,27 +1,33 @@
-# TauREx3
+# TauREx 3
+TauREx 3 is the newest version of the TauREx retrieval code.
 
-TauREx3 is the newest version of the TauREx retrieval code that was created by a disturbed man.
+Documentation can be found [here](https://taurex3-public.readthedocs.io/en/latest/)
+
+Current build: 3.0.2-beta
 
 ## Prerequisites
 
 * numpy
-    - Specifically **numpy.f2py** to compile Fortran extensions
-
-* cython
-    * Required to compile C++ extensions
-
-* Fortran and C++ compilers
-    * For Windows this can be easily achieved using Anaconda3 and doing:
-        `conda install libpython m2w64-toolchain`
 
 
 
-## Installing
+## Installing from PyPi
+
+
+You can install it by doing
+
+```
+pip install taurex
+```
+
+
+## Installing from source
+
 
 Clone the directory using:
 
 ```
-git clone https://github.com/ucl-exoplanets/TauREx3.git
+git clone https://github.com/ucl-exoplanets/TauREx3_public.git
 ```
 
 Move into the TauREx3 folder
@@ -46,7 +52,7 @@ python setup.py build_sphinx
 Try importing taurex:
 
 ```
-python -c "import taurex"
+python -c "import taurex; print(taurex.__version__)"
 ```
 
 Or running taurex itself

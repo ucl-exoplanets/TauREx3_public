@@ -1,0 +1,71 @@
+[Global]
+xsec_path = /path/to/xsec
+cia_path = /path/to/cia
+
+
+# ----Forward Model related -----------
+
+[Chemistry]
+#  We will use the custom chemistry from 
+chemistry_type = custom
+python_file = ../examples/library/example_chem.py
+molecules = H2, He, H2O, CH4
+fractions = 1000, 400, 1, 0.1
+
+    
+
+[Temperature]
+profile_type = isothermal
+
+[Pressure]
+profile_type = Simple
+atm_min_pressure = 1e-4
+atm_max_pressure = 1e6
+nlayers = 10
+
+[Planet]
+planet_type = Simple
+planet_mass = 1.0 
+planet_radius = 1.0
+
+[Star]
+star_type = blackbody
+
+[Model]
+model_type = transmission
+    
+    [[Absorption]]
+    
+    [[CIA]]
+    cia_pairs = H2-He,H2-H2
+    
+    [[Rayleigh]]
+
+# ---------Creating an observation for retrieval--------
+# We use instruments to create an observation
+# Rather than passing in a text file
+
+[Binning]
+bin_type = manual
+accurate = False
+wavelength_res = 0.6,4.1,100
+
+[Instrument]
+instrument = snr
+SNR = 20
+
+[Observation]
+taurex_spectrum = self
+
+# ------Retrieval related --------------
+
+[Optimizer]
+optimizer = nestle
+num_live_points = 50
+
+[Fitting]
+planet_radius:fit = True
+planet_radius:factor = 0.8, 2.0
+
+H2O_frac:fit = True
+CH4_frac:fit = True

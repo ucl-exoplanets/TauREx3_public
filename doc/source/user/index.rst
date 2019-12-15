@@ -1,28 +1,20 @@
 
-==============================
-User Guide
-==============================
+===========================
+TauREx |version| User Guide
+===========================
 
+This guide covers general installation, using
+the standalone ``taurex`` program and the library
 
 .. toctree::
-    :maxdepth: 3
+    :maxdepth: 2
 
     Introduction <introduction>
     Installation <installation>
+    MPI <mpi>
     Supported Data Formats <support_data_formats>
-    Quickstart Guide <quickstart>
-    Input File <inputfile>
-    Global Settings <global>
-    Chemistry <chemistry>
-    Temperature <temperature>
-    Pressure <pressure>
-    Planet <planet>
-    Star <star>
-    Models <models>
-    Lightcurves <lightcurve>
-    Retrieval <retrieval>
-    Cheatsheet <cheatsheet>
+    taurex program <taurex/index>
+    Library <library/index>
 
 
-
-
+* :ref:`genindex`

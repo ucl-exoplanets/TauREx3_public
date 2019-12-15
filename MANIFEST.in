@@ -1,0 +1,2 @@
+recursive-include taurex/external/ *.pyx
+recursive-include taurex/external/ *.pyf

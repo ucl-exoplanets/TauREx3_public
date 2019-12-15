@@ -7,29 +7,31 @@ from taurex.log import Logger
 from taurex.output.writeable import Writeable
 
 
+class BaseSpectrum(Logger, Writeable):
+    """
 
-class BaseSpectrum(Logger,Writeable):
-    """A base class where spectrums are loaded (or later created). This
-    is used to either plot against the forward model or passed into the optimizer to be used
-    to fit the forward model
+    *Abstract class*
+
+    A base class where spectrums are loaded (or later created). This
+    is used to either plot against the forward model or passed into the 
+    optimizer to be used to fit the forward model
 
     Parameters
     ----------
-    
+
     name : str
         Name to be used in logging
-   
+
     """
 
-
-    def __init__(self,name):
+    def __init__(self, name):
         super().__init__(name)
 
     def create_binner(self):
-        from taurex.binning import FluxBinner, SimpleBinner
         """
         Creates the appropriate binning object
         """
+        from taurex.binning import FluxBinner
 
         return FluxBinner(wngrid=self.wavenumberGrid,
                           wngrid_width=self.binWidths)
@@ -70,8 +72,8 @@ class BaseSpectrum(Logger,Writeable):
         **Requires Implementation**
 
 
-        Should return the wavelength grid of the spectrum in microns. This does not
-        need to necessarily match the shape of :func:`spectrum`
+        Should return the wavelength grid of the spectrum in microns.
+        This does not need to necessarily match the shape of :func:`spectrum`
 
         Raises
         ------
@@ -79,7 +81,7 @@ class BaseSpectrum(Logger,Writeable):
 
         """
         raise NotImplementedError
-    
+
     @property
     def wavenumberGrid(self):
         """
@@ -91,7 +93,7 @@ class BaseSpectrum(Logger,Writeable):
 
         """
         return 10000/self.wavelengthGrid
-    
+
     @property
     def binEdges(self):
         """
@@ -106,7 +108,7 @@ class BaseSpectrum(Logger,Writeable):
 
         """
         raise NotImplementedError
-    
+
     @property
     def binWidths(self):
         """
@@ -121,7 +123,6 @@ class BaseSpectrum(Logger,Writeable):
 
         """
         raise NotImplementedError
-
 
     @property
     def errorBar(self):
@@ -138,18 +139,12 @@ class BaseSpectrum(Logger,Writeable):
 
         """
         raise NotImplementedError
-    
-    
 
-
-
-    def write(self,output):
-        output.write_array('wlgrid',self.wavelengthGrid)
-        output.write_array('spectrum',self.spectrum)
-        output.write_array('binedges',self.binEdges)
-        output.write_array('binwidths',self.binWidths)
+    def write(self, output):
+        output.write_array('wlgrid', self.wavelengthGrid)
+        output.write_array('spectrum', self.spectrum)
+        output.write_array('binedges', self.binEdges)
+        output.write_array('binwidths', self.binWidths)
         output.write_array('errorbars', self.errorBar)
 
         return output
-
-

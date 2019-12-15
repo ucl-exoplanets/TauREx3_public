@@ -1,0 +1,67 @@
+[Global]
+xsec_path = /path/to/xsec
+cia_path = /path/to/cia
+
+[Chemistry]
+chemistry_type = free
+fill_gases = CO2, CH4
+ratio = 0.172
+
+
+    [[H2O]]
+    gas_type = constant
+    mix_ratio = 1e-4
+
+    [[NH3]]
+    gas_type = constant
+    mix_ratio = 1e-6
+
+[Temperature]
+profile_type = isothermal
+T = 2000
+
+[Planet]
+planet_type = simple
+planet_radius = 0.5
+planet_mass = 1.0
+
+[Star]
+star_type = blackbody
+radius = 1.4
+temperature = 6000
+
+[Model]
+model_type = transmission
+
+    [[Absorption]]
+
+    [[CIA]]
+    cia_pairs = H2-He, H2-H2
+
+    [[Rayleigh]]
+
+    [[LeeMie]]
+    lee_mie_q = 40
+    lee_mie_mix_ratio = 1e-10
+    lee_mie_bottomP = -1
+    lee_mie_topP = 1e-0
+
+
+
+[Observation]
+observed_spectrum = path/to/spectra/here.dat
+
+
+[Optimizer]
+optimizer = nestle
+num_live_points = 200
+method = multi
+
+[Fitting]
+planet_radius:fit = True
+CH4_CO2:fit = True
+CH4_CO2:bounds = 0.04,0.5
+CH4_CO2:mode = linear
+
+lee_mie_topP:fit = True
+lee_mie_topP:bounds = 1e3,1e-2
