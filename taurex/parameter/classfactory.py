@@ -1,13 +1,8 @@
 from taurex.core import Singleton
 from taurex.log import Logger
 import inspect
-# import pkg_resources
+import pkg_resources
 
-# discovered_plugins = {
-#     entry_point.name: entry_point.load()
-#     for entry_point
-#     in pkg_resources.iter_entry_points('taurex.plugins')
-# }
 
 
 class ClassFactory(Singleton):
@@ -18,22 +13,68 @@ class ClassFactory(Singleton):
     def init(self):
         self.log = Logger('ClassFactory')
 
-        self._temp_klasses = set()
-        self._chem_klasses = set()
-        self._gas_klasses = set()
-        self._press_klasses = set()
-    
+        self.setup_batteries_included()
+
     def setup_batteries_included(self):
         """
         Collect all the classes that are built into
         TauREx 3
         """
-        from taurex import temperature, chemistry, pressure
-        
+        from taurex import temperature, chemistry, pressure, planet, \
+            stellar, instruments, model, contributions, optimizer
+
+        self._temp_klasses = set()
+        self._chem_klasses = set()
+        self._gas_klasses = set()
+        self._press_klasses = set()
+        self._planet_klasses = set()
+        self._star_klasses = set()
+        self._inst_klasses = set()
+        self._model_klasses = set()
+        self._contrib_klasses = set()
+        self._opt_klasses = set()
+
         self._temp_klasses.update(self._collect_temperatures(temperature))
         self._chem_klasses.update(self._collect_chemistry(chemistry))
         self._gas_klasses.update(self._collect_gas(chemistry))
         self._press_klasses.update(self._collect_pressure(pressure))
+        self._planet_klasses.update(self._collect_planets(planet))
+        self._star_klasses.update(self._collect_star(stellar))
+        self._inst_klasses.update(self._collect_instrument(instruments))
+        self._model_klasses.update(self._collect_model(model))
+        self._contrib_klasses.update(
+            self._collect_contributions(contributions))
+
+        self._opt_klasses.update(self._collect_optimizer(optimizer))
+
+    def load_plugin(self, plugin_module):
+
+        self._temp_klasses.update(self._collect_temperatures(plugin_module))
+        self._chem_klasses.update(self._collect_chemistry(plugin_module))
+        self._gas_klasses.update(self._collect_gas(plugin_module))
+        self._press_klasses.update(self._collect_pressure(plugin_module))
+        self._planet_klasses.update(self._collect_planets(plugin_module))
+        self._star_klasses.update(self._collect_star(plugin_module))
+        self._inst_klasses.update(self._collect_instrument(plugin_module))
+        self._model_klasses.update(self._collect_model(plugin_module))
+        self._contrib_klasses.update(
+            self._collect_contributions(plugin_module))
+        self._opt_klasses.update(self._collect_optimizer(plugin_module))
+
+    def discover_plugins(self):
+        return {
+                entry_point.name: entry_point.load()
+                for entry_point
+                in pkg_resources.iter_entry_points('taurex.plugins')
+                }
+
+    def load_plugins(self):
+        plugins = self.discover_plugins()
+        self.log.info('----------Plugin loading---------')
+        self.log.info('Discovered plugins %s', plugins.values())
+
+        for k, v in plugins.items():
+            self.log.info()
 
     def _collect_classes(self, module, base_klass):
         """
