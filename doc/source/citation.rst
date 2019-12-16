@@ -10,7 +10,7 @@ please cite the arXiv preprint_ or the submitted publication::
 
     TauREx III: A fast, dynamic and extendable framework for retrievals
     A. F. Al-Refaie, Q. Changeat, I.P. Waldmann and G. Tinetti
-    Publications of the Astronomical Society of the Pacific, submitted, 2020
+    ApJ, submitted, 2019
 
 
 Equilibrium Chemistry
