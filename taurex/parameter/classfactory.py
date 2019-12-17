@@ -73,7 +73,8 @@ class ClassFactory(Singleton):
 
             try:
                 module = entry_point.load()
-            except (ModuleNotFoundError, ImportError, ) as e:
+            except Exception as e:
+                # For whatever reason do not attempt to load the plugin
                 self.log.warning('Could not load plugin %s', entry_point_name)
                 self.log.warning('Reason: %s', str(e))
                 continue
