@@ -108,3 +108,10 @@ class Rodgers2000(TemperatureProfile):
         temperature.write_array('temperature_layers', self._T_layers)
         temperature.write_scalar('correlation_length', self._tp_corr_length)
         return temperature
+
+    @classmethod
+    def input_keywords(cls):
+        """
+        Return all input keywords
+        """
+        return ['rodgers', 'rodgers2010', ]

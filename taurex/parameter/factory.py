@@ -1,5 +1,5 @@
 from taurex.log import Logger
-
+from .classfactory import ClassFactory
 log = Logger('Factory')
 
 def get_keywordarg_dict(klass):
@@ -68,25 +68,13 @@ def gas_factory(profile_type):
         raise NotImplementedError('Gas profile {} not implemented'.format(profile_type))
 
 
-
 def temp_factory(profile_type):
-    if profile_type == 'isothermal':
-        from taurex.data.profiles.temperature import Isothermal
-        return Isothermal
-    elif profile_type in ('guillot','guillot2010',):
-        from taurex.data.profiles.temperature import Guillot2010
-        return Guillot2010
-    elif profile_type in ('npoint',):
-        from taurex.data.profiles.temperature import NPoint
-        return NPoint
-    elif profile_type in ('rodgers','rodgers2010',):
-        from taurex.data.profiles.temperature import Rodgers2000
-        return Rodgers2000
-    elif profile_type in ('file',):
-        from taurex.data.profiles.temperature import TemperatureFile
-        return TemperatureFile
-    else:
-        raise NotImplementedError('Temperature profile {} not implemented'.format(profile_type))
+    cf = ClassFactory()
+
+    for klass in cf.temperatureKlasses:
+        if profile_type in klass.input_keywords():
+            return klass
+    raise NotImplementedError('Temperature profile {} not implemented'.format(profile_type))
 
 def pressure_factory(profile_type):
     if profile_type == 'simple':

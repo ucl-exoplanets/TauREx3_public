@@ -13,7 +13,12 @@ class ClassFactory(Singleton):
     def init(self):
         self.log = Logger('ClassFactory')
 
+        self.reload_plugins()
+
+    def reload_plugins(self):
+        self.log.info('Reloading all modules and plugins')
         self.setup_batteries_included()
+        self.load_plugins()
 
     def setup_batteries_included(self):
         """
