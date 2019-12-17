@@ -73,3 +73,7 @@ class ConstantGas(Gas):
         gas_entry.write_scalar('mix_ratio', self._mix_ratio)
 
         return gas_entry
+
+    @classmethod
+    def input_keywords(self):
+        return ['constant', ]

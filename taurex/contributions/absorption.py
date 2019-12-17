@@ -75,3 +75,7 @@ class AbsorptionContribution(Contribution):
         of all active gases
         """
         return self.sigma_xsec
+
+    @classmethod
+    def input_keywords(self):
+        return ['Absorption', 'Molecules', ]

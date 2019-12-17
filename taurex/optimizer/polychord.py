@@ -286,3 +286,8 @@ class PolyChordOptimizer(Optimizer):
                 ('fit_params', v['fit_params']),
                 ('tracedata', v['tracedata']),
                 ('weights', v['weights'])]
+
+
+    @classmethod
+    def input_keywords(self):
+        return ['polychord', 'pypolychord', ]

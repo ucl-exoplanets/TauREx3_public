@@ -126,8 +126,8 @@ class ClassFactory(Singleton):
         return self._collect_classes(module, PressureProfile)
 
     def _collect_planets(self, module):
-        from taurex.planet import Planet
-        return self._collect_classes(module, Planet)
+        from taurex.planet import BasePlanet
+        return self._collect_classes(module, BasePlanet)
 
     def _collect_star(self, module):
         from taurex.stellar import Star

@@ -254,3 +254,8 @@ class NestleOptimizer(Optimizer):
             nestle_output['solution']['fitparams'][param_name] = param
 
         return nestle_output
+
+
+    @classmethod
+    def input_keywords(self):
+        return ['nestle', ]

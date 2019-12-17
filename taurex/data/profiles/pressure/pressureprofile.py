@@ -165,3 +165,7 @@ class SimplePressureProfile(PressureProfile):
         pressure.write_scalar('atm_min_pressure', self._atm_min_pressure)
 
         return pressure
+
+    @classmethod
+    def input_keywords(self):
+        return ['simple', 'hydrostatic', ]

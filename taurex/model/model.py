@@ -64,3 +64,8 @@ class ForwardModel(Logger, Fittable, Writeable):
             c.write(contrib)
 
         return model
+
+
+    @classmethod
+    def input_keywords(self):
+        raise NotImplementedError

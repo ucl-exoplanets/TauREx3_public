@@ -684,3 +684,9 @@ class Optimizer(Logger):
         """
         opt = output.create_group('Optimizer')
         self.write_optimizer(opt)
+
+
+
+    @classmethod
+    def input_keywords(self):
+        raise NotImplementedError

@@ -83,3 +83,7 @@ class SimpleCloudsContribution(Contribution):
         contrib = super().write(output)
         contrib.write_scalar('clouds_pressure', self._cloud_pressure)
         return contrib
+
+    @classmethod
+    def input_keywords(self):
+        return ['SimpleClouds', 'ThickClouds', ]

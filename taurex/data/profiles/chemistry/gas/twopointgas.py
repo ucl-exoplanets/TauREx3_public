@@ -133,3 +133,8 @@ class TwoPointGas(Gas):
         gas_entry.write_scalar('mix_ratio_top', self.mixRatioTop)
         gas_entry.write_scalar('mix_ratio_surface', self.mixRatioSurface)
         return gas_entry
+
+
+    @classmethod
+    def input_keywords(self):
+        return ['twopoint', '2point' ]

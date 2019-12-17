@@ -132,3 +132,8 @@ class TransmissionModel(SimpleForwardModel):
 
         integral = np.sum((pradius+ap)*(1.0-tau)*_dz*2.0, axis=0)
         return ((pradius**2.0) + integral)/(sradius**2), tau
+
+
+    @classmethod
+    def input_keywords(self):
+        return ['transmission', 'transit' ]

@@ -305,3 +305,7 @@ class PhoenixStar(BlackbodyStar):
         star = super().write(output)
         star.write_string('phoenix_path', self._phoenix_path)
         return star
+
+    @classmethod
+    def input_keywords(self):
+        return ['phoenix', ]

@@ -108,3 +108,7 @@ class dyPolyChordOptimizer(PolyChordOptimizer):
 
         #pypolychord.run_polychord(polychord_loglike, ndim, 1, settings, polychord_uniform_prior)
         self._polychord_output = self.store_polychord_solutions()
+
+    @classmethod
+    def input_keywords(self):
+        return ['dypolychord', 'dynamic-polychord', ]
