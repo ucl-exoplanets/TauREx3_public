@@ -21,7 +21,7 @@ class ClassFactory(Singleton):
         TauREx 3
         """
         from taurex import temperature, chemistry, pressure, planet, \
-            stellar, instruments, model, contributions, optimizer
+            stellar, instruments, model, contributions, optimizer, opacity
 
         self._temp_klasses = set()
         self._chem_klasses = set()
@@ -33,6 +33,7 @@ class ClassFactory(Singleton):
         self._model_klasses = set()
         self._contrib_klasses = set()
         self._opt_klasses = set()
+        self._opac_klasses = set()
 
         self._temp_klasses.update(self._collect_temperatures(temperature))
         self._chem_klasses.update(self._collect_chemistry(chemistry))
@@ -46,6 +47,7 @@ class ClassFactory(Singleton):
             self._collect_contributions(contributions))
 
         self._opt_klasses.update(self._collect_optimizer(optimizer))
+        self._opac_klasses.update(self._collect_opacity(opacity))
 
     def load_plugin(self, plugin_module):
 
@@ -60,6 +62,7 @@ class ClassFactory(Singleton):
         self._contrib_klasses.update(
             self._collect_contributions(plugin_module))
         self._opt_klasses.update(self._collect_optimizer(plugin_module))
+        self._opac_klasses.update(self._collect_opacity(plugin_module))
 
     def discover_plugins(self):
         return {
@@ -134,3 +137,49 @@ class ClassFactory(Singleton):
         from taurex.opacity import Opacity, InterpolatingOpacity
         return [c for c in self._collect_classes(module, Opacity)
                 if c is not InterpolatingOpacity]
+
+
+    @property
+    def temperatureKlasses(self):
+        return self._temp_klasses
+
+
+    @property
+    def chemistryKlasses(self):
+        return self._chem_klasses
+    
+    @property
+    def gasKlasses(self):
+        return self._gas_klasses
+    
+    @property
+    def pressureKlasses(self):
+        return self._press_klasses
+    
+    @property
+    def planetKlasses(self):
+        return self._planet_klasses
+    
+    @property
+    def starKlasses(self):
+        return self._star_klasses
+    
+    @property
+    def instrumentKlasses(self):
+        return self._inst_klasses
+    
+    @property
+    def modelKlasses(self):
+        return self._model_klasses
+    
+    @property
+    def contributionKlasses(self):
+        return self._contrib_klasses
+    
+    @property
+    def optimizerKlasses(self):
+        return self._opt_klasses
+    
+    @property
+    def opacityKlasses(self):
+        return self._opac_klasses
