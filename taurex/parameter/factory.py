@@ -87,14 +87,11 @@ def pressure_factory(profile_type):
 
 
 def star_factory(star_type):
-    if star_type == 'blackbody':
-        from taurex.data.stellar import BlackbodyStar
-        return BlackbodyStar
-    elif star_type == 'phoenix':
-        from taurex.data.stellar import PhoenixStar
-        return PhoenixStar
-    else:
-        raise NotImplementedError('Star of type {} not implemented'.format(star_type))
+    cf = ClassFactory()
+    for klass in cf.starKlasses:
+        if star_type in klass.input_keywords():
+            return klass
+    raise NotImplementedError('Star of type {} not implemented'.format(star_type))
 
 
 def create_gas_profile(config):
