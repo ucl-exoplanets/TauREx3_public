@@ -4,12 +4,12 @@ import inspect
 import pkg_resources
 
 
-
 class ClassFactory(Singleton):
     """
     A factory the discovers new
     classes from plugins
     """
+
     def init(self):
         self.log = Logger('ClassFactory')
 
@@ -66,10 +66,10 @@ class ClassFactory(Singleton):
 
     def discover_plugins(self):
         return {
-                entry_point.name: entry_point.load()
-                for entry_point
-                in pkg_resources.iter_entry_points('taurex.plugins')
-                }
+            entry_point.name: entry_point.load()
+            for entry_point
+            in pkg_resources.iter_entry_points('taurex.plugins')
+        }
 
     def load_plugins(self):
         plugins = self.discover_plugins()
@@ -138,48 +138,46 @@ class ClassFactory(Singleton):
         return [c for c in self._collect_classes(module, Opacity)
                 if c is not InterpolatingOpacity]
 
-
     @property
     def temperatureKlasses(self):
         return self._temp_klasses
 
-
     @property
     def chemistryKlasses(self):
         return self._chem_klasses
-    
+
     @property
     def gasKlasses(self):
         return self._gas_klasses
-    
+
     @property
     def pressureKlasses(self):
         return self._press_klasses
-    
+
     @property
     def planetKlasses(self):
         return self._planet_klasses
-    
+
     @property
     def starKlasses(self):
         return self._star_klasses
-    
+
     @property
     def instrumentKlasses(self):
         return self._inst_klasses
-    
+
     @property
     def modelKlasses(self):
         return self._model_klasses
-    
+
     @property
     def contributionKlasses(self):
         return self._contrib_klasses
-    
+
     @property
     def optimizerKlasses(self):
         return self._opt_klasses
-    
+
     @property
     def opacityKlasses(self):
         return self._opac_klasses
