@@ -65,11 +65,22 @@ class ClassFactory(Singleton):
         self._opac_klasses.update(self._collect_opacity(plugin_module))
 
     def discover_plugins(self):
-        return {
-            entry_point.name: entry_point.load()
-            for entry_point
-            in pkg_resources.iter_entry_points('taurex.plugins')
-        }
+        plugins = {}
+
+        for entry_point in pkg_resources.iter_entry_points('taurex.plugins'):
+
+            entry_point_name = entry_point.name
+
+            try:
+                module = entry_point.load()
+            except (ModuleNotFoundError, ImportError, ) as e:
+                self.log.warning('Could not load plugin %s', entry_point_name)
+                self.log.warning('Reason: %s', str(e))
+                continue
+
+            plugins[entry_point_name] = module
+
+        return plugins
 
     def load_plugins(self):
         plugins = self.discover_plugins()
