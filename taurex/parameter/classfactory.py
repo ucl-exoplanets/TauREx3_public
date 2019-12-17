@@ -94,7 +94,8 @@ class ClassFactory(Singleton):
         self.log.info('Discovered plugins %s', plugins.values())
 
         for k, v in plugins.items():
-            self.log.info()
+            self.log.info('Loading %s', k)
+            self.load_plugin(v)
 
     def _collect_classes(self, module, base_klass):
         """
