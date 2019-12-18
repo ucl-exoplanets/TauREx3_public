@@ -162,7 +162,7 @@ class NestleOptimizer(Optimizer):
         opt_map = self.fit_values
         opt_values = self.fit_values
         for k, v in self._nestle_output['solution']['fitparams'].items():
-            if k in ('mu_derived',):
+            if k.endswith('_derived'):
                 continue
             idx = names.index(k)
             opt_map[idx] = v['map']

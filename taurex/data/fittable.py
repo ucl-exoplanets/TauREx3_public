@@ -110,7 +110,7 @@ def derivedparam(f=None, param_name=None, param_latex=None, compute=False):
     if f is None:
         return partial(derivedparam, param_name=param_name,
                        param_latex=param_latex,
-                       compute=False)
+                       compute=compute)
 
     def wrapper(self, *args, **kwargs):
         return f(self, *args, **kwargs)
@@ -238,7 +238,7 @@ class Fittable(object):
 
         self._derived_dict[param_name] = (param_name,
                                           param_latex,
-                                          fget,
+                                          fget.__get__(self),
                                           compute)
 
     def compile_fitparams(self):

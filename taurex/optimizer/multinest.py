@@ -329,7 +329,7 @@ class MultiNestOptimizer(Optimizer):
         for k, v in solutions:
             solution_idx = int(k[8:])
             for p_name, p_value in v['fit_params'].items():
-                if p_name in ('mu_derived',):
+                if p_name.endswith('_derived'):
                     continue
                 idx = names.index(p_name)
                 opt_map[idx] = p_value['nest_map']

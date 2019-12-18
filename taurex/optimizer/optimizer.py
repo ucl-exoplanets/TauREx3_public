@@ -213,7 +213,7 @@ class Optimizer(Logger):
 
         """
 
-        return [c[0]() for c in self.derived_parameters]
+        return [c[0] for c in self.derived_parameters]
 
 
     @property
@@ -230,7 +230,7 @@ class Optimizer(Logger):
 
         """
 
-        return [c[1]() for c in self.derived_parameters]
+        return [c[1] for c in self.derived_parameters]
 
     @property
     def derived_values(self):

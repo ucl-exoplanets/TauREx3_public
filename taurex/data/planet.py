@@ -147,7 +147,7 @@ class Planet(Fittable, Logger, Writeable):
         planet.write_scalar('surface_gravity', self.gravity)
         return planet
 
-    @derivedparam(param_name='logg', param_latex='log(g)', compute=False)
+    @derivedparam(param_name='logg', param_latex='log(g)', compute=True)
     def logg(self):
         return math.log10(self.gravity)
 

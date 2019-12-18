@@ -192,7 +192,7 @@ class Chemistry(Fittable, Logger, Writeable):
                 self.mu_profile += self.inactiveGasMixProfile[idx] * \
                     get_molecular_weight(gasname)
 
-    @derivedparam(param_name='mu', param_latex='\mu', compute=True)
+    @derivedparam(param_name='mu', param_latex='$\mu$', compute=True)
     def mu(self):
         from taurex.constants import AMU
         return self.muProfile[0]/AMU
