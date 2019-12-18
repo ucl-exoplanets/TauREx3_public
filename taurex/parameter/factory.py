@@ -306,6 +306,9 @@ def generate_contributions(config):
         elif key == 'FlatMie':
              from taurex.contributions import FlatMieContribution
              contributions.append(create_klass(config[key],FlatMieContribution))
+        elif key == 'HydrogenIon':
+             from taurex.contributions import HydrogenIon
+             contributions.append(create_klass(config[key], HydrogenIon))
 
     return contributions
 

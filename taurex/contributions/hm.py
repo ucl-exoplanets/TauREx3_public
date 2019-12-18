@@ -138,6 +138,7 @@ class HydrogenIon(Contribution):
 
         xsec_ff = []
         xsec_bf = []
+        self.sigma_xsec = np.zeros(shape=(self._nlayers, wngrid.shape[0]))
 
         for i in range(self._nlayers):
             xsec_ff = self.k_ff(10000 / wngrid, self._temperature_profile[i]) * self._P_dyne[i] * \
@@ -145,9 +146,9 @@ class HydrogenIon(Contribution):
             xsec_bf = self.k_bf(10000 / wngrid, self._temperature_profile[i]) * self._P_dyne[i] * \
                       self._hydrogen_mixratio[i] * self._electron_mixratio[i]
 
-        self.sigma_xsec = xsec_ff + xsec_bf
+            self.sigma_xsec[i,:] = xsec_ff[:] + xsec_bf[:]
 
-        self.debug('final xsec %s', self.sigma_xsec[:, :])
+        self.debug('final xsec %s', self.sigma_xsec)
         self.debug('final xsec %s', self.sigma_xsec.max())
         
         #self._total_contrib[...]=0.0
@@ -158,4 +159,7 @@ class HydrogenIon(Contribution):
         return self.sigma_xsec
 
     def write(self, output):
-        raise NotImplementedError
+        contrib = super().write(output)
+        contrib.write_scalar('hydrogen', self._hydrogen_mixratio)
+        contrib.write_scalar('e-', self._electron_mixratio)
+        return contrib
