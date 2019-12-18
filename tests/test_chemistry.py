@@ -44,6 +44,10 @@ class TaurexChemistryTest(unittest.TestCase):
         self.assertIn('C2H2_surface', params)
         self.assertIn('CH4_P', params)
 
+        derived_params = tc.derived_parameters()
+
+        self.assertIn('mu', derived_params)
+
         self.assertIsNotNone(tc.muProfile)
 
     def test_fill_gas(self):

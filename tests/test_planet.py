@@ -25,3 +25,7 @@ class PlanetTest(unittest.TestCase):
 
         self.assertIn('planet_radius', earth_params)
         self.assertIn('planet_mass', earth_params)
+
+        derived_param = self.earth.derived_parameters()
+
+        self.assertIn('logg', derived_param)

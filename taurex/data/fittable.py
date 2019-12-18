@@ -81,6 +81,49 @@ def fitparam(f=None, param_name=None, param_latex=None,
     return pwrap
 
 
+def derivedparam(f=None, param_name=None, param_latex=None, compute=False):
+    """
+    A decorator used in conjunction with :class:`Fittable` to inform which
+    parameters should be derived during retrieval. This allows for posteriors
+    of parameters such as log(g) and mu
+
+
+
+    Parameters
+    ----------
+    f: function
+        Function being passed. Automatically done when used as a decorator
+
+    param_name: str
+        Nicer name of the parameter. Referenced by the optimizer.
+
+    param_latex: str
+        Latex version of the parameter name, useful in plotting and
+        making figures
+    
+    compute: bool
+        By default, is this computed?
+
+    """
+
+
+    if f is None:
+        return partial(derivedparam, param_name=param_name,
+                       param_latex=param_latex,
+                       compute=False)
+
+    def wrapper(self, *args, **kwargs):
+        return f(self, *args, **kwargs)
+    
+    wrapper.param_name = param_name
+    wrapper.param_latex = param_latex
+    wrapper.compute = compute
+    wrapper.decorated = 'derivedparam'
+    pwrap = property(wrapper)
+
+    return pwrap
+
+
 class Fittable(object):
     """
 
@@ -126,6 +169,7 @@ class Fittable(object):
 
     def __init__(self):
         self._param_dict = {}
+        self._derived_dict = {}
 
         self.compile_fitparams()
 
@@ -187,6 +231,16 @@ class Fittable(object):
                                         default_fit,
                                         default_bounds)
 
+    def add_derived_param(self, param_name, param_latex, fget, compute):
+        if param_name in self._param_dict:
+            raise AttributeError(
+                'derived param name {} already exists'.format(param_name))
+
+        self._derived_dict[param_name] = (param_name,
+                                          param_latex,
+                                          fget,
+                                          compute)
+
     def compile_fitparams(self):
         """
         Loops through and finds all fitting parameters in the class and adds
@@ -203,6 +257,18 @@ class Fittable(object):
             def_bounds = get_func.default_bounds
             self.add_fittable_param(param_name, param_latex, get_func,
                                     set_func, def_mode, def_fit, def_bounds)
+
+        for derivedparam in self.find_derivedparams():
+
+            get_func = derivedparam.fget
+            param_name = get_func.param_name
+            param_latex = get_func.param_latex
+            compute = get_func.compute
+
+            self.add_derived_param(param_name,
+                                   param_latex,
+                                   get_func,
+                                   compute)
 
     def modify_bounds(self, parameter, new_bounds):
         """
@@ -252,6 +318,25 @@ class Fittable(object):
                         if prop.decorated == 'fitparam':
                             yield method
 
+    def find_derivedparams(self):
+        """
+        Finds and returns fitting parameters
+
+        Yields
+        ------
+        method : function
+            class method that is defined with the :func:`fitparam` decorator
+        """
+
+        for klass in self.__class__.mro():
+
+            for method in klass.__dict__.values():
+                if hasattr(method, 'fget'):
+                    prop = method.fget
+                    if hasattr(prop, 'decorated'):
+                        if prop.decorated == 'derivedparam':
+                            yield method
+
     def fitting_parameters(self):
         """
         Returns all fitting parameters found as a dictionary
@@ -271,3 +356,11 @@ class Fittable(object):
 
         """
         return self._param_dict
+
+    def derived_parameters(self):
+        """
+
+        Returns all derived fitting parameters
+
+        """
+        return self._derived_dict
