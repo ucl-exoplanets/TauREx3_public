@@ -316,8 +316,10 @@ class Plotter(object):
             latex_derived = self.derivedLatex
 
             if mu_derived is not None:
-                for latex ,param in zip(latex_derived, mu_derived):
-                    latex_names.append(latex)
+                for param in mu_derived:
+                    
+                    index = self.derivedNames.index(param.name.split('/')[-1])
+                    latex_names.append(self.derivedLatex[index])
                     tracedata = np.column_stack((tracedata, param['trace']))
 
 
@@ -714,6 +716,18 @@ class Plotter(object):
         if not self.is_retrieval:
             raise Exception('HDF5 was not generated from retrieval, no fitting latex found')
         return decode_string_array(self.fd['Optimizer']['fit_parameter_latex'])
+
+    @property
+    def derivedNames(self):
+        from taurex.util.util import decode_string_array
+        if not self.is_retrieval:
+            raise Exception('HDF5 was not generated from retrieval, no fitting latex found')
+        try:
+            array = decode_string_array(self.fd['Optimizer']['derived_parameter_names'])
+            return [f'{c}_derived' for c in array]
+        except KeyError:
+            return ['mu_derived']
+
 
     @property
     def derivedLatex(self):

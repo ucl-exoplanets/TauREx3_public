@@ -1,7 +1,7 @@
 from taurex.log import Logger
-from taurex.data.fittable import Fittable
+from taurex.data.fittable import Fittable, derivedparam
 from taurex.output.writeable import Writeable
-
+import numpy as np
 
 class TemperatureProfile(Fittable, Logger, Writeable):
     """
@@ -63,3 +63,7 @@ class TemperatureProfile(Fittable, Logger, Writeable):
         temperature.write_string('temperature_type', self.__class__.__name__)
 
         return temperature
+
+    @derivedparam(param_name = 'avg_T', param_latex='$\\bar{T}$', compute = True)
+    def averageTemperature(self):
+        return np.mean(self.profile)
