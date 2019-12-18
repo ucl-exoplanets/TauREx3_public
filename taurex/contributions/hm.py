@@ -148,6 +148,9 @@ class HydrogenIon(Contribution):
 
             self.sigma_xsec[i,:] = xsec_ff[:] + xsec_bf[:]
 
+        ### convert cm2 to m2 ??
+        ###self.sigma_xsec *= 1e-4
+
         self.debug('final xsec %s', self.sigma_xsec)
         self.debug('final xsec %s', self.sigma_xsec.max())
         
