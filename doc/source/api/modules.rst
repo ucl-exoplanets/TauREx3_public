@@ -4,6 +4,7 @@ Taurex API Documentation
 .. toctree::
    :maxdepth: 6
 
+   taurex.core
    taurex.binning
    taurex.cache
    taurex.cia

@@ -12,3 +12,4 @@ Developers guide
     Guidelines <guidelines>
     Fitting Parameters <fittingparameters>
     Writing Temperature <temperature>
+    Plugins <plugins>
