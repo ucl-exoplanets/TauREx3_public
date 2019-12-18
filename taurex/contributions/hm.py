@@ -128,6 +128,9 @@ class HydrogenIon(Contribution):
     def prepare_each(self, model, wngrid):
         self._nlayers = model.nLayers
         self._P_dyne = model.pressureProfile * 1e6
+
+        ## Since our pressure is in Pa already:
+        self._P_dyne = model.pressureProfile * 1e1
         self._temperature_profile = model.temperatureProfile
 
         #### Taking the H and e- profiles from chemistry class. This allows flexibility in the profiles ;)
@@ -148,8 +151,8 @@ class HydrogenIon(Contribution):
 
             self.sigma_xsec[i,:] = xsec_ff[:] + xsec_bf[:]
 
-        ### convert cm2 to m2 ??
-        ###self.sigma_xsec *= 1e-4
+        ###convert cm2 to m2 ??
+        self.sigma_xsec *= 1e-4
 
         self.debug('final xsec %s', self.sigma_xsec)
         self.debug('final xsec %s', self.sigma_xsec.max())
