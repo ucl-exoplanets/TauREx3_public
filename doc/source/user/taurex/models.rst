@@ -102,7 +102,7 @@ molecules can contribute. No keywords or fitting parameters.
 
 Optically thick clouds
 ======================
-``[[SimpleClouds]]``
+``[[SimpleClouds]]`` or ``[[ThickClouds]]``
 
 A simple cloud model that puts a infinitely absorping cloud deck
 in the atmosphere.
