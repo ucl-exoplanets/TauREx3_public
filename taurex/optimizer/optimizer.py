@@ -72,6 +72,7 @@ class Optimizer(Logger):
         """
         self.info('Initializing parameters')
         self.fitting_parameters = []
+        self.derived_parameters = []
         # param_name,param_latex,
         #                 fget.__get__(self),fset.__get__(self),
         #                         default_fit,default_bounds
@@ -81,6 +82,11 @@ class Optimizer(Logger):
             self.debug('Checking fitting parameter {}'.format(params))
             if to_fit:
                 self.fitting_parameters.append(params)
+
+        for params in self._model.derivedParameters.values():
+            name, latex, fget, compute = params
+            if compute:
+                self.derived_parameters.append(params)
 
         self.info('-------FITTING---------------')
         self.info('Parameters to be fit:')
@@ -192,6 +198,56 @@ class Optimizer(Logger):
         return [c[1] if c[4] == 'linear' else 'log({})'.format(c[1])
                 for c in self.fitting_parameters]
 
+
+    @property
+    def derived_names(self):
+        """ 
+
+        Returns a list of the current values of a fitting parameter. This 
+        respects the ``mode`` setting
+
+        Returns
+        -------
+        :obj:`list`:
+            List of each value of a fitting parameter
+
+        """
+
+        return [c[0]() for c in self.derived_parameters]
+
+
+    @property
+    def derived_latex(self):
+        """ 
+
+        Returns a list of the current values of a fitting parameter. This 
+        respects the ``mode`` setting
+
+        Returns
+        -------
+        :obj:`list`:
+            List of each value of a fitting parameter
+
+        """
+
+        return [c[1]() for c in self.derived_parameters]
+
+    @property
+    def derived_values(self):
+        """ 
+
+        Returns a list of the current values of a fitting parameter. This 
+        respects the ``mode`` setting
+
+        Returns
+        -------
+        :obj:`list`:
+            List of each value of a fitting parameter
+
+        """
+
+        return [c[2]() for c in self.derived_parameters]
+
     def enable_fit(self, parameter):
         """
         Enables fitting of the parameter
@@ -211,6 +267,14 @@ class Optimizer(Logger):
         self._model.fittingParameters[parameter] = (
             name, latex, fget, fset, mode, to_fit, bounds)
 
+    def enable_derived(self, parameter):
+        name, latex, fget, compute = \
+            self._model.derivedParameters[parameter]
+        compute = True
+        self._model.derivedParameters[parameter] = (
+            name, latex, fget, compute
+        )
+
     def disable_fit(self, parameter):
         """
         Disables fitting of the parameter
@@ -228,6 +292,15 @@ class Optimizer(Logger):
 
         self._model.fittingParameters[parameter] = (
             name, latex, fget, fset, mode, to_fit, bounds)
+
+    def disable_derived(self, parameter):
+        name, latex, fget, compute = \
+            self._model.derivedParameters[parameter]
+        compute = False
+        self._model.derivedParameters[parameter] = (
+            name, latex, fget, compute
+        )
+
 
     def set_boundary(self, parameter, new_boundaries):
         """
@@ -444,6 +517,9 @@ class Optimizer(Logger):
             [x[0] for x in self.fit_boundaries]))
         output.write_array('fit_boundary_high', np.array(
             [x[1] for x in self.fit_boundaries]))
+        if len(self.derived_names) > 0:
+            output.write_string_array('derived_parameter_names', self.derived_names)
+            output.write_string_array('derived_parameter_latex', self.derived_latex)
         return output
 
     def write_fit(self, output):
@@ -574,47 +650,54 @@ class Optimizer(Logger):
         for solution, optimized_map, \
                 optimized_median, values in self.get_solution():
 
-            mu = self.compute_mu_derived_trace(solution)
+            derived_dict = self.compute_derived_trace(solution)
 
             solution_dict['solution{}'.format(
-                solution)]['fit_params']['mu_derived'] = mu
+                solution)]['fit_params'].update(derived_dict)
 
         return solution_dict
 
-    def compute_mu_derived_trace(self, solution):
+    def compute_derived_trace(self, solution):
         from taurex.util.util import quantile_corner
-        from taurex.constants import AMU
         sigma_frac = self._sigma_fraction
         self._sigma_fraction = 1.0
-        mu_trace = []
         weights = []
-        self.info('Computing derived mu......')
+
+        derived_param = {p: [] for p in self.derived_names}
+
+        self.info('Computing derived parameters......')
         disableLogging()
         for parameters, weight in self.sample_parameters(solution):
             self.update_model(parameters)
             self._model.initialize_profiles()
-            mu_trace.append(self._model.chemistry.muProfile[0]/AMU)
+            for p, v in zip(self.derived_names, self.derived_values):
+                derived_param[p].append(v)
             weights.append(weight)
         enableLogging()
 
         self.info('Done!')
 
         self._sigma_fraction = sigma_frac
+        
+        result_dict = {}
 
-        q_16, q_50, q_84 = \
-            quantile_corner(np.array(mu_trace), [0.16, 0.5, 0.84],
-                            weights=np.array(weights))
+        for param, trace in derived_param.items():
 
-        mean = np.average(mu_trace, weights=weights, axis=0)
+            q_16, q_50, q_84 = \
+                quantile_corner(np.array(trace), [0.16, 0.5, 0.84],
+                                weights=np.array(weights))
 
-        mu_derived = {
-            'value': q_50,
-            'sigma_m': q_50-q_16,
-            'sigma_p': q_84-q_50,
-            'trace': mu_trace,
-            'mean': mean
-        }
-        return mu_derived
+            mean = np.average(trace, weights=weights, axis=0)
+
+            derived = {
+                'value': q_50,
+                'sigma_m': q_50-q_16,
+                'sigma_p': q_84-q_50,
+                'trace': trace,
+                'mean': mean
+            }
+            result_dict[f'{param}_derived'] = derived
+        return result_dict
 
     def sample_parameters(self, solution):
         """

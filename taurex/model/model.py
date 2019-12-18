@@ -15,6 +15,7 @@ class ForwardModel(Logger, Fittable, Writeable):
         self._native_grid = None
 
         self._fitting_parameters = {}
+        self._derived_parameters = {}
 
         self.contribution_list = []
 
@@ -52,6 +53,10 @@ class ForwardModel(Logger, Fittable, Writeable):
     @property
     def fittingParameters(self):
         return self._fitting_parameters
+
+    @property
+    def derivedParameters(self):
+        return self._derived_parameters
 
     def compute_error(self,  samples, wngrid=None, binner=None):
         return {}, {}

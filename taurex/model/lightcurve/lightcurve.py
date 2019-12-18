@@ -274,12 +274,17 @@ class LightCurveModel(ForwardModel):
         return np.concatenate(result)
 
     def build(self):
-        self._fitting_parameters = {}
-        self._fitting_parameters.update(self.fitting_parameters())
 
         self._forward_model.build()
 
+        self._fitting_parameters = {}
+        self._fitting_parameters.update(self.fitting_parameters())
+
         self._fitting_parameters.update(self._forward_model.fittingParameters)
+
+        self._derived_parameters = {}
+        self._derived_parameters.update(self.derived_parameters())
+        self._derived_parameters.update(self._forward_model.derivedParameters)
 
     @property
     def nativeWavenumberGrid(self):
