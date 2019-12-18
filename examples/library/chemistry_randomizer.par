@@ -1,0 +1,37 @@
+[Global]
+xsec_path = /path/to/xsec
+cia_path = /path/to/cia
+
+
+[Temperature]
+profile_type = isothermal
+T = 1300
+
+[Pressure]
+profile_type = Simple
+atm_min_pressure = 1e-0
+atm_max_pressure = 1e6
+nlayers = 100
+
+[Planet]
+planet_type = Simple
+planet_mass = 1.0
+planet_radius = 1.0
+
+
+[Star]
+star_type = blackbody
+temperature = 5800
+
+[Model]
+model_type = transmission
+
+    [[Absorption]]
+
+    [[CIA]]
+    cia_pairs = H2-H2, H2-He
+
+    [[Rayleigh]]
+
+
+

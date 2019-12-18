@@ -1,0 +1,36 @@
+[Global]
+xsec_path = /path/to/xsec
+cia_path = /path/to/cia
+
+
+
+# ---------Creating an observation for retrieval--------
+# We use instruments to create an observation
+# Rather than passing in a text file
+
+[Binning]
+bin_type = manual
+accurate = False
+wavelength_res = 0.6,4.1,100
+
+
+# Use our custom instrument
+
+[Instrument]
+instrument = custom
+python_file = ../library/example_inst.py
+noise_scale = 1e-4 
+
+[Observation]
+taurex_spectrum = self
+
+# ------Retrieval related --------------
+
+[Optimizer]
+optimizer = nestle
+num_live_points = 50
+
+[Fitting]
+planet_radius:fit = True
+planet_radius:factor = 0.8, 2.0
+

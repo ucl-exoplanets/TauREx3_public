@@ -5,102 +5,97 @@ from taurex.data.profiles.chemistry.gas.twopointgas import TwoPointGas
 from taurex.data.profiles.chemistry.gas.twolayergas import TwoLayerGas
 from taurex.data.profiles.chemistry.gas.arraygas import ArrayGas
 
+
 class ConstantGasTest(unittest.TestCase):
 
     def test_init(self):
         gc = ConstantGas()
-        gc.initialize_profile(10,None,None,None)
-        self.assertEqual(gc.molecule,'H2O')
-        np.testing.assert_equal(gc.mixProfile,np.ones(10)*1e-5)
+        gc.initialize_profile(10, None, None, None)
+        self.assertEqual(gc.molecule, 'H2O')
+        np.testing.assert_equal(gc.mixProfile, np.ones(10)*1e-5)
         param = gc.fitting_parameters()
 
-        h2o=param['H2O']
-        self.assertEqual(h2o[2](),1e-5)
+        h2o = param['H2O']
+        self.assertEqual(h2o[2](), 1e-5)
         h2o[3](1e-4)
-        self.assertEqual(h2o[2](),1e-4)
-        gc.initialize_profile(10,None,None,None)
-        np.testing.assert_equal(gc.mixProfile,np.ones(10)*1e-4)
+        self.assertEqual(h2o[2](), 1e-4)
+        gc.initialize_profile(10, None, None, None)
+        np.testing.assert_equal(gc.mixProfile, np.ones(10)*1e-4)
+
 
 class TwoPointGasProfileTest(unittest.TestCase):
 
     def test_compute_profile(self):
-        cgp = TwoPointGas('CH4',1e-4,1e-8)  
+        cgp = TwoPointGas('CH4', 1e-4, 1e-8)
         params = cgp.fitting_parameters()
-
-
 
         test_layers = 10
 
-        pres_prof = np.arange(1,test_layers+1)
+        pres_prof = np.arange(1, test_layers+1)
         self.assertIsNone(cgp.mixProfile)
-        cgp.initialize_profile(10,pres_prof,pres_prof,pres_prof)  
+        cgp.initialize_profile(10, pres_prof, pres_prof, pres_prof)
         self.assertIsNotNone(cgp.mixProfile)
 
-
     def test_fittingparams(self):
-        cgp = TwoPointGas('CH4',1e-4,1e-8)  
-        params = cgp.fitting_parameters()      
+        cgp = TwoPointGas('CH4', 1e-4, 1e-8)
+        params = cgp.fitting_parameters()
 
-        self.assertIn('CH4_surface',params)
-        self.assertIn('CH4_top',params)
-        self.assertEqual(params['CH4_surface'][2](),1e-4)
-        self.assertEqual(params['CH4_top'][2](),1e-8)
+        self.assertIn('CH4_surface', params)
+        self.assertIn('CH4_top', params)
+        self.assertEqual(params['CH4_surface'][2](), 1e-4)
+        self.assertEqual(params['CH4_top'][2](), 1e-8)
         params['CH4_surface'][3](1e-5)
         params['CH4_top'][3](1e-7)
-        self.assertEqual(params['CH4_surface'][2](),1e-5)
-        self.assertEqual(params['CH4_top'][2](),1e-7)       
+        self.assertEqual(params['CH4_surface'][2](), 1e-5)
+        self.assertEqual(params['CH4_top'][2](), 1e-7)
 
-        self.assertEqual(cgp.mixRatioSurface,1e-5)
-        self.assertEqual(cgp.mixRatioTop,1e-7)   
+        self.assertEqual(cgp.mixRatioSurface, 1e-5)
+        self.assertEqual(cgp.mixRatioTop, 1e-7)
 
 
 class TwoLayerProfileTest(unittest.TestCase):
 
     def test_compute_profile(self):
-        cgp = TwoLayerGas('CH4',1e-4,1e-8,1e3)  
+        cgp = TwoLayerGas('CH4', 1e-4, 1e-8, 1e3)
         params = cgp.fitting_parameters()
-
-
 
         test_layers = 100
 
-        pres_prof = np.arange(1,test_layers+1)*200
+        pres_prof = np.arange(1, test_layers+1)*200
         self.assertIsNone(cgp.mixProfile)
-        cgp.initialize_profile(test_layers,pres_prof,pres_prof,pres_prof)  
+        cgp.initialize_profile(test_layers, pres_prof, pres_prof, pres_prof)
         self.assertIsNotNone(cgp.mixProfile)
 
-
     def test_fittingparams(self):
-        cgp = TwoLayerGas('CH4',1e-4,1e-8,1e3)  
-        params = cgp.fitting_parameters()      
+        cgp = TwoLayerGas('CH4', 1e-4, 1e-8, 1e3)
+        params = cgp.fitting_parameters()
 
-        self.assertIn('CH4_surface',params)
-        self.assertIn('CH4_top',params)
-        self.assertEqual(params['CH4_surface'][2](),1e-4)
-        self.assertEqual(params['CH4_top'][2](),1e-8)
+        self.assertIn('CH4_surface', params)
+        self.assertIn('CH4_top', params)
+        self.assertEqual(params['CH4_surface'][2](), 1e-4)
+        self.assertEqual(params['CH4_top'][2](), 1e-8)
         params['CH4_surface'][3](1e-5)
         params['CH4_top'][3](1e-7)
-        self.assertEqual(params['CH4_surface'][2](),1e-5)
-        self.assertEqual(params['CH4_top'][2](),1e-7)       
+        self.assertEqual(params['CH4_surface'][2](), 1e-5)
+        self.assertEqual(params['CH4_top'][2](), 1e-7)
 
-        self.assertEqual(cgp.mixRatioSurface,1e-5)
-        self.assertEqual(cgp.mixRatioTop,1e-7) 
+        self.assertEqual(cgp.mixRatioSurface, 1e-5)
+        self.assertEqual(cgp.mixRatioTop, 1e-7)
 
 
 class ArrayGasTest(unittest.TestCase):
 
     def test_basic(self):
 
-        ag = ArrayGas(molecule_name='H2O2',mix_ratio_array=[1e-3, 1e-7])
+        ag = ArrayGas(molecule_name='H2O2', mix_ratio_array=[1e-3, 1e-7])
 
         ag.initialize_profile(2, None, None, None)
 
         self.assertEqual(ag.mixProfile[0], 1e-3)
         self.assertEqual(ag.mixProfile[-1], 1e-7)
 
-    
     def test_interpolation(self):
-        ag = ArrayGas(molecule_name='H2O2',mix_ratio_array=[1e-3, 1e-7])
+        ag = ArrayGas(molecule_name='H2O2', mix_ratio_array=[1e-3, 1e-7])
 
         ag.initialize_profile(3, None, None, None)
 
@@ -110,9 +105,9 @@ class ArrayGasTest(unittest.TestCase):
 # class TaurexProfileTest(unittest.TestCase):
 
 #     def setUp(self):
- 
+
 #         self.tp = TaurexGasProfile('test',['H2O','CH4'],[1e-4,1e-12])
-    
+
 #         test_layers = 10
 
 #         pres_prof = np.ones(test_layers)
@@ -120,16 +115,15 @@ class ArrayGasTest(unittest.TestCase):
 #         self.tp.initialize_profile(10,pres_prof,pres_prof,pres_prof)
 
 #     def test_compute_active(self):
-        
+
 #         self.tp.compute_active_gas_profile()
-    
+
 #     def test_compute_inactive(self):
 #         self.tp.compute_inactive_gas_profile()
-    
 
 
 #     def test_get_profiles(self):
-        
+
 #         self.assertIsNotNone(self.tp.activeGasMixProfile)
 #         self.assertEqual(self.tp.activeGasMixProfile.shape[0],2)
 #         self.assertEqual(self.tp.activeGasMixProfile.shape[1],10)
@@ -151,7 +145,6 @@ class ArrayGasTest(unittest.TestCase):
 #         self.assertEqual(params['N2'][1],'N$_2$')
 
 
-
 #         self.tp.add_active_gas_param(0)
 #         self.tp.add_active_gas_param(1)
 #         params = self.tp.fitting_parameters()
@@ -167,10 +160,8 @@ class ArrayGasTest(unittest.TestCase):
 #         self.assertEqual(self.tp.active_gas_mix_ratio[1],1e-18)
 
 # class ConstantProfileTest(unittest.TestCase):
-    
 
 
-    
 #     def test_init(self):
 #         from taurex.data.profiles.gas import ConstantGasProfile
 #         cgp = ConstantGasProfile(['H2O','CH4'],[1e-4,1e-12])
@@ -180,11 +171,11 @@ class ArrayGasTest(unittest.TestCase):
 #         pres_prof = np.ones(test_layers)
 
 #         cgp.initialize_profile(10,pres_prof,pres_prof,pres_prof)
-    
+
 
 #     def test_default_constant(self):
 #         from taurex.data.profiles.gas import ConstantGasProfile
-#         cgp = ConstantGasProfile()     
+#         cgp = ConstantGasProfile()
 
 #         test_layers = 10
 
@@ -193,15 +184,11 @@ class ArrayGasTest(unittest.TestCase):
 #         cgp.initialize_profile(10,pres_prof,pres_prof,pres_prof)
 
 
-
 # class ComplexProfileTest(unittest.TestCase):
-
-        
-           
 
 
 #     def test_parameters(self):
-#         cgp = ComplexGasProfile('test',['H2O','CH4'],[1e-4,1e-12],['CH4'],[1e-4],[1e-8])  
+#         cgp = ComplexGasProfile('test',['H2O','CH4'],[1e-4,1e-12],['CH4'],[1e-4],[1e-8])
 #         params = cgp.fitting_parameters()
 #         self.assertIn('H2O',params)
 #         self.assertNotIn('CH4',params)
@@ -209,8 +196,8 @@ class ArrayGasTest(unittest.TestCase):
 #         self.assertIn('T CH4',params)
 #         self.assertIn('S CH4',params)
 #     # def test_log_parameters(self):
-#     #     cgp = ComplexGasProfile('test',['H2O','CH4'],[1e-4,1e-12],['CH4'],[1e-4],[1e-8],mode='log')  
-#     #     params = cgp.fitting_parameters()      
+#     #     cgp = ComplexGasProfile('test',['H2O','CH4'],[1e-4,1e-12],['CH4'],[1e-4],[1e-8],mode='log')
+#     #     params = cgp.fitting_parameters()
 
 #     #     self.assertIn('log_H2O',params)
 #     #     self.assertNotIn('log_CH4',params)
@@ -222,18 +209,18 @@ class ArrayGasTest(unittest.TestCase):
 # class TwoPointGasProfileTest(unittest.TestCase):
 
 #     def test_compute_profile(self):
-#         cgp = TwoPointGasProfile(['H2O','CH4'],[1e-4,1e-12],['CH4'],[1e-4],[1e-8])  
+#         cgp = TwoPointGasProfile(['H2O','CH4'],[1e-4,1e-12],['CH4'],[1e-4],[1e-8])
 #         params = cgp.fitting_parameters()
 #         test_layers = 10
 
 #         pres_prof = np.ones(test_layers)
 
-#         cgp.initialize_profile(10,pres_prof,pres_prof,pres_prof)   
+#         cgp.initialize_profile(10,pres_prof,pres_prof,pres_prof)
 
 # class TwoLayerGasProfileTest(unittest.TestCase):
 
 #     def test_compute_profile(self):
-#         cgp = TwoLayerGasProfile(['H2O','CH4'],[1e-4,1e-12],['CH4'],[1e-4],[1e-8],[1e-4])  
+#         cgp = TwoLayerGasProfile(['H2O','CH4'],[1e-4,1e-12],['CH4'],[1e-4],[1e-8],[1e-4])
 #         params = cgp.fitting_parameters()
 
 
@@ -242,17 +229,17 @@ class ArrayGasTest(unittest.TestCase):
 #         pres_prof = np.ones(test_layers)
 #         self.assertIn('P CH4',params)
 #         self.assertNotIn('P H2O',params)
-#         cgp.initialize_profile(100,pres_prof,pres_prof,pres_prof)   
+#         cgp.initialize_profile(100,pres_prof,pres_prof,pres_prof)
 
 
 # class AceGasProfileTest(unittest.TestCase):
 
 #     def test_compute_profile(self):
 #         from taurex.data.profiles.gas.acegasprofile import ACEGasProfile
-#         cgp = ACEGasProfile(['H2O','CH4'],spec_file='src/ACE/Data/composes.dat',therm_file='src/ACE/Data/NASA.therm')  
+#         cgp = ACEGasProfile(['H2O','CH4'],spec_file='src/ACE/Data/composes.dat',therm_file='src/ACE/Data/NASA.therm')
 #         params = cgp.fitting_parameters()
 #         test_layers = 10
 
 #         pres_prof = np.ones(test_layers)
 
-#         cgp.initialize_profile(10,pres_prof,pres_prof,pres_prof)   
+#         cgp.initialize_profile(10,pres_prof,pres_prof,pres_prof)

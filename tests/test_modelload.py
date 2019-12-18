@@ -1,10 +1,12 @@
 import unittest
-from taurex.util.hdf5 import load_temperature_from_hdf5, load_pressure_from_hdf5, load_gas_from_hdf5,load_chemistry_from_hdf5
+from taurex.util.hdf5 import load_temperature_from_hdf5, load_pressure_from_hdf5, load_gas_from_hdf5, load_chemistry_from_hdf5
 from taurex.output.hdf5 import HDF5Output
-import tempfile,shutil
+import tempfile
+import shutil
 import numpy as np
 import h5py
 from unittest.mock import patch
+
 
 class HDFTester(unittest.TestCase):
 
@@ -15,8 +17,7 @@ class HDFTester(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.test_dir)
 
-
-    def gen_valid_hdf5_output(self,object_to_store,group_name):
+    def gen_valid_hdf5_output(self, object_to_store, group_name):
         import os
         from taurex.output.hdf5 import HDF5Output
 
@@ -25,12 +26,11 @@ class HDFTester(unittest.TestCase):
         with HDF5Output(file_path) as f:
             group = f.create_group(group_name)
             object_to_store.write(group)
-        
+
         return file_path
 
 
 class TemperatureLoadTest(HDFTester):
-
 
     def test_isothermal(self):
         from taurex.data.profiles.temperature import Isothermal
@@ -44,8 +44,6 @@ class TemperatureLoadTest(HDFTester):
 
         self.assertTrue(isinstance(loaded, Isothermal))
         self.assertEqual(iso.isoTemperature, loaded.isoTemperature)
-
-
 
     def test_guillot(self):
         from taurex.data.profiles.temperature import Guillot2010
@@ -67,7 +65,7 @@ class TemperatureLoadTest(HDFTester):
     def test_2point(self):
         from taurex.data.profiles.temperature import NPoint
         twop = NPoint(T_surface=200.0, T_top=300.0, P_surface=-1, P_top=1e-6)
-        
+
         file_path = self.gen_valid_hdf5_output(twop, 'Test')
 
         with h5py.File(file_path, 'r') as f:
@@ -117,9 +115,10 @@ class PressLoadTest(HDFTester):
 
         self.assertTrue(isinstance(loaded, SimplePressureProfile))
         self.assertEqual(pres.nLayers, loaded.nLayers)
-        
+
         loaded.compute_pressure_profile()
         np.testing.assert_array_equal(pres.profile, loaded.profile)
+
 
 class GasLoadTest(HDFTester):
 
@@ -130,7 +129,7 @@ class GasLoadTest(HDFTester):
         file_path = self.gen_valid_hdf5_output(gas, 'Test')
 
         with h5py.File(file_path, 'r') as f:
-            loaded = load_gas_from_hdf5(f['Test'],'H2O')
+            loaded = load_gas_from_hdf5(f['Test'], 'H2O')
 
         self.assertTrue(isinstance(loaded, ConstantGas))
         self.assertEqual(gas._mix_ratio, loaded._mix_ratio)
@@ -142,7 +141,7 @@ class GasLoadTest(HDFTester):
         file_path = self.gen_valid_hdf5_output(gas, 'Test')
 
         with h5py.File(file_path, 'r') as f:
-            loaded = load_gas_from_hdf5(f['Test'],'H2O')
+            loaded = load_gas_from_hdf5(f['Test'], 'H2O')
 
         self.assertTrue(isinstance(loaded, TwoLayerGas))
         self.assertEqual(gas._mix_ratio_pressure, loaded._mix_ratio_pressure)
@@ -151,20 +150,19 @@ class GasLoadTest(HDFTester):
         self.assertEqual(gas._mix_ratio_smoothing, loaded._mix_ratio_smoothing)
 
 
-
 class PlanetLoadTest(HDFTester):
 
     def test_planet(self):
         from taurex.data.planet import Planet
         from taurex.util.hdf5 import load_planet_from_hdf5
-        
+
         planet = Planet(1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1000.0)
 
         file_path = self.gen_valid_hdf5_output(planet, 'Test')
 
         with h5py.File(file_path, 'r') as f:
             loaded = load_planet_from_hdf5(f['Test'])
-        
+
         self.assertTrue(isinstance(loaded, Planet))
         self.assertEqual(planet._mass, loaded._mass)
         self.assertEqual(planet._radius, loaded._radius)
@@ -196,24 +194,23 @@ class StarLoadTest(HDFTester):
         self.assertEqual(star.temperature, loaded.temperature)
         np.testing.assert_array_equal(star.sed, loaded.sed)
 
+
 class ChemistryLoadTest(HDFTester):
-    
-        
+
     def test_taurex_chemistry(self):
-        from taurex.data.profiles.chemistry import TaurexChemistry,ConstantGas
+        from taurex.data.profiles.chemistry import TaurexChemistry, ConstantGas
         from taurex.cache import OpacityCache
 
-        
         molecules = ['H2O', 'CH4']
         mix_ratios = [1e-2, 1e-8]
         molecule_classes = [ConstantGas, ConstantGas]
 
         with patch.object(OpacityCache, "find_list_of_molecules") as mock_my_method:
             mock_my_method.return_value = molecules
-        
+
             chemistry = TaurexChemistry(fill_gases=['H2', 'N2'], ratio=0.145)
 
-            for mol,mix,klass in zip(molecules, mix_ratios, molecule_classes):
+            for mol, mix, klass in zip(molecules, mix_ratios, molecule_classes):
                 chemistry.addGas(klass(mol, mix))
 
         chemistry.initialize_chemistry(100, None, None, None)
@@ -227,8 +224,8 @@ class ChemistryLoadTest(HDFTester):
         loaded.initialize_chemistry(100, None, None, None)
         self.assertTrue(set(chemistry._fill_gases) == set(loaded._fill_gases))
         self.assertTrue(set(chemistry._fill_ratio) == set(loaded._fill_ratio))
-        np.testing.assert_equal(chemistry.activeGasMixProfile,loaded.activeGasMixProfile)
-
+        np.testing.assert_equal(
+            chemistry.activeGasMixProfile, loaded.activeGasMixProfile)
 
 
 class ContribLoadTest(HDFTester):
@@ -240,10 +237,10 @@ class ContribLoadTest(HDFTester):
         file_path = self.gen_valid_hdf5_output(abs_c, 'Test')
 
         with h5py.File(file_path, 'r') as f:
-            loaded = load_contrib_from_hdf5(f['Test'], AbsorptionContribution.__name__)
+            loaded = load_contrib_from_hdf5(
+                f['Test'], AbsorptionContribution.__name__)
 
         self.assertTrue(isinstance(loaded, AbsorptionContribution))
-
 
     def test_rayleigh(self):
         from taurex.contributions import RayleighContribution
@@ -252,7 +249,8 @@ class ContribLoadTest(HDFTester):
         file_path = self.gen_valid_hdf5_output(ray_c, 'Test')
 
         with h5py.File(file_path, 'r') as f:
-            loaded = load_contrib_from_hdf5(f['Test'], RayleighContribution.__name__)
+            loaded = load_contrib_from_hdf5(
+                f['Test'], RayleighContribution.__name__)
 
         self.assertTrue(isinstance(loaded, RayleighContribution))
 
@@ -319,7 +317,7 @@ class ModelLoadTest(HDFTester):
         tm.add_contribution(RayleighContribution())
         tm.build()
         tm.initialize_profiles()
-        wngrid = np.linspace(100,400)
+        wngrid = np.linspace(100, 400)
         tm.star.initialize(wngrid)
         with patch.object(TransmissionModel, "model") as mock_my_method:
             mock_my_method = None
@@ -352,12 +350,12 @@ class ModelLoadTest(HDFTester):
             chem = TaurexChemistry()
             chem.addGas(ConstantGas())
 
-        tm = EmissionModel(chemistry=chem,ngauss=10)
+        tm = EmissionModel(chemistry=chem, ngauss=10)
         tm.add_contribution(AbsorptionContribution())
         tm.add_contribution(RayleighContribution())
         tm.build()
         tm.initialize_profiles()
-        wngrid = np.linspace(100,400)
+        wngrid = np.linspace(100, 400)
         tm.star.initialize(wngrid)
         with patch.object(EmissionModel, "model") as mock_my_method:
             mock_my_method = None
@@ -391,12 +389,12 @@ class ModelLoadTest(HDFTester):
             chem = TaurexChemistry()
             chem.addGas(ConstantGas())
 
-        tm = DirectImageModel(chemistry=chem,ngauss=10)
+        tm = DirectImageModel(chemistry=chem, ngauss=10)
         tm.add_contribution(AbsorptionContribution())
         tm.add_contribution(RayleighContribution())
         tm.build()
         tm.initialize_profiles()
-        wngrid = np.linspace(100,400)
+        wngrid = np.linspace(100, 400)
         tm.star.initialize(wngrid)
         with patch.object(DirectImageModel, "model") as mock_my_method:
             mock_my_method = None
@@ -417,4 +415,3 @@ class ModelLoadTest(HDFTester):
 
         self.assertTrue(set(truth_contrib) == set(loaded_contrib))
         self.assertEqual(tm._ngauss, loaded._ngauss)
-

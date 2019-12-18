@@ -1,22 +1,37 @@
 from taurex.log import Logger
-from taurex.constants import G,RJUP,MJUP,RSOL,MSOL
-from taurex.data.fittable import fitparam,Fittable
+from taurex.constants import G, RJUP, MJUP, RSOL, MSOL
+from taurex.data.fittable import fitparam, Fittable
 import numpy as np
 from taurex.util.emission import black_body
 from taurex.output.writeable import Writeable
-class BlackbodyStar(Fittable,Logger,Writeable):
+
+
+class Star(Fittable, Logger, Writeable):
     """
     A base class that holds information on the star in the model.
     Its implementation is a star that has a blackbody spectrum.
 
 
     Parameters
-    -----------
-    temperature : float
-        Blackbody temperature in Kelvin
-    
-    radius : float
-        Stellar radius in terms of Solar radius
+    ----------
+
+    temperature: float, optional
+        Stellar temperature in Kelvin
+
+    radius: float, optional
+        Stellar radius in Solar radius
+
+    metallicity: float, optional
+        Metallicity in solar values
+
+    mass: float, optional
+        Stellar mass in solar mass
+
+    distance: float, optional
+        Distance from Earth in pc
+
+    magnitudeK: float, optional
+        Maginitude in K band
 
 
     """
@@ -42,11 +57,11 @@ class BlackbodyStar(Fittable,Logger,Writeable):
 
         Returns
         -------
-        R : float
+        R: float
 
         """
         return self._radius
-    
+
     @property
     def temperature(self):
         """
@@ -54,7 +69,7 @@ class BlackbodyStar(Fittable,Logger,Writeable):
 
         Returns
         -------
-        T : float
+        T: float
 
         """
         return self._temperature
@@ -63,24 +78,21 @@ class BlackbodyStar(Fittable,Logger,Writeable):
     def temperature(self, value):
         self._temperature = value
 
-
-
     @property
     def mass(self):
         return self._mass
 
-    def initialize(self,wngrid):
+    def initialize(self, wngrid):
         """
         Initializes the blackbody spectrum on the given wavenumber grid
 
         Parameters
         ----------
-        wngrid : :obj:`array`
+        wngrid: :obj:`array`
             Wavenumber grid cm-1 to compute black body spectrum
-        
+
         """
-        self.sed = black_body(wngrid,self.temperature)
-    
+        self.sed = black_body(wngrid, self.temperature)
 
     @property
     def spectralEmissionDensity(self):
@@ -89,7 +101,7 @@ class BlackbodyStar(Fittable,Logger,Writeable):
 
         Returns
         -------
-        sed : :obj:`array`
+        sed: :obj:`array`
         """
         return self.sed
 
@@ -107,3 +119,7 @@ class BlackbodyStar(Fittable,Logger,Writeable):
         star.write_scalar('mass_kg', self._mass)
         return star
 
+
+class BlackbodyStar(Star):
+    """Alias for the base star type"""
+    pass

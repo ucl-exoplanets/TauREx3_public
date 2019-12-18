@@ -1,8 +1,14 @@
-taurex.output package
-=====================
+Outputs (``taurex.output``)
+===========================
 
-Submodules
-----------
+
+Base
+---------------------------
+
+.. automodule:: taurex.output.output
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 taurex.output.hdf5 module
 -------------------------
@@ -11,13 +17,7 @@ taurex.output.hdf5 module
    :members:
    :undoc-members:
    :show-inheritance:
-taurex.output.output module
----------------------------
 
-.. automodule:: taurex.output.output
-   :members:
-   :undoc-members:
-   :show-inheritance:
 taurex.output.writeable module
 ------------------------------
 

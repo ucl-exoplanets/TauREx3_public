@@ -1,19 +1,24 @@
 from .instrument import Instrument
 import numpy as np
-from taurex.binning import FluxBinner
 import math
 
 
 class SNRInstrument(Instrument):
     """
 
-
+    Simple instrument model that, for a given
+    wavelength-independant, signal-to-noise ratio,
+    compute resulting noise from it.
 
     Parameters
     ----------
 
-    filename: str
-        Filename of file containing the binning and error
+    SNR: float
+        Signal-to-noise ratio
+
+    binner: :class:`~taurex.binning.binner.Binner`, optional
+        Optional resampler to generate a new spectral
+        grid.
 
 
     """
@@ -29,8 +34,9 @@ class SNRInstrument(Instrument):
         if model_res is None:
             model_res = model.model()
 
-
-
+        binner = self._binner
+        if binner is None:
+            binner = model.defaultBinner()
 
         wngrid, spectrum, error, grid_width = self._binner.bin_model(model_res)
 
@@ -38,4 +44,5 @@ class SNRInstrument(Instrument):
 
         noise = np.ones(spectrum.shape)*signal/self._SNR
 
-        return wngrid, spectrum, noise / math.sqrt(num_observations), grid_width
+        return wngrid, spectrum, \
+            noise / math.sqrt(num_observations), grid_width

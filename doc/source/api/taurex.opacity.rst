@@ -1,24 +1,23 @@
-taurex.opacity package
-======================
+Opacities (''taurex.opacity'')
+===============================
 
-Submodules
-----------
-
-taurex.opacity.interpolateopacity module
-----------------------------------------
-
-.. automodule:: taurex.opacity.interpolateopacity
-   :members:
-   :undoc-members:
-   :show-inheritance:
-taurex.opacity.opacity module
+Base
 -----------------------------
 
 .. automodule:: taurex.opacity.opacity
    :members:
    :undoc-members:
    :show-inheritance:
-taurex.opacity.pickleopacity module
+
+Base Interpolator
+----------------------------------------
+
+.. automodule:: taurex.opacity.interpolateopacity
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Pickle Format (``.pickle``)
 -----------------------------------
 
 .. automodule:: taurex.opacity.pickleopacity
@@ -26,11 +25,18 @@ taurex.opacity.pickleopacity module
    :undoc-members:
    :show-inheritance:
 
+HDF5 Format (``.hdf5``)
+-----------------------------------
 
-Module contents
----------------
+.. automodule:: taurex.opacity.hdf5opacity
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
-.. automodule:: taurex.opacity
+ExoTransmit Format (``.dat``)
+-----------------------------------
+
+.. automodule:: taurex.opacity.hdf5opacity
    :members:
    :undoc-members:
    :show-inheritance:

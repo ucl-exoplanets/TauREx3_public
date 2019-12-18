@@ -1,52 +1,43 @@
-taurex.contributions package
-============================
+Contributions (``taurex.contributions``)
+========================================
 
-Subpackages
------------
+Classes related to the computation of the optical depth
 
-.. toctree::
-
-   taurex.contributions.cuda
-
-Submodules
-----------
-
-taurex.contributions.absorption module
---------------------------------------
-
-.. automodule:: taurex.contributions.absorption
-   :members:
-   :undoc-members:
-   :show-inheritance:
-taurex.contributions.cia module
--------------------------------
-
-.. automodule:: taurex.contributions.cia
-   :members:
-   :undoc-members:
-   :show-inheritance:
-taurex.contributions.contribution module
-----------------------------------------
+Base Contribution
+-----------------
 
 .. automodule:: taurex.contributions.contribution
    :members:
    :undoc-members:
    :show-inheritance:
-taurex.contributions.mie module
--------------------------------
 
-.. automodule:: taurex.contributions.mie
+Absorption
+-----------
+
+.. autoclass:: taurex.contributions.absorption.AbsorptionContribution
    :members:
    :undoc-members:
    :show-inheritance:
-taurex.contributions.rayleigh module
-------------------------------------
+
+CIA
+---
+
+.. automodule:: taurex.contributions.cia
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+Rayleigh
+--------
 
 .. automodule:: taurex.contributions.rayleigh
    :members:
    :undoc-members:
    :show-inheritance:
-taurex.contributions.simpleclouds module
+
+
+SimpleClouds
 ----------------------------------------
 
 .. automodule:: taurex.contributions.simpleclouds
@@ -54,11 +45,26 @@ taurex.contributions.simpleclouds module
    :undoc-members:
    :show-inheritance:
 
+Mie Scattering (BH)
+----------------------------------------
 
-Module contents
----------------
+.. automodule:: taurex.contributions.bhmie
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
-.. automodule:: taurex.contributions
+Mie Scattering (Lee)
+----------------------------------------
+
+.. automodule:: taurex.contributions.leemie
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Mie Scattering (Flat)
+----------------------------------------
+
+.. automodule:: taurex.contributions.flatmie
    :members:
    :undoc-members:
    :show-inheritance:

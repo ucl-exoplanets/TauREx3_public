@@ -1,0 +1,78 @@
+[Global]
+xsec_path = /path/to/xsec
+cia_path = /path/to/cia
+
+[Chemistry]
+chemistry_type = free
+fill_gases = H2, He
+ratio = 0.172
+
+
+    [[H2O]]
+    gas_type = constant
+    mix_ratio = 1e-4
+
+    [[CH4]]
+    gas_type = constant
+    mix_ratio = 1e-5
+
+    [[N2]]
+    gas_type = constant
+    mix_ratio = 1e-8
+
+
+[Temperature]
+profile_type = npoint
+T_surface = 1500
+T_top = 1000
+temperature_points = 1200,
+pressure_points = 1e0
+
+[Planet]
+planet_type = simple
+planet_radius = 1.2
+planet_mass = 0.7
+
+[Star]
+star_type = blackbody
+temperature = 5900
+radius = 1.12
+
+[Model]
+model_type = transmission
+
+    [[Absorption]]
+
+    [[CIA]]
+    cia_pairs = H2-H2, H2-He,
+
+    [[Rayleigh]]
+
+    [[SimpleClouds]]
+    clouds_pressure = 5e2
+
+[Optimizer]
+optimizer = nestle
+num_live_points = 500
+
+[Observation]
+observed_spectrum = /path/to/data.txt
+
+
+[Fitting]
+planet_radius:fit = False
+
+T_surface:fit = True
+T_surface:bounds = 1200, 2000
+T_top:fit = True
+T_top:bounds = 1300,700
+T_point1:fit = True
+T_point1:bounds = 1500, 1000
+
+H2O:fit = True
+H2O:bounds = 1e-12, 1e-1
+CH4:fit = True
+CH4:bounds = 1e-12, 1e-1
+
+clouds_pressure:fit = True
+clouds_pressure:bounds = 1e3,1e-2

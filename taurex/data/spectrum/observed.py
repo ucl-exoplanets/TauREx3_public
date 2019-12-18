@@ -10,13 +10,13 @@ class ObservedSpectrum(ArraySpectrum):
         2. spectral data
         3. error
         4. (optional) bin width
-    
+
     If no bin width is present then they are computed.
 
     Parameters
     -----------
     filename: string
-        Path to observed spectrum file. 
+        Path to observed spectrum file.
 
     """
 
