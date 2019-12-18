@@ -24,5 +24,5 @@ this article::
     doi: 10.1051/0004-6361/201220365
 
 
-.. _preprint: http://arxiv.org/
+.. _preprint: https://arxiv.org/abs/1912.07759
 
