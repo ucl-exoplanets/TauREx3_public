@@ -167,7 +167,7 @@ try:
         data_files=data_files,
         ext_modules=extensions
         )
-except ext_errors as ex:
+except Exception as ex:
     print(str(ex))
     print("The C and/or FORTRAN extension could not be compiled")
     setup(name='taurex',
