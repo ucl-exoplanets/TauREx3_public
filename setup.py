@@ -40,7 +40,7 @@ def build_ace(parent_package='',top_path=None):
                 'src/ACE/Md_Utilitaires.f90','src/ACE/Md_ACE.f90']
 
     data_files = ('taurex/external/ACE', ['src/ACE/Data/NASA.therm', 'src/ACE/Data/composes.dat'])
-    ext = Extension(name='taurex.external.ace', sources=ace_sources,optional=True)
+    ext = Extension(name='taurex.external.ace', sources=ace_sources)
 
     return ext, data_files
 
@@ -53,7 +53,7 @@ def build_bhmie():
                                 ],
                         #extra_compile_args = [],
                         extra_compile_args=["-I./src/MIE/"],
-                        language="c",optional=True)
+                        language="c")
 
 def _have_fortran_compiler():
     from numpy.distutils.fcompiler import available_fcompilers_for_platform, \
