@@ -40,7 +40,7 @@ def build_ace(parent_package='',top_path=None):
                 'src/ACE/Md_Utilitaires.f90','src/ACE/Md_ACE.f90']
 
     data_files = ('taurex/external/ACE', ['src/ACE/Data/NASA.therm', 'src/ACE/Data/composes.dat'])
-    ext = Extension(name='taurex.external.ace', sources=ace_sources)
+    ext = Extension(name='taurex.external.ace', sources=ace_sources,optional=True)
 
     return ext, data_files
 
@@ -53,7 +53,7 @@ def build_bhmie():
                                 ],
                         #extra_compile_args = [],
                         extra_compile_args=["-I./src/MIE/"],
-                        language="c")
+                        language="c",optional=True)
 
 def _have_fortran_compiler():
     from numpy.distutils.fcompiler import available_fcompilers_for_platform, \
@@ -139,31 +139,30 @@ classifiers = [
 ]
 
 # Handle versioning
-version = '3.0.2-beta'
+version = '3.0.3-beta'
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-
 setup(name='taurex',
-      author='Ahmed Faris Al-Refaie',
-      author_email='ahmed.al-refaie.12@ucl.ac.uk',
-      license="BSD",
-      version=version,
-      description='TauREx 3 retrieval framework',
-      classifiers=classifiers,
-      packages=packages,
-      long_description=long_description,
-      url='https://github.com/ucl-exoplanets/TauREx3_public/',
-      long_description_content_type="text/markdown",
-      keywords = ['exoplanet','retrieval','taurex','taurex3','atmosphere','atmospheric'],
-      include_package_data=True,
-      entry_points=entry_points,
-      provides=provides,
-      requires=requires,
-      install_requires=install_requires,
-      extras_require={
+    author='Ahmed Faris Al-Refaie',
+    author_email='ahmed.al-refaie.12@ucl.ac.uk',
+    license="BSD",
+    version=version,
+    description='TauREx 3 retrieval framework',
+    classifiers=classifiers,
+    packages=packages,
+    long_description=long_description,
+    url='https://github.com/ucl-exoplanets/TauREx3_public/',
+    long_description_content_type="text/markdown",
+    keywords = ['exoplanet','retrieval','taurex','taurex3','atmosphere','atmospheric'],
+    include_package_data=True,
+    entry_points=entry_points,
+    provides=provides,
+    requires=requires,
+    install_requires=install_requires,
+    extras_require={
         'Plot':  ["matplotlib"], },
-      data_files=data_files,
-      ext_modules=extensions
-      )
+    data_files=data_files,
+    ext_modules=extensions
+    )
