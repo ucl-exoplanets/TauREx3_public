@@ -56,8 +56,12 @@ def gas_factory(profile_type):
     cf = ClassFactory()
 
     for klass in cf.gasKlasses:
-        if profile_type in klass.input_keywords():
-            return klass
+        try:
+            if profile_type in klass.input_keywords():
+                return klass
+        except NotImplementedError:
+            log.warning('%s',klass)
+
     raise NotImplementedError('Gas profile {} not implemented'.format(profile_type))
 
 
@@ -65,32 +69,48 @@ def temp_factory(profile_type):
     cf = ClassFactory()
 
     for klass in cf.temperatureKlasses:
-        if profile_type in klass.input_keywords():
-            return klass
+        try:
+            if profile_type in klass.input_keywords():
+                return klass
+        except NotImplementedError:
+            log.warning('%s',klass)
+
     raise NotImplementedError('Temperature profile {} not implemented'.format(profile_type))
 
 
 def chemistry_factory(profile_type):
     cf = ClassFactory()
     for klass in cf.chemistryKlasses:
-        if profile_type in klass.input_keywords():
-            return klass
+        try:
+            if profile_type in klass.input_keywords():
+                return klass
+        except NotImplementedError:
+            log.warning('%s',klass)
+
     raise NotImplementedError('Chemistry {} not implemented'.format(profile_type))
 
 
 def pressure_factory(profile_type):
     cf = ClassFactory()
     for klass in cf.pressureKlasses:
-        if profile_type in klass.input_keywords():
-            return klass
+        try:
+            if profile_type in klass.input_keywords():
+                return klass
+        except NotImplementedError:
+            log.warning('%s',klass)
+
     raise NotImplementedError('Pressure profile {} not implemented'.format(profile_type))
 
 
 def star_factory(star_type):
     cf = ClassFactory()
     for klass in cf.starKlasses:
-        if star_type in klass.input_keywords():
-            return klass
+        try:
+            if star_type in klass.input_keywords():
+                return klass
+        except NotImplementedError:
+            log.warning('%s',klass)
+
     raise NotImplementedError('Star of type {} not implemented'.format(star_type))
 
 
@@ -147,33 +167,50 @@ def create_chemistry(config):
 def model_factory(model_type):
     cf = ClassFactory()
     for klass in cf.modelKlasses:
-        if model_type in klass.input_keywords():
-            return klass
+        try:
+            if model_type in klass.input_keywords():
+                return klass
+        except NotImplementedError:
+            log.warning('%s',klass)
+
     raise NotImplementedError('Model {} not implemented'.format(model_type))
 
 
 def planet_factory(planet_type):
     cf = ClassFactory()
     for klass in cf.planetKlasses:
-        print(klass, klass.input_keywords())
-        if planet_type in klass.input_keywords():
-            return klass
+        try:
+            print(klass, klass.input_keywords())
+            if planet_type in klass.input_keywords():
+                return klass
+        except NotImplementedError:
+            log.warning('%s',klass)
+
+            
     raise NotImplementedError('Planet {} not implemented'.format(planet_type))
 
 
 def optimizer_factory(optimizer):
     cf = ClassFactory()
     for klass in cf.optimizerKlasses:
-        if optimizer in klass.input_keywords():
-            return klass
+        try:
+            if optimizer in klass.input_keywords():
+                return klass
+        except NotImplementedError:
+            log.warning('%s',klass)
+
     raise NotImplementedError('Optimizer {} not implemented'.format(optimizer))
 
 
 def instrument_factory(instrument):
     cf = ClassFactory()
     for klass in cf.instrumentKlasses:
-        if instrument in klass.input_keywords():
-            return klass
+        try:
+            if instrument in klass.input_keywords():
+                return klass
+        except NotImplementedError:
+            log.warning('%s',klass)
+
     raise NotImplementedError('Instrument {} not implemented'.format(instrument))
 
 
@@ -250,8 +287,12 @@ def generate_contributions(config):
     for key in config.keys():
 
         for klass in cf.contributionKlasses:
-            if key in klass.input_keywords():
-                contributions.append(create_klass(config[key],klass))
+            try:
+                if key in klass.input_keywords():
+                    contributions.append(create_klass(config[key],klass))
+            except NotImplementedError:
+                log.warning('%s',klass)
+
         # if key == 'Absorption':
         #     contributions.append(create_klass(config[key],AbsorptionContribution))
         # elif key == 'CIA':
