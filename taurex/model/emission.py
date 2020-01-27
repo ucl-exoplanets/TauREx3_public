@@ -155,3 +155,7 @@ class EmissionModel(SimpleForwardModel):
         model = super().write(output)
         model.write_scalar('ngauss', self._ngauss)
         return model
+
+    @classmethod
+    def input_keywords(self):
+        return ['emission', 'eclipse', ]

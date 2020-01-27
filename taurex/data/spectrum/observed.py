@@ -20,7 +20,12 @@ class ObservedSpectrum(ArraySpectrum):
 
     """
 
-    def __init__(self, filename):
+    def __init__(self, filename=None):
         self._filename = filename
 
         super().__init__(np.loadtxt(self._filename))
+
+
+    @classmethod
+    def input_keywords(self):
+        return ['dat-file', 'observed', 'text']

@@ -313,3 +313,7 @@ class TaurexChemistry(Chemistry):
             gas.write(gas_entry)
 
         return gas_entry
+
+    @classmethod
+    def input_keywords(cls):
+        return ['taurex', 'free', ]

@@ -147,3 +147,10 @@ class Guillot2010(TemperatureProfile):
         temperature.write_scalar('kappa_v2', self.kappa_v2)
         temperature.write_scalar('alpha', self.alpha)
         return temperature
+
+    @classmethod
+    def input_keywords(cls):
+        """
+        Return all input keywords
+        """
+        return ['guillot', 'guillot2010', ]

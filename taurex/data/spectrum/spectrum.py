@@ -148,3 +148,8 @@ class BaseSpectrum(Logger, Writeable):
         output.write_array('errorbars', self.errorBar)
 
         return output
+
+    @classmethod
+    def input_keywords(self):
+        raise NotImplementedError
+

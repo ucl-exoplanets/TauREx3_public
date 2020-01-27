@@ -63,3 +63,10 @@ class TemperatureProfile(Fittable, Logger, Writeable):
         temperature.write_string('temperature_type', self.__class__.__name__)
 
         return temperature
+    
+    @classmethod
+    def input_keywords(cls):
+        """
+        Return all input keywords
+        """
+        raise NotImplementedError

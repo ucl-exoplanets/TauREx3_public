@@ -107,7 +107,7 @@ class PhoenixStar(BlackbodyStar):
 
             self.wngrid = 10000/(wl.value)
             argidx = np.argsort(self.wngrid)
-            self._base_sed = sed.to(u.W/u.m**2/u.micron)
+            self._base_sed = sed.to(u.W/u.m**2/u.micron).value
             self.wngrid = self.wngrid[argidx]
             self._base_sed = self._base_sed[argidx]
 
@@ -305,3 +305,7 @@ class PhoenixStar(BlackbodyStar):
         star = super().write(output)
         star.write_string('phoenix_path', self._phoenix_path)
         return star
+
+    @classmethod
+    def input_keywords(self):
+        return ['phoenix', ]

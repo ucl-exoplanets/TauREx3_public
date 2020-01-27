@@ -1,28 +1,38 @@
 import unittest
-from taurex.parameter.factory import create_gas_profile
+from taurex.parameter.classfactory import ClassFactory
+from taurex.temperature import TemperatureProfile
 
 
-class GasFactoryTest(unittest.TestCase):
+class TestTemp(TemperatureProfile):
+    pass
 
-    def test_constant(self):
-        pass
-        # from taurex.data.profiles.gas import ConstantGasProfile
 
-        # test_dict = {'profile_type': 'constant',
+class ClassFactoryTest(unittest.TestCase):
 
-        #                 }
+    def gen_fake_module(self):
+        from types import ModuleType
 
-        # gas = create_gas_profile(test_dict)
-        # self.assertIs(type(gas),ConstantGasProfile)
+        m = ModuleType('test')
 
-        # test_dict = {'profile_type': 'constant',
-        #             'mode': 'linear',
-        #             'active_gases': ['H2O','CO2'],
-        #             'active_gas_mix_ratio' : [1e-4,1e-5],
-        #             'CO2' : 1e-7
-        #                 }
+        m.TestTemp = TestTemp
 
-        # gas = create_gas_profile(test_dict)
-        # self.assertIn('CO2',gas.active_gases)
-        # self.assertEqual(gas.active_gas_mix_ratio[1],1e-7)
-        # self.assertNotEqual(gas.active_gas_mix_ratio[1],1e-5)
+        return m
+
+    def test_detect_plugin_classes(self):
+        cf = ClassFactory()
+
+        fake_module = self.gen_fake_module()
+
+        cf.load_plugin(fake_module)
+
+        self.assertIn(TestTemp, cf.temperatureKlasses)
+
+    def test_model_detection(self):
+        from taurex.model import TransmissionModel, EmissionModel, \
+            DirectImageModel
+        cf = ClassFactory()
+
+        self.assertIn(TransmissionModel, cf.modelKlasses)
+        self.assertIn(EmissionModel, cf.modelKlasses)
+        self.assertIn(DirectImageModel, cf.modelKlasses)
+    

@@ -110,8 +110,6 @@ class OpacityCache(Singleton):
     def set_radis_wavenumber(self, wn_start, wn_end, wn_points):
         self._radis_props = (wn_start, wn_end, wn_points)
 
-        
-
         self.clear_cache()
     
     def set_memory_mode(self,in_memory):
