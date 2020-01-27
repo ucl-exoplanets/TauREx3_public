@@ -201,6 +201,18 @@ def optimizer_factory(optimizer):
 
     raise NotImplementedError('Optimizer {} not implemented'.format(optimizer))
 
+def observation_factory(observation):
+    cf = ClassFactory()
+    for klass in cf.observationKlasses:
+        try:
+            if observation in klass.input_keywords():
+                return klass
+        except NotImplementedError:
+            log.warning('%s', klass)
+
+    raise NotImplementedError('Observation {} not implemented'.format(observation))
+
+
 
 def instrument_factory(instrument):
     cf = ClassFactory()
@@ -242,6 +254,16 @@ def create_optimizer(config):
     from taurex.optimizer.optimizer import Optimizer
     config, klass = determine_klass(config, 'optimizer', optimizer_factory,
                                     Optimizer)
+
+    obj = klass(**config)
+    
+    return obj
+
+
+def create_observation(config):
+    from taurex.spectrum import BaseSpectrum
+    config, klass = determine_klass(config, 'observation', observation_factory,
+                                    BaseSpectrum)
 
     obj = klass(**config)
     

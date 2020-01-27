@@ -160,8 +160,8 @@ class ParameterParser(Logger):
                 from taurex.data.spectrum.iraclis import IraclisSpectrum
                 return IraclisSpectrum(observation_config['iraclis_spectrum'])
             else:
-                self.warning('No observation specified........')
-                return None
+                config = self._raw_config.dict()
+                return create_observation(observation_config)
         return None
     
     def create_manual_binning(self, config):

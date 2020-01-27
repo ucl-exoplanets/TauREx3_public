@@ -26,7 +26,8 @@ class ClassFactory(Singleton):
         TauREx 3
         """
         from taurex import temperature, chemistry, pressure, planet, \
-            stellar, instruments, model, contributions, optimizer, opacity
+            stellar, instruments, model, contributions, optimizer, opacity, \
+            spectrum
 
         self._temp_klasses = set()
         self._chem_klasses = set()
@@ -39,6 +40,7 @@ class ClassFactory(Singleton):
         self._contrib_klasses = set()
         self._opt_klasses = set()
         self._opac_klasses = set()
+        self._obs_klasses = set()
 
         self._temp_klasses.update(self._collect_temperatures(temperature))
         self._chem_klasses.update(self._collect_chemistry(chemistry))
@@ -48,6 +50,7 @@ class ClassFactory(Singleton):
         self._star_klasses.update(self._collect_star(stellar))
         self._inst_klasses.update(self._collect_instrument(instruments))
         self._model_klasses.update(self._collect_model(model))
+        self._obs_klasses.update(self._collect_observation(spectrum))
         self._contrib_klasses.update(
             self._collect_contributions(contributions))
 
@@ -64,6 +67,7 @@ class ClassFactory(Singleton):
         self._star_klasses.update(self._collect_star(plugin_module))
         self._inst_klasses.update(self._collect_instrument(plugin_module))
         self._model_klasses.update(self._collect_model(plugin_module))
+        self._obs_klasses.update(self._collect_observation(plugin_module))
         self._contrib_klasses.update(
             self._collect_contributions(plugin_module))
         self._opt_klasses.update(self._collect_optimizer(plugin_module))
@@ -156,6 +160,10 @@ class ClassFactory(Singleton):
         return [c for c in self._collect_classes(module, Opacity)
                 if c is not InterpolatingOpacity]
 
+    def _collect_observation(self, module):
+        from taurex.spectrum import BaseSpectrum
+        return [c for c in self._collect_classes(module, BaseSpectrum)]
+
     @property
     def temperatureKlasses(self):
         return self._temp_klasses
@@ -199,3 +207,7 @@ class ClassFactory(Singleton):
     @property
     def opacityKlasses(self):
         return self._opac_klasses
+
+    @property
+    def observationKlasses(self):
+        return self._obs_klasses

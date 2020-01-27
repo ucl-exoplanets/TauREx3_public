@@ -14,7 +14,7 @@ class IraclisSpectrum(ArraySpectrum):
 
     """
 
-    def __init__(self, filename):
+    def __init__(self, filename=None):
         self._filename = filename
         try:
             with open(filename, 'rb') as f:
@@ -31,3 +31,7 @@ class IraclisSpectrum(ArraySpectrum):
         final_array = np.vstack((wl, td, err, width)).T
 
         super().__init__(final_array)
+
+    @classmethod
+    def input_keywords(self):
+        return ['iraclis', ]
