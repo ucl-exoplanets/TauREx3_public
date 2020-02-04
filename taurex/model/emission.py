@@ -66,13 +66,26 @@ class EmissionModel(SimpleForwardModel):
                          atm_max_pressure)
 
         self.set_num_gauss(ngauss)
+        self._clamp = 10
 
-    def set_num_gauss(self, value):
+    def set_num_gauss(self,value,coeffs=None):
         self._ngauss = int(value)
 
-        mu, weight = np.polynomial.legendre.leggauss(self._ngauss*2)
-        self._mu_quads = mu[self._ngauss:]
-        self._wi_quads = weight[self._ngauss:]
+        mu,weight =np.polynomial.legendre.leggauss(self._ngauss*2)
+        self._mu_quads =mu[self._ngauss:] 
+        self._wi_quads =weight[self._ngauss:]
+        self._coeffs = coeffs
+        if coeffs is None: 
+            self._coeffs = np.ones(self._ngauss)
+
+            
+
+    def set_quadratures(self,mu,weight,coeffs=None):
+        self._mu_quads =mu
+        self._wi_quads =weight
+        self._coeffs = coeffs
+        if coeffs is None: 
+            self._coeffs = np.ones(self._ngauss)
 
     def compute_final_flux(self, f_total):
         star_sed = self._star.spectralEmissionDensity
@@ -89,8 +102,27 @@ class EmissionModel(SimpleForwardModel):
 
         return last_flux
 
-    def path_integral(self, wngrid, return_contrib):
-        dz = np.gradient(self.altitudeProfile)
+
+    def partial_model(self,wngrid=None,cutoff_grid=True):
+        from taurex.util.util import clip_native_to_wngrid
+        self.initialize_profiles()
+
+        native_grid = self.nativeWavenumberGrid
+        if wngrid is not None and cutoff_grid:
+            native_grid = clip_native_to_wngrid(native_grid,wngrid)
+        self._star.initialize(native_grid)
+
+        for contrib in self.contribution_list:
+            
+            contrib.prepare(self,native_grid)
+            
+        return self.evaluate_emission(native_grid,False)
+
+
+    def evaluate_emission(self,wngrid,return_contrib):
+        import numexpr as ne
+        dz=np.gradient(self.altitudeProfile)
+        
 
         density = self.densityProfile
 
@@ -131,25 +163,55 @@ class EmissionModel(SimpleForwardModel):
                 contrib.contribute(self, layer, layer+1, 0,
                                    0, density, dtau, path_length=dz)
 
-            _tau = np.exp(-layer_tau) - np.exp(-dtau)
 
-            tau[layer] += _tau[0]
+
+            dtau_calc = 0.0
+            if dtau.min() < self._clamp:
+                dtau_calc = np.exp(-dtau)
+            layer_tau_calc = 0.0
+            if layer_tau.min() < self._clamp:
+                layer_tau_calc = np.exp(-layer_tau)
+
+            _tau = layer_tau_calc - dtau_calc
+
+            if isinstance(_tau,float):
+                tau[layer] += _tau
+            else:
+                tau[layer] += _tau[0]
             # for contrib in self.contribution_list:
 
             self.debug('Layer_tau[%s]=%s', layer, layer_tau)
 
             dtau += layer_tau
+
             self.debug('dtau[%s]=%s', layer, dtau)
             BB = black_body(wngrid, temperature[layer])/PI
             self.debug('BB[%s]=%s,%s', layer, temperature[layer], BB)
-            I += BB * (np.exp(-layer_tau*_mu) - np.exp(-dtau*_mu))
+
+            dtau_calc = 0.0
+            if dtau.min() < self._clamp:
+                dtau_calc = np.exp(-dtau*_mu)
+            layer_tau_calc = 0.0
+            if layer_tau.min() < self._clamp:
+                layer_tau_calc = np.exp(-layer_tau*_mu)
+
+
+
+            I += BB * (layer_tau_calc - dtau_calc)
 
         self.debug('I: %s', I)
 
-        flux_total = 2.0 * np.pi * sum(I * (_w / _mu))
-        self.debug('flux_total %s', flux_total)
+        return I,_mu,_w,tau
 
-        return self.compute_final_flux(flux_total).flatten(), tau
+    def path_integral(self,wngrid,return_contrib):
+
+        I,_mu,_w,tau = self.evaluate_emission(wngrid,return_contrib)
+        self.debug('I: %s',I)
+
+        flux_total = 2.0*np.pi*sum(I*(_w/_mu))
+        self.debug('flux_total %s',flux_total)
+        
+        return self.compute_final_flux(flux_total).ravel(),tau
 
     def write(self, output):
         model = super().write(output)
