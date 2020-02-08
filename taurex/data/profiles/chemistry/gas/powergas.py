@@ -261,3 +261,8 @@ class PowerGas(Gas):
         gas_entry.write_scalar('gamma',self.gamma)
 
         return gas_entry
+
+
+    @classmethod
+    def input_keywords(cls):
+        return ['power','powerchemistry','parmentier','superpower', ]

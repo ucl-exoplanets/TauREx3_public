@@ -169,3 +169,7 @@ class HydrogenIon(Contribution):
         contrib.write_scalar('hydrogen', self._hydrogen_mixratio)
         contrib.write_scalar('e-', self._electron_mixratio)
         return contrib
+
+    @classmethod
+    def input_keywords(self):
+        return ['HydrogenIon, ]
