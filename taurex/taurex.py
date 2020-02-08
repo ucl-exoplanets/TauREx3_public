@@ -238,8 +238,13 @@ def main():
                 spectrum['instrument_spectrum'] = inst_result[1]
                 spectrum['instrument_noise'] = inst_result[2]
 
-            spectrum['Contributions'] = \
-                store_contributions(binning, model, output_size=output_size-3)
+            try:
+                spectrum['Contributions'] = \
+                    store_contributions(binning, model, 
+                                        output_size=output_size-3)
+            except Exception:
+                pass
+
             if solution is not None:
                 out.store_dictionary(solution, group_name='Solutions')
                 priors = {}
