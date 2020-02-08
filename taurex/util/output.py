@@ -113,7 +113,7 @@ def generate_profile_dict(model):
     out['scaleheight_profile']=model.scaleheight_profile
     out['altitude_profile']=model.altitudeProfile
     out['gravity_profile']=model.gravity_profile
-    out['pressure_profile']=model.pressure.profile
+    out['pressure_profile']=model.pressureProfile
     return out
 
 def generate_spectra_dict(result, contrib_result, native_grid, bin_grid=None):
