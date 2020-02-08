@@ -172,4 +172,4 @@ class HydrogenIon(Contribution):
 
     @classmethod
     def input_keywords(self):
-        return ['HydrogenIon, ]
+        return ['HydrogenIon', ]
