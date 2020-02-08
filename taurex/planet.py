@@ -1,2 +1,2 @@
 """Alias module imports"""
-from taurex.data.planet import Planet
+from taurex.data.planet import BasePlanet, Planet

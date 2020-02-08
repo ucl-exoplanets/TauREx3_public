@@ -300,3 +300,7 @@ class ACEChemistry(Chemistry):
             for idx, gasname in enumerate(self.inactiveGases):
                 self.mu_profile += self.inactiveGasMixProfile[idx, :] * \
                     self._molecule_weight[gasname]
+
+    @classmethod
+    def input_keywords(self):
+        return ['ace', 'equilibrium', ]

@@ -37,3 +37,10 @@ class TemperatureArray(TemperatureProfile):
         temperature.write_scalar('tp_array', self._tp_profile)
 
         return temperature
+
+    @classmethod
+    def input_keywords(cls):
+        """
+        Return all input keywords
+        """
+        return ['array', 'fromarray', ]

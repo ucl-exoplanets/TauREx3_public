@@ -5,7 +5,7 @@
 ===============
 
 The header describes pressure profiles for the atmosphere.
-Currently only one type of profile is supported, so ``profile_type=simple`` must be included.
+Currently only one type of profile is supported, so ``profile_type=simple`` or ``profile_type=hydrostatic`` must be included.
 ``profile_type = custom`` is also valid, See :ref:`customtypes` 
 
 :Class: :class:`~taurex.data.profiles.pressure.SimplePressureProfile`

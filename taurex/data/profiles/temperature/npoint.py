@@ -234,3 +234,10 @@ class NPoint(TemperatureProfile):
         temperature.write_scalar('smoothing_window', self._smooth_window)
 
         return temperature
+
+    @classmethod
+    def input_keywords(cls):
+        """
+        Return all input keywords
+        """
+        return ['npoint', ]

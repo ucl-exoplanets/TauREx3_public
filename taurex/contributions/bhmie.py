@@ -227,3 +227,7 @@ class BHMieContribution(Contribution):
         contrib.write_string('mie_path', self._mie_path)
         contrib.write_string('mie_type', self._mie_type)
         return contrib
+
+    @classmethod
+    def input_keywords(self):
+        return ['BHMie', ]

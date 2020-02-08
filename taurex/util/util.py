@@ -488,12 +488,26 @@ def wnwidth_to_wlwidth(wngrid, wnwidth):
 
 
 def class_for_name(module_name, class_name):
-    import importlib
-    # load the module, will raise ImportError if module cannot be loaded
-    m = importlib.import_module(module_name)
-    # get the class, will raise AttributeError if class cannot be found
-    c = getattr(m, class_name)
-    return c
+    from ..parameter.classfactory import ClassFactory
+
+    cf = ClassFactory()
+
+    combined_classes = list(cf.temperatureKlasses) + \
+                       list(cf.pressureKlasses) + \
+                       list(cf.chemistryKlasses) + \
+                       list(cf.gasKlasses) + \
+                       list(cf.planetKlasses) + \
+                       list(cf.starKlasses) + \
+                       list(cf.modelKlasses) + \
+                       list(cf.contributionKlasses)
+    
+    combined_classes_name = [c.__name__ for c in combined_classes]
+
+    if class_name in combined_classes_name:
+        return combined_classes[combined_classes_name.index(class_name)]
+    else:
+        raise Exception(f'Class of name {class_name} does not exist')              
+
 
 def create_grid_res(resolution, wave_min, wave_max):
     #
