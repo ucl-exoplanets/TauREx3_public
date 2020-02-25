@@ -1,6 +1,7 @@
 import configobj
 from taurex.log import Logger
 from .factory import *
+from taurex.cache import GlobalCache
 
 class ParameterParser(Logger):
 
@@ -35,7 +36,10 @@ class ParameterParser(Logger):
     def setup_globals(self):
         from taurex.cache import CIACache,OpacityCache
         config = self._raw_config.dict()
+    
+
         if 'Global' in config:
+            global_config = config['Global']
             try:
                 OpacityCache().set_opacity_path(config['Global']['xsec_path'])
             except KeyError:
@@ -63,14 +67,21 @@ class ParameterParser(Logger):
                 self.warning('Radis is disabled')
 
             try:
-                wn_start,wn_end,wn_points = config['Global']['radis_grid']
+                wn_start, wn_end, wn_points = config['Global']['radis_grid']
 
-                OpacityCache().set_radis_wavenumber(wn_start,wn_end,wn_points)
+                OpacityCache().set_radis_wavenumber(wn_start, wn_end,
+                                                    wn_points)
             except KeyError:
                 self.warning('Radis default grid will be used')
 
+            gc = GlobalCache()
 
-    def read(self,filename):
+            for key, value in global_config.items():
+                gc[key] = value
+        
+
+
+    def read(self, filename):
         import os.path
         if not os.path.isfile(filename):
             raise Exception('Input file {} does not exist'.format(filename))
