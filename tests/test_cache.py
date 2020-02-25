@@ -7,6 +7,7 @@ import pickle
 from unittest.mock import patch, mock_open
 from taurex.cache.opacitycache import OpacityCache
 from taurex.cache.ciaacache import CIACache
+from taurex.cache.globalcache import GlobalCache
 import numpy as np
 import logging
 
@@ -134,3 +135,18 @@ class TestCIACache(unittest.TestCase):
 
     def tearDown(self):
         shutil.rmtree(self.test_dir)
+
+
+class TestGlobalCache(unittest.TestCase):
+
+    def test_read_write(self):
+
+        gc = GlobalCache()
+
+        gc['TESTVARIABLE'] = 100
+
+        self.assertEqual(gc['TESTVARIABLE'], 100)
+
+        self.assertEqual(GlobalCache()['TESTVARIABLE'], 100)
+
+        self.assertIsNone(GlobalCache()['ANOTHERVARIABLE'])
