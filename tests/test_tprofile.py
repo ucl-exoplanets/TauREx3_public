@@ -71,9 +71,19 @@ class NpointTest(unittest.TestCase):
         import random
 
         temps = np.linspace(60, 1000, num_points).tolist()
-        pressure = np.linspace(40, 100, num_points).tolist()
+        pressure = np.linspace(40, 10, num_points).tolist()
+
         NP = NPoint(temperature_points=temps, pressure_points=pressure)
         fitparams = NP.fitting_parameters()
+
+        test_layers = 100
+
+        pres_prof = np.logspace(6, 0, 100)
+
+        NP.initialize_profile(Earth(), 100, pres_prof)
+        # See if this breaks
+        NP.profile
+    
         # print(fitparams)
         for idx, val in enumerate(zip(temps, pressure)):
             T, P = val
@@ -99,19 +109,43 @@ class NpointTest(unittest.TestCase):
             self.assertEqual(NP._t_points[idx], 400.0)
             self.assertEqual(NP._p_points[idx], 50.0)
 
-        test_layers = 100
 
-        pres_prof = np.ones(test_layers)
-
-        NP.initialize_profile(Earth(), 100, pres_prof)
-        # See if this breaks
-        NP.profile
 
     def test_exception(self):
 
         with self.assertRaises(Exception):
             NP = NPoint(temperature_points=[
                         500.0, 400.0], pressure_points=[100.0])
+
+    def test_invalid_exception(self):
+        from taurex.data.profiles.temperature.npoint import InvalidTemperatureException
+
+        with self.assertRaises(InvalidTemperatureException):
+
+            NP = NPoint(T_surface=1000, T_top=1000, P_top=1e1, pressure_points=[1e3,1e4],
+                        temperature_points=[1000,1000])
+
+            pressure_profile = np.logspace(6, 0, 100)
+
+            NP.initialize_profile(pressure_profile=pressure_profile, nlayers=100)
+
+            NP.profile
+
+
+
+        NP = NPoint(T_surface=1000, T_top=1000, P_top=1e1, pressure_points=[1e4,1e3],
+                    temperature_points=[1000,1000], limit_slope=1000)
+
+        pressure_profile = np.logspace(6, 0, 100)
+
+        NP.initialize_profile(pressure_profile=pressure_profile, nlayers=100)
+
+        NP.profile
+        with self.assertRaises(InvalidTemperatureException):
+            NP['T_point1'] = 100000
+
+            NP.profile
+        
 
     def test_2layer(self):
         self.gen_npoint_test(1)

@@ -56,12 +56,15 @@ class NPoint(TemperatureProfile):
         smoothing_window : int
             smoothing window
 
+        limit_slope : int
+            
+
 
     """
 
     def __init__(self, T_surface=1500.0, T_top=200.0, P_surface=None,
                  P_top=None, temperature_points=[], pressure_points=[],
-                 smoothing_window=10, limit_slope=3000):
+                 smoothing_window=10, limit_slope=9999999):
         super().__init__('{}Point'.format(len(temperature_points)+2))
 
         if not hasattr(temperature_points, '__len__'):
@@ -198,7 +201,7 @@ class NPoint(TemperatureProfile):
             self.error('Temperature profile is not valid - a pressure point is inverted')
             raise InvalidTemperatureException
 
-        if(any((Tpt[i+1]-Tpt[i])/(np.log10(Ppt[i+1])-np.log10(Ppt[i])) >= self._limit_slope for i in range(len(Ppt)-1))): 
+        if(any(abs((Tpt[i+1]-Tpt[i])/(np.log10(Ppt[i+1])-np.log10(Ppt[i]))) >= self._limit_slope for i in range(len(Ppt)-1))): 
             self.error('Temperature profile is not valid - profile slope too high')
             raise InvalidTemperatureException
 
