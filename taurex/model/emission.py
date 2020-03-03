@@ -162,7 +162,11 @@ class EmissionModel(SimpleForwardModel):
                                    0, 0, density, layer_tau, path_length=dz)
                 contrib.contribute(self, layer, layer+1, 0,
                                    0, density, dtau, path_length=dz)
+            # for contrib in self.contribution_list:
 
+            self.debug('Layer_tau[%s]=%s', layer, layer_tau)
+
+            dtau += layer_tau
 
 
             dtau_calc = 0.0
@@ -178,11 +182,7 @@ class EmissionModel(SimpleForwardModel):
                 tau[layer] += _tau
             else:
                 tau[layer] += _tau[0]
-            # for contrib in self.contribution_list:
 
-            self.debug('Layer_tau[%s]=%s', layer, layer_tau)
-
-            dtau += layer_tau
 
             self.debug('dtau[%s]=%s', layer, dtau)
             BB = black_body(wngrid, temperature[layer])/PI
