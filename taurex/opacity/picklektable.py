@@ -82,4 +82,24 @@ class PickleKTable(InterpolatingOpacity):
         #return factor*(q_11*(Pmax-P)*(Tmax-T) + q_21*(P-Pmin)*(Tmax-T) + q_12*(Pmax-P)*(T-Tmin) + q_22*(P-Pmin)*(T-Tmin))
     
     def opacity(self, temperature, pressure, wngrid=None):
-        return super().opacity(temperature, pressure,wngrid).reshape(-1,len(self._weights))
+        from scipy.interpolate import interp1d
+        if wngrid is None:
+            wngrid_filter = slice(None)
+        else:
+            wngrid_filter = np.where((self.wavenumberGrid >= wngrid.min()) & (
+                self.wavenumberGrid <= wngrid.max()))[0]
+
+        orig = self.compute_opacity(temperature, pressure, wngrid_filter).reshape(-1,len(self.weights))
+
+        if wngrid is None or np.array_equal(self.wavenumberGrid.take(wngrid_filter), wngrid):
+            return orig
+        else:
+            # min_max =  (self.wavenumberGrid <= wngrid.max() ) & (self.wavenumberGrid >= wngrid.min())
+
+            # total_bins = self.wavenumberGrid[min_max].shape[0]
+            # if total_bins > wngrid.shape[0]:
+            #     return np.append(np.histogram(self.wavenumberGrid,wngrid, weights=orig)[0]/np.histogram(self.wavenumberGrid,wngrid)[0],0)
+
+            # else:
+            f = interp1d(self.wavenumberGrid[wngrid_filter], orig, axis=0, copy=False, bounds_error=False,fill_value=(orig[0],orig[-1]),assume_sorted=True)
+            return f(wngrid)
