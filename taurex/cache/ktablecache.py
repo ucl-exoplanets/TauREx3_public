@@ -138,7 +138,7 @@ class KTableCache(Singleton):
         glob_path = os.path.join(self._opacity_path,'*.pickle')
         file_list = [f for f in glob(glob_path)]
         
-        return [pathlib.Path(f).stem.split('.')[0] for f in file_list ]
+        return [pathlib.Path(f).stem.split('.')[0].split('_')[0]  for f in file_list ]
 
 
     def find_list_of_molecules(self):
@@ -181,7 +181,7 @@ class KTableCache(Singleton):
         for files in file_list:
             op = None
             if files.endswith('pickle'):
-                splits = pathlib.Path(files).stem.split('.')
+                splits = pathlib.Path(files).stem.split('.')[0].split('_')
                 if molecule_filter is not None:
                         if not splits[0] in molecule_filter:
                             continue
