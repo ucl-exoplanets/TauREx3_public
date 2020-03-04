@@ -141,7 +141,7 @@ class ACEChemistry(Chemistry):
 
         with open(self._specfile, 'r') as textfile:
 
-            molecules_i_have = OpacityCache().find_list_of_molecules()
+            molecules_i_have = self.availableActive
             self.debug('MOLECULES %s', molecules_i_have)
             for line in textfile:
                 sl = line.split()

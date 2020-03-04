@@ -3,7 +3,10 @@ from taurex.util import get_molecular_weight
 from taurex.data.fittable import Fittable
 import numpy as np
 from taurex.output.writeable import Writeable
-from taurex.cache import OpacityCache
+from taurex.cache import OpacityCache, GlobalCache
+from taurex.cache.ktablecache import KTableCache
+
+
 
 
 class Chemistry(Fittable, Logger, Writeable):
@@ -38,7 +41,13 @@ class Chemistry(Fittable, Logger, Writeable):
         Fittable.__init__(self)
 
         self.mu_profile = None
-        self._avail_active = OpacityCache().find_list_of_molecules()
+
+
+        if GlobalCache()['opacity_method'] == 'ktables':
+            self._avail_active = KTableCache().find_list_of_molecules()
+        else:
+
+            self._avail_active = OpacityCache().find_list_of_molecules()
 
     @property
     def availableActive(self):
