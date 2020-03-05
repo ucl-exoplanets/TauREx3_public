@@ -172,7 +172,7 @@ class KTableCache(Singleton):
         """ 
         from glob import glob
         import os
-        from taurex.opacity.picklektable import PickleKTable
+        from taurex.opacity.ktables.picklektable import PickleKTable
 
         glob_path = [os.path.join(path,'*.h5'),os.path.join(path,'*.hdf5'),os.path.join(path,'*.pickle'),os.path.join(path,'*.dat')]
     
