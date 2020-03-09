@@ -567,10 +567,16 @@ class Optimizer(Logger):
                 solution, self._observed.wavenumberGrid)
 
             for k, v in profile_dict.items():
-                sol_values['Profiles'][k] = v
+                if k in sol_values['Profiles']:
+                    sol_values['Profiles'][k].update(v)
+                else:
+                    sol_values['Profiles'][k] = v
 
             for k, v in spectrum_dict.items():
-                sol_values['Spectra'][k] = v
+                if k in sol_values['Spectra']:
+                    sol_values['Spectra'][k].update(v)
+                else:
+                    sol_values['Spectra'][k] = v
 
             solution_dict['solution{}'.format(solution)] = sol_values
 
