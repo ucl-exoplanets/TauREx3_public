@@ -549,9 +549,13 @@ class Optimizer(Logger):
             sol_values['Spectra'] = self._binner.generate_spectrum_output(
                 opt_result, output_size=output_size)
 
-            sol_values['Spectra']['Contributions'] = store_contributions(
-                self._binner, self._model, output_size=output_size-3)
-
+            try:
+                sol_values['Spectra']['Contributions'] = store_contributions(
+                    self._binner, self._model, output_size=output_size-3)
+            except Exception as e:
+                self.warning('Not bothering to store contributions since its broken')
+                self.warning('%s ', str(e))
+    
             # Update with the optimized median
             self.update_model(optimized_median)
 
@@ -563,10 +567,16 @@ class Optimizer(Logger):
                 solution, self._observed.wavenumberGrid)
 
             for k, v in profile_dict.items():
-                sol_values['Profiles'][k] = v
+                if k in sol_values['Profiles']:
+                    sol_values['Profiles'][k].update(v)
+                else:
+                    sol_values['Profiles'][k] = v
 
             for k, v in spectrum_dict.items():
-                sol_values['Spectra'][k] = v
+                if k in sol_values['Spectra']:
+                    sol_values['Spectra'][k].update(v)
+                else:
+                    sol_values['Spectra'][k] = v
 
             solution_dict['solution{}'.format(solution)] = sol_values
 
@@ -684,3 +694,9 @@ class Optimizer(Logger):
         """
         opt = output.create_group('Optimizer')
         self.write_optimizer(opt)
+
+
+
+    @classmethod
+    def input_keywords(self):
+        raise NotImplementedError

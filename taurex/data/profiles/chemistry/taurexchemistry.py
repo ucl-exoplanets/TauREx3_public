@@ -83,7 +83,7 @@ class TaurexChemistry(Chemistry):
         self._fill_ratio = ratio
         self.active_mixratio_profile = None
         self.inactive_mixratio_profile = None
-        self.molecules_i_have = OpacityCache().find_list_of_molecules()
+        self.molecules_i_have = self.availableActive
         self.debug('MOLECULES I HAVE %s', self.molecules_i_have)
         self.setup_fill_params()
 
@@ -313,3 +313,7 @@ class TaurexChemistry(Chemistry):
             gas.write(gas_entry)
 
         return gas_entry
+
+    @classmethod
+    def input_keywords(cls):
+        return ['taurex', 'free', ]

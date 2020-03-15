@@ -12,9 +12,12 @@ class HDF5OutputGroup(OutputGroup):
         self._entry = entry
 
     @only_master_rank
-    def write_array(self, array_name, array, metadata=None):
-        ds = self._entry.create_dataset(
-            str(array_name), data=array, shape=array.shape, dtype=array.dtype)
+    def write_array(self,array_name,array,metadata=None):
+        if isinstance(array,list):
+            for idx,a in enumerate(array):
+                self.write_array('{}{}'.format(array_name,idx),a,metadata)
+            return
+        ds = self._entry.create_dataset(str(array_name), data=array,shape=array.shape,dtype=array.dtype)
         if metadata:
             for k, v in metadata.items():
                 ds.attrs[k] = v

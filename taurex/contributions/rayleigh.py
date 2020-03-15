@@ -49,3 +49,7 @@ class RayleighContribution(Contribution):
                     model.chemistry.get_gas_mix_profile(gasname)[:, None]
                 self.sigma_xsec = final_sigma
                 yield gasname, final_sigma
+
+    @classmethod
+    def input_keywords(self):
+        return ['Rayleigh', ]

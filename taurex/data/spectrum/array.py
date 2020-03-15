@@ -23,7 +23,7 @@ class ArraySpectrum(BaseSpectrum):
 
     """
 
-    def __init__(self, spectrum):
+    def __init__(self, spectrum=None):
         super().__init__(self.__class__.__name__)
 
         self._obs_spectrum = spectrum
@@ -103,3 +103,7 @@ class ArraySpectrum(BaseSpectrum):
         """
         self._bin_edges, self._bin_widths = \
             compute_bin_edges(self.wavelengthGrid)
+
+    @classmethod
+    def input_keywords(self):
+        return ['array', ]

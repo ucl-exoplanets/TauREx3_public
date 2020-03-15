@@ -33,3 +33,8 @@ class Instrument(Logger):
         """
 
         raise NotImplementedError
+    
+
+    @classmethod
+    def input_keywords(self):
+        raise NotImplementedError

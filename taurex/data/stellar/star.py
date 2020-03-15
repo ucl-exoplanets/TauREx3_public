@@ -119,7 +119,13 @@ class Star(Fittable, Logger, Writeable):
         star.write_scalar('mass_kg', self._mass)
         return star
 
+    @classmethod
+    def input_keywords(self):
+        raise NotImplementedError
+
 
 class BlackbodyStar(Star):
     """Alias for the base star type"""
-    pass
+    @classmethod
+    def input_keywords(self):
+        return ['blackbody', ]

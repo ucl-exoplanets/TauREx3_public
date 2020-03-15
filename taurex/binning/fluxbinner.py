@@ -145,7 +145,7 @@ class FluxBinner(Binner):
 
             sum_weight = np.sum(weight)
 
-            sum_spectrum = np.sum(weight *
+            sum_spectrum = np.sum(weight/sum_weight *
                                   old_spect_flux[..., save_start:save_stop+1],
                                   axis=-1)
 

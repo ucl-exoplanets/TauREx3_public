@@ -254,3 +254,7 @@ class Contribution(Fittable, Logger, Writeable):
         """
         contrib = output.create_group(self.__class__.__name__)
         return contrib
+
+    @classmethod
+    def input_keywords(self):
+        raise NotImplementedError

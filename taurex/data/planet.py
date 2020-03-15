@@ -4,7 +4,7 @@ from .fittable import fitparam, Fittable
 from taurex.output.writeable import Writeable
 
 
-class Planet(Fittable, Logger, Writeable):
+class BasePlanet(Fittable, Logger, Writeable):
     """Holds information on a planet and its properties and
     derived properties
 
@@ -147,6 +147,16 @@ class Planet(Fittable, Logger, Writeable):
         planet.write_scalar('surface_gravity', self.gravity)
         return planet
 
+    @classmethod
+    def input_keywords(self):
+        raise NotImplementedError
+
+
+class Planet(BasePlanet):
+    @classmethod
+    def input_keywords(self):
+        return ['simple', ]
+
 
 class Earth(Planet):
     """An implementation for earth"""
@@ -154,6 +164,9 @@ class Earth(Planet):
     def __init__(self):
         Planet.__init__(self, 5.972e24, 6371000)
 
+    @classmethod
+    def input_keywords(self):
+        return ['earth', ]
 
 class Mars(Planet):
 
@@ -165,3 +178,7 @@ class Mars(Planet):
         distance = 1.524
         Planet.__init__(mass=mass.value, radius=radius.value,
                         distance=distance)
+
+    @classmethod
+    def input_keywords(self):
+        return ['mars', ]

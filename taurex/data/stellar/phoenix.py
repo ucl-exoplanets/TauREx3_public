@@ -3,6 +3,7 @@ from .star import BlackbodyStar
 import numpy as np
 import os
 from taurex.constants import MSOL
+from taurex.cache import GlobalCache
 import math
 
 
@@ -61,6 +62,9 @@ class PhoenixStar(BlackbodyStar):
         self.info('Star is PHOENIX type')
         self._phoenix_path = phoenix_path
 
+        if self._phoenix_path is None or not os.path.isdir(self._phoenix_path):
+            self._phoenix_path = GlobalCache()['phoenix_path']
+
         self.get_avail_phoenix()
         self.use_blackbody = False
         self.recompute_spectra()
@@ -107,7 +111,7 @@ class PhoenixStar(BlackbodyStar):
 
             self.wngrid = 10000/(wl.value)
             argidx = np.argsort(self.wngrid)
-            self._base_sed = sed.to(u.W/u.m**2/u.micron)
+            self._base_sed = sed.to(u.W/u.m**2/u.micron).value
             self.wngrid = self.wngrid[argidx]
             self._base_sed = self._base_sed[argidx]
 
@@ -305,3 +309,7 @@ class PhoenixStar(BlackbodyStar):
         star = super().write(output)
         star.write_string('phoenix_path', self._phoenix_path)
         return star
+
+    @classmethod
+    def input_keywords(self):
+        return ['phoenix', ]

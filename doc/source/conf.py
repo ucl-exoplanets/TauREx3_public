@@ -26,7 +26,7 @@ author = 'Ahmed Al-Refaie'
 # The short X.Y version
 sys.path.insert(0, os.path.abspath('../../'))
 # The full version, including alpha/beta/rc tags
-release = '3.0.2-beta'
+release = '3.0.10-alpha'
 version = '.'.join(release.split('.')[:2])
 
 # -- General configuration ---------------------------------------------------
