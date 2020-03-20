@@ -24,6 +24,8 @@ class Prior(Logger):
         else:
             return 10**value
 
+    def params(self):
+        raise NotImplementedError
 
 class Uniform(Prior):
 
@@ -45,6 +47,9 @@ class Uniform(Prior):
     def sample(self, x):
         return stats.uniform.ppf(x, loc=self._low_bounds, scale=self._scale)
 
+    def params(self):
+
+        return f'Bounds = [{self._low_bounds},{self._up_bounds}]'
 
 class LogUniform(Uniform):
 
@@ -66,6 +71,9 @@ class Gaussian(Prior):
     def sample(self, x):
         return stats.norm.ppf(x, loc=self._loc, scale=self._scale)
 
+    def params(self):
+
+        return f'Mean = {self._loc} Stdev = {self._scale}'
 
 class LogGaussian(Gaussian):
 
