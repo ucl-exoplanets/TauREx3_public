@@ -49,3 +49,33 @@ class TestParsing(unittest.TestCase):
         self.assertIsInstance(func_args['bounds'], tuple)
         self.assertIn(100, func_args['bounds'])
         self.assertIn(789, func_args['bounds'])
+
+
+class TestUniform(unittest.TestCase):
+    
+    def test_uniform(self):
+        from taurex.core.priors import Uniform
+
+        with self.assertRaises(ValueError):
+            Uniform()
+
+        u = Uniform(bounds=(100, 500))
+
+        self.assertEqual(u._low_bounds,100.0)
+        self.assertEqual(u.sample(0.0), 100.0)
+        self.assertEqual(u.sample(1.0), 500.0)
+        self.assertEqual(u.sample(0.5), 300.0)
+
+        self.assertEqual(u.prior(100), 100.0)
+    
+    def test_loguniform(self):
+        from taurex.core.priors import LogUniform
+        import math
+        with self.assertRaises(ValueError):
+            LogUniform()
+
+        u = LogUniform(lin_bounds=(100, 500))
+        
+        self.assertEqual(u.sample(0.0), math.log10(100.0))
+        self.assertEqual(u.sample(1.0), math.log10(500.0))
+        self.assertEqual(u.prior(3), 1000)
