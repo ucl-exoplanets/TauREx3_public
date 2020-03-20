@@ -93,10 +93,9 @@ class MultiNestOptimizer(Optimizer):
             # prior distributions called by multinest. Implements a uniform prior
             # converting parameters from normalised grid to uniform prior
             # print(type(cube))
-            for idx, bounds in enumerate(self.fit_boundaries):
+            for idx, priors in enumerate(self.fitting_priors):
                 # print(idx,self.fitting_parameters[idx])
-                bound_min, bound_max = bounds
-                cube[idx] = (cube[idx] * (bound_max-bound_min)) + bound_min
+                cube[idx] = priors.sample(cube[idx])
                 #print('CUBE idx',cube[idx])
             # print('-----------')
         # status = None

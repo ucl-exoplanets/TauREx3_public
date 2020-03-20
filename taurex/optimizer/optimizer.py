@@ -34,7 +34,7 @@ class Optimizer(Logger):
         self.set_observed(observed)
         self._model_callback = None
         self._sigma_fraction = sigma_fraction
-
+        self._fit_priors = {}
     def set_model(self, model):
         """
         Sets the model to be optimized/fit
@@ -62,16 +62,17 @@ class Optimizer(Logger):
             self._binner = observed.create_binner()
 
     def compile_params(self):
+        from taurex.core.priors import Uniform, LogUniform
         """ 
-
-
         Goes through and compiles all parameters within the model that
         we will be retrieving. Called before :func:`compute_fit`
 
 
         """
+
         self.info('Initializing parameters')
         self.fitting_parameters = []
+        self.fitting_priors = []
         # param_name,param_latex,
         #                 fget.__get__(self),fset.__get__(self),
         #                         default_fit,default_bounds
@@ -81,7 +82,13 @@ class Optimizer(Logger):
             self.debug('Checking fitting parameter {}'.format(params))
             if to_fit:
                 self.fitting_parameters.append(params)
-
+                if name not in self._fit_priors:
+                    if mode == 'log':
+                        self.fitting_priors.append(
+                                            LogUniform(lin_bounds=bounds))
+                    else:
+                        self.fitting_priors.append(Uniform(bounds=bounds))
+    
         self.info('-------FITTING---------------')
         self.info('Parameters to be fit:')
         for params in self.fitting_parameters:
@@ -103,11 +110,11 @@ class Optimizer(Logger):
 
         """
 
-        for value, param in zip(fit_params, self.fitting_parameters):
+        for value, param, priors in zip(fit_params, self.fitting_parameters, self.fitting_priors):
             name, latex, fget, fset, mode, to_fit, bounds = param
-            if mode == 'log':
-                value = 10**value
-            fset(value)
+            # if mode == 'log':
+            #     value = 10**value
+            fset(priors.prior(value))
 
     @property
     def fit_values_nomode(self):
@@ -307,6 +314,13 @@ class Optimizer(Logger):
         self._model.fittingParameters[parameter] = (
             name, latex, fget, fset, new_mode, to_fit, bounds)
 
+    def set_prior(self, parameter, prior):
+        if parameter not in self._model.fittingParameters:
+            self.error('Fitting parameter %s does not exist', parameter)
+            raise ValueError('Fitting parameter does not exist')
+
+        self._fit_priors[parameter] = prior
+
     def chisq_trans(self, fit_params, data, datastd):
         """
 
@@ -445,6 +459,10 @@ class Optimizer(Logger):
         output.write_array('fit_boundary_high', np.array(
             [x[1] for x in self.fit_boundaries]))
         return output
+
+
+
+
 
     def write_fit(self, output):
         """
