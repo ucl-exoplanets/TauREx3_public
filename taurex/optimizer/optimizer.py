@@ -88,13 +88,14 @@ class Optimizer(Logger):
                                             LogUniform(lin_bounds=bounds))
                     else:
                         self.fitting_priors.append(Uniform(bounds=bounds))
-    
+                else:
+                    self.fitting_priors.append(self._fit_priors[name])
         self.info('-------FITTING---------------')
         self.info('Parameters to be fit:')
-        for params in self.fitting_parameters:
+        for params, priors in zip(self.fitting_parameters, self.fitting_priors):
             name, latex, fget, fset, mode, to_fit, bounds = params
-            self.info('{}: Value: {} Mode:{} Boundaries:{}'.format(
-                name, fget(), mode, bounds))
+            self.info('{}: Value: {} Type:{} Params:{}'.format(
+                name, fget(), priors.__class__.__name__, priors.params()))
 
     def update_model(self, fit_params):
         """
@@ -392,10 +393,9 @@ class Optimizer(Logger):
         self.compile_params()
 
         fit_names = self.fit_names
-        fit_boundaries = self.fit_boundaries
 
-        fit_min = [x[0] for x in fit_boundaries]
-        fit_max = [x[1] for x in fit_boundaries]
+        prior_type = [p.__class__.__name__ for p in self.fitting_priors]
+        args = [p.params() for p in self.fitting_priors] 
 
         fit_values = self.fit_values
         self.info('')
@@ -406,8 +406,8 @@ class Optimizer(Logger):
         self.info('Dimensionality of fit: %s', len(fit_names))
         self.info('')
 
-        output = tabulate(zip(fit_names, fit_values, fit_min, fit_max),
-                          headers=['Param', 'Value', 'Bound-min', 'Bound-max'])
+        output = tabulate(zip(fit_names, fit_values, prior_type, args),
+                          headers=['Param', 'Value', 'Type', 'Args'])
 
         self.info('\n%s\n\n', output)
         self.info('')
@@ -455,9 +455,9 @@ class Optimizer(Logger):
         output.write_string_array('fit_parameter_names', self.fit_names)
         output.write_string_array('fit_parameter_latex', self.fit_latex)
         output.write_array('fit_boundary_low', np.array(
-            [x[0] for x in self.fit_boundaries]))
+            [x.boundaries()[0] for x in self.fitting_priors]))
         output.write_array('fit_boundary_high', np.array(
-            [x[1] for x in self.fit_boundaries]))
+            [x.boundaries()[1] for x in self.fitting_priors]))
         return output
 
 

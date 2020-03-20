@@ -51,6 +51,9 @@ class TestParsing(unittest.TestCase):
         self.assertIn(789, func_args['bounds'])
 
 
+    # def test_create(self):
+    #     string = "Uniform(bounds=1532)"
+
 class TestUniform(unittest.TestCase):
     
     def test_uniform(self):

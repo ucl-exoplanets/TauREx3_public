@@ -26,6 +26,10 @@ class Prior(Logger):
 
     def params(self):
         raise NotImplementedError
+    
+
+    def boundaries(self):
+        raise NotImplementedError
 
 class Uniform(Prior):
 
@@ -51,6 +55,11 @@ class Uniform(Prior):
 
         return f'Bounds = [{self._low_bounds},{self._up_bounds}]'
 
+    def boundaries(self):
+
+        return self._low_bounds, self._up_bounds
+
+
 class LogUniform(Uniform):
 
     def __init__(self, bounds=None, lin_bounds=None):
@@ -63,7 +72,7 @@ class LogUniform(Uniform):
 class Gaussian(Prior):
 
     def __init__(self, mean=0.5, std=0.25):
-        super.__init__()
+        super().__init__()
 
         self._loc = mean
         self._scale = std
@@ -75,6 +84,8 @@ class Gaussian(Prior):
 
         return f'Mean = {self._loc} Stdev = {self._scale}'
 
+    def boundaries(self):
+        return self.sample(0.1), self.sample(0.9)
 class LogGaussian(Gaussian):
 
     def __init__(self, mean=-2, std=0.25,
