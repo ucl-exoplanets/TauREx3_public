@@ -163,6 +163,7 @@ def main():
             bounds = value['bounds']
             mode = value['mode']
             factor = value['factor']
+            prior = value['prior']
 
             if fit:
                 logging.info('Fitting: {}'.format(key))
@@ -178,6 +179,9 @@ def main():
 
             if mode:
                 optimizer.set_mode(key, mode.lower())
+
+            if prior is not None:
+                optimizer.set_prior(key, prior)
 
         start_time = time.time()
         solution = optimizer.fit(output_size=output_size)
@@ -238,8 +242,13 @@ def main():
                 spectrum['instrument_spectrum'] = inst_result[1]
                 spectrum['instrument_noise'] = inst_result[2]
 
-            spectrum['Contributions'] = \
-                store_contributions(binning, model, output_size=output_size-3)
+            try:
+                spectrum['Contributions'] = \
+                    store_contributions(binning, model, 
+                                        output_size=output_size-3)
+            except Exception:
+                pass
+
             if solution is not None:
                 out.store_dictionary(solution, group_name='Solutions')
                 priors = {}

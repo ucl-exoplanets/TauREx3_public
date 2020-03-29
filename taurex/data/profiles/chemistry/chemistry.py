@@ -3,7 +3,7 @@ from taurex.util import get_molecular_weight
 from taurex.data.fittable import Fittable
 import numpy as np
 from taurex.output.writeable import Writeable
-from taurex.cache import OpacityCache
+from taurex.cache import OpacityCache, GlobalCache
 
 
 class Chemistry(Fittable, Logger, Writeable):
@@ -39,6 +39,9 @@ class Chemistry(Fittable, Logger, Writeable):
 
         self.mu_profile = None
         self._avail_active = OpacityCache().find_list_of_molecules()
+        deactive_list = GlobalCache()['deactive_molecules']
+        if deactive_list is not None:
+            self._avail_active = [k for k in self._avail_active if k not in deactive_list]
 
     @property
     def availableActive(self):

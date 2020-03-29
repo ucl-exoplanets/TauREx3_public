@@ -3,6 +3,7 @@ from .star import BlackbodyStar
 import numpy as np
 import os
 from taurex.constants import MSOL
+from taurex.cache import GlobalCache
 import math
 
 
@@ -60,6 +61,9 @@ class PhoenixStar(BlackbodyStar):
 
         self.info('Star is PHOENIX type')
         self._phoenix_path = phoenix_path
+
+        if self._phoenix_path is None or not os.path.isdir(self._phoenix_path):
+            self._phoenix_path = GlobalCache()['phoenix_path']
 
         self.get_avail_phoenix()
         self.use_blackbody = False

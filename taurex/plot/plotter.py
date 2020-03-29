@@ -404,7 +404,10 @@ class Plotter(object):
         plt.xlim(np.min(wlgrid)-0.05*np.min(wlgrid), np.max(wlgrid)+0.05*np.max(wlgrid))
         # plt.ylim(0.0,0.006)
         plt.xlabel(r'Wavelength ($\mu$m)')
-        plt.ylabel(self.modelAxis[self.modelType])
+        try:
+            plt.ylabel(self.modelAxis[self.modelType])
+        except KeyError:
+            pass
 
         if np.max(wlgrid) - np.min(wlgrid) > 5:
             plt.xscale('log')
@@ -437,7 +440,10 @@ class Plotter(object):
         plt.xlim(np.min(wlgrid)-0.05*np.min(wlgrid), np.max(wlgrid)+0.05*np.max(wlgrid))
         # plt.ylim(0.0,0.006)
         plt.xlabel(r'Wavelength ($\mu$m)')
-        plt.ylabel(self.modelAxis[self.modelType])
+        try:
+            plt.ylabel(self.modelAxis[self.modelType])
+        except KeyError:
+            pass
 
         if np.max(wlgrid) - np.min(wlgrid) > 5:
             plt.xscale('log')
@@ -512,7 +518,10 @@ class Plotter(object):
         plt.xlim(np.min(wlgrid)-0.05*np.min(wlgrid), np.max(wlgrid)+0.05*np.max(wlgrid))
         # plt.ylim(0.0,0.006)
         plt.xlabel('Wavelength ($\mu$m)')
-        plt.ylabel(self.modelAxis[self.modelType])
+        try:
+            plt.ylabel(self.modelAxis[self.modelType])
+        except KeyError:
+            pass
 
         if np.max(wlgrid) - np.min(wlgrid) > 5:
             plt.xscale('log')

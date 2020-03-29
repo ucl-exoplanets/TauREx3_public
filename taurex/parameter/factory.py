@@ -336,7 +336,19 @@ def generate_contributions(config):
 
     return contributions
 
-    
+
+def create_prior(prior):
+    from taurex.util.fitting import parse_priors
+
+    prior_name, args = parse_priors(prior)
+    cf = ClassFactory()
+    for p in cf.priorKlasses:
+        if prior_name in (p.__name__, p.__name__.lower(), p.__name__.upper(),):
+            return p(**args)
+    else:
+        raise ValueError('Unknown Prior Type in input file')
+
+
 def create_model(config,gas,temperature,pressure,planet,star):
     from taurex.model import ForwardModel
     log.debug(config)
