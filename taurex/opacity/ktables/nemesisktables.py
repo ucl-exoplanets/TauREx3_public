@@ -4,13 +4,13 @@ import numpy as np
 import pathlib
 
 
-class HDF5KTable(InterpolatingOpacity):
+class NemesisKTables(InterpolatingOpacity):
     """
-    This is the base class for computing opactities using correlated k tables
+    This is the base class for computing opactities
     """
     
-    def __init__(self, filename,interpolation_mode='linear', in_memory=False):
-        super().__init__('HDF5Ktable:{}'.format(pathlib.Path(filename).stem[0:10]),
+    def __init__(self,filename,interpolation_mode='linear'):
+        super().__init__('NemesisKtable:{}'.format(pathlib.Path(filename).stem[0:10]),
                         interpolation_mode=interpolation_mode)
 
         self._filename = filename
@@ -28,31 +28,33 @@ class HDF5KTable(InterpolatingOpacity):
     def xsecGrid(self):
         return self._xsec_grid
 
+    def decode_ktables(self,filename):
+        pass
 
-    def _load_pickle_file(self, filename):
+    # def _load_pickle_file(self, filename):
 
-        #Load the pickle file
-        self.info('Loading opacity from {}'.format(filename))
-        try:
-            with open(filename, 'rb') as f:
-                self._spec_dict = pickle.load(f)
-        except UnicodeDecodeError:
-            with open(filename, 'rb') as f:
-                self._spec_dict = pickle.load(f, encoding='latin1')       
+    #     #Load the pickle file
+    #     self.info('Loading opacity from {}'.format(filename))
+    #     try:
+    #         with open(filename, 'rb') as f:
+    #             self._spec_dict = pickle.load(f)
+    #     except UnicodeDecodeError:
+    #         with open(filename, 'rb') as f:
+    #             self._spec_dict = pickle.load(f, encoding='latin1')       
         
-        self._wavenumber_grid = self._spec_dict['bin_centers']
-        self._ngauss = self._spec_dict['ngauss']
-        self._temperature_grid = self._spec_dict['t']
-        self._pressure_grid = self._spec_dict['p']*1e5
-        self._xsec_grid = self._spec_dict['kcoeff']
-        self._weights = self._spec_dict['weights']
-        self._molecule_name = self._spec_dict['name']
+    #     self._wavenumber_grid = self._spec_dict['bin_centers']
+    #     self._ngauss = self._spec_dict['ngauss']
+    #     self._temperature_grid = self._spec_dict['t']
+    #     self._pressure_grid = self._spec_dict['p']*1e5
+    #     self._xsec_grid = self._spec_dict['kcoeff']
+    #     self._weights = self._spec_dict['weights']
+    #     self._molecule_name = self._spec_dict['name']
 
-        self._min_pressure = self._pressure_grid.min()
-        self._max_pressure = self._pressure_grid.max()
-        self._min_temperature = self._temperature_grid.min()
-        self._max_temperature = self._temperature_grid.max()
-        self.clean_molecule_name()
+    #     self._min_pressure = self._pressure_grid.min()
+    #     self._max_pressure = self._pressure_grid.max()
+    #     self._min_temperature = self._temperature_grid.min()
+    #     self._max_temperature = self._temperature_grid.max()
+    #     self.clean_molecule_name()
 
     def clean_molecule_name(self):
         splits = self.moleculeName.split('_')
