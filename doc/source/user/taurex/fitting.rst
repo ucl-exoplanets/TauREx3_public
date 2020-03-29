@@ -56,12 +56,30 @@ prior space::
     H2O:fit = True
     H2O:prior = "LogUniform(lin_bounds=(1e-12, 1e-2))"
 
-is equivalent to the previous example.
+is equivalent to the previous example. 
+The second included prior is the ``Gaussian`` prior which 
+has mean and standard deviation arguments::
+
+    planet_radius:prior = "Gaussian(mean=1.0,std=0.3)"
+
+as well as log versions::
+
+    H2O:prior = "LogGaussian(mean=-4,std=2)"
+
+The mean can be defined in linear space with the ``lin_mean``
+argument::
+
+    H2O:prior = "LogGaussian(lin_mean=1e-4,std=2)"
 
 
 
 Old-Style priors
 ================
+
+.. warning::
+    It is recommended that the new style priors are used.
+    These are only included for compatability and will be removed in
+    the next major version of TauREx
 
 We can set the prior boundaries between 1.0 - 5.0 Jupiter masses 
 using the ``bounds`` option::

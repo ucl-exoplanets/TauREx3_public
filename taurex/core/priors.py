@@ -5,11 +5,17 @@ import enum
 
 
 class PriorMode(enum.Enum):
+    """
+    Defines the type of prior space
+    """
     LINEAR = 0,
     LOG = 1,
 
 
 class Prior(Logger):
+    """
+    Defines a prior function
+    """
 
     def __init__(self):
         super().__init__(self.__class__.__name__)
@@ -27,9 +33,9 @@ class Prior(Logger):
     def params(self):
         raise NotImplementedError
     
-
     def boundaries(self):
         raise NotImplementedError
+
 
 class Uniform(Prior):
 
