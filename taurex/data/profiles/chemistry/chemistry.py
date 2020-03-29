@@ -48,6 +48,10 @@ class Chemistry(Fittable, Logger, Writeable):
         else:
 
             self._avail_active = OpacityCache().find_list_of_molecules()
+        #self._avail_active = OpacityCache().find_list_of_molecules()
+        deactive_list = GlobalCache()['deactive_molecules']
+        if deactive_list is not None:
+            self._avail_active = [k for k in self._avail_active if k not in deactive_list]
 
     @property
     def availableActive(self):

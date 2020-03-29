@@ -34,7 +34,7 @@ class Optimizer(Logger):
         self.set_observed(observed)
         self._model_callback = None
         self._sigma_fraction = sigma_fraction
-
+        self._fit_priors = {}
     def set_model(self, model):
         """
         Sets the model to be optimized/fit
@@ -62,16 +62,17 @@ class Optimizer(Logger):
             self._binner = observed.create_binner()
 
     def compile_params(self):
+        from taurex.core.priors import Uniform, LogUniform
         """ 
-
-
         Goes through and compiles all parameters within the model that
         we will be retrieving. Called before :func:`compute_fit`
 
 
         """
+
         self.info('Initializing parameters')
         self.fitting_parameters = []
+        self.fitting_priors = []
         # param_name,param_latex,
         #                 fget.__get__(self),fset.__get__(self),
         #                         default_fit,default_bounds
@@ -81,13 +82,20 @@ class Optimizer(Logger):
             self.debug('Checking fitting parameter {}'.format(params))
             if to_fit:
                 self.fitting_parameters.append(params)
-
+                if name not in self._fit_priors:
+                    if mode == 'log':
+                        self.fitting_priors.append(
+                                            LogUniform(lin_bounds=bounds))
+                    else:
+                        self.fitting_priors.append(Uniform(bounds=bounds))
+                else:
+                    self.fitting_priors.append(self._fit_priors[name])
         self.info('-------FITTING---------------')
         self.info('Parameters to be fit:')
-        for params in self.fitting_parameters:
+        for params, priors in zip(self.fitting_parameters, self.fitting_priors):
             name, latex, fget, fset, mode, to_fit, bounds = params
-            self.info('{}: Value: {} Mode:{} Boundaries:{}'.format(
-                name, fget(), mode, bounds))
+            self.info('{}: Value: {} Type:{} Params:{}'.format(
+                name, fget(), priors.__class__.__name__, priors.params()))
 
     def update_model(self, fit_params):
         """
@@ -103,11 +111,11 @@ class Optimizer(Logger):
 
         """
 
-        for value, param in zip(fit_params, self.fitting_parameters):
+        for value, param, priors in zip(fit_params, self.fitting_parameters, self.fitting_priors):
             name, latex, fget, fset, mode, to_fit, bounds = param
-            if mode == 'log':
-                value = 10**value
-            fset(value)
+            # if mode == 'log':
+            #     value = 10**value
+            fset(priors.prior(value))
 
     @property
     def fit_values_nomode(self):
@@ -307,6 +315,13 @@ class Optimizer(Logger):
         self._model.fittingParameters[parameter] = (
             name, latex, fget, fset, new_mode, to_fit, bounds)
 
+    def set_prior(self, parameter, prior):
+        if parameter not in self._model.fittingParameters:
+            self.error('Fitting parameter %s does not exist', parameter)
+            raise ValueError('Fitting parameter does not exist')
+
+        self._fit_priors[parameter] = prior
+
     def chisq_trans(self, fit_params, data, datastd):
         """
 
@@ -378,10 +393,9 @@ class Optimizer(Logger):
         self.compile_params()
 
         fit_names = self.fit_names
-        fit_boundaries = self.fit_boundaries
 
-        fit_min = [x[0] for x in fit_boundaries]
-        fit_max = [x[1] for x in fit_boundaries]
+        prior_type = [p.__class__.__name__ for p in self.fitting_priors]
+        args = [p.params() for p in self.fitting_priors] 
 
         fit_values = self.fit_values
         self.info('')
@@ -392,8 +406,8 @@ class Optimizer(Logger):
         self.info('Dimensionality of fit: %s', len(fit_names))
         self.info('')
 
-        output = tabulate(zip(fit_names, fit_values, fit_min, fit_max),
-                          headers=['Param', 'Value', 'Bound-min', 'Bound-max'])
+        output = tabulate(zip(fit_names, fit_values, prior_type, args),
+                          headers=['Param', 'Value', 'Type', 'Args'])
 
         self.info('\n%s\n\n', output)
         self.info('')
@@ -441,10 +455,14 @@ class Optimizer(Logger):
         output.write_string_array('fit_parameter_names', self.fit_names)
         output.write_string_array('fit_parameter_latex', self.fit_latex)
         output.write_array('fit_boundary_low', np.array(
-            [x[0] for x in self.fit_boundaries]))
+            [x.boundaries()[0] for x in self.fitting_priors]))
         output.write_array('fit_boundary_high', np.array(
-            [x[1] for x in self.fit_boundaries]))
+            [x.boundaries()[1] for x in self.fitting_priors]))
         return output
+
+
+
+
 
     def write_fit(self, output):
         """
@@ -567,10 +585,16 @@ class Optimizer(Logger):
                 solution, self._observed.wavenumberGrid)
 
             for k, v in profile_dict.items():
-                sol_values['Profiles'][k] = v
+                if k in sol_values['Profiles']:
+                    sol_values['Profiles'][k].update(v)
+                else:
+                    sol_values['Profiles'][k] = v
 
             for k, v in spectrum_dict.items():
-                sol_values['Spectra'][k] = v
+                if k in sol_values['Spectra']:
+                    sol_values['Spectra'][k].update(v)
+                else:
+                    sol_values['Spectra'][k] = v
 
             solution_dict['solution{}'.format(solution)] = sol_values
 

@@ -336,6 +336,7 @@ class ParameterParser(Logger):
 
 
     def generate_fitting_parameters(self):
+        from .factory import create_prior
         config = self._raw_config.dict()
         if 'Fitting' in config:
             fitting_config = config['Fitting']
@@ -345,7 +346,10 @@ class ParameterParser(Logger):
             for key,value in fitting_config.items():
                 fit_param,fit_type=key.split(':')
                 if not fit_param in fitting_params:
-                    fitting_params[fit_param] = {'fit':None,'bounds':None,'mode':None,'factor':None}
+                    fitting_params[fit_param] = {'fit':None,'bounds':None,'mode':None,'factor':None, 'prior': None}
+
+                if fit_type=='prior':
+                    value = create_prior(value)
                 fitting_params[fit_param][fit_type]=value
 
         return fitting_params

@@ -198,11 +198,11 @@ class NPoint(TemperatureProfile):
     def check_profile(self, Ppt, Tpt):
         
         if(any(Ppt[i] <= Ppt[i + 1] for i in range(len(Ppt)-1))): 
-            self.error('Temperature profile is not valid - a pressure point is inverted')
+            self.warning('Temperature profile is not valid - a pressure point is inverted')
             raise InvalidTemperatureException
 
         if(any(abs((Tpt[i+1]-Tpt[i])/(np.log10(Ppt[i+1])-np.log10(Ppt[i]))) >= self._limit_slope for i in range(len(Ppt)-1))): 
-            self.error('Temperature profile is not valid - profile slope too high')
+            self.warning('Temperature profile is not valid - profile slope too high')
             raise InvalidTemperatureException
 
 
