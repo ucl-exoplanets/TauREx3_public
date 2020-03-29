@@ -163,6 +163,7 @@ def main():
             bounds = value['bounds']
             mode = value['mode']
             factor = value['factor']
+            prior = value['prior']
 
             if fit:
                 logging.info('Fitting: {}'.format(key))
@@ -178,6 +179,9 @@ def main():
 
             if mode:
                 optimizer.set_mode(key, mode.lower())
+
+            if prior is not None:
+                optimizer.set_prior(key, prior)
 
         start_time = time.time()
         solution = optimizer.fit(output_size=output_size)
