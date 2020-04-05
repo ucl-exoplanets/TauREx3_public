@@ -21,6 +21,10 @@ class Prior(Logger):
         super().__init__(self.__class__.__name__)
         self._prior_mode = PriorMode.LINEAR
 
+    @property
+    def priorMode(self):
+        return self._prior_mode
+
     def sample(self, x):
         raise NotImplementedError
 

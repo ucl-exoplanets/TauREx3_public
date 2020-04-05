@@ -2,6 +2,7 @@ from taurex.log import Logger, disableLogging, enableLogging
 import numpy as np
 import math
 from taurex import OutputSize
+from taurex.core.priors import PriorMode
 
 
 class Optimizer(Logger):
@@ -180,8 +181,9 @@ class Optimizer(Logger):
             List of names of parameters that will be fit
 
         """
-        return [c[0] if c[4] == 'linear' else 'log_{}'.format(c[0])
-                for c in self.fitting_parameters]
+
+        return [c[0] if self._fit_priors[c[0]].priorMode is PriorMode.LINEAR
+                else 'log_{}'.format(c[0]) for c in self.fitting_parameters]
 
     @property
     def fit_latex(self):
