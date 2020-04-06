@@ -84,11 +84,14 @@ class Optimizer(Logger):
             if to_fit:
                 self.fitting_parameters.append(params)
                 if name not in self._fit_priors:
+                    prior = None
                     if mode == 'log':
-                        self.fitting_priors.append(
-                                            LogUniform(lin_bounds=bounds))
+                        prior = LogUniform(lin_bounds=bounds)
+                        
                     else:
-                        self.fitting_priors.append(Uniform(bounds=bounds))
+                        prior = Uniform(bounds=bounds)
+                    self.fitting_priors.append(prior)
+                    self._fit_priors[name] = prior
                 else:
                     self.fitting_priors.append(self._fit_priors[name])
         self.info('-------FITTING---------------')
