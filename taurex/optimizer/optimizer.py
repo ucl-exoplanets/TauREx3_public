@@ -201,8 +201,7 @@ class Optimizer(Logger):
 
 
         """
-
-        return [c[1] if c[4] == 'linear' else 'log({})'.format(c[1])
+        return [c[1] if self._fit_priors[c[0]].priorMode is PriorMode.LINEAR else 'log({})'.format(c[1])
                 for c in self.fitting_parameters]
 
     def enable_fit(self, parameter):
