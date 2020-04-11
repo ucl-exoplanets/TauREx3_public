@@ -119,7 +119,7 @@ class Plotter(object):
 
             fig = plt.figure(figsize=(7,7/self.phi))
             ax = fig.add_subplot(111)
-            num_moles = len(self.activeGases+self.inactiveGases)
+            num_moles = len(self.activeGases)
 
             profiles = solution_val['Profiles']
             pressure_profile = profiles['pressure_profile'][:]/1e5
@@ -144,6 +144,38 @@ class Plotter(object):
                                   np.power(10, (np.log10(prof) - (
                                               np.log10(prof + prof_std) - np.log10(prof)))),
                                   color=self.cmap(mol_idx / num_moles), alpha=0.5)
+
+
+        plt.yscale('log')
+        plt.gca().invert_yaxis()
+        plt.xscale('log')
+        plt.xlim(1e-12, 3)
+        plt.xlabel('Mixing ratio')
+        plt.ylabel('Pressure (bar)')
+        plt.tight_layout()
+        box = ax.get_position()
+        ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+        ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), ncol=1, prop={'size':11}, frameon=False)
+        if self.title:
+            plt.title(self.title+' - Active', fontsize=14)
+        plt.savefig(os.path.join(self.out_folder, '%s_fit_active_mixratio.pdf' % (self.prefix)))
+        plt.close('all')
+
+        for solution_idx, solution_val in self.solution_iter():
+
+            fig = plt.figure(figsize=(7,7/self.phi))
+            ax = fig.add_subplot(111)
+            num_moles = len(self.inactiveGases)
+
+            profiles = solution_val['Profiles']
+            pressure_profile = profiles['pressure_profile'][:]/1e5
+            active_profile = profiles['active_mix_profile'][...]
+            active_profile_std = profiles['active_mix_profile_std'][...]
+
+            inactive_profile = profiles['inactive_mix_profile'][...]
+            inactive_profile_std = profiles['inactive_mix_profile_std'][...]
+
+            cols_mol = {}
 
             for mol_idx,mol_name in enumerate(self.inactiveGases):
                 inactive_idx = len(self.activeGases) + mol_idx
@@ -173,14 +205,14 @@ class Plotter(object):
         ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
         ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), ncol=1, prop={'size':11}, frameon=False)
         if self.title:
-            plt.title(self.title, fontsize=14)
-        plt.savefig(os.path.join(self.out_folder, '%s_fit_mixratio.pdf' % (self.prefix)))
+            plt.title(self.title+'- Inactive', fontsize=14)
+        plt.savefig(os.path.join(self.out_folder, '%s_fit_inactive_mixratio.pdf' % (self.prefix)))
         plt.close('all')
 
+
     def plot_forward_xprofile(self):
-        fig = plt.figure(figsize=(7,7/self.phi))
-        ax = fig.add_subplot(111)
-        num_moles = len(self.activeGases+self.inactiveGases)
+
+
 
         solution_val = self.forward_output()
 
@@ -191,6 +223,11 @@ class Plotter(object):
         inactive_profile = profiles['inactive_mix_profile'][...]
 
         cols_mol = {}
+
+        fig = plt.figure(figsize=(7,7/self.phi))
+        ax = fig.add_subplot(111)
+        num_moles = len(self.activeGases)
+
         for mol_idx,mol_name in enumerate(self.activeGases):
             cols_mol[mol_name] = self.cmap(mol_idx/num_moles)
 
@@ -198,14 +235,7 @@ class Plotter(object):
 
             plt.plot(prof,pressure_profile,color=cols_mol[mol_name], label=mol_name)
 
-        for mol_idx,mol_name in enumerate(self.inactiveGases):
-            inactive_idx = len(self.activeGases) + mol_idx
-            cols_mol[mol_name] = self.cmap(inactive_idx/num_moles)
 
-            
-            prof = inactive_profile[mol_idx]
-
-            plt.plot(prof,pressure_profile,color=cols_mol[mol_name], label=mol_name)
 
         plt.yscale('log')
         plt.gca().invert_yaxis()
@@ -218,9 +248,41 @@ class Plotter(object):
         ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
         ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), ncol=1, prop={'size':11}, frameon=False)
         if self.title:
-            plt.title(self.title, fontsize=14)
-        plt.savefig(os.path.join(self.out_folder, '%s_fit_mixratio.pdf' % (self.prefix)))
-        plt.close('all')
+            plt.title(self.title+' - Active', fontsize=14)
+        plt.savefig(os.path.join(self.out_folder, '%s_fit_active_mixratio.pdf' % (self.prefix)))
+        plt.close()
+
+
+        cols_mol = {}
+
+        fig = plt.figure(figsize=(7,7/self.phi))
+        ax = fig.add_subplot(111)
+        num_moles = len(self.inactiveGases)
+
+        for mol_idx,mol_name in enumerate(self.inactiveGases):
+            cols_mol[mol_name] = self.cmap(mol_idx/num_moles)
+
+            prof = inactive_profile[mol_idx]
+
+            plt.plot(prof,pressure_profile,color=cols_mol[mol_name], label=mol_name)
+
+
+
+        plt.yscale('log')
+        plt.gca().invert_yaxis()
+        plt.xscale('log')
+        plt.xlim(1e-12, 3)
+        plt.xlabel('Mixing ratio')
+        plt.ylabel('Pressure (bar)')
+        plt.tight_layout()
+        box = ax.get_position()
+        ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+        ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), ncol=1, prop={'size':11}, frameon=False)
+        if self.title:
+            plt.title(self.title+' - Inactive', fontsize=14)
+        plt.savefig(os.path.join(self.out_folder, '%s_fit_inactive_mixratio.pdf' % (self.prefix)))
+        plt.close()
+
 
     def plot_fitted_tp(self):
 
