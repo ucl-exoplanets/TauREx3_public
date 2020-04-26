@@ -146,6 +146,9 @@ class SimpleForwardModel(ForwardModel):
 
             self._initialized = True
 
+        # Setup any photochemistry
+        self._chemistry.set_star_planet(self.star, self.planet)
+
         # Now initialize the gas profile real
         self._chemistry.initialize_chemistry(self.pressure.nLayers,
                                              self.temperatureProfile,

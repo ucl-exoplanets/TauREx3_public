@@ -43,6 +43,25 @@ class Chemistry(Fittable, Logger, Writeable):
         if deactive_list is not None:
             self._avail_active = [k for k in self._avail_active if k not in deactive_list]
 
+    def set_star_planet(self, star, planet):
+        """
+
+        Supplies the star and planet to chemistry
+        for photochemistry reasons. Does nothing by default
+
+        Parameters
+        ----------
+
+        star: :class:`~taurex.data.stellar.star.Star`
+            A star object
+
+        planet: :class:`~taurex.data.planet.Planet`
+            A planet object
+
+
+        """
+        pass
+
     @property
     def availableActive(self):
         """
