@@ -202,7 +202,10 @@ class SafeFortranCaller:
 
     def cleanup(self):
         self.cleanup_processes()
-        self.cleanup_queues()
+        try:
+            self.cleanup_queues()
+        except OSError:
+            pass
 
     def __del__(self):
         self.cleanup()
