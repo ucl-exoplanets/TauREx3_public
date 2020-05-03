@@ -2,6 +2,7 @@ from taurex.log import Logger, disableLogging, enableLogging
 import numpy as np
 import math
 from taurex import OutputSize
+from taurex.core.priors import PriorMode
 
 
 class Optimizer(Logger):
@@ -83,11 +84,14 @@ class Optimizer(Logger):
             if to_fit:
                 self.fitting_parameters.append(params)
                 if name not in self._fit_priors:
+                    prior = None
                     if mode == 'log':
-                        self.fitting_priors.append(
-                                            LogUniform(lin_bounds=bounds))
+                        prior = LogUniform(lin_bounds=bounds)
+                        
                     else:
-                        self.fitting_priors.append(Uniform(bounds=bounds))
+                        prior = Uniform(bounds=bounds)
+                    self.fitting_priors.append(prior)
+                    self._fit_priors[name] = prior
                 else:
                     self.fitting_priors.append(self._fit_priors[name])
         self.info('-------FITTING---------------')
@@ -180,8 +184,9 @@ class Optimizer(Logger):
             List of names of parameters that will be fit
 
         """
-        return [c[0] if c[4] == 'linear' else 'log_{}'.format(c[0])
-                for c in self.fitting_parameters]
+
+        return [c[0] if self._fit_priors[c[0]].priorMode is PriorMode.LINEAR
+                else 'log_{}'.format(c[0]) for c in self.fitting_parameters]
 
     @property
     def fit_latex(self):
@@ -196,8 +201,7 @@ class Optimizer(Logger):
 
 
         """
-
-        return [c[1] if c[4] == 'linear' else 'log({})'.format(c[1])
+        return [c[1] if self._fit_priors[c[0]].priorMode is PriorMode.LINEAR else 'log({})'.format(c[1])
                 for c in self.fitting_parameters]
 
     def enable_fit(self, parameter):
