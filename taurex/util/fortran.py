@@ -3,13 +3,11 @@ from queue import Empty
 from .module import getattr_recursive, setattr_recursive, runfunc_recursive
 import importlib
 from contextlib import contextmanager
-import ctypes
 import io
 import os
 import sys
 import tempfile
 
-#libc = ctypes.CDLL(None)
 
 
 @contextmanager
