@@ -21,4 +21,4 @@ def runfunc_recursive(obj, func, *args, **kwargs):
         return getattr(obj, split[0])(*args, **kwargs)
     else:
         return runfunc_recursive(getattr(obj, split[0]), '.'.join(split[1:]),
-                                 args, kwargs)
+                                 *args, **kwargs)

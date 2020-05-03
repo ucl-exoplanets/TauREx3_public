@@ -51,8 +51,7 @@ class SafeFortranProcess(mp.Process):
                 args = item[2]
                 kwargs = item[3]
                 try:
-                    out = 'Success', runfunc_recursive(mod, attr, *args, 
-                                                      **kwargs)
+                    out = 'Success', runfunc_recursive(mod, attr, *args, **kwargs)
                 except Exception as e:
                     out = 'Exception', str(e)
 
@@ -82,6 +81,7 @@ class SafeFortranCaller:
                                                self._output_queue,
                                                self.shutdown_event,
                                                self._module)
+            self._process.daemon = True
             self._process.start()
         return self._process, self._message_queue, self._output_queue
 
@@ -141,7 +141,7 @@ class SafeFortranCaller:
 
         success, value = 'Crash', None
         timeout = 1.0
-        m.put(('CA::', attr, args, kwargs))
+        m.put(('CALL', attr, args, kwargs))
 
         while p.is_alive():
             try:
