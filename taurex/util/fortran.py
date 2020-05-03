@@ -1,5 +1,5 @@
 import multiprocessing as mp
-from queue import Empty
+from queue import Empty, Full
 from .module import getattr_recursive, setattr_recursive, runfunc_recursive
 import importlib
 from contextlib import contextmanager
@@ -60,8 +60,10 @@ class StreamToLogQueue:
 
             if isinstance(out, bytes):
                 out = out.decode('utf-8')
-
-            self.log_queue.put(out)
+            try:
+                self.log_queue.put_nowait(out)
+            except Full:
+                pass
 
 
 
