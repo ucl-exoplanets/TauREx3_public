@@ -306,14 +306,21 @@ def generate_contributions(config):
 
     cf = ClassFactory()
     contributions = []
+    check_key = list(config.keys())
     for key in config.keys():
 
         for klass in cf.contributionKlasses:
             try:
                 if key in klass.input_keywords():
-                    contributions.append(create_klass(config[key],klass))
+                    contributions.append(create_klass(config[key], klass))
+                    check_key.pop(check_key.index(key))
+                    break
             except NotImplementedError:
                 log.warning('%s',klass)
+
+    if len(check_key) > 0:
+        log.error(f'Unknown Contributions {check_key}')
+        raise Exception(f'Unknown contributions {check_key}')
 
     return contributions
 
