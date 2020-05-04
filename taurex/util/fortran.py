@@ -8,8 +8,6 @@ import os
 import sys
 import tempfile
 
-
-
 @contextmanager
 def stdout_redirector(stream):
     # The original fd stdout points to. Usually 1 on POSIX systems.
