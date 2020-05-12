@@ -524,9 +524,10 @@ class Optimizer(Logger):
                   'points (the rest is in parallel)', len(sample_list)//size)
 
         disableLogging()
-        count = 0
+
 
         def sample_iter():
+            count = 0
             for parameters, weight in sample_list[rank::size]:
                 self.update_model(parameters)
                 enableLogging()
@@ -536,6 +537,7 @@ class Optimizer(Logger):
                         count*100.0 / (len(sample_list)/size)))
                 disableLogging()
                 yield weight
+                count +=1
 
         return self._model.compute_error(sample_iter, wngrid=binning,
                                          binner=self._binner)

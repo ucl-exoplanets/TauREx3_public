@@ -306,33 +306,21 @@ def generate_contributions(config):
 
     cf = ClassFactory()
     contributions = []
+    check_key = list(config.keys())
     for key in config.keys():
 
         for klass in cf.contributionKlasses:
             try:
                 if key in klass.input_keywords():
-                    contributions.append(create_klass(config[key],klass))
+                    contributions.append(create_klass(config[key], klass))
+                    check_key.pop(check_key.index(key))
+                    break
             except NotImplementedError:
                 log.warning('%s',klass)
 
-        # if key == 'Absorption':
-        #     contributions.append(create_klass(config[key],AbsorptionContribution))
-        # elif key == 'CIA':
-        #     contributions.append(create_klass(config[key],CIAContribution))
-        # elif key == 'Rayleigh':
-        #     contributions.append(create_klass(config[key],RayleighContribution))
-        # elif key == 'SimpleClouds':
-        #      from taurex.contributions import SimpleCloudsContribution
-        #      contributions.append(create_klass(config[key],SimpleCloudsContribution))
-        # elif key == 'BHMie':
-        #      from taurex.contributions import BHMieContribution
-        #      contributions.append(create_klass(config[key],BHMieContribution))
-        # elif key == 'LeeMie':
-        #      from taurex.contributions import LeeMieContribution
-        #      contributions.append(create_klass(config[key],LeeMieContribution))
-        # elif key == 'FlatMie':
-        #      from taurex.contributions import FlatMieContribution
-        #      contributions.append(create_klass(config[key],FlatMieContribution))
+    if len(check_key) > 0:
+        log.error(f'Unknown Contributions {check_key}')
+        raise Exception(f'Unknown contributions {check_key}')
 
     return contributions
 
