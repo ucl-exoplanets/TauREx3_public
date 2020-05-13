@@ -2,6 +2,7 @@ from taurex.log import Logger, disableLogging, enableLogging
 import numpy as np
 import math
 from taurex import OutputSize
+from taurex.core.priors import PriorMode
 
 
 class Optimizer(Logger):
@@ -83,11 +84,14 @@ class Optimizer(Logger):
             if to_fit:
                 self.fitting_parameters.append(params)
                 if name not in self._fit_priors:
+                    prior = None
                     if mode == 'log':
-                        self.fitting_priors.append(
-                                            LogUniform(lin_bounds=bounds))
+                        prior = LogUniform(lin_bounds=bounds)
+                        
                     else:
-                        self.fitting_priors.append(Uniform(bounds=bounds))
+                        prior = Uniform(bounds=bounds)
+                    self.fitting_priors.append(prior)
+                    self._fit_priors[name] = prior
                 else:
                     self.fitting_priors.append(self._fit_priors[name])
         self.info('-------FITTING---------------')
@@ -180,8 +184,9 @@ class Optimizer(Logger):
             List of names of parameters that will be fit
 
         """
-        return [c[0] if c[4] == 'linear' else 'log_{}'.format(c[0])
-                for c in self.fitting_parameters]
+
+        return [c[0] if self._fit_priors[c[0]].priorMode is PriorMode.LINEAR
+                else 'log_{}'.format(c[0]) for c in self.fitting_parameters]
 
     @property
     def fit_latex(self):
@@ -196,8 +201,7 @@ class Optimizer(Logger):
 
 
         """
-
-        return [c[1] if c[4] == 'linear' else 'log({})'.format(c[1])
+        return [c[1] if self._fit_priors[c[0]].priorMode is PriorMode.LINEAR else 'log({})'.format(c[1])
                 for c in self.fitting_parameters]
 
     def enable_fit(self, parameter):
@@ -520,9 +524,10 @@ class Optimizer(Logger):
                   'points (the rest is in parallel)', len(sample_list)//size)
 
         disableLogging()
-        count = 0
+
 
         def sample_iter():
+            count = 0
             for parameters, weight in sample_list[rank::size]:
                 self.update_model(parameters)
                 enableLogging()
@@ -532,6 +537,7 @@ class Optimizer(Logger):
                         count*100.0 / (len(sample_list)/size)))
                 disableLogging()
                 yield weight
+                count +=1
 
         return self._model.compute_error(sample_iter, wngrid=binning,
                                          binner=self._binner)
@@ -612,22 +618,44 @@ class Optimizer(Logger):
     def compute_mu_derived_trace(self, solution):
         from taurex.util.util import quantile_corner
         from taurex.constants import AMU
-        sigma_frac = self._sigma_fraction
-        self._sigma_fraction = 1.0
-        mu_trace = []
-        weights = []
+        from taurex import mpi
+        enableLogging()
         self.info('Computing derived mu......')
+
+        samples = self.get_samples(solution)
+        weights = self.get_weights(solution)
+        len_samples = len(samples)
+
+        rank = mpi.get_rank()
+
+        num_procs = mpi.nprocs()
+
+        mu_trace = np.zeros(shape=len_samples)
+        count = 0
         disableLogging()
-        for parameters, weight in self.sample_parameters(solution):
+        for idx in range(rank, len_samples, num_procs):
+            enableLogging()
+            if rank == 0 and count % 10 == 0 and count > 0:
+
+                self.info('Progress {}%'.format(
+                    idx*100.0 / len_samples))
+            disableLogging()
+
+            parameters = samples[idx]
             self.update_model(parameters)
             self._model.initialize_profiles()
-            mu_trace.append(self._model.chemistry.muProfile[0]/AMU)
-            weights.append(weight)
+            mu_trace[idx] = self._model.chemistry.muProfile[0]/AMU
+            count += 1
+        # for parameters, weight in self.sample_parameters(solution):
+        #     self.update_model(parameters)
+        #     self._model.initialize_profiles()
+        #     mu_trace.append(self._model.chemistry.muProfile[0]/AMU)
+        #     weights.append(weight)
         enableLogging()
 
-        self.info('Done!')
+        mu_trace = mpi.allreduce(mu_trace, op='SUM')
 
-        self._sigma_fraction = sigma_frac
+        self.info('Done!')
 
         q_16, q_50, q_84 = \
             quantile_corner(np.array(mu_trace), [0.16, 0.5, 0.84],
@@ -646,8 +674,6 @@ class Optimizer(Logger):
 
     def sample_parameters(self, solution):
         """
-        **Requires implementation***
-
         Read traces and weights and return
         a random ``sigma_fraction`` sample of them
 
@@ -655,7 +681,7 @@ class Optimizer(Logger):
         ----------
         solution:
             a solution output from sampler
-
+        
         Yields
         ------
         traces: :obj:`array`
@@ -663,9 +689,17 @@ class Optimizer(Logger):
 
         weight: float
             Weight of sample
-
+        
         """
-        raise NotImplementedError
+        from taurex.util.util import random_int_iter
+        samples = self.get_samples(solution)
+        weights = self.get_weights(solution)
+
+        iterator = random_int_iter(samples.shape[0], self._sigma_fraction)
+        for x in iterator:
+            w = weights[x]+1e-300
+
+            yield samples[x, :], w
 
     def get_solution(self):
         """
@@ -694,6 +728,13 @@ class Optimizer(Logger):
 
         """
         raise NotImplementedError
+
+    def get_samples(self, solution_id):
+        raise NotImplementedError
+
+    def get_weights(self, solution_id):
+        raise NotImplementedError
+
 
     def write(self, output):
         """

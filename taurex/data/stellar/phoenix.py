@@ -55,15 +55,16 @@ class PhoenixStar(BlackbodyStar):
                          distance=distance,
                          magnitudeK=magnitudeK, mass=mass,
                          metallicity=metallicity)
-        if phoenix_path is None:
-            self.error('No file path to phoenix files defined')
-            raise Exception('No file path to phoenix files defined')
-
-        self.info('Star is PHOENIX type')
         self._phoenix_path = phoenix_path
 
         if self._phoenix_path is None or not os.path.isdir(self._phoenix_path):
             self._phoenix_path = GlobalCache()['phoenix_path']
+
+        if self._phoenix_path is None or not os.path.isdir(self._phoenix_path):
+            self.error(f'No file path or incorrect path to phoenix files defined - {self._phoenix_path}')
+            raise Exception(f'No file path or incorrect path to phoenix files defined - {self._phoenix_path}')
+
+        self.info('Star is PHOENIX type')
 
         self.get_avail_phoenix()
         self.use_blackbody = False
