@@ -631,17 +631,24 @@ class Optimizer(Logger):
 
         num_procs = mpi.nprocs()
 
-        mu_traces = np.zeros(shape=len_samples)
+        mu_trace = np.zeros(shape=len_samples)
         weights = np.zeros(shape=len_samples)
-
+        count = 0
         disableLogging()
         for idx in range(rank, len_samples, num_procs):
+            enableLogging()
+            if rank == 0 and count % 10 == 0 and count > 0:
+
+                self.info('Progress {}%'.format(
+                    idx*100.0 / len_samples))
+            disableLogging()
+
             parameters, weight = samples[idx]
             self.update_model(parameters)
             self._model.initialize_profiles()
-            mu_traces[idx] = self._model.chemistry.muProfile[0]/AMU
+            mu_trace[idx] = self._model.chemistry.muProfile[0]/AMU
             weights[idx] = weight
-
+            count += 1
         # for parameters, weight in self.sample_parameters(solution):
         #     self.update_model(parameters)
         #     self._model.initialize_profiles()
@@ -649,7 +656,7 @@ class Optimizer(Logger):
         #     weights.append(weight)
         enableLogging()
 
-        mu_trace = mpi.allreduce(mu_traces, op='SUM')
+        mu_trace = mpi.allreduce(mu_trace, op='SUM')
         weights = mpi.allreduce(weights, op='SUM')
 
         self.info('Done!')
