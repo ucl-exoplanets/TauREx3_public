@@ -618,18 +618,39 @@ class Optimizer(Logger):
     def compute_mu_derived_trace(self, solution):
         from taurex.util.util import quantile_corner
         from taurex.constants import AMU
+        from taurex import mpi
         sigma_frac = self._sigma_fraction
         self._sigma_fraction = 1.0
-        mu_trace = []
-        weights = []
         self.info('Computing derived mu......')
+
+        samples = list(self.sample_parameters(solution))
+
+        len_samples = len(samples)
+
+        rank = mpi.get_rank()
+
+        num_procs = mpi.nprocs()
+
+        mu_traces = np.zeros(shape=len_samples)
+        weights = np.zeros(shape=len_samples)
+
         disableLogging()
-        for parameters, weight in self.sample_parameters(solution):
+        for idx in range(rank, len_samples, num_procs):
+            parameters, weight = samples[idx]
             self.update_model(parameters)
             self._model.initialize_profiles()
-            mu_trace.append(self._model.chemistry.muProfile[0]/AMU)
-            weights.append(weight)
+            mu_traces[idx] = self._model.chemistry.muProfile[0]/AMU
+            weights[idx] = weight
+
+        # for parameters, weight in self.sample_parameters(solution):
+        #     self.update_model(parameters)
+        #     self._model.initialize_profiles()
+        #     mu_trace.append(self._model.chemistry.muProfile[0]/AMU)
+        #     weights.append(weight)
         enableLogging()
+
+        mu_trace = mpi.allreduce(mu_traces, op='SUM')
+        weights = mpi.allreduce(weights, op='SUM')
 
         self.info('Done!')
 

@@ -2,6 +2,14 @@
 from functools import lru_cache
 from functools import wraps
 
+def convert_op(operation):
+    from mpi4py import MPI
+    if operation.lower() == 'sum':
+        return MPI.SUM
+    else:
+        raise NotImplementedError
+
+
 @lru_cache(maxsize=2)
 def nprocs():
     """Gets number of processes or returns 1 if mpi is not installed
@@ -34,6 +42,18 @@ def allgather(value):
 
     return data
 
+def allreduce(value, op):
+    try:
+        from mpi4py import MPI
+    except ImportError:
+        return value
+
+    comm = MPI.COMM_WORLD
+    data = value
+    data = comm.allreduce(value, op=convert_op(op))
+
+    return data
+
 
 def broadcast(array, rank=0):
     import numpy as np
@@ -55,6 +75,7 @@ def broadcast(array, rank=0):
         data = comm.bcast(array, root=rank)
 
     return data
+
 
 
 @lru_cache(maxsize=2)
