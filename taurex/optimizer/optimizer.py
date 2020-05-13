@@ -656,8 +656,6 @@ class Optimizer(Logger):
 
         self.info('Done!')
 
-        self._sigma_fraction = sigma_frac
-
         q_16, q_50, q_84 = \
             quantile_corner(np.array(mu_trace), [0.16, 0.5, 0.84],
                             weights=np.array(weights))
