@@ -101,13 +101,13 @@ class ParameterParser(Logger):
         else:
             raise KeyError
 
-    
     def generate_appropriate_model(self):
 
         try:
             return self.generate_lightcurve()
         except KeyError:
-            return self.generate_model()
+            pass
+        return self.generate_model()
 
     def generate_instrument(self, binner=None):
 
