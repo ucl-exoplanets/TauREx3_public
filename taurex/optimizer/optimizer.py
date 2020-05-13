@@ -619,6 +619,7 @@ class Optimizer(Logger):
         from taurex.util.util import quantile_corner
         from taurex.constants import AMU
         from taurex import mpi
+        enableLogging()
         self.info('Computing derived mu......')
 
         samples = self.get_samples(solution)
