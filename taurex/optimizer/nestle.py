@@ -106,33 +106,11 @@ class NestleOptimizer(Optimizer):
 
         self._nestle_output = self.store_nestle_output(res)
 
-    def sample_parameters(self, solution):
-        """
-        Read traces and weights and return
-        a random ``sigma_fraction`` sample of them
+    def get_samples(self, solution_idx):
+        return self._nestle_output['solution']['samples']
 
-        Parameters
-        ----------
-        solution:
-            a solution output from sampler
-
-        Yields
-        ------
-        traces: :obj:`array`
-            Traces of a particular sample
-
-        weight: float
-            Weight of sample
-        
-        """
-        from taurex.util.util import random_int_iter
-        samples = self._nestle_output['solution']['samples']
-        weights = self._nestle_output['solution']['weights']
-
-        for x in random_int_iter(samples.shape[0], self._sigma_fraction):
-            w = weights[x]+1e-300
-
-            yield samples[x, :], w
+    def get_weights(self, solution_idx):
+        return self._nestle_output['solution']['weights']
 
     def get_solution(self):
         """

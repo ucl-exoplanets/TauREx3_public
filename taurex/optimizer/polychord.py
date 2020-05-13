@@ -253,16 +253,13 @@ class PolyChordOptimizer(Optimizer):
 
         return stats
 
-    def sample_parameters(self, solution):
-        from taurex.util.util import random_int_iter
-        solution_id = 'solution{}'.format(solution)
-        samples = self._polychord_output['solutions'][solution_id]['tracedata']
-        weights = self._polychord_output['solutions'][solution_id]['weights']
 
-        for x in random_int_iter(samples.shape[0], self._sigma_fraction):
-            w = weights[x]+1e-300
+    def get_samples(self, solution_idx):
+        return self._polychord_output['solutions'][f'solution{solution_idx}']['tracedata']
 
-            yield samples[x, :], w
+    def get_weights(self, solution_idx):
+        return self._polychord_output['solutions'][f'solution{solution_idx}']['weights']
+
 
     def get_solution(self):
         names = self.fit_names
