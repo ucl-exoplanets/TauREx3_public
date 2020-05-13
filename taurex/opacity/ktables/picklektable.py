@@ -1,4 +1,4 @@
-from .interpolateopacity import InterpolatingOpacity
+from ..interpolateopacity import InterpolatingOpacity
 import pickle
 import numpy as np
 import pathlib
