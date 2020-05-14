@@ -207,18 +207,18 @@ class OpacityCache(Singleton):
         from taurex.opacity.radisopacity import RadisHITRANOpacity
         if molecule not in self.opacity_dict:
             self.log.info('Creating Opacity from RADIS+HITRAN')
-            wn_start,wn_end,wn_points = self._radis_props
-            radis = RadisHITRANOpacity(molecule_name=molecule, wn_start=wn_start,wn_end=wn_end,wn_points=wn_points)
-            
-            
+            wn_start, wn_end, wn_points = self._radis_props
+            radis = RadisHITRANOpacity(molecule_name=molecule,
+                                       wn_start=wn_start,
+                                       wn_end=wn_end,
+                                       wn_points=wn_points)
 
-            self.add_opacity(radis,molecule_filter=molecule_filter)
+            self.add_opacity(radis, molecule_filter=molecule_filter)
             return radis
         else:
             self.log.info('Opacity %s already exsits',molecule)
 
-
-    def add_opacity(self,opacity,molecule_filter=None):
+    def add_opacity(self, opacity, molecule_filter=None):
         """
 
         Adds a :class:`~taurex.opacity.opacity.Opacity` object to the cache to then be
