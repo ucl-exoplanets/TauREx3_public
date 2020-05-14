@@ -163,7 +163,8 @@ class KTableCache(Singleton):
         import os
         from taurex.opacity import PickleOpacity
         pickles = []
- 
+        nemesis = []
+        hdf5 = []
         if self._opacity_path is not None:
         
             pickles = self.search_pickle_molecules()
@@ -290,3 +291,4 @@ class KTableCache(Singleton):
         Clears all currently loaded cross-sections
         """
         self.opacity_dict = {}
+        self._opacity_path = GlobalCache()['ktable_path']
