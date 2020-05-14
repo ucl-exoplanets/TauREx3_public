@@ -67,6 +67,10 @@ class HDF5Opacity(InterpolatingOpacity):
         self._min_temperature = self._temperature_grid.min()
         self._max_temperature = self._temperature_grid.max()
 
+        if self.in_memory:
+            self._spec_dict.close()
+        
+
     @property
     def wavenumberGrid(self):
         return self._wavenumber_grid
