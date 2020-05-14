@@ -25,7 +25,7 @@ class TestOpacityCache(unittest.TestCase):
 
     def gen_opacities(self, num_opacties):
         from taurex.opacity import PickleOpacity
-        self.opacity_names = ['optest{}'.format(
+        self.opacity_names = ['H{}'.format(
             x) for x in range(num_opacties)]
         self.opacity_list = []
         for op_name in self.opacity_names:
@@ -61,12 +61,12 @@ class TestOpacityCache(unittest.TestCase):
 
         self.assertEqual(opacity1._opacity_path, opacity2._opacity_path)
 
-        opacity1['optest0']
+        opacity1['H0']
 
-        self.assertIn('optest0', opacity2.opacity_dict)
+        self.assertIn('H0', opacity2.opacity_dict)
 
-        opacity2['optest2']
-        self.assertIn('optest2', opacity1.opacity_dict)
+        opacity2['H2']
+        self.assertIn('H2', opacity1.opacity_dict)
 
     def test_find_molecules(self):
         opacity1 = OpacityCache()
@@ -74,7 +74,7 @@ class TestOpacityCache(unittest.TestCase):
 
         opList = opacity1.find_list_of_molecules()
 
-        self.assertIn('optest2', opList)
+        self.assertIn('H2', opList)
 
     def tearDown(self):
         shutil.rmtree(self.test_dir)

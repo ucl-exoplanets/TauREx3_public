@@ -116,6 +116,7 @@ mass = {
   "Mt":	266,
 }
 
+
 def calculate_weight(chem):
     s = re.findall('([A-Z][a-z]?)([0-9]*)', chem)
     compoundweight = 0
@@ -126,7 +127,33 @@ def calculate_weight(chem):
     return compoundweight
 
 
-_mol_latex={
+def sanitize_molecule_string(molecule):
+    """
+    Cleans a molecule string to match up
+    with molecule naming in TauREx3.
+
+    e.g:
+
+    H2O -> H2O
+
+    1H2-16O -> H2O
+
+    Parameters
+    ----------
+    molecule: str
+        Molecule to sanitize
+    
+    Returns
+    -------
+    str:
+        Sanitized name
+
+    """
+    return ''.join([''.join(s) for s in
+                    re.findall('([A-Z][a-z]?)([0-9]*)', molecule)])
+
+
+_mol_latex = {
 
     'HE':
         'He',
