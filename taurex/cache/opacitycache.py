@@ -5,6 +5,7 @@ Contains caching class for Molecular cross section files
 from .singleton import Singleton
 from taurex.log import Logger
 import pathlib
+from taurex.util.util import sanitize_molecule_string
 class OpacityCache(Singleton):
     """
     Implements a lazy load of opacities. A singleton that
@@ -263,9 +264,11 @@ class OpacityCache(Singleton):
         glob_path = [os.path.join(self._opacity_path,'*.h5'),os.path.join(self._opacity_path,'*.hdf5')]
         file_list = [f for glist in glob_path for f in glob(glist)]
         
-        return [HDF5Opacity(f,interpolation_mode=self._default_interpolation,in_memory=False).moleculeName for f in file_list ]
+        return [sanitize_molecule_string(HDF5Opacity(f,interpolation_mode=self._default_interpolation,in_memory=False).moleculeName) 
+                 for f in file_list ]
 
     def search_pickle_molecules(self):
+        
         """
         Find molecules with ``.pickle`` opacities in set path
 
@@ -281,7 +284,7 @@ class OpacityCache(Singleton):
         glob_path = os.path.join(self._opacity_path,'*.pickle')
         file_list = [f for f in glob(glob_path)]
         
-        return [pathlib.Path(f).stem.split('.')[0] for f in file_list ]
+        return [sanitize_molecule_string(pathlib.Path(f).stem.split('.')[0]) for f in file_list ]
 
     def search_exotransmit_molecules(self):
         """
@@ -299,7 +302,7 @@ class OpacityCache(Singleton):
         glob_path = os.path.join(self._opacity_path,'*.dat')
         file_list = [f for f in glob(glob_path)]
         
-        return [pathlib.Path(f).stem[4:] for f in file_list ]
+        return [sanitize_molecule_string(pathlib.Path(f).stem[4:]) for f in file_list ]
 
     def search_radis_molecules(self):
         """
@@ -377,15 +380,16 @@ class OpacityCache(Singleton):
 
             elif files.endswith('pickle'):
                 splits = pathlib.Path(files).stem.split('.')
+                mol_name = sanitize_molecule_string(splits[0])
                 if molecule_filter is not None:
                         if not splits[0] in molecule_filter:
                             continue
                 if splits[0] in self.opacity_dict.keys():
                     continue
                 op = PickleOpacity(files,interpolation_mode=self._default_interpolation)
-                op._molecule_name = splits[0]
+                op._molecule_name = mol_name
             elif files.endswith('dat'):
-                mol_name = pathlib.Path(files).stem[4:]
+                mol_name = sanitize_molecule_string(pathlib.Path(files).stem[4:])
                 if molecule_filter is not None:
                         if not mol_name in molecule_filter:
                             continue

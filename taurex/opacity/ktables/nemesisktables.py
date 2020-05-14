@@ -50,26 +50,26 @@ class NemesisKTables(InterpolatingOpacity):
 
         array_counter += 10+num_quads*2
         self._samples, self._weights = \
-            nem_file_float[10:array_counter].reshape(2, -1)
+            nem_file_float[10:array_counter].reshape(2, -1).astype(np.float64)
         self.debug('Samples: %s, Weights: %s', self._samples, self._weights)
         self.debug('%s', nem_file_int[array_counter])
         array_counter += 1
         self.debug('%s', nem_file_int[array_counter])
         array_counter += 1
-        self._pressure_grid = nem_file_float[array_counter:array_counter+num_pressure]
+        self._pressure_grid = nem_file_float[array_counter:array_counter+num_pressure].astype(np.float64)*1e5
         self.debug('Pgrid: %s',self._pressure_grid)
         array_counter+=num_pressure
-        self._temperature_grid = nem_file_float[array_counter:array_counter+num_temperature]
+        self._temperature_grid = nem_file_float[array_counter:array_counter+num_temperature].astype(np.float64)
         array_counter += num_temperature
         self.debug('Tgrid: %s',self._temperature_grid)
-        self._wavenumber_grid = 10000/nem_file_float[array_counter:array_counter+wncount]
+        self._wavenumber_grid = 10000/nem_file_float[array_counter:array_counter+wncount].astype(np.float64)
         self._wavenumber_grid = self._wavenumber_grid[::-1]
         array_counter += wncount
         self.debug('Wngrid: %s',self._wavenumber_grid)
-
-        self._xsec_grid=nem_file_float[array_counter:].reshape(wncount,num_quads,num_pressure, num_temperature) * 1e-20
-        self._xsec_grid = self._xsec_grid.transpose((2,3,0,1))
-        self._xsec_grid = self._xsec_grid[:,:,::-1,:]
+    
+        self._xsec_grid=(nem_file_float[array_counter:].reshape(wncount, num_pressure,num_temperature,num_quads) * 1e-20).astype(np.float64)
+        self._xsec_grid = self._xsec_grid.transpose((1,2,0,3))
+        self._xsec_grid = self._xsec_grid[::,::,::-1,:]
         self._min_pressure = self._pressure_grid.min()
         self._max_pressure = self._pressure_grid.max()
         self._min_temperature = self._temperature_grid.min()

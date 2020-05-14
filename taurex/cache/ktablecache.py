@@ -6,6 +6,7 @@ from .singleton import Singleton
 from taurex.log import Logger
 import pathlib
 from . import GlobalCache
+from taurex.util.util import sanitize_molecule_string
 
 class KTableCache(Singleton):
     """
@@ -77,19 +78,18 @@ class KTableCache(Singleton):
             if key in self.opacity_dict:
                 return self.opacity_dict[key]
             else:
-                try:
-                    if self._radis:
-                        return self.create_radis_opacity(key,molecule_filter=[key])
-                    else:
-                        raise Exception
-                except Exception as e:
-                    self.log.error('EXception thrown %s',e)
-                    #Otherwise throw an error
-                    self.log.error('Opacity for molecule %s could not be loaded',key)
-                    self.log.error('It could not be found in the local dictionary %s',list(self.opacity_dict.keys()))
-                    self.log.error('Or paths %s',self._opacity_path)
-                    self.log.error('Try loading it manually/ putting it in a path')
-                    raise Exception('Opacity could notn be loaded')
+                # try:
+                #     # if self._radis:
+                #     #     return self.create_radis_opacity(key,molecule_filter=[key])
+                #     # else:
+                #         raise Exception
+                # except Exception as e:
+                #Otherwise throw an error
+                self.log.error('Opacity for molecule %s could not be loaded',key)
+                self.log.error('It could not be found in the local dictionary %s',list(self.opacity_dict.keys()))
+                self.log.error('Or paths %s',self._opacity_path)
+                self.log.error('Try loading it manually/ putting it in a path')
+                raise Exception('Opacity could not be loaded')
 
 
 
@@ -138,7 +138,24 @@ class KTableCache(Singleton):
         glob_path = os.path.join(self._opacity_path,'*.pickle')
         file_list = [f for f in glob(glob_path)]
         
-        return [pathlib.Path(f).stem.split('.')[0].split('_')[0]  for f in file_list ]
+        return [sanitize_molecule_string(pathlib.Path(f).stem.split('.')[0].split('_')[0])  for f in file_list ]
+
+    def search_nemesis_molecules(self):
+        from glob import glob
+        import os    
+        glob_path = os.path.join(self._opacity_path,'*.kta')
+        file_list = [f for f in glob(glob_path)]
+        
+        return [sanitize_molecule_string(pathlib.Path(f).stem.split('.')[0].split('_')[0])  for f in file_list ] 
+
+    def search_petitradtrans_molecules(self):
+        from glob import glob
+        import os    
+        glob_path = [os.path.join(self._opacity_path,'*.h5'),os.path.join(self._opacity_path,'*.hdf5')]
+        file_list = [f for glist in glob_path for f in glob(glist)]
+        
+        return [sanitize_molecule_string(pathlib.Path(f).stem.split('.')[0].split('_')[0])  for f in file_list ] 
+
 
 
     def find_list_of_molecules(self):
@@ -150,8 +167,10 @@ class KTableCache(Singleton):
         if self._opacity_path is not None:
         
             pickles = self.search_pickle_molecules()
+            nemesis = self.search_nemesis_molecules()
+            hdf5 = self.search_petitradtrans_molecules()
 
-        return list(set(pickles))
+        return list(set(pickles+nemesis+hdf5))
 
     def load_opacity_from_path(self,path,molecule_filter=None):
         """
@@ -173,26 +192,54 @@ class KTableCache(Singleton):
         from glob import glob
         import os
         from taurex.opacity.ktables.picklektable import PickleKTable
+        from taurex.opacity.ktables.nemesisktables import NemesisKTables
+        from taurex.opacity.ktables.hdfktable import HDF5KTable
 
-        glob_path = [os.path.join(path,'*.h5'),os.path.join(path,'*.hdf5'),os.path.join(path,'*.pickle'),os.path.join(path,'*.dat')]
+        glob_path = [os.path.join(path, '*.h5'),
+                     os.path.join(path, '*.hdf5'), 
+                     os.path.join(path, '*.pickle'), 
+                     os.path.join(path, '*.kta')]
     
         file_list = [f for glist in glob_path for f in glob(glist)]
-        self.log.debug('File list %s',file_list)
+        self.log.debug('File list %s', file_list)
         for files in file_list:
             op = None
-            if files.endswith('pickle'):
-                splits = pathlib.Path(files).stem.split('.')[0].split('_')
+            if files.endswith('.hdf5') or files.endswith('.h5'):
+                splits = pathlib.Path(files).stem.split('_')[0]
+                mol_name = sanitize_molecule_string(splits)
                 if molecule_filter is not None:
-                        if not splits[0] in molecule_filter:
-                            continue
-                if splits[0] in self.opacity_dict.keys():
+                    if mol_name not in molecule_filter:
+                        continue
+                if mol_name in self.opacity_dict.keys():
+                    continue
+                op = HDF5KTable(files)
+                op._molecule_name = mol_name
+
+            elif files.endswith('.kta'):
+                splits = pathlib.Path(files).stem.split('_')[0]
+                mol_name = sanitize_molecule_string(splits)
+                if molecule_filter is not None:
+                    if mol_name not in molecule_filter:
+                        continue
+                if mol_name in self.opacity_dict.keys():
+                    continue
+                op = NemesisKTables(files)
+                op._molecule_name = mol_name
+                
+            elif files.endswith('pickle'):
+                splits = pathlib.Path(files).stem.split('.')[0].split('_')
+                mol_name = sanitize_molecule_string(splits[0])
+                if molecule_filter is not None:
+                    if mol_name not in molecule_filter:
+                        continue
+                if mol_name in self.opacity_dict.keys():
                     continue
                 op = PickleKTable(files)
                 op._molecule_name = splits[0]
             if op is not None:
-                self.add_opacity(op,molecule_filter=molecule_filter)
+                self.add_opacity(op, molecule_filter=molecule_filter)
 
-    def load_opacity(self,opacities=None,opacity_path=None,molecule_filter=None):
+    def load_opacity(self, opacities=None, opacity_path=None, molecule_filter=None):
         """
         Main function to use when loading molecular opacities. Handles both 
         cross sections and paths. Handles lists of either so lists of 
