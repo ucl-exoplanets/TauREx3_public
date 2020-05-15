@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ACE and BHMie removed, turned into plugins
 - New style priors with non-uniform priors
 - Correlated k-tables supported
+- Active and inactive gases are plotted seperately
+
 
 ## [3.0.10] - 2020-02-25
 - Included global variable storage system
