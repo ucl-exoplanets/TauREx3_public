@@ -226,7 +226,10 @@ class SimpleForwardModel(ForwardModel):
         g[0] = self._planet.gravity
         # scaleheight at the surface (0th layer)
         H[0] = (KBOLTZ*self.temperatureProfile[0])/(mu_profile[0]*g[0])
-
+        #####
+        ####
+        ####
+        # TODO: CHANGE TO LOG10
         for i in range(1, nlayers):
             deltaz = (-1.)*H[i-1]*np.log(
                 self.pressure.pressure_profile_levels[i] /
@@ -337,11 +340,20 @@ class SimpleForwardModel(ForwardModel):
         """
         from taurex.exceptions import InvalidModelException
         from taurex.cache.opacitycache import OpacityCache
+        from taurex.cache import GlobalCache
+
+        cacher = OpacityCache()
+
+        if GlobalCache()['opacity_method'] == 'ktables':
+            from taurex.cache.ktablecache import KTableCache 
+            cacher = KTableCache()
+
+
 
         active_gases = self.chemistry.activeGases
 
         wavenumbergrid = \
-            [OpacityCache()[gas].wavenumberGrid for gas in active_gases]
+            [cacher[gas].wavenumberGrid for gas in active_gases]
 
         current_grid = None
         for wn in wavenumbergrid:
@@ -352,7 +364,7 @@ class SimpleForwardModel(ForwardModel):
 
         if current_grid is None:
             self.error('No active molecules detected')
-            self.error('Most likely no cross-sections were detected')
+            self.error('Most likely no cross-sections/ktables were detected')
             raise InvalidModelException('No active absorbing molecules')
 
         return current_grid
