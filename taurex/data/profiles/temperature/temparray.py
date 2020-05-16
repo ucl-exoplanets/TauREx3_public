@@ -38,7 +38,8 @@ class TemperatureArray(TemperatureProfile):
             interp_temp = np.log10(self._p_profile)
             interp_array = np.log10(self.pressure_profile)
 
-        return np.interp(interp_array[::-1], interp_temp[::-1], self._tp_profile[::-1])[::-1]
+        return np.interp(interp_array[::-1], interp_temp[::-1],
+                         self._tp_profile[::-1])
 
     def write(self, output):
 
