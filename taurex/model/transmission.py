@@ -88,15 +88,17 @@ class TransmissionModel(SimpleForwardModel):
 
     def path_integral(self, wngrid, return_contrib):
 
-        dz = np.gradient(self.altitudeProfile)
+        total_layers = self.nLayers
+
+        dz = np.zeros(total_layers)
+        dz[:-1] = np.diff(self.altitudeProfile)
+        dz[-1] = self.altitudeProfile[-1] - self.altitudeProfile[-2]
 
         wngrid_size = wngrid.shape[0]
 
         path_length = self.compute_path_length(dz)
 
         density_profile = self.densityProfile
-
-        total_layers = self.nLayers
 
         path_length = self.compute_path_length(dz)
         self.path_length = path_length
