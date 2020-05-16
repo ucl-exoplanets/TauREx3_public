@@ -572,3 +572,12 @@ def conversion_factor(from_unit, to_unit):
         to_conv = u.Unit(to_unit, format="cds")
 
     return from_conv.to(to_unit)
+
+
+def compute_dz(altitude):
+
+    dz = np.zeros_like(altitude)
+    dz[:-1] = np.diff(altitude)
+    dz[-1] = altitude[-1] - altitude[-2]
+
+    return dz
