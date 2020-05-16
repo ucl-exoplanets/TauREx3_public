@@ -121,17 +121,15 @@ class EmissionModel(SimpleForwardModel):
 
     def evaluate_emission(self,wngrid,return_contrib):
         import numexpr as ne
-        total_layers = self.nLayers
+        from taurex.util.util import compute_dz
 
-        dz = np.zeros(total_layers)
-        dz[:-1] = np.diff(self.altitudeProfile)
-        dz[-1] = self.altitudeProfile[-1] - self.altitudeProfile[-2]
-        
+        dz = compute_dz(self.altitudeProfile)
+
+        total_layers = self.nLayers
 
         density = self.densityProfile
 
         wngrid_size = wngrid.shape[0]
-
 
         temperature = self.temperatureProfile
         tau = np.zeros(shape=(self.nLayers, wngrid_size))

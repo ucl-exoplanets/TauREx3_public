@@ -87,12 +87,11 @@ class TransmissionModel(SimpleForwardModel):
         return dl
 
     def path_integral(self, wngrid, return_contrib):
+        from taurex.util.util import compute_dz
+
+        dz = compute_dz(self.altitudeProfile)
 
         total_layers = self.nLayers
-
-        dz = np.zeros(total_layers)
-        dz[:-1] = np.diff(self.altitudeProfile)
-        dz[-1] = self.altitudeProfile[-1] - self.altitudeProfile[-2]
 
         wngrid_size = wngrid.shape[0]
 
