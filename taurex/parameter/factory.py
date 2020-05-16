@@ -306,7 +306,7 @@ def generate_contributions(config):
 
     cf = ClassFactory()
     contributions = []
-    check_key = list(config.keys())
+    check_key = [k for k, v in config.items() if isinstance(v, dict)] 
     for key in config.keys():
 
         for klass in cf.contributionKlasses:
