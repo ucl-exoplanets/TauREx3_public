@@ -128,7 +128,7 @@ def test_conversion_factor():
 
     assert conversion_factor('m**2/h', 'cm**2/s') == 1e4/3600
 
-    assert conversion_factor('erg/cm**2/s/Hz','Jy') == 1e23
+    assert conversion_factor('erg/(cm**2*s*Hz)','Jy') == 1e23
 
 
 def test_wngrid_clip():

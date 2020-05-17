@@ -78,8 +78,6 @@ class InterpolatingOpacity(Opacity):
         self.debug('Interpolating %s %s %s %s %s %s', T, P,
                    t_idx_min, t_idx_max, p_idx_min, p_idx_max)
 
-            
-
         check_pressure_max = P >= self.pressureMax
         check_temperature_max = T >= self.temperatureMax
 

@@ -1,17 +1,23 @@
 import pytest
 from taurex.opacity import InterpolatingOpacity
 import numpy as np
-from hypothesis import given,example
+from hypothesis import given,example,settings
 from hypothesis.strategies import floats
 class FakeOpac(InterpolatingOpacity):
+
+    
 
     def __init__(self):
         super().__init__('Fake')
 
-        self._temperature_grid = np.linspace(300, 1000, 10)
-        self._pressure_grid = np.logspace(0, 6, 11)
-        self._wavenumber_grid = np.linspace(300, 3000, 100)
-        self._xsec_grid = np.random.rand(10*11*100).reshape(11, 10, 100)
+        num_temp = 5
+        num_press = 8
+        num_wav = 100
+
+        self._temperature_grid = np.linspace(300, 1000, num_temp)
+        self._pressure_grid = np.logspace(0, 6, num_press)
+        self._wavenumber_grid = np.linspace(300, 3000, num_wav)
+        self._xsec_grid = np.ones(num_temp*num_press*num_wav).reshape(num_press, num_temp, num_wav)
 
     @property
     def xsecGrid(self):
@@ -84,6 +90,13 @@ def test_find_closest_index(fake_interp_opac, temperature, pressure):
         assert found_max_p >= pressure
 
 
+def test_min_max(fake_interp_opac):
+    assert fake_interp_opac.pressureMax == fake_interp_opac.pressureGrid.max()
+    assert fake_interp_opac.pressureMin == fake_interp_opac.pressureGrid.min()
+    assert fake_interp_opac.temperatureMin == fake_interp_opac.temperatureGrid.min()
+    assert fake_interp_opac.temperatureMax == fake_interp_opac.temperatureGrid.max()
+
+
 @given(temperature=floats(100, 2000), pressure=floats(1e-1, 1e7))
 @example(temperature=100, pressure=1e-1)
 @example(temperature=10, pressure=1e-1)
@@ -101,10 +114,10 @@ def test_find_closest_index(fake_interp_opac, temperature, pressure):
 @example(temperature=10, pressure=1e8)
 @example(temperature=2000, pressure=1e8)
 @example(temperature=3000, pressure=1e8)
+@settings(deadline=500)
 def test_interpolation(fake_interp_opac, temperature, pressure):
     """ I cant test if its correct, only that it works for now"""
     op = fake_interp_opac.opacity(temperature, pressure)
-
     minimum_case = temperature < fake_interp_opac.temperatureMin \
         and pressure < fake_interp_opac.pressureMin
 
@@ -112,9 +125,9 @@ def test_interpolation(fake_interp_opac, temperature, pressure):
         and temperature > fake_interp_opac.temperatureMax
 
     if minimum_case:
-        np.testing.assert_array_equal(
+        assert np.allclose(
             np.zeros_like(fake_interp_opac.wavenumberGrid), op)
 
-    if maximum_case:
-        np.testing.assert_array_equal(
+    elif maximum_case:
+        assert np.array_equal(
             fake_interp_opac.xsecGrid[-1, -1]/10000, op)
