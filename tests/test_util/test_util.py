@@ -90,6 +90,24 @@ def test_molecule_sanitization_same():
     for n in names:
         assert sanitize_molecule_string(n) == n
 
+@hypothesis.given(integers(10, 1000))
+def test_width_conversion(s):
+
+    from taurex.util.util import wnwidth_to_wlwidth, create_grid_res
+    res = create_grid_res(s, 0.1, 10)
+
+    wl = res[:,0]
+    wlwidths = res[:,1]
+
+    wn = 10000/wl[::-1]
+    wnwidths = wnwidth_to_wlwidth(wl, wlwidths)[::-1]
+    
+    np.testing.assert_array_almost_equal(wnwidth_to_wlwidth(wn, wnwidths)[::-1], wlwidths, 6)
+
+
+
+
+
 def test_molecule_sanitization_exomol():
     from taurex.util.util import sanitize_molecule_string
     names = {
@@ -98,5 +116,5 @@ def test_molecule_sanitization_exomol():
             '1H2-16O2': 'H2O2'
 
     }
-    for k,n in names.items():
+    for k, n in names.items():
         assert sanitize_molecule_string(k) == n
