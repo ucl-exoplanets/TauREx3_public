@@ -4,6 +4,7 @@ import hypothesis
 from hypothesis.strategies import floats
 import hypothesis.extra.numpy as hnum
 
+
 @pytest.mark.parametrize(
     "test_input,expected",
     [
@@ -38,12 +39,12 @@ def test_bilin(test_input, expected):
 
     assert val == expected
 
-@hypothesis.given(hnum.arrays(np.float64, hnum.array_shapes(), elements=floats(0, 1000)))
+@hypothesis.given(hnum.arrays(np.float64, hnum.array_shapes(), elements=floats(0.0, 1000)))
 @hypothesis.example(np.array([[0.0, 0.0]]))
 def test_online_variance(s):
     from taurex.util.math import OnlineVariance
     num_values = s.shape[0]
-    expected = np.std(s,axis=0)
+    expected = np.std(s, axis=0)
 
     onv = OnlineVariance()
     for x in s:
