@@ -9,3 +9,4 @@ def pickle_opac(tmpdir, request):
     p.dump(gen_opacity(np.linspace(200, 2000, 10),
                        np.logspace(6, 0, 12), 100,
                        'H2O'))
+    return p

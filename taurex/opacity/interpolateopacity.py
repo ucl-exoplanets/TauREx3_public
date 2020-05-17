@@ -20,10 +20,14 @@ class InterpolatingOpacity(Opacity):
 
     def find_closest_index(self, T, P):
         t_min = self.temperatureGrid.searchsorted(T, side='right')-1
+        t_min = max(0, t_min)
         t_max = t_min+1
+        t_max = min(len(self.temperatureGrid)-1, t_max)
 
         p_min = self.pressureGrid.searchsorted(P, side='right')-1
+        p_min = max(0, p_min)
         p_max = p_min+1
+        p_max = min(len(self.pressureGrid)-1, p_max)
 
         return t_min, t_max, p_min, p_max
 

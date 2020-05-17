@@ -118,3 +118,36 @@ def test_molecule_sanitization_exomol():
     }
     for k, n in names.items():
         assert sanitize_molecule_string(k) == n
+
+
+def test_conversion_factor():
+    from taurex.util.util import conversion_factor
+    assert conversion_factor('Pa', 'bar') == 1e-5
+
+    assert conversion_factor('m', 'um') == 1e6
+
+    assert conversion_factor('m**2/h', 'cm**2/s') == 1e4/3600
+
+    assert conversion_factor('erg/cm**2/s/Hz','Jy') == 1e23
+
+
+def test_wngrid_clip():
+    from taurex.util.util import clip_native_to_wngrid
+    from taurex.binning import FluxBinner
+
+    total_values = 1000
+    wngrid = np.linspace(100, 10000, total_values)
+
+    values = np.random.rand(total_values)
+
+    test_grid = wngrid[(wngrid > 4000) & (wngrid < 8000)]
+
+    fb = FluxBinner(wngrid=test_grid)
+
+    true = fb.bindown(wngrid, values)
+
+    clipped = clip_native_to_wngrid(wngrid, test_grid)
+    interp_values = np.interp(clipped, wngrid, values)
+    clipped_flux = fb.bindown(clipped, interp_values)
+
+    np.testing.assert_array_equal(true[1], clipped_flux[1])
