@@ -29,7 +29,7 @@ class FakeOpac(InterpolatingOpacity):
     def pressureGrid(self):
         return self._pressure_grid
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def fake_interp_opac():
     return FakeOpac()
 
@@ -57,10 +57,10 @@ def test_find_closest_index(fake_interp_opac, temperature, pressure):
     t_grid = fake_interp_opac.temperatureGrid
     p_grid = fake_interp_opac.pressureGrid
 
-    min_t = t_grid.min()
-    max_t = t_grid.max()
-    min_p = p_grid.min()
-    max_p = p_grid.max()
+    min_t = fake_interp_opac.temperatureMin
+    max_t = fake_interp_opac.temperatureMax
+    min_p = fake_interp_opac.pressureMin
+    max_p = fake_interp_opac.pressureMax
 
     found_min_t = t_grid[t_min]
     found_max_t = t_grid[t_max]
@@ -82,3 +82,39 @@ def test_find_closest_index(fake_interp_opac, temperature, pressure):
     else:
         assert found_min_p <= pressure
         assert found_max_p >= pressure
+
+
+@given(temperature=floats(100, 2000), pressure=floats(1e-1, 1e7))
+@example(temperature=100, pressure=1e-1)
+@example(temperature=10, pressure=1e-1)
+@example(temperature=2000, pressure=1e-1)
+@example(temperature=3000, pressure=1e-1)
+@example(temperature=100, pressure=1e-2)
+@example(temperature=10, pressure=1e-2)
+@example(temperature=2000, pressure=1e-2)
+@example(temperature=3000, pressure=1e-2)
+@example(temperature=100, pressure=1e7)
+@example(temperature=10, pressure=1e7)
+@example(temperature=2000, pressure=1e7)
+@example(temperature=3000, pressure=1e7)
+@example(temperature=100, pressure=1e8)
+@example(temperature=10, pressure=1e8)
+@example(temperature=2000, pressure=1e8)
+@example(temperature=3000, pressure=1e8)
+def test_interpolation(fake_interp_opac, temperature, pressure):
+    """ I cant test if its correct, only that it works for now"""
+    op = fake_interp_opac.opacity(temperature, pressure)
+
+    minimum_case = temperature < fake_interp_opac.temperatureMin \
+        and pressure < fake_interp_opac.pressureMin
+
+    maximum_case = pressure > fake_interp_opac.pressureMax \
+        and temperature > fake_interp_opac.temperatureMax
+
+    if minimum_case:
+        np.testing.assert_array_equal(
+            np.zeros_like(fake_interp_opac.wavenumberGrid), op)
+
+    if maximum_case:
+        np.testing.assert_array_equal(
+            fake_interp_opac.xsecGrid[-1, -1]/10000, op)

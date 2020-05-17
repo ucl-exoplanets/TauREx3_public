@@ -15,6 +15,23 @@ class InterpolatingOpacity(Opacity):
         self._interp_mode = interpolation_mode
 
     @property
+    def pressureMax(self):
+        return self.pressureGrid[-1]
+
+    @property
+    def pressureMin(self):
+        return self.pressureGrid[0]
+
+    @property
+    def temperatureMax(self):
+        return self.temperatureGrid[-1]
+
+    @property
+    def temperatureMin(self):
+        return self.temperatureGrid[0]
+
+
+    @property
     def xsecGrid(self):
         raise NotImplementedError
 
@@ -61,15 +78,13 @@ class InterpolatingOpacity(Opacity):
         self.debug('Interpolating %s %s %s %s %s %s', T, P,
                    t_idx_min, t_idx_max, p_idx_min, p_idx_max)
 
-        if p_idx_max == 0 and t_idx_max == 0:
+            
 
-            return np.zeros_like(self.xsecGrid[0, 0, wngrid_filter]).ravel()
+        check_pressure_max = P >= self.pressureMax
+        check_temperature_max = T >= self.temperatureMax
 
-        check_pressure_max = P >= self._max_pressure
-        check_temperature_max = T >= self._max_temperature
-
-        check_pressure_min = P < self._min_pressure
-        check_temperature_min = T < self._min_temperature
+        check_pressure_min = P < self.pressureMin
+        check_temperature_min = T < self.temperatureMin
 
         self.debug('Check pressure min/max %s/%s',
                    check_pressure_min, check_pressure_max)
@@ -79,6 +94,9 @@ class InterpolatingOpacity(Opacity):
         if check_pressure_max and check_temperature_max:
             self.debug('Maximum Temperature pressure reached. Using last')
             return self.xsecGrid[-1, -1, wngrid_filter].ravel()
+
+        if check_pressure_min and check_temperature_min:
+            return np.zeros_like(self.xsecGrid[0, 0, wngrid_filter]).ravel()
 
         # Max pressure
         if check_pressure_max:
@@ -90,8 +108,7 @@ class InterpolatingOpacity(Opacity):
             self.debug('Max temperature reached. Interpolating pressure only')
             return self.interp_pressure_only(P, p_idx_min, p_idx_max, -1, wngrid_filter)
 
-        if check_pressure_min and check_temperature_min:
-            return self.xsecGrid[0, 0, wngrid_filter].ravel()
+
 
         if check_pressure_min:
             self.debug('Min pressure reached. Interpolating temperature only')
