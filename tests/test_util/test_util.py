@@ -2,7 +2,20 @@ import pytest
 import hypothesis
 from hypothesis.strategies import integers
 import numpy as np
+from ..strategies import molecules
 
+@hypothesis.given(molecules(style='normal'))
+def test_molecular_weight_hyp_normal(mol):
+    from taurex.util.util import calculate_weight
+    k,_,v = mol
+    assert calculate_weight(k) == pytest.approx(v, rel=1e-3)
+
+@hypothesis.given(molecules(style='exomol'))
+def test_molecular_weight_hyp_exomol(mol):
+    from taurex.util.util import calculate_weight
+    k,e,v = mol
+    assert calculate_weight(e) == pytest.approx(v, rel=1e-3)
+    assert calculate_weight(e) == calculate_weight(k)
 
 def test_molecular_weight():
     from taurex.util.util import calculate_weight
@@ -105,19 +118,11 @@ def test_width_conversion(s):
     np.testing.assert_array_almost_equal(wnwidth_to_wlwidth(wn, wnwidths)[::-1], wlwidths, 6)
 
 
-
-
-
-def test_molecule_sanitization_exomol():
+@hypothesis.given(molecules(style='exomol'))
+def test_molecule_sanitization(mol):
     from taurex.util.util import sanitize_molecule_string
-    names = {
-            '1H2-16O': 'H2O',
-            '24Mg-1H': 'MgH',
-            '1H2-16O2': 'H2O2'
-
-    }
-    for k, n in names.items():
-        assert sanitize_molecule_string(k) == n
+    expected, exomol, mass = mol
+    assert sanitize_molecule_string(exomol) == expected
 
 
 def test_conversion_factor():
