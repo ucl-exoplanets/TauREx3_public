@@ -112,3 +112,4 @@ taurex/external/acemodule.c
 .vscode/ipch/22f44eeddc4f9f6d/mmap_address.bin
 *.prof
 .DS_Store
+pytest.ini
