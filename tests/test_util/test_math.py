@@ -56,5 +56,7 @@ def test_online_variance(s):
         assert np.isnan(var)
         assert np.isnan(p_var)
     else:
+        assert np.all(np.isclose(var, p_var))
         assert np.sqrt(var) == pytest.approx(expected, rel=1e-6)
+        assert np.sqrt(p_var) == pytest.approx(expected, rel=1e-6)
     #onv = Onli
