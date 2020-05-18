@@ -30,6 +30,11 @@ class PressureProfile(Fittable, Logger, Writeable):
         Fittable.__init__(self)
         Logger.__init__(self, name)
 
+        if nlayers <= 0:
+            self.error('Number of layers: [%s] should be greater than 0',
+                       nlayers)
+            raise ValueError('Number of layers should be at least 1')
+
         self._nlayers = int(nlayers)
 
     @property
@@ -105,6 +110,14 @@ class SimplePressureProfile(PressureProfile):
 
         super().__init__('pressure_profile', nlayers)
         self.pressure_profile = None
+
+        if atm_max_pressure < atm_min_pressure:
+            self.error('Max pressure %1.2e should be greater '
+                       'than min pressure %1.2e', atm_max_pressure, 
+                       atm_min_pressure)
+            raise ValueError('Max pressure is less than minimum pressure')
+
+
         self._atm_min_pressure = atm_min_pressure
         self._atm_max_pressure = atm_max_pressure
 
@@ -123,9 +136,9 @@ class SimplePressureProfile(PressureProfile):
         # get mid point pressure between levels (i.e. get layer pressure)
         # computing geometric
         # average between pressure at n and n+1 level
-        self.pressure_profile = \
-            np.power(10, np.log10(self.pressure_profile_levels)[:-1] +
-                     np.diff(np.log10(self.pressure_profile_levels))/2.)
+        self.pressure_profile = self.pressure_profile_levels[:-1] * \
+            np.sqrt(self.pressure_profile_levels[1:] /
+                    self.pressure_profile_levels[:-1])
 
     @fitparam(param_name='atm_min_pressure',
               param_latex='$P_\mathrm{min}$',
