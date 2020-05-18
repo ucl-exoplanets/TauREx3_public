@@ -272,9 +272,11 @@ class OnlineVariance(object):
         #print('VARIANCES',variances)
         #print('AVERAGES',averages)
         #print('COUNTS',counts)
-        
-        finalvariance = self.combine_variance(averages,variances,counts)
-        return finalvariance[-1]
+        if sum(counts) < 2:
+            return np.nan
+        else:
+            finalvariance = self.combine_variance(averages,variances,counts)
+            return finalvariance[-1]
 
         
         

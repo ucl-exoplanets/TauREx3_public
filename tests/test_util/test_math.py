@@ -50,9 +50,11 @@ def test_online_variance(s):
     for x in s:
         onv.update(x)
     
-    var = onv.parallelVariance()
-    if s.shape[0] < 2:
-        assert np.all(np.isnan(var))
+    p_var = onv.parallelVariance()
+    var = onv.variance
+    if num_values < 2:
+        assert np.isnan(var)
+        assert np.isnan(p_var)
     else:
         assert np.sqrt(var) == pytest.approx(expected, rel=1e-6)
     #onv = Onli

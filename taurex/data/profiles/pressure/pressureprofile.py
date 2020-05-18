@@ -2,7 +2,7 @@ from taurex.log import Logger
 from taurex.data.fittable import fitparam, Fittable
 import numpy as np
 from taurex.output.writeable import Writeable
-
+import math
 
 class PressureProfile(Fittable, Logger, Writeable):
     """
@@ -128,11 +128,14 @@ class SimplePressureProfile(PressureProfile):
         """
 
         # set pressure profile of layer boundaries
-        press_exp = np.linspace(np.log(self._atm_min_pressure),
-                                np.log(self._atm_max_pressure),
-                                self.nLevels)
-        self.pressure_profile_levels = np.exp(press_exp)[::-1]
-
+        # press_exp = np.linspace(np.log(self._atm_min_pressure),
+        #                       np.log(self._atm_max_pressure),
+        #                       self.nLevels)
+        # self.pressure_profile_levels = np.exp(press_exp)[::-1]
+        self.pressure_profile_levels = \
+            np.logspace(math.log10(self._atm_min_pressure),
+                        math.log10(self._atm_max_pressure),
+                        self.nLevels)[::-1]
         # get mid point pressure between levels (i.e. get layer pressure)
         # computing geometric
         # average between pressure at n and n+1 level
