@@ -1,6 +1,7 @@
 import configobj
 from taurex.log import Logger
 from .factory import *
+from taurex.cache import GlobalCache
 
 class ParameterParser(Logger):
 
@@ -35,7 +36,10 @@ class ParameterParser(Logger):
     def setup_globals(self):
         from taurex.cache import CIACache,OpacityCache
         config = self._raw_config.dict()
+    
+
         if 'Global' in config:
+            global_config = config['Global']
             try:
                 OpacityCache().set_opacity_path(config['Global']['xsec_path'])
             except KeyError:
@@ -63,14 +67,21 @@ class ParameterParser(Logger):
                 self.warning('Radis is disabled')
 
             try:
-                wn_start,wn_end,wn_points = config['Global']['radis_grid']
+                wn_start, wn_end, wn_points = config['Global']['radis_grid']
 
-                OpacityCache().set_radis_wavenumber(wn_start,wn_end,wn_points)
+                OpacityCache().set_radis_wavenumber(wn_start, wn_end,
+                                                    wn_points)
             except KeyError:
                 self.warning('Radis default grid will be used')
 
+            gc = GlobalCache()
 
-    def read(self,filename):
+            for key, value in global_config.items():
+                gc[key] = value
+        
+
+
+    def read(self, filename):
         import os.path
         if not os.path.isfile(filename):
             raise Exception('Input file {} does not exist'.format(filename))
@@ -90,13 +101,13 @@ class ParameterParser(Logger):
         else:
             raise KeyError
 
-    
     def generate_appropriate_model(self):
 
         try:
             return self.generate_lightcurve()
         except KeyError:
-            return self.generate_model()
+            pass
+        return self.generate_model()
 
     def generate_instrument(self, binner=None):
 
@@ -325,6 +336,7 @@ class ParameterParser(Logger):
 
 
     def generate_fitting_parameters(self):
+        from .factory import create_prior
         config = self._raw_config.dict()
         if 'Fitting' in config:
             fitting_config = config['Fitting']
@@ -334,7 +346,10 @@ class ParameterParser(Logger):
             for key,value in fitting_config.items():
                 fit_param,fit_type=key.split(':')
                 if not fit_param in fitting_params:
-                    fitting_params[fit_param] = {'fit':None,'bounds':None,'mode':None,'factor':None}
+                    fitting_params[fit_param] = {'fit':None,'bounds':None,'mode':None,'factor':None, 'prior': None}
+
+                if fit_type=='prior':
+                    value = create_prior(value)
                 fitting_params[fit_param][fit_type]=value
 
         return fitting_params

@@ -28,6 +28,7 @@ class ClassFactory(Singleton):
         from taurex import temperature, chemistry, pressure, planet, \
             stellar, instruments, model, contributions, optimizer, opacity, \
             spectrum
+        from taurex.core import priors
 
         self._temp_klasses = set()
         self._chem_klasses = set()
@@ -41,6 +42,7 @@ class ClassFactory(Singleton):
         self._opt_klasses = set()
         self._opac_klasses = set()
         self._obs_klasses = set()
+        self._prior_klasses = set()
 
         self._temp_klasses.update(self._collect_temperatures(temperature))
         self._chem_klasses.update(self._collect_chemistry(chemistry))
@@ -56,6 +58,7 @@ class ClassFactory(Singleton):
 
         self._opt_klasses.update(self._collect_optimizer(optimizer))
         self._opac_klasses.update(self._collect_opacity(opacity))
+        self._prior_klasses.update(self._collect_priors(priors))
 
     def load_plugin(self, plugin_module):
 
@@ -72,6 +75,7 @@ class ClassFactory(Singleton):
             self._collect_contributions(plugin_module))
         self._opt_klasses.update(self._collect_optimizer(plugin_module))
         self._opac_klasses.update(self._collect_opacity(plugin_module))
+        self._prior_klasses.update(self._collect_priors(plugin_module))
 
     def discover_plugins(self):
         plugins = {}
@@ -164,6 +168,10 @@ class ClassFactory(Singleton):
         from taurex.spectrum import BaseSpectrum
         return [c for c in self._collect_classes(module, BaseSpectrum)]
 
+    def _collect_priors(self, module):
+        from taurex.core.priors import Prior
+        return [c for c in self._collect_classes(module, Prior)]
+
     @property
     def temperatureKlasses(self):
         return self._temp_klasses
@@ -211,3 +219,7 @@ class ClassFactory(Singleton):
     @property
     def observationKlasses(self):
         return self._obs_klasses
+
+    @property
+    def priorKlasses(self):
+        return self._prior_klasses

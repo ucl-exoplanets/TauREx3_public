@@ -93,10 +93,9 @@ class MultiNestOptimizer(Optimizer):
             # prior distributions called by multinest. Implements a uniform prior
             # converting parameters from normalised grid to uniform prior
             # print(type(cube))
-            for idx, bounds in enumerate(self.fit_boundaries):
+            for idx, priors in enumerate(self.fitting_priors):
                 # print(idx,self.fitting_parameters[idx])
-                bound_min, bound_max = bounds
-                cube[idx] = (cube[idx] * (bound_max-bound_min)) + bound_min
+                cube[idx] = priors.sample(cube[idx])
                 #print('CUBE idx',cube[idx])
             # print('-----------')
         # status = None
@@ -309,16 +308,11 @@ class MultiNestOptimizer(Optimizer):
         solution['GlobalStats'] = self._multinest_output['NEST_stats']
         return solution
 
-    def sample_parameters(self, solution):
-        from taurex.util.util import random_int_iter
-        solution_id = 'solution{}'.format(solution)
-        samples = self._multinest_output['solutions'][solution_id]['tracedata']
-        weights = self._multinest_output['solutions'][solution_id]['weights']
+    def get_samples(self, solution_idx):
+        return self._multinest_output['solutions'][f'solution{solution_idx}']['tracedata']
 
-        for x in random_int_iter(samples.shape[0], self._sigma_fraction):
-            w = weights[x]+1e-300
-
-            yield samples[x, :], w
+    def get_weights(self, solution_idx):
+        return self._multinest_output['solutions'][f'solution{solution_idx}']['weights']
 
     def get_solution(self):
         names = self.fit_names

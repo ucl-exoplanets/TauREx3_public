@@ -306,37 +306,37 @@ def generate_contributions(config):
 
     cf = ClassFactory()
     contributions = []
+    check_key = [k for k, v in config.items() if isinstance(v, dict)]
     for key in config.keys():
 
         for klass in cf.contributionKlasses:
             try:
                 if key in klass.input_keywords():
-                    contributions.append(create_klass(config[key],klass))
+                    contributions.append(create_klass(config[key], klass))
+                    check_key.pop(check_key.index(key))
+                    break
             except NotImplementedError:
                 log.warning('%s',klass)
 
-        # if key == 'Absorption':
-        #     contributions.append(create_klass(config[key],AbsorptionContribution))
-        # elif key == 'CIA':
-        #     contributions.append(create_klass(config[key],CIAContribution))
-        # elif key == 'Rayleigh':
-        #     contributions.append(create_klass(config[key],RayleighContribution))
-        # elif key == 'SimpleClouds':
-        #      from taurex.contributions import SimpleCloudsContribution
-        #      contributions.append(create_klass(config[key],SimpleCloudsContribution))
-        # elif key == 'BHMie':
-        #      from taurex.contributions import BHMieContribution
-        #      contributions.append(create_klass(config[key],BHMieContribution))
-        # elif key == 'LeeMie':
-        #      from taurex.contributions import LeeMieContribution
-        #      contributions.append(create_klass(config[key],LeeMieContribution))
-        # elif key == 'FlatMie':
-        #      from taurex.contributions import FlatMieContribution
-        #      contributions.append(create_klass(config[key],FlatMieContribution))
+    if len(check_key) > 0:
+        log.error(f'Unknown Contributions {check_key}')
+        raise Exception(f'Unknown contributions {check_key}')
 
     return contributions
 
-    
+
+def create_prior(prior):
+    from taurex.util.fitting import parse_priors
+
+    prior_name, args = parse_priors(prior)
+    cf = ClassFactory()
+    for p in cf.priorKlasses:
+        if prior_name in (p.__name__, p.__name__.lower(), p.__name__.upper(),):
+            return p(**args)
+    else:
+        raise ValueError('Unknown Prior Type in input file')
+
+
 def create_model(config,gas,temperature,pressure,planet,star):
     from taurex.model import ForwardModel
     log.debug(config)
