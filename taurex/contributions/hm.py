@@ -133,6 +133,12 @@ class HydrogenIon(Contribution):
         self._P_dyne = model.pressureProfile * 1e1
         self._temperature_profile = model.temperatureProfile
 
+        if 'H' not in model.chemistry.activeGases + model.chemistry.inactiveGases:
+            raise InvalidModelException('No hydrogen in chemical model')
+
+        if 'e-' not in model.chemistry.activeGases + model.chemistry.inactiveGases:
+            raise InvalidModelException('No free electrons in chemical model')
+
         #### Taking the H and e- profiles from chemistry class. This allows flexibility in the profiles ;)
         self._hydrogen_mixratio = model.chemistry.get_gas_mix_profile('H')
         self.debug('hydrogen %s', self._hydrogen_mixratio)

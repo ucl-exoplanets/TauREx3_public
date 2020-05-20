@@ -265,4 +265,4 @@ class PowerGas(Gas):
 
     @classmethod
     def input_keywords(cls):
-        return ['power','powerchemistry','parmentier','superpower', ]
+        return ['power', 'powerchemistry', 'parmentier',]
