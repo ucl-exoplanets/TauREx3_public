@@ -2,7 +2,7 @@ import pytest
 import hypothesis
 from hypothesis.strategies import integers
 import numpy as np
-from ..strategies import molecules
+from ..strategies import molecules, hyp_wngrid
 
 @hypothesis.given(molecules(style='normal'))
 def test_molecular_weight_hyp_normal(mol):
@@ -156,3 +156,13 @@ def test_wngrid_clip():
     clipped_flux = fb.bindown(clipped, interp_values)
 
     np.testing.assert_array_equal(true[1], clipped_flux[1])
+
+@hypothesis.given(integers(10, 100))
+def test_bin_edges(res):
+    from taurex.util.util import compute_bin_edges, create_grid_res
+    grid = create_grid_res(res, 300, 10000)
+    edges, widths = compute_bin_edges(grid[:, 0])
+    
+    assert round(np.mean(grid[:, 0]/widths)) == res
+
+    
