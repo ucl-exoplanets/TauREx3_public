@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New style priors with non-uniform priors
 - Correlated k-tables supported
 - Active and inactive gases are plotted seperately
+- H- absorption included
 
 
 ## [3.0.10] - 2020-02-25
