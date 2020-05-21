@@ -11,7 +11,11 @@ import tempfile
 @contextmanager
 def stdout_redirector(stream):
     # The original fd stdout points to. Usually 1 on POSIX systems.
-    original_stdout_fd = sys.stdout.fileno()
+    try:
+        original_stdout_fd = sys.stdout.fileno()
+    except io.UnsupportedOperation:
+        yield
+        return
 
     def _redirect_stdout(to_fd):
         """Redirect stdout to the given file descriptor."""

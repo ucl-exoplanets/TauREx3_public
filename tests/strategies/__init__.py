@@ -1,6 +1,8 @@
 import hypothesis
 from hypothesis.strategies import composite, lists, tuples, integers, floats, text, booleans
 from hypothesis import assume
+import hypothesis.extra.numpy as hyp_numpy
+import numpy as np
 
 @composite
 def molecules(draw, style='normal'):
@@ -154,3 +156,24 @@ def fitting_parameters(draw):
     default_fit = draw(lists(booleans(), min_size=num_fit, max_size=num_fit))
 
     return list(zip(fitting_names, value, mode, default_fit, bounds))
+
+@composite
+def hyp_wngrid(draw, num_elements=integers(3, 50), sort=False):
+    wngrid = draw(hyp_numpy.arrays(np.float64, num_elements, elements=floats(100, 30000), unique=True))
+    if sort:
+        wngrid = np.sort(wngrid)
+    
+    return wngrid
+
+
+@composite
+def wngrid_spectra(draw, num_elements=integers(3, 50), sort=False):
+
+    wngrid = draw(hyp_wngrid(num_elements, sort))
+    if sort:
+        wngrid = np.sort(wngrid)
+
+    spectra = draw(hyp_numpy.arrays(np.float64, wngrid.shape[0],
+                                    elements=floats(1e-10, 1e-1), fill=floats(1e-10, 1e-1)))
+
+    return wngrid, spectra

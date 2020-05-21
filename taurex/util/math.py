@@ -268,11 +268,14 @@ class OnlineVariance(object):
 
         averages = mpi.allgather(mean)
         counts = mpi.allgather(self.wcount)
+        all_counts = mpi.allgather(self.count)
+
+        
         #all_data = [(v,m,c) for v,m,c in zip(variances,averages,counts) if not v is 0 and not averages is 0.0 and not counts is 0.0]        
         #print('VARIANCES',variances)
         #print('AVERAGES',averages)
         #print('COUNTS',counts)
-        if sum(counts) < 2:
+        if sum(all_counts) < 2:
             return np.nan
         else:
             finalvariance = self.combine_variance(averages,variances,counts)
