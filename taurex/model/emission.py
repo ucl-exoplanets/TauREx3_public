@@ -71,9 +71,9 @@ class EmissionModel(SimpleForwardModel):
     def set_num_gauss(self,value,coeffs=None):
         self._ngauss = int(value)
 
-        mu,weight =np.polynomial.legendre.leggauss(self._ngauss*2)
-        self._mu_quads =mu[self._ngauss:] 
-        self._wi_quads =weight[self._ngauss:]
+        mu,weight =np.polynomial.legendre.leggauss(self._ngauss)
+        self._mu_quads =(mu+1)/2
+        self._wi_quads =weight/2
         self._coeffs = coeffs
         if coeffs is None: 
             self._coeffs = np.ones(self._ngauss)
@@ -81,8 +81,8 @@ class EmissionModel(SimpleForwardModel):
             
 
     def set_quadratures(self,mu,weight,coeffs=None):
-        self._mu_quads =mu
-        self._wi_quads =weight
+        self._mu_quads =(mu+1)/2
+        self._wi_quads =weight/2
         self._coeffs = coeffs
         if coeffs is None: 
             self._coeffs = np.ones(self._ngauss)
