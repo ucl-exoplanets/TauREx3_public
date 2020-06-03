@@ -71,9 +71,9 @@ class EmissionModel(SimpleForwardModel):
     def set_num_gauss(self,value,coeffs=None):
         self._ngauss = int(value)
 
-        mu,weight =np.polynomial.legendre.leggauss(self._ngauss*2)
-        self._mu_quads =mu[self._ngauss:] 
-        self._wi_quads =weight[self._ngauss:]
+        mu,weight =np.polynomial.legendre.leggauss(self._ngauss)
+        self._mu_quads =(mu+1)/2
+        self._wi_quads =weight/2
         self._coeffs = coeffs
         if coeffs is None: 
             self._coeffs = np.ones(self._ngauss)
@@ -81,8 +81,8 @@ class EmissionModel(SimpleForwardModel):
             
 
     def set_quadratures(self,mu,weight,coeffs=None):
-        self._mu_quads =mu
-        self._wi_quads =weight
+        self._mu_quads =(mu+1)/2
+        self._wi_quads =weight/2
         self._coeffs = coeffs
         if coeffs is None: 
             self._coeffs = np.ones(self._ngauss)
@@ -121,14 +121,15 @@ class EmissionModel(SimpleForwardModel):
 
     def evaluate_emission(self,wngrid,return_contrib):
         import numexpr as ne
-        dz=np.gradient(self.altitudeProfile)
-        
+        from taurex.util.util import compute_dz
+
+        dz = compute_dz(self.altitudeProfile)
+
+        total_layers = self.nLayers
 
         density = self.densityProfile
 
         wngrid_size = wngrid.shape[0]
-
-        total_layers = self.nLayers
 
         temperature = self.temperatureProfile
         tau = np.zeros(shape=(self.nLayers, wngrid_size))

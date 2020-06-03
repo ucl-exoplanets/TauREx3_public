@@ -556,3 +556,28 @@ def create_grid_res(resolution, wave_min, wave_max):
         wave_list.append(wave)
 
     return np.array((wave_list ,width_list)).T
+
+
+def conversion_factor(from_unit, to_unit):
+    import astropy.units as u
+
+    try:
+        from_conv = u.Unit(from_unit)
+    except:
+        from_conv = u.Unit(from_unit, format="cds")
+
+    try:
+        to_conv = u.Unit(to_unit)
+    except:
+        to_conv = u.Unit(to_unit, format="cds")
+
+    return from_conv.to(to_unit)
+
+
+def compute_dz(altitude):
+
+    dz = np.zeros_like(altitude)
+    dz[:-1] = np.diff(altitude)
+    dz[-1] = altitude[-1] - altitude[-2]
+
+    return dz

@@ -8,3 +8,4 @@ from .rayleigh import RayleighContribution
 from .simpleclouds import SimpleCloudsContribution
 from .leemie import LeeMieContribution
 from .flatmie import FlatMieContribution
+from .hm import HydrogenIon
