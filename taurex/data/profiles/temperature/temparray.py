@@ -9,12 +9,17 @@ class TemperatureArray(TemperatureProfile):
 
     """
 
-    def __init__(self, tp_array=[2000, 1000], p_points=None):
+    def __init__(self, tp_array=[2000, 1000], p_points=None, reverse=False):
         super().__init__(self.__class__.__name__)
 
         self._tp_profile = np.array(tp_array)
+        if reverse:
+            self._tp_profile = self._tp_profile[::-1]
         if p_points is not None:
+        
             self._p_profile = np.array(p_points)
+            if reverse:
+                self._p_profile = self._p_profile[::-1]
         else:
             self._p_profile = None
 

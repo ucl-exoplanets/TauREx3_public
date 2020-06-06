@@ -4,10 +4,13 @@ import numpy as np
 
 class ArrayPressureProfile(PressureProfile):
 
-    def __init__(self, array):
+    def __init__(self, array, reverse=False):
         
         super().__init__(self.__class__.__name__, array.shape[-1])
-        self.pressure_profile = array
+        if reverse:
+            self.pressure_profile = array[::-1]
+        else:
+            self.pressure_profile = array
 
     def compute_pressure_profile(self):
         """
