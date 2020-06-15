@@ -51,7 +51,7 @@ class Plotter(object):
     def forward_output(self):
         return self.fd['Output']
 
-    def compute_ranges(self):
+    def compute_ranges(self, mu=True):
 
         solution_ranges = []
 
@@ -60,7 +60,8 @@ class Plotter(object):
         mu_derived = None
         for idx,sol in self.solution_iter():
             
-            mu_derived = self.get_mu_parameters(sol)
+            if mu:
+                mu_derived = self.get_mu_parameters(sol)
 
 
             fitting_names = self.fittingNames
@@ -76,7 +77,7 @@ class Plotter(object):
 
                 param_list.append([val,val- 5.0*sigma_m,val+5.0*sigma_p])
             
-            if mu_derived is not None:
+            if mu_derived is not None and mu:
                 sigma_m = mu_derived['sigma_m'][()]
                 sigma_p = mu_derived['sigma_p'][()]
                 val = mu_derived['value'][()]     
@@ -88,7 +89,7 @@ class Plotter(object):
         fitting_boundary_low = self.fittingBoundaryLow
         fitting_boundary_high = self.fittingBoundaryHigh
 
-        if mu_derived is not None:
+        if mu_derived is not None and mu:
             fitting_boundary_low = np.concatenate((fitting_boundary_low, [-1e99]))
             fitting_boundary_high = np.concatenate((fitting_boundary_high, [1e99]))
 
@@ -351,31 +352,31 @@ class Plotter(object):
 
 
 
-    def plot_posteriors(self):
+    def plot_posteriors(self , fig=None, save=True, plot_mu=True):
         if not self.is_retrieval:
             raise Exception('HDF5 was not generated from retrieval, no posteriors found')
         
-        ranges = self.compute_ranges()
+        ranges = self.compute_ranges(plot_mu)
 
         figs = []
 
         for solution_idx, solution_val in self.solution_iter():
 
             # print(solution_idx)
-
-            mu_derived = self.get_mu_parameters(solution_val)
+            if plot_mu:
+                mu_derived = self.get_mu_parameters(solution_val)
 
             tracedata = solution_val['tracedata']
             weights = solution_val['weights']
 
-            figure_past = None
+            figure_past = fig
 
             if solution_idx > 0:
                 figure_past = figs[solution_idx - 1]
 
             latex_names = self.fittingLatex
 
-            if mu_derived is not None:
+            if mu_derived is not None and plot_mu:
                 latex_names.append('$\mu$ (derived)')
                 tracedata = np.column_stack((tracedata, mu_derived['trace']))
 
@@ -412,11 +413,14 @@ class Plotter(object):
                     ha="center", va="top", fontsize=14)
 
             figs.append(fig)
+        if save:
+            plt.savefig(os.path.join(self.out_folder, '%s_posteriors.pdf' % (self.prefix)))
+            self.posterior_figure_handles = figs
+            self.posterior_figure_ranges  = ranges
+            plt.close()
+        else:
+            return fig
 
-        plt.savefig(os.path.join(self.out_folder, '%s_posteriors.pdf' % (self.prefix)))
-        self.posterior_figure_handles = figs
-        self.posterior_figure_ranges  = ranges
-        plt.close()
 
     @property
     def modelType(self):
