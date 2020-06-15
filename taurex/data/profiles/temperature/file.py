@@ -26,14 +26,22 @@ class TemperatureFile(TemperatureArray):
 
         if press_col is not None:
             arr = np.loadtxt(filename, skiprows=skiprows, 
-                             usecols=(press_col, temp_col),delimiter=delimiter
+                             usecols=(int(press_col), int(temp_col)),delimiter=delimiter,
                              )
             temperature_arr = arr[:, 1]*convertT
             pressure_arr = arr[:, 0]*convertP
         else:
             arr = np.loadtxt(filename, skiprows=skiprows,
-                             usecols=temp_col,
+                             usecols=int(temp_col),
                              )
             temperature_arr = arr[:]*convertT
 
         super().__init__(tp_array=temperature_arr, p_points=pressure_arr)
+
+
+    @classmethod
+    def input_keywords(cls):
+        """
+        Return all input keywords
+        """
+        return ['file','fromfile', ]
