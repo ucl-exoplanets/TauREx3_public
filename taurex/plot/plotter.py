@@ -371,8 +371,6 @@ class Plotter(object):
 
             figure_past = fig
 
-            if solution_idx > 0:
-                figure_past = figs[solution_idx - 1]
 
             latex_names = self.fittingLatex
 
@@ -411,12 +409,8 @@ class Plotter(object):
                 fig.gca().annotate(self.title, xy=(0.5, 1.0), xycoords="figure fraction",
                     xytext=(0, -5), textcoords="offset points",
                     ha="center", va="top", fontsize=14)
-
-            figs.append(fig)
         if save:
             plt.savefig(os.path.join(self.out_folder, '%s_posteriors.pdf' % (self.prefix)))
-            self.posterior_figure_handles = figs
-            self.posterior_figure_ranges  = ranges
             plt.close()
         else:
             return fig
