@@ -352,11 +352,11 @@ class Plotter(object):
 
 
 
-    def plot_posteriors(self , fig=None, save=True, plot_mu=True):
+    def plot_posteriors(self , fig=None, save=True, ranges=None, plot_mu=True, color=None, truth=None):
         if not self.is_retrieval:
             raise Exception('HDF5 was not generated from retrieval, no posteriors found')
-        
-        ranges = self.compute_ranges(plot_mu)
+        if ranges is None:
+            ranges = self.compute_ranges(plot_mu)
 
         figs = []
 
@@ -378,8 +378,9 @@ class Plotter(object):
                 latex_names.append('$\mu$ (derived)')
                 tracedata = np.column_stack((tracedata, mu_derived['trace']))
 
-
-            color_idx = np.float(solution_idx)/self.num_solutions
+            if color is None:
+                color_idx = np.float(solution_idx)/self.num_solutions
+                color = self.cmap(float(color_idx))
 
             # print('color: {}'.format(color_idx))
             ### https://matplotlib.org/users/customizing.html
@@ -398,10 +399,11 @@ class Plotter(object):
                                     show_titles=True,
                                     title_kwargs=dict(fontsize=12),
                                     range=ranges,
+                                    truths=truth,
                                     #quantiles=[0.16, 0.5],
                                     ret=True,
                                     fill_contours=True,
-                                    color=self.cmap(float(color_idx)),
+                                    color=color,
                                     top_ticks=False,
                                     bins=30,
                                     fig = figure_past)
