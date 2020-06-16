@@ -223,6 +223,15 @@ class Chemistry(Fittable, Logger, Writeable):
                 self.mu_profile += self.inactiveGasMixProfile[idx] * \
                     get_molecular_weight(gasname)
 
+    @property
+    def gases(self):
+        return self.activeGases + self.inactiveGases
+
+    @property
+    def mixProfile(self):
+        return np.concatenate((self.activeGasMixProfile,
+                               self.inactiveGasMixProfile))
+
     def write(self, output):
         """
         Writes chemistry class and arguments to file
