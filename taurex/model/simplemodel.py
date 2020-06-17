@@ -501,6 +501,13 @@ class SimpleForwardModel(ForwardModel):
         tp_profiles = OnlineVariance()
         active_gases = OnlineVariance()
         inactive_gases = OnlineVariance()
+        cond = None
+
+        has_condensates = self.chemistry.hasCondensates
+
+        if has_condensates:
+            cond = OnlineVariance()
+
 
         if binner is not None:
             binned_spectrum = OnlineVariance()
@@ -519,6 +526,10 @@ class SimpleForwardModel(ForwardModel):
             inactive_gases.update(self.chemistry.inactiveGasMixProfile,
                                   weight=weight)
 
+            if cond is not None:
+                cond.update(self.chemistry.condensateMixProfile,
+                            weight=weight)
+
             native_spectrum.update(native, weight=weight)
 
             if binned_spectrum is not None:
@@ -535,6 +546,9 @@ class SimpleForwardModel(ForwardModel):
         profile_dict['temp_profile_std'] = tp_std
         profile_dict['active_mix_profile_std'] = active_std
         profile_dict['inactive_mix_profile_std'] = inactive_std
+        if cond is not None:
+            profile_dict['condensate_profile_std'] = \
+                np.sqrt(cond.parallelVariance())
 
         spectrum_dict['native_std'] = \
             np.sqrt(native_spectrum.parallelVariance())

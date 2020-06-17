@@ -245,6 +245,8 @@ class Chemistry(Fittable, Logger, Writeable):
         gas_entry.write_string('chemistry_type', self.__class__.__name__)
         gas_entry.write_string_array('active_gases', self.activeGases)
         gas_entry.write_string_array('inactive_gases', self.inactiveGases)
+        if self.hasCondensates:
+            gas_entry.write_string_array('condensates', self.condensates)
         return gas_entry
 
     @property

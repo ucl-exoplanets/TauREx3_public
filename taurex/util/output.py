@@ -114,6 +114,8 @@ def generate_profile_dict(model):
     out['altitude_profile']=model.altitudeProfile
     out['gravity_profile']=model.gravity_profile
     out['pressure_profile']=model.pressureProfile
+    if model.chemistry.hasCondensates:
+        out['condensate_profile'] = model.chemistry.condensateMixProfile
     return out
 
 def generate_spectra_dict(result, contrib_result, native_grid, bin_grid=None):
