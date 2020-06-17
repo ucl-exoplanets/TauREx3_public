@@ -109,6 +109,10 @@ class Plotter(object):
         return decode_string_array(self.fd['ModelParameters']['Chemistry']['active_gases'])
 
     @property
+    def condensates(self):
+        return decode_string_array(self.fd['ModelParameters']['Chemistry']['condensates'])
+
+    @property
     def inactiveGases(self):
         return decode_string_array(self.fd['ModelParameters']['Chemistry']['inactive_gases'])
 
@@ -282,6 +286,55 @@ class Plotter(object):
             plt.title(self.title+' - Inactive', fontsize=14)
         plt.savefig(os.path.join(self.out_folder, '%s_fit_inactive_mixratio.pdf' % (self.prefix)))
         plt.close()
+
+    def plot_forward_cprofile(self):
+
+
+
+        solution_val = self.forward_output()
+
+        try:
+            self.condensates
+        except KeyError:
+            print('No condensates in chemistry/file, ignoring plot')
+            return
+
+
+        profiles = solution_val['Profiles']
+        pressure_profile = profiles['pressure_profile'][:]/1e5
+        active_profile = profiles['condensate_profile']
+
+        cols_mol = {}
+
+        fig = plt.figure(figsize=(7,7/self.phi))
+        ax = fig.add_subplot(111)
+        num_moles = len(self.condensates)
+
+        for mol_idx,mol_name in enumerate(self.condensates):
+            cols_mol[mol_name] = self.cmap(mol_idx/num_moles)
+
+            prof = active_profile[mol_idx]
+
+            plt.plot(prof,pressure_profile,color=cols_mol[mol_name], label=mol_name)
+
+
+
+        plt.yscale('log')
+        plt.gca().invert_yaxis()
+        plt.xscale('log')
+        plt.xlim(1e-12, 3)
+        plt.xlabel('Mixing ratio')
+        plt.ylabel('Pressure (bar)')
+        plt.tight_layout()
+        box = ax.get_position()
+        ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+        ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), ncol=1, prop={'size':11}, frameon=False)
+        if self.title:
+            plt.title(self.title, fontsize=14)
+        plt.savefig(os.path.join(self.out_folder, '%s_fit_condensate_mixratio.pdf' % (self.prefix)))
+        plt.close()
+
+
 
 
     def plot_fitted_tp(self):
@@ -822,6 +875,7 @@ def main():
     parser.add_argument("-i", "--input",dest='input_file',type=str,required=True,help="Input hdf5 file from taurex")
     parser.add_argument("-P","--plot-posteriors",dest="posterior",default=False,help="Plot fitting posteriors",action='store_true')
     parser.add_argument("-x","--plot-xprofile",dest="xprofile",default=False,help="Plot molecular profiles",action='store_true')
+    parser.add_argument("-D","--plot-cprofile",dest="cprofile",default=False,help="Plot condensate profiles",action='store_true')
     parser.add_argument("-t","--plot-tpprofile",dest="tpprofile",default=False,help="Plot Temperature profiles",action='store_true')
     parser.add_argument("-d","--plot-tau",dest="tau",default=False,help="Plot optical depth contribution",action="store_true")
     parser.add_argument("-s","--plot-spectrum",dest="spectrum",default=False,help="Plot spectrum",action='store_true')
@@ -842,6 +896,7 @@ def main():
     plot_fullcontrib = args.full_contrib or args.all
     plot_posteriors = args.posterior or args.all
     plot_tau = args.tau or args.all
+    plot_cond = args.cprofile or args.all
 
     plot=Plotter(args.input_file,cmap=args.cmap,
                     title=args.title,prefix=args.prefix,out_folder=args.output_dir)
@@ -865,6 +920,13 @@ def main():
             plot.plot_fitted_tp()
         else:
             plot.plot_forward_tp()
+
+    if plot_cond:
+        if plot.is_retrieval:
+            pass
+        else:
+            plot.plot_forward_cprofile()
+
 
     if plot_contrib:
         if plot.is_retrieval:
