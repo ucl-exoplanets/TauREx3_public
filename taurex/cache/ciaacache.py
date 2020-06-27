@@ -1,8 +1,7 @@
 """
 Contains caching class for Collisionally Induced Absorption files
 """
-
-from .singleton import Singleton
+from taurex.core import Singleton
 from taurex.log import Logger
 
 
