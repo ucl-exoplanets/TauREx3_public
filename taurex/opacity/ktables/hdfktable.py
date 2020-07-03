@@ -4,7 +4,7 @@ import numpy as np
 import pathlib
 from taurex.util.util import sanitize_molecule_string
 
-class HDF5KTable(InterpolatingOpacity):
+class HDF5KTable(InterpolatingOpacity, KTable):
     """
     This is the base class for computing opactities using correlated k tables
     """

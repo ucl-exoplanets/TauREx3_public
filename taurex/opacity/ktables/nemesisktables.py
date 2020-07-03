@@ -2,9 +2,9 @@ from ..interpolateopacity import InterpolatingOpacity
 import pickle
 import numpy as np
 import pathlib
+from .ktable import KTable
 
-
-class NemesisKTables(InterpolatingOpacity):
+class NemesisKTables(InterpolatingOpacity,KTable):
     """
     This is the base class for computing opactities
     """
