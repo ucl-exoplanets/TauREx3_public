@@ -5,7 +5,7 @@ Contains caching class for Molecular cross section files
 from .singleton import Singleton
 from taurex.log import Logger
 from .globalcache import GlobalCache
-from taurex.parameter.classfactory import ClassFactory
+
 from taurex.core import Singleton
 class OpacityCache(Singleton):
     """
@@ -60,6 +60,7 @@ class OpacityCache(Singleton):
         self.opacity_dict = {}
         self._opacity_path = None
         self.log = Logger('OpacityCache')
+        self._force_active = []
     
     def set_opacity_path(self, opacity_path):
         """
@@ -129,6 +130,20 @@ class OpacityCache(Singleton):
 
         GlobalCache()['xsec_in_memory'] = in_memory
         self.clear_cache()
+
+    def force_active(self, molecules):
+        """
+        Allows some molecules to be forced as active.
+        Useful when using other radiative codes to do the calculation
+
+        Parameters
+        ----------
+        molecules: obj:`list`
+            List of molecules
+
+        """
+        self._force_active = molecules
+
 
     def set_interpolation(self, interpolation_mode):
         """
@@ -227,6 +242,7 @@ class OpacityCache(Singleton):
     def find_list_of_molecules(self):
         from glob import glob
         import os
+        from taurex.parameter.classfactory import ClassFactory
         opacity_klasses = ClassFactory().opacityKlasses
 
         molecules = []
@@ -234,7 +250,9 @@ class OpacityCache(Singleton):
         for c in opacity_klasses:
             molecules.extend([x[0] for x in c.discover()])
         
-        return set(molecules)
+        forced = self._force_active or []
+
+        return set(molecules+forced)
 
 
 
@@ -256,8 +274,8 @@ class OpacityCache(Singleton):
             :func:`__getitem__` for filtering
 
         """ 
-        from glob import glob
-        import os
+        from taurex.parameter.classfactory import ClassFactory
+
         cf = ClassFactory()
 
         opacity_klass_list = sorted(cf.opacityKlasses,
@@ -269,6 +287,8 @@ class OpacityCache(Singleton):
                 self.log.debug('Klass: %s %s', mol, args)
                 op = None
                 if mol in molecule_filter:
+                    if not isinstance(args, (list, tuple,)):
+                        args = [args]
                     op = c(*args)
 
                 if op is not None and op.moleculeName not in self.opacity_dict:
