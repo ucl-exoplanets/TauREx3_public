@@ -4,7 +4,8 @@ import numpy as np
 import pathlib
 from .ktable import KTable
 
-class PickleKTable(InterpolatingOpacity, KTable):
+
+class PickleKTable(KTable, InterpolatingOpacity):
     """
     This is the base class for computing opactities
     """

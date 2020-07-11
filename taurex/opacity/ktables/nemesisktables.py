@@ -5,7 +5,7 @@ from .ktable import KTable
 from taurex.util.util import sanitize_molecule_string
 
 
-class NemesisKTables(InterpolatingOpacity, KTable):
+class NemesisKTables(KTable, InterpolatingOpacity):
     """
     This is the base class for computing opactities
     """

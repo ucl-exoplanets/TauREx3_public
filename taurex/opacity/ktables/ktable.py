@@ -1,4 +1,7 @@
 
+import numpy as np
+
+
 class KTable:
     
     @property
@@ -7,13 +10,11 @@ class KTable:
 
     def opacity(self, temperature, pressure, wngrid=None):
         from scipy.interpolate import interp1d
-        if wngrid is None:
-            wngrid_filter = slice(None)
-        else:
+        wngrid_filter = slice(None)
+        if wngrid is not None:
             wngrid_filter = np.where((self.wavenumberGrid >= wngrid.min()) & (
                 self.wavenumberGrid <= wngrid.max()))[0]
-
-        orig = self.compute_opacity(temperature, pressure, wngrid_filter).reshape(-1,len(self.weights))
+        orig = self.compute_opacity(temperature, pressure, wngrid_filter).reshape(-1, len(self.weights))
 
         if wngrid is None or np.array_equal(self.wavenumberGrid.take(wngrid_filter), wngrid):
             return orig
@@ -26,4 +27,4 @@ class KTable:
 
             # else:
             f = interp1d(self.wavenumberGrid[wngrid_filter], orig, axis=0, copy=False, bounds_error=False,fill_value=(orig[0],orig[-1]),assume_sorted=True)
-            return f(wngrid)
+            return f(wngrid).reshape(-1, len(self.weights))
