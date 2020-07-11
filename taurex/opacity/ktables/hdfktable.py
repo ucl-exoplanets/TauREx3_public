@@ -3,13 +3,42 @@ import h5py
 import numpy as np
 import pathlib
 from taurex.util.util import sanitize_molecule_string
+from .ktable import KTable
+
 
 class HDF5KTable(InterpolatingOpacity, KTable):
     """
     This is the base class for computing opactities using correlated k tables
     """
     
-    def __init__(self, filename,interpolation_mode='linear', in_memory=True):
+    @classmethod
+    def discover(cls):
+        import os
+        import glob
+        import pathlib
+        from taurex.cache import GlobalCache
+        
+        path = GlobalCache()['ktable_path']
+        if path is None:
+            return []
+        path = os.path.join(path, '*.hdf5')
+
+        files = glob.glob(path) + glob.glob(os.path.join(GlobalCache()['ktable_path'], '*.h5'))
+
+        discovery = []
+
+        interp = GlobalCache()['xsec_interpolation'] or 'linear'
+
+        for f in files:
+            splits = pathlib.Path(f).stem.split('_')
+            mol_name = sanitize_molecule_string(splits[0])
+
+            discovery.append((mol_name, [f, interp]))
+
+        return discovery
+
+
+    def __init__(self, filename, interpolation_mode='linear', in_memory=True):
         self._molecule_name = sanitize_molecule_string(pathlib.Path(filename).stem.split('_')[0])
         super().__init__('HDF5Ktable:{}'.format(self._molecule_name),
                         interpolation_mode=interpolation_mode)
@@ -20,8 +49,7 @@ class HDF5KTable(InterpolatingOpacity, KTable):
         self._resolution = None
         self.in_memory = in_memory
         self._load_pickle_file(filename)
-        
-        
+
     @property
     def moleculeName(self):
         return self._molecule_name
@@ -29,7 +57,6 @@ class HDF5KTable(InterpolatingOpacity, KTable):
     @property
     def xsecGrid(self):
         return self._xsec_grid
-
 
     def _load_pickle_file(self, filename):
 
@@ -82,26 +109,3 @@ class HDF5KTable(InterpolatingOpacity, KTable):
 
 
         #return factor*(q_11*(Pmax-P)*(Tmax-T) + q_21*(P-Pmin)*(Tmax-T) + q_12*(Pmax-P)*(T-Tmin) + q_22*(P-Pmin)*(T-Tmin))
-    
-    def opacity(self, temperature, pressure, wngrid=None):
-        from scipy.interpolate import interp1d
-        if wngrid is None:
-            wngrid_filter = slice(None)
-        else:
-            wngrid_filter = np.where((self.wavenumberGrid >= wngrid.min()) & (
-                self.wavenumberGrid <= wngrid.max()))[0]
-
-        orig = self.compute_opacity(temperature, pressure, wngrid_filter).reshape(-1,len(self.weights))
-
-        if wngrid is None or np.array_equal(self.wavenumberGrid.take(wngrid_filter), wngrid):
-            return orig
-        else:
-            # min_max =  (self.wavenumberGrid <= wngrid.max() ) & (self.wavenumberGrid >= wngrid.min())
-
-            # total_bins = self.wavenumberGrid[min_max].shape[0]
-            # if total_bins > wngrid.shape[0]:
-            #     return np.append(np.histogram(self.wavenumberGrid,wngrid, weights=orig)[0]/np.histogram(self.wavenumberGrid,wngrid)[0],0)
-
-            # else:
-            f = interp1d(self.wavenumberGrid[wngrid_filter], orig, axis=0, copy=False, bounds_error=False,fill_value=(orig[0],orig[-1]),assume_sorted=True)
-            return f(wngrid)

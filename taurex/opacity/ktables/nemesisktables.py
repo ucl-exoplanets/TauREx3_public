@@ -1,20 +1,49 @@
 from ..interpolateopacity import InterpolatingOpacity
-import pickle
 import numpy as np
 import pathlib
 from .ktable import KTable
+from taurex.util.util import sanitize_molecule_string
 
-class NemesisKTables(InterpolatingOpacity,KTable):
+
+class NemesisKTables(InterpolatingOpacity, KTable):
     """
     This is the base class for computing opactities
     """
-    
+
+    @classmethod
+    def discover(cls):
+        import os
+        import glob
+        import pathlib
+        from taurex.cache import GlobalCache
+        
+        path = GlobalCache()['ktable_path']
+        if path is None:
+            return []
+        path = os.path.join(path, '*.kta')
+
+        files = glob.glob(path)
+
+        discovery = []
+
+        interp = GlobalCache()['xsec_interpolation'] or 'linear'
+
+        for f in files:
+            splits = pathlib.Path(f).stem.split('_')
+            mol_name = sanitize_molecule_string(splits[0])
+
+            discovery.append((mol_name, [f, interp]))
+
+        return discovery
+
     def __init__(self, filename, interpolation_mode='linear'):
         super().__init__('NemesisKtable:{}'.format(pathlib.Path(filename).stem[0:10]),
                         interpolation_mode=interpolation_mode)
 
         self._filename = filename
-        self._molecule_name = None
+        splits = pathlib.Path(filename).stem.split('_')
+        mol_name = sanitize_molecule_string(splits[0])
+        self._molecule_name = mol_name
         self._spec_dict = None
         self._resolution = None
         self._decode_ktables(filename)
@@ -133,26 +162,3 @@ class NemesisKTables(InterpolatingOpacity,KTable):
 
 
         #return factor*(q_11*(Pmax-P)*(Tmax-T) + q_21*(P-Pmin)*(Tmax-T) + q_12*(Pmax-P)*(T-Tmin) + q_22*(P-Pmin)*(T-Tmin))
-    
-    def opacity(self, temperature, pressure, wngrid=None):
-        from scipy.interpolate import interp1d
-        if wngrid is None:
-            wngrid_filter = slice(None)
-        else:
-            wngrid_filter = np.where((self.wavenumberGrid >= wngrid.min()) & (
-                self.wavenumberGrid <= wngrid.max()))[0]
-
-        orig = self.compute_opacity(temperature, pressure, wngrid_filter).reshape(-1,len(self.weights))
-
-        if wngrid is None or np.array_equal(self.wavenumberGrid.take(wngrid_filter), wngrid):
-            return orig
-        else:
-            # min_max =  (self.wavenumberGrid <= wngrid.max() ) & (self.wavenumberGrid >= wngrid.min())
-
-            # total_bins = self.wavenumberGrid[min_max].shape[0]
-            # if total_bins > wngrid.shape[0]:
-            #     return np.append(np.histogram(self.wavenumberGrid,wngrid, weights=orig)[0]/np.histogram(self.wavenumberGrid,wngrid)[0],0)
-
-            # else:
-            f = interp1d(self.wavenumberGrid[wngrid_filter], orig, axis=0, copy=False, bounds_error=False,fill_value=(orig[0],orig[-1]),assume_sorted=True)
-            return f(wngrid)

@@ -1,7 +1,7 @@
-from taurex.log import Logger
 import numpy as np
 from .opacity import Opacity
-from taurex.util.math import *
+from taurex.util.math import intepr_bilin, interp_exp_and_lin, \
+    interp_lin_only, interp_exp_only
 
 
 class InterpolatingOpacity(Opacity):
@@ -17,6 +17,18 @@ class InterpolatingOpacity(Opacity):
     @property
     def xsecGrid(self):
         raise NotImplementedError
+
+    @property
+    def logPressure(self):
+        return np.log10(self.pressureGrid)
+
+    @property
+    def pressureBounds(self):
+        return self.pressureGrid.min(), self.pressureGrid.max()
+
+    @property
+    def temperatureBounds(self):
+        return self.temperatureGrid.min(), self.temperatureGrid.max()
 
     def find_closest_index(self, T, P):
         t_min = self.temperatureGrid.searchsorted(T, side='right')-1
@@ -52,7 +64,8 @@ class InterpolatingOpacity(Opacity):
 
         return interp_lin_only(fx0, fx1, P, Pmin, Pmax)
 
-    def interp_bilinear_grid(self, T, P, t_idx_min, t_idx_max, p_idx_min, p_idx_max, wngrid_filter=None):
+    def interp_bilinear_grid(self, T, P, t_idx_min, t_idx_max, p_idx_min, 
+                             p_idx_max, wngrid_filter=None):
 
         self.debug('Interpolating %s %s %s %s %s %s', T, P,
                    t_idx_min, t_idx_max, p_idx_min, p_idx_max)
@@ -61,11 +74,14 @@ class InterpolatingOpacity(Opacity):
 
             return np.zeros_like(self.xsecGrid[0, 0, wngrid_filter]).ravel()
 
-        check_pressure_max = P >= self._max_pressure
-        check_temperature_max = T >= self._max_temperature
+        min_pressure, max_pressure = self.pressureBounds
+        min_temperature, max_temperature = self.temperatureBounds
 
-        check_pressure_min = P < self._min_pressure
-        check_temperature_min = T < self._min_temperature
+        check_pressure_max = P >= max_pressure
+        check_temperature_max = T >= max_temperature
+
+        check_pressure_min = P < min_pressure
+        check_temperature_min = T < min_temperature
 
         self.debug('Check pressure min/max %s/%s',
                    check_pressure_min, check_pressure_max)

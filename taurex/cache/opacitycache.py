@@ -254,10 +254,7 @@ class OpacityCache(Singleton):
 
         return set(molecules+forced)
 
-
-
-
-    def load_opacity_from_path(self,path,molecule_filter=None):
+    def load_opacity_from_path(self, path, molecule_filter=None):
         """
         Searches path for molecular cross-section files, creates and loads them into the cache
         ``.pickle`` will be loaded as :class:`~taurex.opacity.pickleopacity.PickleOpacity`
