@@ -23,7 +23,8 @@ class HDF5KTable(KTable, InterpolatingOpacity):
             return []
         path = os.path.join(path, '*.hdf5')
 
-        files = glob.glob(path) + glob.glob(os.path.join(GlobalCache()['ktable_path'], '*.h5'))
+        files = glob.glob(path) + \
+            glob.glob(os.path.join(GlobalCache()['ktable_path'], '*.h5'))
 
         discovery = []
 
@@ -41,7 +42,7 @@ class HDF5KTable(KTable, InterpolatingOpacity):
     def __init__(self, filename, interpolation_mode='linear', in_memory=True):
         self._molecule_name = sanitize_molecule_string(pathlib.Path(filename).stem.split('_')[0])
         super().__init__('HDF5Ktable:{}'.format(self._molecule_name),
-                        interpolation_mode=interpolation_mode)
+                         interpolation_mode=interpolation_mode)
         self._molecule_name = sanitize_molecule_string(pathlib.Path(filename).stem.split('_')[0])
         self._filename = filename
         self._spec_dict = None

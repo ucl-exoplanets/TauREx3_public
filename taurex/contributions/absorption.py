@@ -54,6 +54,7 @@ class AbsorptionContribution(Contribution):
         self.debug('Preparing model with %s', wngrid.shape)
         self._ngrid = wngrid.shape[0]
         self._use_ktables = GlobalCache()['opacity_method'] == 'ktables'
+        self.info('Using cross-sections? %s', not self._use_ktables)
         weights = None
 
         if self._use_ktables:
@@ -70,7 +71,6 @@ class AbsorptionContribution(Contribution):
             self.info('Recomputing active gas %s opacity',gas)
 
             xsec = self._opacity_cache[gas]
-
 
             if self._use_ktables and self.weights is None:
                 self.weights = xsec.weights

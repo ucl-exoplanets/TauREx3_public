@@ -165,8 +165,9 @@ class ClassFactory(Singleton):
 
     def _collect_opacity(self, module):
         from taurex.opacity import Opacity, InterpolatingOpacity
+        from taurex.opacity.ktables import KTable
         return [c for c in self._collect_classes(module, Opacity)
-                if c is not InterpolatingOpacity]
+                if c is not InterpolatingOpacity and not issubclass(c, KTable)]
 
     def _collect_ktables(self, module):
         from taurex.opacity.ktables import KTable
