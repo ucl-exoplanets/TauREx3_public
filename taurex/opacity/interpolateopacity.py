@@ -24,7 +24,7 @@ class InterpolatingOpacity(Opacity):
 
     @property
     def pressureBounds(self):
-        return self.pressureGrid.min(), self.pressureGrid.max()
+        return self.logPressure.min(), self.logPressure.max()
 
     @property
     def temperatureBounds(self):
@@ -34,7 +34,7 @@ class InterpolatingOpacity(Opacity):
         t_min = self.temperatureGrid.searchsorted(T, side='right')-1
         t_max = t_min+1
 
-        p_min = self.pressureGrid.searchsorted(P, side='right')-1
+        p_min = self.logPressure.searchsorted(P, side='right')-1
         p_max = p_min+1
 
         return t_min, t_max, p_min, p_max
@@ -57,8 +57,8 @@ class InterpolatingOpacity(Opacity):
                 'Unknown interpolation mode {}'.format(self._interp_mode))
 
     def interp_pressure_only(self, P, p_idx_min, p_idx_max, T, filt):
-        Pmax = self.pressureGrid[p_idx_max]
-        Pmin = self.pressureGrid[p_idx_min]
+        Pmax = self.logPressure[p_idx_max]
+        Pmin = self.logPressure[p_idx_min]
         fx0 = self.xsecGrid[p_idx_min, T, filt]
         fx1 = self.xsecGrid[p_idx_max, T, filt]
 
@@ -120,8 +120,8 @@ class InterpolatingOpacity(Opacity):
 
         Tmax = self.temperatureGrid[t_idx_max]
         Tmin = self.temperatureGrid[t_idx_min]
-        Pmax = self.pressureGrid[p_idx_max]
-        Pmin = self.pressureGrid[p_idx_min]
+        Pmax = self.logPressure[p_idx_max]
+        Pmin = self.logPressure[p_idx_min]
 
         if self._interp_mode == 'linear':
             return intepr_bilin(q_11, q_12, q_21, q_22, T, Tmin, Tmax, P, Pmin, Pmax)
@@ -132,5 +132,6 @@ class InterpolatingOpacity(Opacity):
                 'Unknown interpolation mode {}'.format(self._interp_mode))
 
     def compute_opacity(self, temperature, pressure, wngrid=None):
-
-        return self.interp_bilinear_grid(temperature, pressure, *self.find_closest_index(temperature, pressure), wngrid) / 10000
+        import math
+        logpressure = math.log10(pressure)
+        return self.interp_bilinear_grid(temperature, logpressure, *self.find_closest_index(temperature, logpressure), wngrid) / 10000

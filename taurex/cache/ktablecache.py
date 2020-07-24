@@ -160,7 +160,6 @@ class KTableCache(Singleton):
 
         opacity_klass_list = sorted(cf.ktableKlasses,
                                     key=lambda x: x.priority())
-
         for c in opacity_klass_list:
             try:
                 discover = c.discover()
@@ -174,7 +173,6 @@ class KTableCache(Singleton):
                     if not isinstance(args, (list, tuple,)):
                         args = [args]
                     op = c(*args)
-
                 if op is not None and op.moleculeName not in self.opacity_dict:
                     self.add_opacity(op, molecule_filter=molecule_filter)
 
@@ -216,13 +214,12 @@ class KTableCache(Singleton):
                 self.log.error('Unknown type %s passed into opacities, should be a list, single \
                      opacity or None if reading a path',type(opacities))
                 raise Exception('Unknown type passed into opacities')
-        elif opacity_path is not None:
+        else:
+            self.load_opacity_from_path(opacity_path,molecule_filter=molecule_filter)
+            # if isinstance(opacity_path,(list,)):
+            #     for path in opacity_path:
+            #         self.load_opacity_from_path(path,molecule_filter=molecule_filter)
 
-            if isinstance(opacity_path,str):
-                self.load_opacity_from_path(opacity_path,molecule_filter=molecule_filter)
-            elif isinstance(opacity_path,(list,)):
-                for path in opacity_path:
-                    self.load_opacity_from_path(path,molecule_filter=molecule_filter)
     
     def clear_cache(self):
         """

@@ -283,7 +283,7 @@ class OpacityCache(Singleton):
             for mol, args in c.discover():
                 self.log.debug('Klass: %s %s', mol, args)
                 op = None
-                if mol in molecule_filter:
+                if mol in molecule_filter and mol not in self.opacity_dict:
                     if not isinstance(args, (list, tuple,)):
                         args = [args]
                     op = c(*args)
@@ -329,13 +329,13 @@ class OpacityCache(Singleton):
                 self.log.error('Unknown type %s passed into opacities, should be a list, single \
                      opacity or None if reading a path',type(opacities))
                 raise Exception('Unknown type passed into opacities')
-        elif opacity_path is not None:
-
-            if isinstance(opacity_path, str):
-                self.load_opacity_from_path(opacity_path, molecule_filter=molecule_filter)
-            elif isinstance(opacity_path, (list,)):
-                for path in opacity_path:
-                    self.load_opacity_from_path(path, molecule_filter=molecule_filter)
+        else:
+            self.load_opacity_from_path(opacity_path, molecule_filter=molecule_filter)
+            # if isinstance(opacity_path, str):
+            #     self.load_opacity_from_path(opacity_path, molecule_filter=molecule_filter)
+            # elif isinstance(opacity_path, (list,)):
+            #     for path in opacity_path:
+            #         self.load_opacity_from_path(path, molecule_filter=molecule_filter)
     
     def clear_cache(self):
         """
