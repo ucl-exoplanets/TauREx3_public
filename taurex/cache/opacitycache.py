@@ -290,7 +290,7 @@ class OpacityCache(Singleton):
 
                 if op is not None and op.moleculeName not in self.opacity_dict:
                     self.add_opacity(op, molecule_filter=molecule_filter)
-
+                op = None # Ensure garbage collection when run once
     def load_opacity(self, opacities=None, opacity_path=None, molecule_filter=None):
         """
         Main function to use when loading molecular opacities. Handles both 
