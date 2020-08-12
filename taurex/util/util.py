@@ -123,7 +123,10 @@ def calculate_weight(chem):
 
     for element, count in s:
         count = int(count or '1')
-        compoundweight += mass[element] * count
+        try:
+            compoundweight += mass[element] * count
+        except KeyError:
+            return 0.0
     return compoundweight
 
 

@@ -1,7 +1,7 @@
 import configobj
 from taurex.log import Logger
 from .factory import *
-from taurex.cache import GlobalCache
+
 
 class ParameterParser(Logger):
 
@@ -34,7 +34,8 @@ class ParameterParser(Logger):
 
 
     def setup_globals(self):
-        from taurex.cache import CIACache,OpacityCache
+        from taurex.cache import GlobalCache
+        from taurex.cache import CIACache, OpacityCache
         config = self._raw_config.dict()
     
 
