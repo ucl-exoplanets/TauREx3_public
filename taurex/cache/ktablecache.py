@@ -4,9 +4,9 @@ Contains caching class for Molecular cross section files
 
 from .singleton import Singleton
 from taurex.log import Logger
-import pathlib
 from . import GlobalCache
 from taurex.util.util import sanitize_molecule_string
+
 
 class KTableCache(Singleton):
     """
@@ -41,12 +41,13 @@ class KTableCache(Singleton):
         """
 
         import os
+
+        GlobalCache()['ktable_path'] = opacity_path
+
         if not os.path.isdir(opacity_path):
             self.log.error('PATH: %s does not exist!!!', opacity_path)
             raise NotADirectoryError
         self.log.debug('Path set to %s', opacity_path)
-        self._opacity_path = opacity_path
-    
 
     def __getitem__(self, key):
         """
@@ -122,58 +123,20 @@ class KTableCache(Singleton):
             self.log.info('Loading opacity %s into model',opacity.moleculeName)
             self.opacity_dict[opacity.moleculeName] = opacity   
 
-    def search_pickle_molecules(self):
-        """
-        Find molecules with ``.pickle`` opacities in set path
-
-        Returns
-        -------
-        molecules: :obj`list`
-            List of molecules with ``.pickle`` opacities
-        
-        """
-
-        from glob import glob
-        import os    
-        glob_path = os.path.join(self._opacity_path,'*.pickle')
-        file_list = [f for f in glob(glob_path)]
-        
-        return [sanitize_molecule_string(pathlib.Path(f).stem.split('.')[0].split('_')[0])  for f in file_list ]
-
-    def search_nemesis_molecules(self):
-        from glob import glob
-        import os    
-        glob_path = os.path.join(self._opacity_path,'*.kta')
-        file_list = [f for f in glob(glob_path)]
-        
-        return [sanitize_molecule_string(pathlib.Path(f).stem.split('.')[0].split('_')[0])  for f in file_list ] 
-
-    def search_petitradtrans_molecules(self):
-        from glob import glob
-        import os    
-        glob_path = [os.path.join(self._opacity_path,'*.h5'),os.path.join(self._opacity_path,'*.hdf5')]
-        file_list = [f for glist in glob_path for f in glob(glist)]
-        
-        return [sanitize_molecule_string(pathlib.Path(f).stem.split('.')[0].split('_')[0])  for f in file_list ] 
-
-
-
     def find_list_of_molecules(self):
-        from glob import glob
-        import os
-        from taurex.opacity import PickleOpacity
-        pickles = []
-        nemesis = []
-        hdf5 = []
-        if self._opacity_path is not None:
+        from taurex.parameter.classfactory import ClassFactory
+        opacity_klasses = ClassFactory().ktableKlasses
+
+        molecules = []
+
+        for c in opacity_klasses:
+            molecules.extend([x[0] for x in c.discover()])
         
-            pickles = self.search_pickle_molecules()
-            nemesis = self.search_nemesis_molecules()
-            hdf5 = self.search_petitradtrans_molecules()
+        forced = []
 
-        return list(set(pickles+nemesis+hdf5))
+        return set(molecules+forced)
 
-    def load_opacity_from_path(self,path,molecule_filter=None):
+    def load_opacity_from_path(self, path, molecule_filter=None):
         """
         Searches path for molecular cross-section files, creates and loads them into the cache
         ``.pickle`` will be loaded as :class:`~taurex.opacity.pickleopacity.PickleOpacity`
@@ -189,56 +152,29 @@ class KTableCache(Singleton):
             if its molecule is in this list. Mostly used by the 
             :func:`__getitem__` for filtering
 
-        """ 
-        from glob import glob
-        import os
-        from taurex.opacity.ktables.picklektable import PickleKTable
-        from taurex.opacity.ktables.nemesisktables import NemesisKTables
-        from taurex.opacity.ktables.hdfktable import HDF5KTable
+        """
 
-        glob_path = [os.path.join(path, '*.h5'),
-                     os.path.join(path, '*.hdf5'), 
-                     os.path.join(path, '*.pickle'), 
-                     os.path.join(path, '*.kta')]
-    
-        file_list = [f for glist in glob_path for f in glob(glist)]
-        self.log.debug('File list %s', file_list)
-        for files in file_list:
-            op = None
-            if files.endswith('.hdf5') or files.endswith('.h5'):
-                splits = pathlib.Path(files).stem.split('_')[0]
-                mol_name = sanitize_molecule_string(splits)
-                if molecule_filter is not None:
-                    if mol_name not in molecule_filter:
-                        continue
-                if mol_name in self.opacity_dict.keys():
-                    continue
-                op = HDF5KTable(files)
-                op._molecule_name = mol_name
+        from taurex.parameter.classfactory import ClassFactory
 
-            elif files.endswith('.kta'):
-                splits = pathlib.Path(files).stem.split('_')[0]
-                mol_name = sanitize_molecule_string(splits)
-                if molecule_filter is not None:
-                    if mol_name not in molecule_filter:
-                        continue
-                if mol_name in self.opacity_dict.keys():
-                    continue
-                op = NemesisKTables(files)
-                op._molecule_name = mol_name
-                
-            elif files.endswith('pickle'):
-                splits = pathlib.Path(files).stem.split('.')[0].split('_')
-                mol_name = sanitize_molecule_string(splits[0])
-                if molecule_filter is not None:
-                    if mol_name not in molecule_filter:
-                        continue
-                if mol_name in self.opacity_dict.keys():
-                    continue
-                op = PickleKTable(files)
-                op._molecule_name = splits[0]
-            if op is not None:
-                self.add_opacity(op, molecule_filter=molecule_filter)
+        cf = ClassFactory()
+
+        opacity_klass_list = sorted(cf.ktableKlasses,
+                                    key=lambda x: x.priority())
+        for c in opacity_klass_list:
+            try:
+                discover = c.discover()
+            except NotImplementedError:
+                self.log.warning('Klass %s has no discover method', c.__name__)
+                continue
+            for mol, args in c.discover():
+                self.log.debug('Klass: %s %s', mol, args)
+                op = None
+                if mol in molecule_filter:
+                    if not isinstance(args, (list, tuple,)):
+                        args = [args]
+                    op = c(*args)
+                if op is not None and op.moleculeName not in self.opacity_dict:
+                    self.add_opacity(op, molecule_filter=molecule_filter)
 
     def load_opacity(self, opacities=None, opacity_path=None, molecule_filter=None):
         """
@@ -278,13 +214,12 @@ class KTableCache(Singleton):
                 self.log.error('Unknown type %s passed into opacities, should be a list, single \
                      opacity or None if reading a path',type(opacities))
                 raise Exception('Unknown type passed into opacities')
-        elif opacity_path is not None:
+        else:
+            self.load_opacity_from_path(opacity_path,molecule_filter=molecule_filter)
+            # if isinstance(opacity_path,(list,)):
+            #     for path in opacity_path:
+            #         self.load_opacity_from_path(path,molecule_filter=molecule_filter)
 
-            if isinstance(opacity_path,str):
-                self.load_opacity_from_path(opacity_path,molecule_filter=molecule_filter)
-            elif isinstance(opacity_path,(list,)):
-                for path in opacity_path:
-                    self.load_opacity_from_path(path,molecule_filter=molecule_filter)
     
     def clear_cache(self):
         """

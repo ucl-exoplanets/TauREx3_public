@@ -9,7 +9,7 @@ class FilePressureProfile(ArrayPressureProfile):
         
         to_Pa = conversion_factor(units, 'Pa')
 
-        read_arr = np.loadtxt(filename, usecols=usecols, skiprows=skiprows,delimiter=delimiter,dtype=np.float64
+        read_arr = np.loadtxt(filename, usecols=int(usecols), skiprows=int(skiprows),delimiter=delimiter,dtype=np.float64
                               )
         super().__init__(read_arr*to_Pa,reverse=reverse)
 
