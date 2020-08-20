@@ -4,6 +4,8 @@ from taurex.binning import FluxBinner, SimpleBinner, Binner, NativeBinner
 from .strategies import wngrid_spectra
 from hypothesis import given
 from hypothesis.strategies import booleans
+
+
 def test_binner():
     b = Binner()
     with pytest.raises(NotImplementedError):
@@ -28,6 +30,7 @@ def test_simplebinner(spectra):
     assert(wngrid.shape[0] == wn.shape[0])
 
     assert np.mean(sp) == pytest.approx(np.mean(spectra[1]), rel=0.1)
+
 
 @given(wngrid_spectra(sort=booleans()))
 def test_native_binner(s):
