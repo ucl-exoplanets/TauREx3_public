@@ -83,7 +83,7 @@ class ClassFactory(Singleton):
 
     def discover_plugins(self):
         plugins = {}
-
+        failed_plugins = {}
         for entry_point in pkg_resources.iter_entry_points('taurex.plugins'):
 
             entry_point_name = entry_point.name
@@ -94,14 +94,15 @@ class ClassFactory(Singleton):
                 # For whatever reason do not attempt to load the plugin
                 self.log.warning('Could not load plugin %s', entry_point_name)
                 self.log.warning('Reason: %s', str(e))
+                failed_plugins[entry_point_name] = str(e)
                 continue
 
             plugins[entry_point_name] = module
 
-        return plugins
+        return plugins, failed_plugins
 
     def load_plugins(self):
-        plugins = self.discover_plugins()
+        plugins, failed_plugins = self.discover_plugins()
         self.log.info('----------Plugin loading---------')
         self.log.info('Discovered plugins %s', plugins.values())
 
