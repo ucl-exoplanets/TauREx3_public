@@ -20,7 +20,7 @@ def main():
     parser = argparse.ArgumentParser(description='TauREx {}'.format(version))
 
     parser.add_argument("-i", "--input", dest='input_file', type=str,
-                        required=True, help="Input par file to pass")
+                        help="Input par file to pass")
 
     parser.add_argument("-R", "--retrieval", dest='retrieval', default=False,
                         help="When set, runs retrieval", action='store_true')
@@ -50,9 +50,46 @@ def main():
 
     parser.add_argument("-S", "--save-spectrum",
                         dest='save_spectrum', type=str)
+
+    parser.add_argument('-v', "--version", dest='version', default=False,
+                        help="Display version", action='store_true')
+
+    parser.add_argument("--plugins", dest='plugins', default=False,
+                        help="Display plugins", action='store_true')
+
     args = parser.parse_args()
 
     output_size = OutputSize.heavy
+
+    if args.version:
+        print(version)
+        return
+
+    if args.plugins:
+        from taurex.parameter.classfactory import ClassFactory
+
+        setLogLevel(logging.ERROR)
+
+        successful_plugins, failed_plugins = ClassFactory().discover_plugins()
+
+        
+        print('\nSuccessfully loaded plugins')
+        print('---------------------------')
+        for k,v in successful_plugins.items():
+            print(k)
+
+        print('\n\nFailed plugins')
+        print('---------------------------')
+        for k,v in failed_plugins.items():
+            print(k)
+            print(f'Reason: {v}')
+        
+        print('\n')
+        return
+
+    if args.input_file is None:
+        print('Fatal: No input file specified.')
+        return
 
     if args.light:
         output_size = OutputSize.light
