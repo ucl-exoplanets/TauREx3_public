@@ -137,9 +137,9 @@ def molecules(draw, style='normal'):
 
 
 @composite
-def molecule_vmr(draw):
+def molecule_vmr(draw, min_range=1e-20, max_range=1):
     molecule = draw(molecules())
-    vmr = draw(floats(1e-20, 1e0))
+    vmr = draw(floats(min_range, max_range))
 
     return molecule, vmr
 

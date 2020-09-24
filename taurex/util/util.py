@@ -584,3 +584,7 @@ def compute_dz(altitude):
     dz[-1] = altitude[-1] - altitude[-2]
 
     return dz
+
+def has_duplicates(arr):
+
+    return len(arr) != len(set(arr))

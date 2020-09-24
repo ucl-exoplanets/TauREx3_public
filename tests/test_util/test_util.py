@@ -165,4 +165,14 @@ def test_bin_edges(res):
     
     assert round(np.mean(grid[:, 0]/widths)) == res
 
+
+def test_check_duplicates():
+    from taurex.util.util import has_duplicates
+    arr = ['Hello', 'Hello']
+
+    assert has_duplicates(arr) == True
+
+    arr = ['Hello', 'World']
+
+    assert has_duplicates(arr) == False
     
