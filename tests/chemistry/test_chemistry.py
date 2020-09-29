@@ -65,6 +65,7 @@ def test_chemistry_active_xsec(mols):
 
         assert c.availableActive == active_molecules
 
+    assert False
 
 @given(mols=lists(molecules()))
 def test_chemistry_active_ktable(mols):
