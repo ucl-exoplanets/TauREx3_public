@@ -37,7 +37,7 @@ def test_bilin(T, P, x11, x12, x21, x22):
 @hypothesis.given(T=floats(1, 2), P=floats(1, 2),
                   a=floats(1e-30, 1e-1), b=floats(1e-30, 1e-1),
                   c=floats(1e-30, 1e-1), d=floats(1e-30, 1e-1))
-@hypothesis.settings(deadline=400)
+#@hypothesis.settings(deadline=400)
 def test_exp_lin(T, P, a, b, c, d):
     from taurex.util.math import interp_exp_and_lin, interp_lin_only, \
         interp_exp_only
