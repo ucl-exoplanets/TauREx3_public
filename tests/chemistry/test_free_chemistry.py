@@ -22,8 +22,6 @@ def test_fill_gas_pair_ratio(ratio, tp):
     h2 = tc.gases.index('H2')
     he = tc.gases.index('He')
 
-    left = 1.0 - ratio
-
     assert tc.fitting_parameters()['He_H2'][2]() == ratio
 
     computed_ratio = tc.mixProfile[he]/tc.mixProfile[h2]
@@ -34,7 +32,7 @@ def test_fill_gas_pair_ratio(ratio, tp):
 
 @given(mole_ratios=lists(molecule_vmr(min_range=0.0, max_range=1.0), min_size=1),
        tp=TPs())
-@settings(deadline=None)
+#@settings(deadline=None)
 def test_multi_fill_gas(mole_ratios, tp):
     
     fill_gases = [m[0][0] for m in mole_ratios]
@@ -66,7 +64,7 @@ def test_multi_fill_gas(mole_ratios, tp):
 
 
 @given(mols=lists(molecule_vmr(), min_size=1), tp=TPs())
-@settings(deadline=None)
+#@settings(deadline=None)
 def test_constant_profile(mols, tp):
 
     molecule_names = [m[0][0] for m in mols]
