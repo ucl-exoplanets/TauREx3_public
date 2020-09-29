@@ -224,10 +224,10 @@ def TP_npoints(draw, min_layers=2, max_layers=30):
     P = draw(pressures(min_layers=min_layers, max_layers=max_layers))
     nlayers = P.shape[0]
 
-    T_top = draw(floats(min_value=100.0, max_value=3000.0,allow_nan=False))
+    T_top = draw(floats(min_value=100.0, max_value=3000.0, allow_nan=False))
     T_surface = draw(floats(min_value=100.0, max_value=3000.0, allow_nan=False))
 
-    P_top = draw(integers(min_value=-6,max_value=6))
+    P_top = draw(integers(min_value=-6, max_value=6))
     P_top = 10**P_top
     P_surface = -1
 
@@ -235,8 +235,8 @@ def TP_npoints(draw, min_layers=2, max_layers=30):
 
     if leftover > 0:
 
-        temp_points = draw(lists(floats(min_value=100.0, max_value=3000.0,allow_nan=False), leftover, leftover))
-        press_points = draw(lists(floats(min_value=1e-6, max_value=1e6,allow_nan=False), leftover, leftover))
+        temp_points = draw(lists(floats(min_value=100.0, max_value=3000.0,allow_nan=False), min_size=leftover, max_size=leftover))
+        press_points = draw(lists(floats(min_value=1e-6, max_value=1e6,allow_nan=False), min_size=leftover, max_size=leftover))
     else:
         temp_points = []
         press_points = []
