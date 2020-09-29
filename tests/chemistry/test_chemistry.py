@@ -1,9 +1,8 @@
 import pytest
 from taurex.chemistry import Chemistry
 from hypothesis import given
-from hypothesis.strategies import integers, floats, lists
+from hypothesis.strategies import lists
 from ..strategies import molecules
-import numpy as np
 from unittest.mock import patch
 
 

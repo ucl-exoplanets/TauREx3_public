@@ -177,3 +177,94 @@ def wngrid_spectra(draw, num_elements=integers(3, 50), sort=False):
                                     elements=floats(1e-10, 1e-1), fill=floats(1e-10, 1e-1)))
 
     return wngrid, spectra
+
+
+@composite
+def temperatures(draw, min_layers=2, max_layers=30):
+    nlayers = draw(integers(min_value=min_layers, max_value=max_layers))
+
+    min_T = draw(floats(min_value=100.0, max_value=3000.0))
+    max_T = draw(floats(min_value=100.0, max_value=3000.0))
+    T = np.linspace(min_T, max_T, nlayers)
+
+    return T    
+
+
+@composite
+def pressures(draw, min_layers=2, max_layers=30):
+
+    nlayers = draw(integers(min_value=min_layers, max_value=max_layers))
+    min_P = draw(integers(min_value=4, max_value=6))
+    max_P = draw(integers(min_value=-6, max_value=3))
+
+    P = np.logspace(min_P, max_P, nlayers)
+
+    return P
+
+
+@composite
+def TPs(draw, min_layers=2, max_layers=30):
+    nlayers = draw(integers(min_value=min_layers, max_value=max_layers))
+
+    min_T = draw(floats(min_value=100.0, max_value=3000.0, allow_nan=False))
+    max_T = draw(floats(min_value=100.0, max_value=3000.0, allow_nan=False))
+    T = np.linspace(min_T, max_T, nlayers)
+
+    min_P = draw(integers(min_value=4, max_value=6))
+    max_P = draw(integers(min_value=-6, max_value=3))
+
+    P = np.logspace(min_P, max_P, nlayers)
+
+    return T, P, nlayers
+
+
+@composite
+def TP_npoints(draw, min_layers=2, max_layers=30):
+
+    P = draw(pressures(min_layers=min_layers, max_layers=max_layers))
+    nlayers = P.shape[0]
+
+    T_top = draw(floats(min_value=100.0, max_value=3000.0,allow_nan=False))
+    T_surface = draw(floats(min_value=100.0, max_value=3000.0, allow_nan=False))
+
+    P_top = draw(integers(min_value=-6,max_value=6))
+    P_top = 10**P_top
+    P_surface = -1
+
+    leftover = nlayers - 2
+
+    if leftover > 0:
+
+        temp_points = draw(lists(floats(min_value=100.0, max_value=3000.0,allow_nan=False), leftover, leftover))
+        press_points = draw(lists(floats(min_value=1e-6, max_value=1e6,allow_nan=False), leftover, leftover))
+    else:
+        temp_points = []
+        press_points = []
+
+    return nlayers, T_top, T_surface, P_top, P_surface, temp_points,\
+        press_points, P
+
+
+@composite
+def planets(draw, mass_range=[0.001, 10.0],
+            radius_range=[0.001, 10.0]):
+    from taurex.planet import Planet
+    planet_mass = draw(floats(min_value=mass_range[0],
+                              max_value=mass_range[1],
+                              allow_nan=False))
+    planet_radius = draw(floats(min_value=radius_range[0],
+                                max_value=radius_range[1],
+                                allow_nan=False))
+    planet_distance = draw(floats(allow_nan=False))
+    impact_param = draw(floats(allow_nan=False))
+    orbital_period = draw(floats(allow_nan=False))
+    albedo = draw(floats(allow_nan=False))
+    transit_time = draw(floats(allow_nan=False))
+
+    return Planet(planet_mass=planet_mass,
+                  planet_radius=planet_radius,
+                  planet_distance=planet_distance,
+                  impact_param=impact_param,
+                  orbital_period=orbital_period,
+                  albedo=albedo,
+                  transit_time=transit_time)
