@@ -1,5 +1,38 @@
 """The main taurex program"""
 
+def parse_keywords(keywords):
+    import tabulate
+    from taurex.parameter.classfactory import ClassFactory
+    cf = ClassFactory()
+    print('\n')
+    if keywords in ('contribs', ):
+        print('')
+        print('-----------------------------------------------')
+        print('-------------Available Contributions-----------')
+        print('-----------------------------------------------')
+        print('')
+        table = [(f'[[{c.__name__}]]', c.__module__.split('.')[0]) for c in cf.contributionKlasses]
+        print(tabulate.tabulate(table, headers=['Header','Source'],tablefmt="fancy_grid"))
+
+    elif keywords in ('chemistry', ):
+        print('')
+        print('-----------------------------------------------')
+        print('-------------Available [Chemistry]-------------')
+        print('-----------------------------------------------')
+        print('')
+        table = [(' / '.join(c.input_keywords()),f'{c.__name__}', c.__module__.split('.')[0]) for c in cf.chemistryKlasses]
+        print(tabulate.tabulate(table, headers=['chemistry_type','Class', 'Source'], tablefmt="fancy_grid"))
+        print('\n')
+    elif keywords in ('temperature', ):
+        print('')
+        print('-----------------------------------------------')
+        print('-------------Available [Temperature]-----------')
+        print('-----------------------------------------------')
+        print('')
+        table = [(' / '.join(c.input_keywords()),f'{c.__name__}', c.__module__.split('.')[0]) for c in cf.temperatureKlasses]
+        print(tabulate.tabulate(table, headers=['profile_type','Class', 'Source'], tablefmt="fancy_grid"))
+        print('\n')
+
 
 def main():
     import argparse
@@ -60,6 +93,8 @@ def main():
     parser.add_argument("--fitparams", dest='fitparams', default=False,
                         help="Display available fitting params", action='store_true')
 
+    parser.add_argument("--keywords", dest="keywords", type=str)
+
     args = parser.parse_args()
 
     output_size = OutputSize.heavy
@@ -89,6 +124,13 @@ def main():
         
         print('\n')
         return
+
+    if args.keywords:
+        parse_keywords(args.keywords)
+        return
+
+
+
 
     if args.input_file is None:
         print('Fatal: No input file specified.')
