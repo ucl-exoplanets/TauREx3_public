@@ -22,10 +22,8 @@ def test_guillot_behaviour(T_irr, kappa_ir, kappa_v1,
 
     g = None
 
-    
-
     if any([kappa_ir == 0.0, kappa_v1 == 0.0, kappa_v2 == 0.0,
-            math.isinf(kappa_ir), T_irr < 0, T_int < 0]):
+            T_irr < 0, T_int < 0]):
         with pytest.raises(InvalidModelException):
             g = Guillot2010(T_irr, kappa_ir, kappa_v1, kappa_v2, alpha, T_int)
         return
@@ -93,5 +91,5 @@ def test_guillot_values():
     """
     Should be a list of inputs and outputs
     """
-    
+
     pass
