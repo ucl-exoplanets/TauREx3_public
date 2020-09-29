@@ -57,6 +57,9 @@ def main():
     parser.add_argument("--plugins", dest='plugins', default=False,
                         help="Display plugins", action='store_true')
 
+    parser.add_argument("--fitparams", dest='fitparams', default=False,
+                        help="Display available fitting params", action='store_true')
+
     args = parser.parse_args()
 
     output_size = OutputSize.heavy
@@ -115,6 +118,39 @@ def main():
 
     # build the model
     model.build()
+
+    if args.fitparams:
+        import tabulate
+        print('')
+        print('-----------------------------------------------')
+        print('------Available Retrieval Parameters-----------')
+        print('-----------------------------------------------')
+        print('')
+
+        keywords = [k for k,v in model.fittingParameters.items()]
+        current_values = [v[2]() for k,v in model.fittingParameters.items()]
+
+        short_desc = []
+        for k,v in model.fittingParameters.items():
+            doc = v[2].__doc__
+            if doc is None or doc is 'None':
+                short_desc.append('')
+            else:
+                split = doc.split('\n')
+                for spl in split:
+                    if len(spl) > 0:
+                        s = spl
+                        break
+
+                short_desc.append(s)
+
+
+        output = tabulate.tabulate(zip(keywords,  short_desc),
+                              headers=['Param Name', 'Short Desc'],
+                              tablefmt="fancy_grid")
+        print(output)
+        print('\n\n')
+        return
 
     # Get the spectrum
     observation = pp.generate_observation()

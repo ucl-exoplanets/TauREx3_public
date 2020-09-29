@@ -139,6 +139,8 @@ class TaurexChemistry(Chemistry):
             fget = read_mol
             fset = write_mol
 
+            fget.__doc__ = f'{gas}/{main_gas} ratio (volume)'
+
             bounds = [1.0e-12, 0.1]
 
             default_fit = False

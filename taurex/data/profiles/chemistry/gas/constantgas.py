@@ -59,6 +59,8 @@ class ConstantGas(Gas):
         def write_mol(self, value):
             self._mix_ratio = value
 
+        read_mol.__doc__ = f"{mol_name} constant mix ratio (VMR)"
+
         fget = read_mol
         fset = write_mol
 

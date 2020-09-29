@@ -77,7 +77,7 @@ def fitparam(f=None, param_name=None, param_latex=None,
     wrapper.default_mode = default_mode
     wrapper.decorated = 'fitparam'
     pwrap = property(wrapper)
-
+    wrapper.__doc__ = str(f.__doc__)
     return pwrap
 
 
@@ -178,7 +178,7 @@ class Fittable(object):
         if param_name in self._param_dict:
             raise AttributeError(
                 'param name {} already exists'.format(param_name))
-
+        
         self._param_dict[param_name] = (param_name,
                                         param_latex,
                                         fget.__get__(self),
