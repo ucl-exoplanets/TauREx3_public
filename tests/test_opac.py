@@ -58,7 +58,8 @@ def fake_interp_opac():
 @example(temperature=3000, pressure=1e8)
 def test_find_closest_index(fake_interp_opac, temperature, pressure):
 
-    t_min, t_max, p_min, p_max = fake_interp_opac.find_closest_index(temperature, pressure)
+    t_min, t_max, p_min, p_max = \
+        fake_interp_opac.find_closest_index(temperature, pressure)
 
     t_grid = fake_interp_opac.temperatureGrid
     p_grid = fake_interp_opac.pressureGrid
