@@ -41,10 +41,14 @@ def test_phoenix_find_spectrum(tmpdir):
     with patch('glob.glob', return_value=file_list) as p:
         phoenix.get_avail_phoenix()
     
+    # Test if we find the right temperatures, logg and Zs
+
     assert set(T) == set(phoenix._T_list)
     assert set(logg) == set(phoenix._Logg_list)
     assert set(Z) == set(phoenix._Z_list)
 
+
+    # Test if we select the correct file
     for fn, tp, lg, mtl in test_cases:
         phoenix._logg = lg
         phoenix._temperature = tp
