@@ -23,6 +23,7 @@ def test_lin(test_input, expected):
 @hypothesis.given(T=floats(0, 1), P=floats(0, 1),
                   x11=floats(1e-30, 1e-1), x12=floats(1e-30, 1e-1),
                   x21=floats(1e-30, 1e-1), x22=floats(1e-30, 1e-1))
+@hypothesis.settings(deadline=None)   # This requires a compilation stage initially
 def test_bilin(T, P, x11, x12, x21, x22):
     from taurex.util.math import intepr_bilin, interp_lin_only
     Pmin, Pmax = 0.0, 1.0

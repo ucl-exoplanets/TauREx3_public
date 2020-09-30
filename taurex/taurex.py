@@ -11,7 +11,7 @@ def parse_keywords(keywords):
         print('-------------Available Contributions-----------')
         print('-----------------------------------------------')
         print('')
-        table = [(f'[[{c.__name__}]]', c.__module__.split('.')[0]) for c in cf.contributionKlasses]
+        table = [(f'[[{c.__name__}]]', c.__module__.split('.')[0].split('_')[-1]) for c in cf.contributionKlasses]
         print(tabulate.tabulate(table, headers=['Header','Source'],tablefmt="fancy_grid"))
 
     elif keywords in ('chemistry', ):
@@ -20,7 +20,7 @@ def parse_keywords(keywords):
         print('-------------Available [Chemistry]-------------')
         print('-----------------------------------------------')
         print('')
-        table = [(' / '.join(c.input_keywords()),f'{c.__name__}', c.__module__.split('.')[0]) for c in cf.chemistryKlasses]
+        table = [(' / '.join(c.input_keywords()),f'{c.__name__}', c.__module__.split('.')[0].split('_')[-1]) for c in cf.chemistryKlasses]
         print(tabulate.tabulate(table, headers=['chemistry_type','Class', 'Source'], tablefmt="fancy_grid"))
         print('\n')
     elif keywords in ('temperature', ):
@@ -29,10 +29,56 @@ def parse_keywords(keywords):
         print('-------------Available [Temperature]-----------')
         print('-----------------------------------------------')
         print('')
-        table = [(' / '.join(c.input_keywords()),f'{c.__name__}', c.__module__.split('.')[0]) for c in cf.temperatureKlasses]
+        table = [(' / '.join(c.input_keywords()),f'{c.__name__}', c.__module__.split('.')[0].split('_')[-1]) for c in cf.temperatureKlasses]
         print(tabulate.tabulate(table, headers=['profile_type','Class', 'Source'], tablefmt="fancy_grid"))
         print('\n')
-
+    elif keywords in ('gas', ):
+        print('')
+        print('-----------------------------------------------')
+        print('-------------Available Gas Profiles------------')
+        print('-----------------------------------------------')
+        print('')
+        table = [(' / '.join(c.input_keywords()),f'{c.__name__}', c.__module__.split('.')[0].split('_')[-1]) for c in cf.gasKlasses]
+        print(tabulate.tabulate(table, headers=['gas_type','Class', 'Source'], tablefmt="fancy_grid"))
+        print('\n')
+    elif keywords in ('optimizer', ):
+        print('')
+        print('-----------------------------------------------')
+        print('-------------Available Optimizers--------------')
+        print('-----------------------------------------------')
+        print('')
+        table = [(' / '.join(c.input_keywords()),f'{c.__name__}', c.__module__.split('.')[0].split('_')[-1]) for c in cf.optimizerKlasses]
+        print(tabulate.tabulate(table, headers=['optimizer','Class', 'Source'], tablefmt="fancy_grid"))
+        print('\n')
+    elif keywords in ('prior', ):
+        print('')
+        print('-----------------------------------------------')
+        print('-------------Available Priors------------------')
+        print('-----------------------------------------------')
+        print('')
+        table = [(f'{c.__name__}', c.__module__.split('.')[0].split('_')[-1]) for c in cf.priorKlasses]
+        print(tabulate.tabulate(table, headers=['prior','Class', 'Source'], tablefmt="fancy_grid"))
+        print('\n')
+    elif keywords in ('model', ):
+        print('')
+        print('-----------------------------------------------')
+        print('-------------Available Forward [Model]s--------')
+        print('-----------------------------------------------')
+        print('')
+        table = [(' / '.join(c.input_keywords()),f'{c.__name__}', c.__module__.split('.')[0].split('_')[-1]) for c in cf.modelKlasses]
+        print(tabulate.tabulate(table, headers=['model_type','Class', 'Source'], tablefmt="fancy_grid"))
+        print('\n')
+    elif keywords in ('pressure', ):
+        print('')
+        print('-----------------------------------------------')
+        print('-------------Available [Pressure]s-------------')
+        print('-----------------------------------------------')
+        print('')
+        table = [(' / '.join(c.input_keywords()), f'{c.__name__}',
+                 c.__module__.split('.')[0].split('_')[-1])
+                 for c in cf.pressureKlasses]
+        print(tabulate.tabulate(table, headers=['profile_type','Class', 'Source'], tablefmt="fancy_grid"))
+        print('\n')
 
 def main():
     import argparse
