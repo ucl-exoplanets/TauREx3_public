@@ -193,14 +193,15 @@ class PowerGas(Gas):
         A = np.power(10, A)
         if molecule_name in known_molecules:
             i = known_molecules.index(molecule_name)
-            print(i, a[i], b[i], g[i], A[i])
+            self.debug('%s %s %s %s %s', i, a[i], b[i], g[i], A[i])
             return a[i], b[i], g[i], A[i]
         else:
             return None, None, None, None
 
 
     
-    def initialize_profile(self,nlayers,temperature_profile,pressure_profile,altitude_profile):
+    def initialize_profile(self, nlayers, temperature_profile,
+                           pressure_profile, altitude_profile):
 
         self._mix_profile = np.zeros(nlayers)
         molecule_name = self._profile_type
@@ -241,12 +242,10 @@ class PowerGas(Gas):
 
         #Ad = alpha * np.log10(pressure_profile) + beta / temperature_profile + gamma
 
-        pressure_profile *= 1e-5  ### convert pressure to bar
-        Ad = np.power(10, gamma*(-1)) * np.power(pressure_profile, alpha)* np.power(10, beta/temperature_profile)
+        P = pressure_profile*1e-5  ### convert pressure to bar
+        Ad = np.power(10, gamma*(-1)) * np.power(P, alpha)* np.power(10, beta/temperature_profile)
         mix = 1 / np.sqrt(mix_surface) + 1 / np.sqrt(Ad)
         mix = np.power(1/mix,2)
-
-        pressure_profile *= 1e5
 
         self._mix_profile = mix
 
