@@ -1,3 +1,4 @@
+import pytest
 from taurex.chemistry import PowerGas
 from ..strategies import molecule_vmr, TPs
 from hypothesis import given
@@ -8,8 +9,8 @@ import numpy as np
 @given(molecule=molecule_vmr(), alpha=floats(allow_nan=False),
                     beta=floats(allow_nan=False), gamma=floats(allow_nan=False), tp=TPs())
 def test_powergas_all(molecule, alpha, beta, gamma, tp):
-    
-    T,P,n = tp
+
+    T, P, n = tp
     mol, vmr = molecule
     mol_name = mol[0]
     cg = PowerGas(mol[0], mix_ratio_surface=vmr, alpha=alpha, beta=beta,
@@ -29,3 +30,23 @@ def test_powergas_all(molecule, alpha, beta, gamma, tp):
 
     assert f'{mol_name}_gamma' in params
     assert params[f'{mol_name}_gamma'][2]() == gamma
+
+    assert cg.mixProfile.shape[0] == n
+
+
+@pytest.mark.parametrize(
+    "molecule",
+    ['H2', 'H2O', 'TiO', 'VO', 'H-', 'Na', 'K'])
+@given(TP=TPs())
+def test_auto_profile(molecule, TP):
+    T, P, n = TP
+    ps_auto = PowerGas(molecule_name=molecule, profile_type='auto')
+    ps_truth = PowerGas(molecule_name='LOL', profile_type=molecule)
+
+    ps_auto.initialize_profile(n, T, P, None)
+    ps_truth.initialize_profile(n, T, P, None)
+
+    assert np.all(ps_truth.mixProfile == ps_auto.mixProfile)
+
+
+
