@@ -591,4 +591,11 @@ def has_duplicates(arr):
 
 
 def find_closest_pair(arr, value):
-    pass
+
+    right = arr.searchsorted(value)
+    right = max(min(arr.shape[0]-1, right),1)
+
+    left = right-1
+    left = max(0, left)
+
+    return left, right

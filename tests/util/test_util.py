@@ -1,8 +1,9 @@
 import pytest
 import hypothesis
-from hypothesis.strategies import integers
+from hypothesis.strategies import integers, floats
 import numpy as np
 from ..strategies import molecules, hyp_wngrid
+from hypothesis.extra.numpy import arrays
 
 @hypothesis.given(molecules(style='normal'))
 def test_molecular_weight_hyp_normal(mol):
@@ -170,9 +171,36 @@ def test_check_duplicates():
     from taurex.util.util import has_duplicates
     arr = ['Hello', 'Hello']
 
-    assert has_duplicates(arr) == True
+    assert has_duplicates(arr) is True
 
     arr = ['Hello', 'World']
 
-    assert has_duplicates(arr) == False
-    
+    assert has_duplicates(arr) is False
+
+
+@hypothesis.given(arr=arrays(np.float, 10,
+                             elements=floats(min_value=-10.0,
+                                             max_value=20.0,
+                                             allow_nan=False),
+                             unique=True).map(np.sort),
+                  value=floats(min_value=-20.0, max_value=50.0,
+                               allow_nan=False))
+def test_closest_pair(arr, value):
+    from taurex.util.util import find_closest_pair
+
+    left, right = find_closest_pair(arr, value)
+
+    hypothesis.note(f'L: {left} R: {right} V: {value}')
+
+    assert left == right-1 or left == right
+    if value < arr.min():
+        assert left == 0
+        assert right == 1
+    elif value > arr.max():
+        assert left == arr.shape[0]-2
+        assert right == arr.shape[0]-1
+    else:
+        assert value >= arr[left]
+        assert value <= arr[right]
+
+
