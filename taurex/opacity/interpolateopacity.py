@@ -60,7 +60,7 @@ class InterpolatingOpacity(Opacity):
         # p_max = min(len(self.pressureGrid)-1, p_max)
 
         t_min, t_max = find_closest_pair(self.temperatureGrid, T)
-        p_min, p_max = find_closest_pair(self.pressureGrid, P)
+        p_min, p_max = find_closest_pair(self.logPressure, P)
 
         return t_min, t_max, p_min, p_max
 

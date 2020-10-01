@@ -59,8 +59,6 @@ class TestUniform(unittest.TestCase):
     def test_uniform(self):
         from taurex.core.priors import Uniform
 
-        with self.assertRaises(ValueError):
-            Uniform()
 
         u = Uniform(bounds=(100, 500))
 
@@ -74,8 +72,6 @@ class TestUniform(unittest.TestCase):
     def test_loguniform(self):
         from taurex.core.priors import LogUniform
         import math
-        with self.assertRaises(ValueError):
-            LogUniform()
 
         u = LogUniform(lin_bounds=(100, 500))
         

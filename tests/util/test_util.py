@@ -190,7 +190,7 @@ def test_closest_pair(arr, value):
 
     left, right = find_closest_pair(arr, value)
 
-    hypothesis.note(f'L: {left} R: {right} V: {value}')
+    #hypothesis.note(f'L: {left} R: {right} V: {value}')
 
     assert left == right-1 or left == right
     if value < arr.min():
