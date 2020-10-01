@@ -588,3 +588,7 @@ def compute_dz(altitude):
 def has_duplicates(arr):
 
     return len(arr) != len(set(arr))
+
+
+def find_closest_pair(arr, value):
+    pass
