@@ -70,8 +70,15 @@ def fitparam(f=None, param_name=None, param_latex=None,
     def wrapper(self, *args, **kwargs):
 
         return f(self, *args, **kwargs)
+
+    if param_name is None:
+        raise ValueError('Fitting parameter must have a name')
+
     wrapper.param_name = param_name
+
     wrapper.param_latex = param_latex
+    if wrapper.param_latex is None:
+        wrapper.param_latex = param_name
     wrapper.default_fit = default_fit
     wrapper.default_bounds = default_bounds
     wrapper.default_mode = default_mode
