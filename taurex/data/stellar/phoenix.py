@@ -151,9 +151,9 @@ class PhoenixStar(BlackbodyStar):
         self.recompute_spectra()
 
     def find_nearest_file(self):
-
+        import math
         idx = self._index_finder(
-            [self._temperature, self._logg, self._metallicity])
+            [self._temperature, self._logg, math.log10(self._metallicity)])
         return self._files[int(idx)]
 
     def get_avail_phoenix(self):
@@ -164,12 +164,12 @@ class PhoenixStar(BlackbodyStar):
         self._T_list = np.array(
             [np.float(os.path.basename(k)[3:8]) for k in files])*100
         self._Logg_list = np.array(
-            [np.float(os.path.basename(k)[9:12]) for k in files])
+            [np.float(os.path.basename(k)[8:12]) for k in files])
         self._Z_list = np.array(
             [np.float(os.path.basename(k)[13:16]) for k in files])
         self._index_finder = NearestNDInterpolator(
             (self._T_list, self._Logg_list, self._Z_list),
-            np.arange(0, self._T_list.shape[0]))
+            np.arange(0, self._T_list.shape[0]),rescale=True)
 
     # def preload_phoenix_spectra(self):
 

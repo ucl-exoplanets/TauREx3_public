@@ -15,6 +15,23 @@ class InterpolatingOpacity(Opacity):
         self._interp_mode = interpolation_mode
 
     @property
+    def pressureMax(self):
+        return self.pressureGrid[-1]
+
+    @property
+    def pressureMin(self):
+        return self.pressureGrid[0]
+
+    @property
+    def temperatureMax(self):
+        return self.temperatureGrid[-1]
+
+    @property
+    def temperatureMin(self):
+        return self.temperatureGrid[0]
+
+
+    @property
     def xsecGrid(self):
         raise NotImplementedError
 
@@ -31,11 +48,19 @@ class InterpolatingOpacity(Opacity):
         return self.temperatureGrid.min(), self.temperatureGrid.max()
 
     def find_closest_index(self, T, P):
-        t_min = self.temperatureGrid.searchsorted(T, side='right')-1
-        t_max = t_min+1
+        from taurex.util.util import find_closest_pair
+        # t_min = self.temperatureGrid.searchsorted(T, side='right')-1
+        # t_min = max(0, t_min)
+        # t_max = t_min+1
+        # t_max = min(len(self.temperatureGrid)-1, t_max)
 
-        p_min = self.logPressure.searchsorted(P, side='right')-1
-        p_max = p_min+1
+        # p_min = self.pressureGrid.searchsorted(P, side='right')-1
+        # p_min = max(0, p_min)
+        # p_max = p_min+1
+        # p_max = min(len(self.pressureGrid)-1, p_max)
+
+        t_min, t_max = find_closest_pair(self.temperatureGrid, T)
+        p_min, p_max = find_closest_pair(self.logPressure, P)
 
         return t_min, t_max, p_min, p_max
 
@@ -70,9 +95,8 @@ class InterpolatingOpacity(Opacity):
         self.debug('Interpolating %s %s %s %s %s %s', T, P,
                    t_idx_min, t_idx_max, p_idx_min, p_idx_max)
 
-        if p_idx_max == 0 and t_idx_max == 0:
-
-            return np.zeros_like(self.xsecGrid[0, 0, wngrid_filter]).ravel()
+        check_pressure_max = P >= self.pressureMax
+        check_temperature_max = T >= self.temperatureMax
 
         min_pressure, max_pressure = self.pressureBounds
         min_temperature, max_temperature = self.temperatureBounds
@@ -92,6 +116,9 @@ class InterpolatingOpacity(Opacity):
             self.debug('Maximum Temperature pressure reached. Using last')
             return self.xsecGrid[-1, -1, wngrid_filter].ravel()
 
+        if check_pressure_min and check_temperature_min:
+            return np.zeros_like(self.xsecGrid[0, 0, wngrid_filter]).ravel()
+
         # Max pressure
         if check_pressure_max:
             self.debug('Max pressure reached. Interpolating temperature only')
@@ -102,8 +129,7 @@ class InterpolatingOpacity(Opacity):
             self.debug('Max temperature reached. Interpolating pressure only')
             return self.interp_pressure_only(P, p_idx_min, p_idx_max, -1, wngrid_filter)
 
-        if check_pressure_min and check_temperature_min:
-            return self.xsecGrid[0, 0, wngrid_filter].ravel()
+
 
         if check_pressure_min:
             self.debug('Min pressure reached. Interpolating temperature only')

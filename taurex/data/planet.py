@@ -99,6 +99,9 @@ class BasePlanet(Fittable, Logger, Writeable):
     @fitparam(param_name='planet_distance', param_latex='$D_{planet}$',
               default_fit=False, default_bounds=[1, 2])
     def distance(self):
+        """
+        Planet semi major axis from parent star (AU)
+        """
         return self._distance
 
     @distance.setter

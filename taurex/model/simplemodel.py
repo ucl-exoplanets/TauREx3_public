@@ -548,6 +548,12 @@ class SimpleForwardModel(ForwardModel):
     def path_integral(self, wngrid, return_contrib):
         raise NotImplementedError
 
+    def generate_profiles(self):
+        from taurex.util.output import generate_profile_dict
+        return generate_profile_dict(self)
+
+
+
     def write(self, output):
         # Run a model if needed
         self.model()

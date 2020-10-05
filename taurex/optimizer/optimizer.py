@@ -36,6 +36,8 @@ class Optimizer(Logger):
         self._model_callback = None
         self._sigma_fraction = sigma_fraction
         self._fit_priors = {}
+        self.fitting_parameters = []
+        self.fitting_priors = []
     def set_model(self, model):
         """
         Sets the model to be optimized/fit
@@ -114,6 +116,15 @@ class Optimizer(Logger):
 
 
         """
+
+        if len(fit_params) != len(self.fitting_parameters):
+            self.error('Trying to update model with more fitting parameters'
+                       ' than enabled')
+            self.error(f'No. enabled parameters:{len(self.fitting_parameters)}'
+                       f' Update length: {len(fit_params)}')
+            raise ValueError('Trying to update model with more fitting'
+                             ' parameters than enabled')
+
 
         for value, param, priors in zip(fit_params, self.fitting_parameters, self.fitting_priors):
             name, latex, fget, fset, mode, to_fit, bounds = param
@@ -586,7 +597,7 @@ class Optimizer(Logger):
             self._model.model(cutoff_grid=False)
 
             # Store profiles here
-            sol_values['Profiles'] = generate_profile_dict(self._model)
+            sol_values['Profiles'] = self._model.generate_profiles()
             profile_dict, spectrum_dict = self.generate_profiles(
                 solution, self._observed.wavenumberGrid)
 

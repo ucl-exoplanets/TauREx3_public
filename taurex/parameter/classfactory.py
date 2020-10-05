@@ -104,7 +104,7 @@ class ClassFactory(Singleton):
     def load_plugins(self):
         plugins, failed_plugins = self.discover_plugins()
         self.log.info('----------Plugin loading---------')
-        self.log.info('Discovered plugins %s', plugins.values())
+        self.log.debug('Discovered plugins %s', plugins.values())
 
         for k, v in plugins.items():
             self.log.info('Loading %s', k)

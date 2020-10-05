@@ -227,8 +227,11 @@ class NPoint(TemperatureProfile):
 
         smooth_window = self._smooth_window
 
-        TP = np.interp((np.log(self.pressure_profile[::-1])),
-                       np.log(Pnodes[::-1]), Tnodes[::-1])
+        if np.all(Tnodes == Tnodes[0]):
+            return np.ones_like(self.pressure_profile)*Tnodes[0]
+
+        TP = np.interp((np.log10(self.pressure_profile[::-1])),
+                       np.log10(Pnodes[::-1]), Tnodes[::-1])
 
         # smoothing T-P profile
         wsize = int(self.nlayers*(smooth_window / 100.0))
@@ -238,7 +241,10 @@ class NPoint(TemperatureProfile):
         border = np.int((len(TP) - len(TP_smooth))/2)
 
         foo = TP[::-1]
-        foo[border:-border] = TP_smooth[::-1]
+        if len(TP_smooth) == len(foo):
+            foo = TP_smooth[::-1]
+        else:
+            foo[border:-border] = TP_smooth[::-1]
 
         return foo
 
