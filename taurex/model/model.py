@@ -14,7 +14,7 @@ class ForwardModel(Logger, Fittable, Writeable):
 
         self._native_grid = None
 
-        self._fitting_parameters = {}
+        self._fitting_parameters = self.fitting_parameters()
 
         self.contribution_list = []
 
@@ -65,6 +65,13 @@ class ForwardModel(Logger, Fittable, Writeable):
 
         return model
 
+    def generate_profiles(self):
+        """
+        Must return a dictionary of profiles you want to
+        store after modeling
+        """
+
+        return {}
 
     @classmethod
     def input_keywords(self):

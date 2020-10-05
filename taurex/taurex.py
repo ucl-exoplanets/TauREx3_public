@@ -391,7 +391,7 @@ def main():
                 obs = o.create_group('Observed')
                 observation.write(obs)
 
-            profiles = generate_profile_dict(model)
+            profiles = model.generate_profiles()
             spectrum = \
                 binning.generate_spectrum_output(result,
                                                  output_size=output_size)
