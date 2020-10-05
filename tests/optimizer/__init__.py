@@ -51,6 +51,8 @@ class LineModel(ForwardModel):
         test = Dummy()
         return test
 
+    def generate_profiles(self):
+        return {}
 
 class LineObs(BaseSpectrum):
 
