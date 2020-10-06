@@ -3,7 +3,10 @@ from taurex.util import get_molecular_weight
 from taurex.data.fittable import Fittable, derivedparam
 import numpy as np
 from taurex.output.writeable import Writeable
-from taurex.cache import OpacityCache
+from taurex.cache import OpacityCache, GlobalCache
+from taurex.cache.ktablecache import KTableCache
+
+
 
 
 class Chemistry(Fittable, Logger, Writeable):
@@ -38,7 +41,36 @@ class Chemistry(Fittable, Logger, Writeable):
         Fittable.__init__(self)
 
         self.mu_profile = None
-        self._avail_active = OpacityCache().find_list_of_molecules()
+
+
+        if GlobalCache()['opacity_method'] == 'ktables':
+            self._avail_active = KTableCache().find_list_of_molecules()
+        else:
+
+            self._avail_active = OpacityCache().find_list_of_molecules()
+        #self._avail_active = OpacityCache().find_list_of_molecules()
+        deactive_list = GlobalCache()['deactive_molecules']
+        if deactive_list is not None:
+            self._avail_active = [k for k in self._avail_active if k not in deactive_list]
+
+    def set_star_planet(self, star, planet):
+        """
+
+        Supplies the star and planet to chemistry
+        for photochemistry reasons. Does nothing by default
+
+        Parameters
+        ----------
+
+        star: :class:`~taurex.data.stellar.star.Star`
+            A star object
+
+        planet: :class:`~taurex.data.planet.Planet`
+            A planet object
+
+
+        """
+        pass
 
     @property
     def availableActive(self):

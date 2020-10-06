@@ -185,3 +185,7 @@ class LeeMieContribution(Contribution):
         contrib.write_scalar('lee_mie_bottomP', self._mie_bottom_pressure)
         contrib.write_scalar('lee_mie_topP', self._mie_top_pressure)
         return contrib
+
+    @classmethod
+    def input_keywords(self):
+        return ['LeeMie', ]

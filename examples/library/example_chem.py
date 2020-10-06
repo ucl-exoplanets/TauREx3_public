@@ -1,8 +1,7 @@
 from taurex.chemistry import Chemistry
-from taurex.core import fitparam
 from taurex.exceptions import InvalidModelException
 import numpy as np
-from taurex.util import molecule_texlabel # For molecule LaTex labels
+from taurex.util import molecule_texlabel  # For molecule LaTex labels
 
 
 class ExampleChemistry(Chemistry):

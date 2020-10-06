@@ -1,6 +1,7 @@
 from .chemistry import Chemistry
 import numpy as np
 from taurex.util import molecule_texlabel
+from taurex.util.util import has_duplicates
 from taurex.cache import OpacityCache
 from taurex.exceptions import InvalidModelException
 
@@ -73,6 +74,11 @@ class TaurexChemistry(Chemistry):
         if isinstance(ratio, float):
             ratio = [ratio]
 
+        if has_duplicates(fill_gases):
+            self.error('Fill gasses has duplicate molecules')
+            self.error('Fill gasses: %s', fill_gases)
+            raise ValueError('Duplicate fill gases detected')
+
         if len(fill_gases) > 1 and len(ratio) != len(fill_gases)-1:
             self.error('Fill gases and ratio count are not correctly matched')
             self.error('There should be %s ratios, you have defined %s',
@@ -81,11 +87,33 @@ class TaurexChemistry(Chemistry):
 
         self._fill_gases = fill_gases
         self._fill_ratio = ratio
-        self.active_mixratio_profile = None
-        self.inactive_mixratio_profile = None
-        self.molecules_i_have = OpacityCache().find_list_of_molecules()
-        self.debug('MOLECULES I HAVE %s', self.molecules_i_have)
+        self._mix_profile = None
+        self.debug('MOLECULES I HAVE %s', self.availableActive)
         self.setup_fill_params()
+        self.determine_mix_mask()
+    
+    def determine_mix_mask(self):
+
+        try:
+            self._active, self._active_mask = zip(*[(m, i) for i, m in
+                                                        enumerate(self.gases)
+                                                        if m in
+                                                        self.availableActive])
+        except ValueError:
+            self.debug('No active gases detected')
+            self._active, self._active_mask = [], None
+
+        try:
+            self._inactive, self._inactive_mask = zip(*[(m, i) for i, m in
+                                                            enumerate(self.gases)
+                                                            if m not in
+                                                            self.availableActive])
+        except ValueError:
+            self.debug('No inactive gases detected')
+            self._inactive, self._inactive_mask = [], None
+
+        self._active_mask = np.array(self._active_mask)
+        self._inactive_mask = np.array(self._inactive_mask)
 
     def setup_fill_params(self):
         if not hasattr(self._fill_gases, '__len__') or \
@@ -111,11 +139,31 @@ class TaurexChemistry(Chemistry):
             fget = read_mol
             fset = write_mol
 
+            fget.__doc__ = f'{gas}/{main_gas} ratio (volume)'
+
             bounds = [1.0e-12, 0.1]
 
             default_fit = False
             self.add_fittable_param(param_name, param_tex, fget,
                                     fset, 'log', default_fit, bounds)
+
+    def compute_mu_profile(self, nlayers):
+        """
+        Computes molecular weight of atmosphere
+        for each layer
+
+        Parameters
+        ----------
+        nlayers: int
+            Number of layers
+        """
+        from taurex.util.util import get_molecular_weight
+        self.mu_profile = np.zeros(shape=(nlayers,))
+        if self.mixProfile is not None:
+            mix_profile = self.mixProfile
+            for idx, gasname in enumerate(self.gases):
+                self.mu_profile += mix_profile[idx] * \
+                    get_molecular_weight(gasname)
 
     def isActive(self, gas):
         """
@@ -133,7 +181,7 @@ class TaurexChemistry(Chemistry):
         bool:
             True if active
         """
-        if gas in self.molecules_i_have:
+        if gas in self.availableActive:
             return True
         else:
             return False
@@ -152,15 +200,25 @@ class TaurexChemistry(Chemistry):
 
         if gas.molecule in [x.molecule for x in self._gases]:
             self.error('Gas already exists %s', gas.molecule)
-            raise InvalidChemistryException
+            raise ValueError('Gas already exists')
 
         self.debug('Gas %s fill gas: %s', gas.molecule, self._fill_gases)
         if gas.molecule in self._fill_gases:
             self.error('Gas %s is already a fill gas: %s', gas.molecule,
                        self._fill_gases)
-            raise InvalidChemistryException
+            raise ValueError('Gas already exists')
 
         self._gases.append(gas)
+
+        self.determine_mix_mask()
+
+    @property
+    def gases(self):
+        return self._fill_gases + [g.molecule for g in self._gases]
+
+    @property
+    def mixProfile(self):
+        return self._mix_profile
 
     @property
     def activeGases(self):
@@ -199,22 +257,14 @@ class TaurexChemistry(Chemistry):
         """
         self.info('Initializing chemistry model')
 
-        active_profile = []
-        inactive_profile = []
+        mix_profile = []
 
-        self._active = []
-        self._inactive = []
         for gas in self._gases:
             gas.initialize_profile(nlayers, temperature_profile,
                                    pressure_profile, altitude_profile)
-            if self.isActive(gas.molecule):
-                active_profile.append(gas.mixProfile)
-                self._active.append(gas.molecule)
-            else:
-                inactive_profile.append(gas.mixProfile)
-                self._inactive.append(gas.molecule)
+            mix_profile.append(gas.mixProfile)
 
-        total_mix = sum(active_profile) + sum(inactive_profile)
+        total_mix = sum(mix_profile)
 
         self.debug('Total mix output %s', total_mix)
 
@@ -229,54 +279,30 @@ class TaurexChemistry(Chemistry):
         mixratio_remainder = 1. - total_mix
 
         mixratio_remainder += np.zeros(shape=(nlayers))
+        mix_profile = self.fill_atmosphere(mixratio_remainder) + mix_profile
 
-        remain_active, remain_inactive = \
-            self.fill_atmosphere(mixratio_remainder)
-
-        active_profile.extend(remain_active)
-
-        inactive_profile.extend(remain_inactive)
-
-        if len(active_profile) > 0:
-            self.active_mixratio_profile = np.vstack(active_profile)
+        if len(mix_profile) > 0:
+            self._mix_profile = np.vstack(mix_profile)
         else:
-            self.active_mixratio_profile = 0.0
-        if len(inactive_profile) > 0:
-            self.inactive_mixratio_profile = np.vstack(inactive_profile)
-        else:
-            self.inactive_mixratio_profile = 0.0
+            self._mix_profile = 0.0
+
         super().initialize_chemistry(nlayers, temperature_profile,
                                      pressure_profile, altitude_profile)
 
     def fill_atmosphere(self, mixratio_remainder):
-        active_profile = []
-        inactive_profile = []
+
+        fill = []
 
         if len(self._fill_gases) == 1:
-            if self.isActive(self._fill_gases[0]):
-                active_profile.append(mixratio_remainder)
-                self._active.append(self._fill_gases[0])
-            else:
-                inactive_profile.append(mixratio_remainder)
-                self._inactive.append(self._fill_gases[0])
+            return [mixratio_remainder]
         else:
-            main_molecule = mixratio_remainder/(1. + sum(self._fill_ratio))
-            if self.isActive(self._fill_gases[0]):
-                active_profile.append(main_molecule)
-                self._active.append(self._fill_gases[0])
-            else:
-                inactive_profile.append(main_molecule)
-                self._inactive.append(self._fill_gases[0])
+            main_molecule = mixratio_remainder*(1/(1+sum(self._fill_ratio)))
+
+            fill.append(main_molecule)
             for molecule, ratio in zip(self._fill_gases[1:], self._fill_ratio):
                 second_molecule = ratio * main_molecule
-
-                if self.isActive(molecule):
-                    active_profile.append(second_molecule)
-                    self._active.append(molecule)
-                else:
-                    inactive_profile.append(second_molecule)
-                    self._inactive.append(molecule)
-        return active_profile, inactive_profile
+                fill.append(second_molecule)
+        return fill
 
     @property
     def activeGasMixProfile(self):
@@ -288,7 +314,7 @@ class TaurexChemistry(Chemistry):
         active_mix_profile : :obj:`array`
 
         """
-        return self.active_mixratio_profile
+        return self.mixProfile[self._active_mask]
 
     @property
     def inactiveGasMixProfile(self):
@@ -300,7 +326,7 @@ class TaurexChemistry(Chemistry):
         inactive_mix_profile : :obj:`array`
 
         """
-        return self.inactive_mixratio_profile
+        return self.mixProfile[self._inactive_mask]
 
     def write(self, output):
         gas_entry = super().write(output)
@@ -313,3 +339,7 @@ class TaurexChemistry(Chemistry):
             gas.write(gas_entry)
 
         return gas_entry
+
+    @classmethod
+    def input_keywords(cls):
+        return ['taurex', 'free', ]

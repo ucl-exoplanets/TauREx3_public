@@ -116,17 +116,47 @@ mass = {
   "Mt":	266,
 }
 
+
 def calculate_weight(chem):
     s = re.findall('([A-Z][a-z]?)([0-9]*)', chem)
     compoundweight = 0
 
     for element, count in s:
         count = int(count or '1')
-        compoundweight += mass[element] * count
+        try:
+            compoundweight += mass[element] * count
+        except KeyError:
+            return 0.0
     return compoundweight
 
 
-_mol_latex={
+def sanitize_molecule_string(molecule):
+    """
+    Cleans a molecule string to match up
+    with molecule naming in TauREx3.
+
+    e.g:
+
+    H2O -> H2O
+
+    1H2-16O -> H2O
+
+    Parameters
+    ----------
+    molecule: str
+        Molecule to sanitize
+    
+    Returns
+    -------
+    str:
+        Sanitized name
+
+    """
+    return ''.join([''.join(s) for s in
+                    re.findall('([A-Z][a-z]?)([0-9]*)', molecule)])
+
+
+_mol_latex = {
 
     'HE':
         'He',
@@ -488,12 +518,26 @@ def wnwidth_to_wlwidth(wngrid, wnwidth):
 
 
 def class_for_name(module_name, class_name):
-    import importlib
-    # load the module, will raise ImportError if module cannot be loaded
-    m = importlib.import_module(module_name)
-    # get the class, will raise AttributeError if class cannot be found
-    c = getattr(m, class_name)
-    return c
+    from ..parameter.classfactory import ClassFactory
+
+    cf = ClassFactory()
+
+    combined_classes = list(cf.temperatureKlasses) + \
+                       list(cf.pressureKlasses) + \
+                       list(cf.chemistryKlasses) + \
+                       list(cf.gasKlasses) + \
+                       list(cf.planetKlasses) + \
+                       list(cf.starKlasses) + \
+                       list(cf.modelKlasses) + \
+                       list(cf.contributionKlasses)
+    
+    combined_classes_name = [c.__name__ for c in combined_classes]
+
+    if class_name in combined_classes_name:
+        return combined_classes[combined_classes_name.index(class_name)]
+    else:
+        raise Exception(f'Class of name {class_name} does not exist')              
+
 
 def create_grid_res(resolution, wave_min, wave_max):
     #
@@ -515,3 +559,71 @@ def create_grid_res(resolution, wave_min, wave_max):
         wave_list.append(wave)
 
     return np.array((wave_list ,width_list)).T
+
+
+def conversion_factor(from_unit, to_unit):
+    import astropy.units as u
+
+    try:
+        from_conv = u.Unit(from_unit)
+    except:
+        from_conv = u.Unit(from_unit, format="cds")
+
+    try:
+        to_conv = u.Unit(to_unit)
+    except:
+        to_conv = u.Unit(to_unit, format="cds")
+
+    return from_conv.to(to_unit)
+
+
+def compute_dz(altitude):
+
+    dz = np.zeros_like(altitude)
+    dz[:-1] = np.diff(altitude)
+    dz[-1] = altitude[-1] - altitude[-2]
+
+    return dz
+
+def has_duplicates(arr):
+
+    return len(arr) != len(set(arr))
+
+
+def find_closest_pair(arr, value) -> (int, int):
+    """
+    Will find the indices that lie to the left and right
+    of the value
+
+    arr[left] <= value <= arr[right]
+
+    If the value is less than the array minimum then it will
+    always return left=0 and right=1
+
+    If the value is above the maximum 
+
+    Parameters
+    ----------
+    arr: :obj:`array`
+        Array to search, must be sorted
+    
+    value: float
+        Value to find in array
+
+
+    Returns
+    -------
+    left: int
+    
+    right: int
+
+    """
+
+
+    right = arr.searchsorted(value)
+    right = max(min(arr.shape[0]-1, right),1)
+
+    left = right-1
+    left = max(0, left)
+
+    return left, right

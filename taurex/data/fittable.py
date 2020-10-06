@@ -70,14 +70,21 @@ def fitparam(f=None, param_name=None, param_latex=None,
     def wrapper(self, *args, **kwargs):
 
         return f(self, *args, **kwargs)
+
+    if param_name is None:
+        raise ValueError('Fitting parameter must have a name')
+
     wrapper.param_name = param_name
+
     wrapper.param_latex = param_latex
+    if wrapper.param_latex is None:
+        wrapper.param_latex = param_name
     wrapper.default_fit = default_fit
     wrapper.default_bounds = default_bounds
     wrapper.default_mode = default_mode
     wrapper.decorated = 'fitparam'
     pwrap = property(wrapper)
-
+    wrapper.__doc__ = str(f.__doc__)
     return pwrap
 
 
@@ -222,7 +229,7 @@ class Fittable(object):
         if param_name in self._param_dict:
             raise AttributeError(
                 'param name {} already exists'.format(param_name))
-
+        
         self._param_dict[param_name] = (param_name,
                                         param_latex,
                                         fget.__get__(self),

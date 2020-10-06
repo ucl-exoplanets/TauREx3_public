@@ -1,5 +1,5 @@
 from taurex.log import Logger
-
+from .classfactory import ClassFactory
 log = Logger('Factory')
 
 def get_keywordarg_dict(klass):
@@ -21,7 +21,7 @@ def get_keywordarg_dict(klass):
 
 
 
-def create_klass(config,klass):
+def create_klass(config, klass):
     kwargs = get_keywordarg_dict(klass)
 
     for key in config:
@@ -33,7 +33,6 @@ def create_klass(config,klass):
             log.error('Available parameters are %s',kwargs.keys())
             raise KeyError
     obj = klass(**kwargs)
-
     # for key,value in config.items():
     #     try:
     #         obj[key] = value
@@ -43,67 +42,76 @@ def create_klass(config,klass):
     return obj
 
 
+def create_profile(config, factory, baseclass=None,
+                   keyword_type='profile_type'):
+    config, klass = determine_klass(config, keyword_type, 
+                                    factory, baseclass)
 
+    obj = create_klass(config, klass)
 
-
-def create_profile(config, factory, baseclass=None):
-    config, klass = determine_klass(config, 'profile_type',factory,
-                                    baseclass)
-
-    obj = create_klass(config,klass)
-    
     return obj
 
-def gas_factory(profile_type):
-    if profile_type == 'constant':
-        from taurex.data.profiles.chemistry import ConstantGas
-        return ConstantGas
-    elif profile_type in ('twopoint', '2point',):
-        from taurex.data.profiles.chemistry import TwoPointGas
-        return TwoPointGas
-    elif profile_type in ('twolayer','2layer',):
-        from taurex.data.profiles.chemistry import TwoLayerGas
-        return TwoLayerGas
-    else:
-        raise NotImplementedError('Gas profile {} not implemented'.format(profile_type))
 
+def gas_factory(profile_type):
+    cf = ClassFactory()
+
+    for klass in cf.gasKlasses:
+        try:
+            if profile_type in klass.input_keywords():
+                return klass
+        except NotImplementedError:
+            log.warning('%s',klass)
+
+    raise NotImplementedError('Gas profile {} not implemented'.format(profile_type))
 
 
 def temp_factory(profile_type):
-    if profile_type == 'isothermal':
-        from taurex.data.profiles.temperature import Isothermal
-        return Isothermal
-    elif profile_type in ('guillot','guillot2010',):
-        from taurex.data.profiles.temperature import Guillot2010
-        return Guillot2010
-    elif profile_type in ('npoint',):
-        from taurex.data.profiles.temperature import NPoint
-        return NPoint
-    elif profile_type in ('rodgers','rodgers2010',):
-        from taurex.data.profiles.temperature import Rodgers2000
-        return Rodgers2000
-    elif profile_type in ('file',):
-        from taurex.data.profiles.temperature import TemperatureFile
-        return TemperatureFile
-    else:
-        raise NotImplementedError('Temperature profile {} not implemented'.format(profile_type))
+    cf = ClassFactory()
+
+    for klass in cf.temperatureKlasses:
+        try:
+            if profile_type in klass.input_keywords():
+                return klass
+        except NotImplementedError:
+            log.warning('%s',klass)
+
+    raise NotImplementedError('Temperature profile {} not implemented'.format(profile_type))
+
+
+def chemistry_factory(profile_type):
+    cf = ClassFactory()
+    for klass in cf.chemistryKlasses:
+        try:
+            if profile_type in klass.input_keywords():
+                return klass
+        except NotImplementedError:
+            log.warning('%s',klass)
+
+    raise NotImplementedError('Chemistry {} not implemented'.format(profile_type))
+
 
 def pressure_factory(profile_type):
-    if profile_type == 'simple':
-        from taurex.data.profiles.pressure import SimplePressureProfile
-        return SimplePressureProfile
-    else:
-        raise NotImplementedError('Pressure profile {} not implemented'.format(profile_type))
+    cf = ClassFactory()
+    for klass in cf.pressureKlasses:
+        try:
+            if profile_type in klass.input_keywords():
+                return klass
+        except NotImplementedError:
+            log.warning('%s',klass)
+
+    raise NotImplementedError('Pressure profile {} not implemented'.format(profile_type))
+
 
 def star_factory(star_type):
-    if star_type == 'blackbody':
-        from taurex.data.stellar import BlackbodyStar
-        return BlackbodyStar
-    elif star_type == 'phoenix':
-        from taurex.data.stellar import PhoenixStar
-        return PhoenixStar
-    else:
-        raise NotImplementedError('Star of type {} not implemented'.format(star_type))
+    cf = ClassFactory()
+    for klass in cf.starKlasses:
+        try:
+            if star_type in klass.input_keywords():
+                return klass
+        except NotImplementedError:
+            log.warning('%s',klass)
+
+    raise NotImplementedError('Star of type {} not implemented'.format(star_type))
 
 
 def create_gas_profile(config):
@@ -121,102 +129,106 @@ def create_pressure_profile(config):
     return create_profile(config, pressure_factory, PressureProfile)
 
 
-def create_ace(config):
-    from taurex.data.profiles.chemistry import ACEChemistry
-    return ACEChemistry(**config)
-
-
 def create_chemistry(config):
-    try:
-        chemistry = config.pop('chemistry_type').lower()
-    except KeyError:
-        log.error('No chemistry defined in input')
-        raise KeyError    
+    from taurex.data.profiles.chemistry.chemistry import Chemistry
+    from taurex.data.profiles.chemistry import TaurexChemistry
+    from taurex.data.profiles.chemistry.gas.gas import Gas
 
-    if chemistry in ('ace','equilibrium'):
-        return create_ace(config)
-    elif chemistry in ('file', ):
-        from taurex.chemistry import ChemistryFile
-        return create_klass(config, ChemistryFile)
-    elif chemistry in ('custom',):
-        from taurex.chemistry import Chemistry
-        config['chemistry_type'] = 'custom'
-        config, klass = determine_klass(config, 'chemistry_type', None,
-                        Chemistry)
-        obj = klass(**config)
-        return obj
-    elif chemistry in ('taurex', 'complex', 'defined', 'free'):
-        from taurex.data.profiles.chemistry import TaurexChemistry
-        gases = []
-        config_key=[]
-        for key, value in config.items():
-            
-            if isinstance(value, dict):
-                log.debug('FOUND GAS {} {}'.format(key, value))
-                config_key.append(key)
-                gas_type = value.pop('gas_type').lower()
-                klass = gas_factory(gas_type)
-                gases.append(klass(molecule_name=key, **value))
+    gases = []
+    config_key = []
 
-        for k in config_key: del config[k]
-        log.debug('leftover keys {}'.format(config))
-        obj = TaurexChemistry(**config)
+    for key, value in config.items():
+
+        if isinstance(value, dict):
+            log.debug('FOUND GAS {} {}'.format(key, value))
+
+            config_key.append(key)
+            new_value = value
+            new_value['molecule_name'] = key
+            _gas = create_profile(new_value, gas_factory,
+                                  baseclass=Gas, keyword_type='gas_type')
+            gases.append(_gas)
+
+    for k in config_key:
+        del config[k]
+
+    log.debug('leftover keys {}'.format(config))
+
+    obj = create_profile(config, chemistry_factory, Chemistry,
+                         keyword_type='chemistry_type')
+
+    if isinstance(obj, TaurexChemistry):
         for g in gases:
             obj.addGas(g)
-    
-        return obj
-    else:
-        raise ValueError('Unknown chemistry type {}'.format(chemistry))
+
+    return obj
 
 
 def model_factory(model_type):
-    if model_type == 'transmission':
-        from taurex.model import TransmissionModel
-        return TransmissionModel
-    elif model_type == 'emission':
-        from taurex.model import EmissionModel
-        return EmissionModel
-    elif model_type in ('directimage', 'direct image'):
-        from taurex.model import DirectImageModel
-        return DirectImageModel
-    else:
-        raise NotImplementedError('Model {} not implemented'.format(model_type))
+    cf = ClassFactory()
+    for klass in cf.modelKlasses:
+        try:
+            if model_type in klass.input_keywords():
+                return klass
+        except NotImplementedError:
+            log.warning('%s',klass)
+
+    raise NotImplementedError('Model {} not implemented'.format(model_type))
 
 
 def planet_factory(planet_type):
-    if planet_type in ('simple', 'planet', 'basic', 'meme',):
-        from taurex.data import Planet
-        return Planet
-    else:
-        raise NotImplementedError('Model {} not implemented'.format(model_type))
+    cf = ClassFactory()
+    for klass in cf.planetKlasses:
+        try:
+            if planet_type in klass.input_keywords():
+                return klass
+        except NotImplementedError:
+            log.warning('%s', klass)
+
+            
+    raise NotImplementedError('Planet {} not implemented'.format(planet_type))
+
 
 def optimizer_factory(optimizer):
-    if optimizer == 'nestle':
-        from taurex.optimizer.nestle import NestleOptimizer
-        return NestleOptimizer
-    elif optimizer in ('multinest','pymultinest',):
-        from taurex.optimizer.multinest import MultiNestOptimizer
-        return MultiNestOptimizer
-    elif optimizer in ('polychord','pypolychord'):
-        from taurex.optimizer.polychord import PolyChordOptimizer
-        return PolyChordOptimizer
-    elif optimizer in ('dypolychord','dynamic-polychord'):
-        from taurex.optimizer.dypolychord import dyPolyChordOptimizer
-        return dyPolyChordOptimizer
-    else:
-        raise NotImplementedError('Optimizer {} not implemented'.format(optimizer))    
+    cf = ClassFactory()
+    for klass in cf.optimizerKlasses:
+        try:
+            if optimizer in klass.input_keywords():
+                return klass
+        except NotImplementedError:
+            log.warning('%s',klass)
+
+    raise NotImplementedError('Optimizer {} not implemented'.format(optimizer))
+
+def observation_factory(observation):
+    cf = ClassFactory()
+    for klass in cf.observationKlasses:
+        try:
+            if observation in klass.input_keywords():
+                return klass
+        except NotImplementedError:
+            log.warning('%s', klass)
+
+    raise NotImplementedError('Observation {} not implemented'.format(observation))
+
 
 
 def instrument_factory(instrument):
-    if instrument in ('file', 'fromfile',):
-        from taurex.instruments import InstrumentFile
-        return InstrumentFile
+    cf = ClassFactory()
+    for klass in cf.instrumentKlasses:
+        try:
+            if instrument in klass.input_keywords():
+                return klass
+        except NotImplementedError:
+            log.warning('%s',klass)
+
+    raise NotImplementedError('Instrument {} not implemented'.format(instrument))
 
 
 def create_star(config):
-    from taurex.data.stellar.star import BlackbodyStar
+    from taurex.data.stellar.star import Star
     config, klass = determine_klass(config, 'star_type', star_factory,
-                                    BlackbodyStar)
+                                    Star)
 
     obj = klass(**config)
 
@@ -241,6 +253,16 @@ def create_optimizer(config):
     from taurex.optimizer.optimizer import Optimizer
     config, klass = determine_klass(config, 'optimizer', optimizer_factory,
                                     Optimizer)
+
+    obj = klass(**config)
+    
+    return obj
+
+
+def create_observation(config):
+    from taurex.spectrum import BaseSpectrum
+    config, klass = determine_klass(config, 'observation', observation_factory,
+                                    BaseSpectrum)
 
     obj = klass(**config)
     
@@ -280,32 +302,40 @@ def create_instrument(config):
     return obj
 
 def generate_contributions(config):
-    from taurex.contributions import AbsorptionContribution, CIAContribution, RayleighContribution
 
+    cf = ClassFactory()
     contributions = []
+    check_key = [k for k, v in config.items() if isinstance(v, dict)]
     for key in config.keys():
-        if key == 'Absorption':
-            contributions.append(create_klass(config[key],AbsorptionContribution))
-        elif key == 'CIA':
-            contributions.append(create_klass(config[key],CIAContribution))
-        elif key == 'Rayleigh':
-            contributions.append(create_klass(config[key],RayleighContribution))
-        elif key == 'SimpleClouds':
-             from taurex.contributions import SimpleCloudsContribution
-             contributions.append(create_klass(config[key],SimpleCloudsContribution))
-        elif key == 'BHMie':
-             from taurex.contributions import BHMieContribution
-             contributions.append(create_klass(config[key],BHMieContribution))
-        elif key == 'LeeMie':
-             from taurex.contributions import LeeMieContribution
-             contributions.append(create_klass(config[key],LeeMieContribution))
-        elif key == 'FlatMie':
-             from taurex.contributions import FlatMieContribution
-             contributions.append(create_klass(config[key],FlatMieContribution))
+
+        for klass in cf.contributionKlasses:
+            try:
+                if key in klass.input_keywords():
+                    contributions.append(create_klass(config[key], klass))
+                    check_key.pop(check_key.index(key))
+                    break
+            except NotImplementedError:
+                log.warning('%s',klass)
+
+    if len(check_key) > 0:
+        log.error(f'Unknown Contributions {check_key}')
+        raise Exception(f'Unknown contributions {check_key}')
 
     return contributions
 
-    
+
+def create_prior(prior):
+    from taurex.util.fitting import parse_priors
+
+    prior_name, args = parse_priors(prior)
+    cf = ClassFactory()
+    for p in cf.priorKlasses:
+        if prior_name in (p.__name__, p.__name__.lower(), p.__name__.upper(),):
+            return p(**args)
+    else:
+        raise ValueError('Unknown Prior Type in input file')
+
+
 def create_model(config,gas,temperature,pressure,planet,star):
     from taurex.model import ForwardModel
     log.debug(config)

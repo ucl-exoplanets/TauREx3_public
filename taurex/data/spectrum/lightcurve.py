@@ -20,7 +20,7 @@ class ObservedLightCurve(BaseSpectrum):
 
     """
 
-    def __init__(self, filename):
+    def __init__(self, filename=None):
         super().__init__('observed_lightcurve')
 
         import pickle
@@ -153,3 +153,8 @@ class ObservedLightCurve(BaseSpectrum):
         output.write_array('lightcurve_errorbars', self.errorBar)
 
         return output
+
+
+    @classmethod
+    def input_keywords(self):
+        return ['lightcurve', ]

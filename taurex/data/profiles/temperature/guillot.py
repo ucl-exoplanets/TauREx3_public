@@ -1,7 +1,7 @@
 from .tprofile import TemperatureProfile
 import numpy as np
 from taurex.data.fittable import fitparam
-
+from taurex.exceptions import InvalidModelException
 
 class Guillot2010(TemperatureProfile):
     """
@@ -24,11 +24,13 @@ class Guillot2010(TemperatureProfile):
             mean optical opacity two
         alpha: float
             ratio between kappa_v1 and kappa_v2 downwards radiation stream
+        T_int: float
+            Internal heating parameter (K)
 
     """
 
     def __init__(self, T_irr=1500, kappa_irr=0.01, kappa_v1=0.005,
-                 kappa_v2=0.005, alpha=0.5):
+                 kappa_v2=0.005, alpha=0.5, T_int=100):
         super().__init__('Guillot')
 
         self.T_irr = T_irr
@@ -37,6 +39,9 @@ class Guillot2010(TemperatureProfile):
         self.kappa_v1 = kappa_v1
         self.kappa_v2 = kappa_v2
         self.alpha = alpha
+        self.T_int = T_int
+
+        self._check_values()
 
     @fitparam(param_name='T_irr',
               param_latex='$T_\\mathrm{irr}$',
@@ -99,6 +104,47 @@ class Guillot2010(TemperatureProfile):
     def opticalRatio(self, value):
         self.alpha = value
 
+    @fitparam(param_name='T_int_guillot', param_latex='$T^{g}_{int}$',
+              default_fit=False, default_bounds=[0.0, 1.0])
+    def internalTemperature(self):
+        """ratio between kappa_v1 and kappa_v2 """
+        return self.T_int
+
+    @internalTemperature.setter
+    def internalTemperature(self, value):
+        self.T_int = value
+
+    def _check_values(self):
+        """
+        Ensures kappa values are valid
+
+        Raises
+        ------
+        InvalidModelException:
+            If any kappa is zero
+        
+        """
+
+        if self.kappa_ir == 0.0:
+            self.warning('Kappa ir is zero')
+            raise InvalidModelException('kappa_ir is zero')
+
+        gamma_1 = self.kappa_v1/(self.kappa_ir)
+        gamma_2 = self.kappa_v2/(self.kappa_ir)
+
+        if gamma_1 == 0.0 or gamma_2 == 0.0:
+            self.warning('Gamma is zero. kappa_v1 = %s kappa_v2 = %s'
+                         ' kappa_ir = %s',
+                         self.kappa_v1,
+                         self.kappa_v2, self.kappa_ir)
+            raise InvalidModelException('Kappa v1/v2/ir values result in zero gamma')
+        
+        if self.T_irr < 0 or self.T_int < 0:
+            self.warning('Negative temperature input T_irr=%s T_int=%s',
+                         self.T_irr, self.T_int)
+            raise InvalidModelException('Negative temperature input')   
+
+
     @property
     def profile(self):
         """
@@ -113,11 +159,15 @@ class Guillot2010(TemperatureProfile):
         """
 
         planet_grav = self.planet.gravity
-        gamma_1 = self.kappa_v1/(self.kappa_ir + 1e-10)
-        gamma_2 = self.kappa_v2/(self.kappa_ir + 1e-10)
+
+        self._check_values()
+
+        gamma_1 = self.kappa_v1/(self.kappa_ir)
+        gamma_2 = self.kappa_v2/(self.kappa_ir)
         tau = self.kappa_ir * self.pressure_profile / planet_grav
 
-        T_int = 100  # todo internal heat parameter looks suspicious..
+
+        T_int = self.T_int  # todo internal heat parameter looks suspicious..
 
         def eta(gamma, tau):
             import scipy.special as spe
@@ -147,3 +197,10 @@ class Guillot2010(TemperatureProfile):
         temperature.write_scalar('kappa_v2', self.kappa_v2)
         temperature.write_scalar('alpha', self.alpha)
         return temperature
+
+    @classmethod
+    def input_keywords(cls):
+        """
+        Return all input keywords
+        """
+        return ['guillot', 'guillot2010', ]

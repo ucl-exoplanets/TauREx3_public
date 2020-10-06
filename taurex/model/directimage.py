@@ -72,3 +72,8 @@ class DirectImageModel(EmissionModel):
 
         return((f_total * (planet_radius**2) * 2.0 * PI) /
                (4 * PI * (star_distance_meters**2))) * SDR
+
+
+    @classmethod
+    def input_keywords(self):
+        return ['direct', 'directimage' ]

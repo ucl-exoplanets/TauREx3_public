@@ -2,6 +2,7 @@ from .interpolateopacity import InterpolatingOpacity
 import pickle
 import numpy as np
 import pathlib
+from taurex.util.util import sanitize_molecule_string
 
 
 class PickleOpacity(InterpolatingOpacity):
@@ -9,6 +10,33 @@ class PickleOpacity(InterpolatingOpacity):
     This is the base class for computing opactities
 
     """
+
+    @classmethod
+    def discover(cls):
+        import os
+        import glob
+        import pathlib
+        from taurex.cache import GlobalCache
+        from taurex.util.util import sanitize_molecule_string
+
+        path = GlobalCache()['xsec_path']
+        if path is None:
+            return []
+        path = os.path.join(path, '*.pickle')
+
+        files = glob.glob(path)
+
+        discovery = []
+
+        interp = GlobalCache()['xsec_interpolation'] or 'linear'
+
+        for f in files:
+            splits = pathlib.Path(f).stem.split('.')
+            mol_name = sanitize_molecule_string(splits[0])
+
+            discovery.append((mol_name, [f, interp]))
+
+        return discovery
 
     def __init__(self, filename, interpolation_mode='linear'):
         super().__init__('PickleOpacity:{}'.format(pathlib.Path(filename).stem[0:10]),
@@ -45,7 +73,10 @@ class PickleOpacity(InterpolatingOpacity):
         self._pressure_grid = self._spec_dict['p']*1e5
         self._xsec_grid = self._spec_dict['xsecarr']
         self._resolution = np.average(np.diff(self._wavenumber_grid))
-        self._molecule_name = self._spec_dict['name']
+
+        splits = pathlib.Path(filename).stem.split('.')
+        mol_name = sanitize_molecule_string(splits[0])
+        self._molecule_name = mol_name
 
         self._min_pressure = self._pressure_grid.min()
         self._max_pressure = self._pressure_grid.max()

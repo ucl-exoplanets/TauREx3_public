@@ -211,3 +211,7 @@ class TwoLayerGas(Gas):
         gas_entry.write_scalar('mix_ratio_smoothing', self.mixRatioSmoothing)
 
         return gas_entry
+
+    @classmethod
+    def input_keywords(self):
+        return ['twolayer', '2layer' ]

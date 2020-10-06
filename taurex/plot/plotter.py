@@ -51,7 +51,7 @@ class Plotter(object):
     def forward_output(self):
         return self.fd['Output']
 
-    def compute_ranges(self):
+    def compute_ranges(self, mu=True):
 
         solution_ranges = []
 
@@ -81,6 +81,7 @@ class Plotter(object):
                 sigma_p = d['sigma_p'][()]
                 val = d['value'][()]     
                 param_list.append([val, val - 5.0 * sigma_m, val+5.0*sigma_p])
+
             
             solution_ranges.append(param_list)
 
@@ -90,6 +91,7 @@ class Plotter(object):
         if len(mu_derived) > 0:
             fitting_boundary_low = np.concatenate((fitting_boundary_low, [-1e99]*len(mu_derived)))
             fitting_boundary_high = np.concatenate((fitting_boundary_high, [1e99]*len(mu_derived)))
+
 
 
         range_all = np.array(solution_ranges)
@@ -118,7 +120,7 @@ class Plotter(object):
 
             fig = plt.figure(figsize=(7,7/self.phi))
             ax = fig.add_subplot(111)
-            num_moles = len(self.activeGases+self.inactiveGases)
+            num_moles = len(self.activeGases)
 
             profiles = solution_val['Profiles']
             pressure_profile = profiles['pressure_profile'][:]/1e5
@@ -143,6 +145,38 @@ class Plotter(object):
                                   np.power(10, (np.log10(prof) - (
                                               np.log10(prof + prof_std) - np.log10(prof)))),
                                   color=self.cmap(mol_idx / num_moles), alpha=0.5)
+
+
+        plt.yscale('log')
+        plt.gca().invert_yaxis()
+        plt.xscale('log')
+        plt.xlim(1e-12, 3)
+        plt.xlabel('Mixing ratio')
+        plt.ylabel('Pressure (bar)')
+        plt.tight_layout()
+        box = ax.get_position()
+        ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+        ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), ncol=1, prop={'size':11}, frameon=False)
+        if self.title:
+            plt.title(self.title+' - Active', fontsize=14)
+        plt.savefig(os.path.join(self.out_folder, '%s_fit_active_mixratio.pdf' % (self.prefix)))
+        plt.close('all')
+
+        for solution_idx, solution_val in self.solution_iter():
+
+            fig = plt.figure(figsize=(7,7/self.phi))
+            ax = fig.add_subplot(111)
+            num_moles = len(self.inactiveGases)
+
+            profiles = solution_val['Profiles']
+            pressure_profile = profiles['pressure_profile'][:]/1e5
+            active_profile = profiles['active_mix_profile'][...]
+            active_profile_std = profiles['active_mix_profile_std'][...]
+
+            inactive_profile = profiles['inactive_mix_profile'][...]
+            inactive_profile_std = profiles['inactive_mix_profile_std'][...]
+
+            cols_mol = {}
 
             for mol_idx,mol_name in enumerate(self.inactiveGases):
                 inactive_idx = len(self.activeGases) + mol_idx
@@ -172,14 +206,14 @@ class Plotter(object):
         ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
         ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), ncol=1, prop={'size':11}, frameon=False)
         if self.title:
-            plt.title(self.title, fontsize=14)
-        plt.savefig(os.path.join(self.out_folder, '%s_fit_mixratio.pdf' % (self.prefix)))
+            plt.title(self.title+'- Inactive', fontsize=14)
+        plt.savefig(os.path.join(self.out_folder, '%s_fit_inactive_mixratio.pdf' % (self.prefix)))
         plt.close('all')
 
+
     def plot_forward_xprofile(self):
-        fig = plt.figure(figsize=(7,7/self.phi))
-        ax = fig.add_subplot(111)
-        num_moles = len(self.activeGases+self.inactiveGases)
+
+
 
         solution_val = self.forward_output()
 
@@ -190,6 +224,11 @@ class Plotter(object):
         inactive_profile = profiles['inactive_mix_profile'][...]
 
         cols_mol = {}
+
+        fig = plt.figure(figsize=(7,7/self.phi))
+        ax = fig.add_subplot(111)
+        num_moles = len(self.activeGases)
+
         for mol_idx,mol_name in enumerate(self.activeGases):
             cols_mol[mol_name] = self.cmap(mol_idx/num_moles)
 
@@ -197,14 +236,7 @@ class Plotter(object):
 
             plt.plot(prof,pressure_profile,color=cols_mol[mol_name], label=mol_name)
 
-        for mol_idx,mol_name in enumerate(self.inactiveGases):
-            inactive_idx = len(self.activeGases) + mol_idx
-            cols_mol[mol_name] = self.cmap(inactive_idx/num_moles)
 
-            
-            prof = inactive_profile[mol_idx]
-
-            plt.plot(prof,pressure_profile,color=cols_mol[mol_name], label=mol_name)
 
         plt.yscale('log')
         plt.gca().invert_yaxis()
@@ -217,9 +249,41 @@ class Plotter(object):
         ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
         ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), ncol=1, prop={'size':11}, frameon=False)
         if self.title:
-            plt.title(self.title, fontsize=14)
-        plt.savefig(os.path.join(self.out_folder, '%s_fit_mixratio.pdf' % (self.prefix)))
-        plt.close('all')
+            plt.title(self.title+' - Active', fontsize=14)
+        plt.savefig(os.path.join(self.out_folder, '%s_fit_active_mixratio.pdf' % (self.prefix)))
+        plt.close()
+
+
+        cols_mol = {}
+
+        fig = plt.figure(figsize=(7,7/self.phi))
+        ax = fig.add_subplot(111)
+        num_moles = len(self.inactiveGases)
+
+        for mol_idx,mol_name in enumerate(self.inactiveGases):
+            cols_mol[mol_name] = self.cmap(mol_idx/num_moles)
+
+            prof = inactive_profile[mol_idx]
+
+            plt.plot(prof,pressure_profile,color=cols_mol[mol_name], label=mol_name)
+
+
+
+        plt.yscale('log')
+        plt.gca().invert_yaxis()
+        plt.xscale('log')
+        plt.xlim(1e-12, 3)
+        plt.xlabel('Mixing ratio')
+        plt.ylabel('Pressure (bar)')
+        plt.tight_layout()
+        box = ax.get_position()
+        ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+        ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), ncol=1, prop={'size':11}, frameon=False)
+        if self.title:
+            plt.title(self.title+' - Inactive', fontsize=14)
+        plt.savefig(os.path.join(self.out_folder, '%s_fit_inactive_mixratio.pdf' % (self.prefix)))
+        plt.close()
+
 
     def plot_fitted_tp(self):
 
@@ -289,11 +353,11 @@ class Plotter(object):
     def get_derived_parameters(self, solution):
         return [c for k, c in solution['fit_params'].items() if k.endswith('_derived')]
 
-    def plot_posteriors(self):
+    def plot_posteriors(self , fig=None, save=True, ranges=None, plot_mu=True, color=None, truth=None):
         if not self.is_retrieval:
             raise Exception('HDF5 was not generated from retrieval, no posteriors found')
-        
-        ranges = self.compute_ranges()
+        if ranges is None:
+            ranges = self.compute_ranges(plot_mu)
 
         figs = []
 
@@ -303,13 +367,12 @@ class Plotter(object):
 
             mu_derived = self.get_derived_parameters(solution_val)
 
+
             tracedata = solution_val['tracedata']
             weights = solution_val['weights']
 
-            figure_past = None
+            figure_past = fig
 
-            if solution_idx > 0:
-                figure_past = figs[solution_idx - 1]
 
             latex_names = self.fittingLatex
 
@@ -323,7 +386,9 @@ class Plotter(object):
                     tracedata = np.column_stack((tracedata, param['trace']))
 
 
-            color_idx = np.float(solution_idx)/self.num_solutions
+            if color is None:
+                color_idx = np.float(solution_idx)/self.num_solutions
+                color = self.cmap(float(color_idx))
 
             # print('color: {}'.format(color_idx))
             ### https://matplotlib.org/users/customizing.html
@@ -342,10 +407,11 @@ class Plotter(object):
                                     show_titles=True,
                                     title_kwargs=dict(fontsize=12),
                                     range=ranges,
+                                    truths=truth,
                                     #quantiles=[0.16, 0.5],
                                     ret=True,
                                     fill_contours=True,
-                                    color=self.cmap(float(color_idx)),
+                                    color=color,
                                     top_ticks=False,
                                     bins=30,
                                     fig = figure_past)
@@ -353,13 +419,12 @@ class Plotter(object):
                 fig.gca().annotate(self.title, xy=(0.5, 1.0), xycoords="figure fraction",
                     xytext=(0, -5), textcoords="offset points",
                     ha="center", va="top", fontsize=14)
+        if save:
+            plt.savefig(os.path.join(self.out_folder, '%s_posteriors.pdf' % (self.prefix)))
+            plt.close()
+        else:
+            return fig
 
-            figs.append(fig)
-
-        plt.savefig(os.path.join(self.out_folder, '%s_posteriors.pdf' % (self.prefix)))
-        self.posterior_figure_handles = figs
-        self.posterior_figure_ranges  = ranges
-        plt.close()
 
     @property
     def modelType(self):
@@ -409,7 +474,10 @@ class Plotter(object):
         plt.xlim(np.min(wlgrid)-0.05*np.min(wlgrid), np.max(wlgrid)+0.05*np.max(wlgrid))
         # plt.ylim(0.0,0.006)
         plt.xlabel(r'Wavelength ($\mu$m)')
-        plt.ylabel(self.modelAxis[self.modelType])
+        try:
+            plt.ylabel(self.modelAxis[self.modelType])
+        except KeyError:
+            pass
 
         if np.max(wlgrid) - np.min(wlgrid) > 5:
             plt.xscale('log')
@@ -442,7 +510,10 @@ class Plotter(object):
         plt.xlim(np.min(wlgrid)-0.05*np.min(wlgrid), np.max(wlgrid)+0.05*np.max(wlgrid))
         # plt.ylim(0.0,0.006)
         plt.xlabel(r'Wavelength ($\mu$m)')
-        plt.ylabel(self.modelAxis[self.modelType])
+        try:
+            plt.ylabel(self.modelAxis[self.modelType])
+        except KeyError:
+            pass
 
         if np.max(wlgrid) - np.min(wlgrid) > 5:
             plt.xscale('log')
@@ -517,7 +588,10 @@ class Plotter(object):
         plt.xlim(np.min(wlgrid)-0.05*np.min(wlgrid), np.max(wlgrid)+0.05*np.max(wlgrid))
         # plt.ylim(0.0,0.006)
         plt.xlabel('Wavelength ($\mu$m)')
-        plt.ylabel(self.modelAxis[self.modelType])
+        try:
+            plt.ylabel(self.modelAxis[self.modelType])
+        except KeyError:
+            pass
 
         if np.max(wlgrid) - np.min(wlgrid) > 5:
             plt.xscale('log')

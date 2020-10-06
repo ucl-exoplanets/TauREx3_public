@@ -3,6 +3,7 @@ from .star import BlackbodyStar
 import numpy as np
 import os
 from taurex.constants import MSOL
+from taurex.cache import GlobalCache
 import math
 
 
@@ -54,12 +55,16 @@ class PhoenixStar(BlackbodyStar):
                          distance=distance,
                          magnitudeK=magnitudeK, mass=mass,
                          metallicity=metallicity)
-        if phoenix_path is None:
-            self.error('No file path to phoenix files defined')
-            raise Exception('No file path to phoenix files defined')
+        self._phoenix_path = phoenix_path
+
+        if self._phoenix_path is None or not os.path.isdir(self._phoenix_path):
+            self._phoenix_path = GlobalCache()['phoenix_path']
+
+        if self._phoenix_path is None or not os.path.isdir(self._phoenix_path):
+            self.error(f'No file path or incorrect path to phoenix files defined - {self._phoenix_path}')
+            raise Exception(f'No file path or incorrect path to phoenix files defined - {self._phoenix_path}')
 
         self.info('Star is PHOENIX type')
-        self._phoenix_path = phoenix_path
 
         self.get_avail_phoenix()
         self.use_blackbody = False
@@ -107,7 +112,7 @@ class PhoenixStar(BlackbodyStar):
 
             self.wngrid = 10000/(wl.value)
             argidx = np.argsort(self.wngrid)
-            self._base_sed = sed.to(u.W/u.m**2/u.micron)
+            self._base_sed = sed.to(u.W/u.m**2/u.micron).value
             self.wngrid = self.wngrid[argidx]
             self._base_sed = self._base_sed[argidx]
 
@@ -146,9 +151,9 @@ class PhoenixStar(BlackbodyStar):
         self.recompute_spectra()
 
     def find_nearest_file(self):
-
+        import math
         idx = self._index_finder(
-            [self._temperature, self._logg, self._metallicity])
+            [self._temperature, self._logg, math.log10(self._metallicity)])
         return self._files[int(idx)]
 
     def get_avail_phoenix(self):
@@ -159,12 +164,12 @@ class PhoenixStar(BlackbodyStar):
         self._T_list = np.array(
             [np.float(os.path.basename(k)[3:8]) for k in files])*100
         self._Logg_list = np.array(
-            [np.float(os.path.basename(k)[9:12]) for k in files])
+            [np.float(os.path.basename(k)[8:12]) for k in files])
         self._Z_list = np.array(
             [np.float(os.path.basename(k)[13:16]) for k in files])
         self._index_finder = NearestNDInterpolator(
             (self._T_list, self._Logg_list, self._Z_list),
-            np.arange(0, self._T_list.shape[0]))
+            np.arange(0, self._T_list.shape[0]),rescale=True)
 
     # def preload_phoenix_spectra(self):
 
@@ -305,3 +310,7 @@ class PhoenixStar(BlackbodyStar):
         star = super().write(output)
         star.write_string('phoenix_path', self._phoenix_path)
         return star
+
+    @classmethod
+    def input_keywords(self):
+        return ['phoenix', ]

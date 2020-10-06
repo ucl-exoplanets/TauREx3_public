@@ -1,2 +1,1 @@
-from taurex.data.profiles.pressure.pressureprofile \
-    import PressureProfile, SimplePressureProfile
+from taurex.data.profiles.pressure import PressureProfile, SimplePressureProfile,  FilePressureProfile, ArrayPressureProfile

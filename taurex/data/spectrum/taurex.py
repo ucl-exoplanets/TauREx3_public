@@ -16,7 +16,7 @@ class TaurexSpectrum(ArraySpectrum):
 
     """
 
-    def __init__(self, filename):
+    def __init__(self, filename=None):
         super().__init__(self._load_from_hdf5(filename))
 
     def _load_from_hdf5(self, filename):

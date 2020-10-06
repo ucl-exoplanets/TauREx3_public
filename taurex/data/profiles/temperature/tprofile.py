@@ -64,6 +64,13 @@ class TemperatureProfile(Fittable, Logger, Writeable):
 
         return temperature
 
-    @derivedparam(param_name = 'avg_T', param_latex='$\\bar{T}$', compute = True)
+    @derivedparam(param_name='avg_T', param_latex='$\\bar{T}$', compute=False)
     def averageTemperature(self):
         return np.mean(self.profile)
+    
+    @classmethod
+    def input_keywords(cls):
+        """
+        Return all input keywords
+        """
+        raise NotImplementedError

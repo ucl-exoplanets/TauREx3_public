@@ -1,5 +1,84 @@
 """The main taurex program"""
 
+def parse_keywords(keywords):
+    import tabulate
+    from taurex.parameter.classfactory import ClassFactory
+    cf = ClassFactory()
+    print('\n')
+    if keywords in ('contribs', ):
+        print('')
+        print('-----------------------------------------------')
+        print('-------------Available Contributions-----------')
+        print('-----------------------------------------------')
+        print('')
+        table = [(f'[[{c.__name__}]]', c.__module__.split('.')[0].split('_')[-1]) for c in cf.contributionKlasses]
+        print(tabulate.tabulate(table, headers=['Header','Source'],tablefmt="fancy_grid"))
+
+    elif keywords in ('chemistry', ):
+        print('')
+        print('-----------------------------------------------')
+        print('-------------Available [Chemistry]-------------')
+        print('-----------------------------------------------')
+        print('')
+        table = [(' / '.join(c.input_keywords()),f'{c.__name__}', c.__module__.split('.')[0].split('_')[-1]) for c in cf.chemistryKlasses]
+        print(tabulate.tabulate(table, headers=['chemistry_type','Class', 'Source'], tablefmt="fancy_grid"))
+        print('\n')
+    elif keywords in ('temperature', ):
+        print('')
+        print('-----------------------------------------------')
+        print('-------------Available [Temperature]-----------')
+        print('-----------------------------------------------')
+        print('')
+        table = [(' / '.join(c.input_keywords()),f'{c.__name__}', c.__module__.split('.')[0].split('_')[-1]) for c in cf.temperatureKlasses]
+        print(tabulate.tabulate(table, headers=['profile_type','Class', 'Source'], tablefmt="fancy_grid"))
+        print('\n')
+    elif keywords in ('gas', ):
+        print('')
+        print('-----------------------------------------------')
+        print('-------------Available Gas Profiles------------')
+        print('-----------------------------------------------')
+        print('')
+        table = [(' / '.join(c.input_keywords()),f'{c.__name__}', c.__module__.split('.')[0].split('_')[-1]) for c in cf.gasKlasses]
+        print(tabulate.tabulate(table, headers=['gas_type','Class', 'Source'], tablefmt="fancy_grid"))
+        print('\n')
+    elif keywords in ('optimizer', ):
+        print('')
+        print('-----------------------------------------------')
+        print('-------------Available Optimizers--------------')
+        print('-----------------------------------------------')
+        print('')
+        table = [(' / '.join(c.input_keywords()),f'{c.__name__}', c.__module__.split('.')[0].split('_')[-1]) for c in cf.optimizerKlasses]
+        print(tabulate.tabulate(table, headers=['optimizer','Class', 'Source'], tablefmt="fancy_grid"))
+        print('\n')
+    elif keywords in ('prior', ):
+        print('')
+        print('-----------------------------------------------')
+        print('-------------Available Priors------------------')
+        print('-----------------------------------------------')
+        print('')
+        table = [(f'{c.__name__}', c.__module__.split('.')[0].split('_')[-1]) for c in cf.priorKlasses]
+        print(tabulate.tabulate(table, headers=['prior','Class', 'Source'], tablefmt="fancy_grid"))
+        print('\n')
+    elif keywords in ('model', ):
+        print('')
+        print('-----------------------------------------------')
+        print('-------------Available Forward [Model]s--------')
+        print('-----------------------------------------------')
+        print('')
+        table = [(' / '.join(c.input_keywords()),f'{c.__name__}', c.__module__.split('.')[0].split('_')[-1]) for c in cf.modelKlasses]
+        print(tabulate.tabulate(table, headers=['model_type','Class', 'Source'], tablefmt="fancy_grid"))
+        print('\n')
+    elif keywords in ('pressure', ):
+        print('')
+        print('-----------------------------------------------')
+        print('-------------Available [Pressure]s-------------')
+        print('-----------------------------------------------')
+        print('')
+        table = [(' / '.join(c.input_keywords()), f'{c.__name__}',
+                 c.__module__.split('.')[0].split('_')[-1])
+                 for c in cf.pressureKlasses]
+        print(tabulate.tabulate(table, headers=['profile_type','Class', 'Source'], tablefmt="fancy_grid"))
+        print('\n')
 
 def main():
     import argparse
@@ -20,7 +99,7 @@ def main():
     parser = argparse.ArgumentParser(description='TauREx {}'.format(version))
 
     parser.add_argument("-i", "--input", dest='input_file', type=str,
-                        required=True, help="Input par file to pass")
+                        help="Input par file to pass")
 
     parser.add_argument("-R", "--retrieval", dest='retrieval', default=False,
                         help="When set, runs retrieval", action='store_true')
@@ -50,9 +129,58 @@ def main():
 
     parser.add_argument("-S", "--save-spectrum",
                         dest='save_spectrum', type=str)
+
+    parser.add_argument('-v', "--version", dest='version', default=False,
+                        help="Display version", action='store_true')
+
+    parser.add_argument("--plugins", dest='plugins', default=False,
+                        help="Display plugins", action='store_true')
+
+    parser.add_argument("--fitparams", dest='fitparams', default=False,
+                        help="Display available fitting params", action='store_true')
+
+    parser.add_argument("--keywords", dest="keywords", type=str)
+
     args = parser.parse_args()
 
     output_size = OutputSize.heavy
+
+    if args.version:
+        print(version)
+        return
+
+    if args.plugins:
+        from taurex.parameter.classfactory import ClassFactory
+
+        setLogLevel(logging.ERROR)
+
+        successful_plugins, failed_plugins = ClassFactory().discover_plugins()
+
+        
+        print('\nSuccessfully loaded plugins')
+        print('---------------------------')
+        for k,v in successful_plugins.items():
+            print(k)
+
+        print('\n\nFailed plugins')
+        print('---------------------------')
+        for k,v in failed_plugins.items():
+            print(k)
+            print(f'Reason: {v}')
+        
+        print('\n')
+        return
+
+    if args.keywords:
+        parse_keywords(args.keywords)
+        return
+
+
+
+
+    if args.input_file is None:
+        print('Fatal: No input file specified.')
+        return
 
     if args.light:
         output_size = OutputSize.light
@@ -78,6 +206,39 @@ def main():
 
     # build the model
     model.build()
+
+    if args.fitparams:
+        import tabulate
+        print('')
+        print('-----------------------------------------------')
+        print('------Available Retrieval Parameters-----------')
+        print('-----------------------------------------------')
+        print('')
+
+        keywords = [k for k,v in model.fittingParameters.items()]
+        current_values = [v[2]() for k,v in model.fittingParameters.items()]
+
+        short_desc = []
+        for k,v in model.fittingParameters.items():
+            doc = v[2].__doc__
+            if doc is None or doc is 'None':
+                short_desc.append('')
+            else:
+                split = doc.split('\n')
+                for spl in split:
+                    if len(spl) > 0:
+                        s = spl
+                        break
+
+                short_desc.append(s)
+
+
+        output = tabulate.tabulate(zip(keywords,  short_desc),
+                              headers=['Param Name', 'Short Desc'],
+                              tablefmt="fancy_grid")
+        print(output)
+        print('\n\n')
+        return
 
     # Get the spectrum
     observation = pp.generate_observation()
@@ -163,6 +324,7 @@ def main():
             bounds = value['bounds']
             mode = value['mode']
             factor = value['factor']
+            prior = value['prior']
 
             if fit:
                 logging.info('Fitting: {}'.format(key))
@@ -178,6 +340,9 @@ def main():
 
             if mode:
                 optimizer.set_mode(key, mode.lower())
+
+            if prior is not None:
+                optimizer.set_prior(key, prior)
 
         start_time = time.time()
         solution = optimizer.fit(output_size=output_size)
@@ -226,7 +391,7 @@ def main():
                 obs = o.create_group('Observed')
                 observation.write(obs)
 
-            profiles = generate_profile_dict(model)
+            profiles = model.generate_profiles()
             spectrum = \
                 binning.generate_spectrum_output(result,
                                                  output_size=output_size)
@@ -238,8 +403,13 @@ def main():
                 spectrum['instrument_spectrum'] = inst_result[1]
                 spectrum['instrument_noise'] = inst_result[2]
 
-            spectrum['Contributions'] = \
-                store_contributions(binning, model, output_size=output_size-3)
+            try:
+                spectrum['Contributions'] = \
+                    store_contributions(binning, model, 
+                                        output_size=output_size-3)
+            except Exception:
+                pass
+
             if solution is not None:
                 out.store_dictionary(solution, group_name='Solutions')
                 priors = {}

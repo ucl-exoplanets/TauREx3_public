@@ -80,9 +80,9 @@ class NestleOptimizer(Optimizer):
             # converting parameters from normalised grid to uniform prior
             cube = []
 
-            for idx, bounds in enumerate(self.fit_boundaries):
-                bound_min, bound_max = bounds
-                cube.append((theta[idx] * (bound_max-bound_min)) + bound_min)
+            for idx, prior in enumerate(self.fitting_priors):
+
+                cube.append(prior.sample(theta[idx]))
 
             return tuple(cube)
 
@@ -106,33 +106,11 @@ class NestleOptimizer(Optimizer):
 
         self._nestle_output = self.store_nestle_output(res)
 
-    def sample_parameters(self, solution):
-        """
-        Read traces and weights and return
-        a random ``sigma_fraction`` sample of them
+    def get_samples(self, solution_idx):
+        return self._nestle_output['solution']['samples']
 
-        Parameters
-        ----------
-        solution:
-            a solution output from sampler
-
-        Yields
-        ------
-        traces: :obj:`array`
-            Traces of a particular sample
-
-        weight: float
-            Weight of sample
-        
-        """
-        from taurex.util.util import random_int_iter
-        samples = self._nestle_output['solution']['samples']
-        weights = self._nestle_output['solution']['weights']
-
-        for x in random_int_iter(samples.shape[0], self._sigma_fraction):
-            w = weights[x]+1e-300
-
-            yield samples[x, :], w
+    def get_weights(self, solution_idx):
+        return self._nestle_output['solution']['weights']
 
     def get_solution(self):
         """
@@ -254,3 +232,8 @@ class NestleOptimizer(Optimizer):
             nestle_output['solution']['fitparams'][param_name] = param
 
         return nestle_output
+
+
+    @classmethod
+    def input_keywords(self):
+        return ['nestle', ]

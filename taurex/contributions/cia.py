@@ -157,3 +157,7 @@ class CIAContribution(Contribution):
         if len(self.ciaPairs) > 0:
             contrib.write_string_array('cia_pairs', self.ciaPairs)
         return contrib
+
+    @classmethod
+    def input_keywords(self):
+        return ['CIA', ]
