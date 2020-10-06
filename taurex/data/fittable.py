@@ -134,7 +134,7 @@ def derivedparam(f=None, param_name=None, param_latex=None, compute=False):
     wrapper.compute = compute
     wrapper.decorated = 'derivedparam'
     pwrap = property(wrapper)
-
+    wrapper.__doc__ = str(f.__doc__)
     return pwrap
 
 

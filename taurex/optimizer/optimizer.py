@@ -641,13 +641,14 @@ class Optimizer(Logger):
 
         solution_dict = {}
 
-        self.info('Generating spectra and profiles')
+        self.info('Post-processing - Generating spectra and profiles')
 
         # Loop through each solution, grab optimized parameters and anything 
         # else we want to store
         for solution, optimized_map, \
                 optimized_median, values in self.get_solution():
 
+            enableLogging()
             self.info('Computing solution %s', solution)
             sol_values = {}
 
@@ -706,6 +707,9 @@ class Optimizer(Logger):
                     continue
                 solution_dict[f'solution{solution}']['derived_params'].update(derived_dict)
 
+        enableLogging()
+        self.info('Post-processing - Complete')
+
         return solution_dict
 
     def compute_derived_trace(self, solution):
@@ -713,7 +717,6 @@ class Optimizer(Logger):
         from taurex.constants import AMU
         from taurex import mpi
         enableLogging()
-        self.info('Computing derived mu......')
 
         samples = self.get_samples(solution)
         weights = self.get_weights(solution)
@@ -725,7 +728,9 @@ class Optimizer(Logger):
 
         count = 0
 
-        derived_param = {p: [] for p in self.derived_names}
+        derived_param = {p: ([],[]) for p in self.derived_names}
+
+        weight_comb = []
 
         if len(self.derived_names) == 0:
             return
@@ -741,26 +746,39 @@ class Optimizer(Logger):
             disableLogging()
 
             parameters = samples[idx]
+            weight = weights[idx]
             self.update_model(parameters)
             self._model.initialize_profiles()
             for p, v in zip(self.derived_names, self.derived_values):
-                derived_param[p].append(v)
-
+                derived_param[p][0].append(v)
+                derived_param[p][1].append(weight)
+            
         result_dict = {}
 
-        for param, trace in derived_param.items():
+        sorted_weights = weights.argsort()
+
+        for param, (trace, w) in derived_param.items():
+            
+            all_trace = np.array(mpi.allreduce(trace, op='SUM'))  # I cant remember why this works
+            all_weight = np.array(mpi.allreduce(w, op='SUM'))  # I cant remember why this works
+
+            all_weight_sort = all_weight.argsort()
+
+            # Sort them into the right order
+            all_weight[sorted_weights] = all_weight[all_weight_sort]
+            all_trace[sorted_weights] = all_trace[all_weight_sort]
 
             q_16, q_50, q_84 = \
-                quantile_corner(np.array(trace), [0.16, 0.5, 0.84],
-                                weights=np.array(weights))
+                quantile_corner(np.array(all_trace), [0.16, 0.5, 0.84],
+                                weights=np.array(all_weight))
 
-            mean = np.average(trace, weights=weights, axis=0)
+            mean = np.average(all_trace, weights=all_weight, axis=0)
 
             derived = {
                 'value': q_50,
                 'sigma_m': q_50-q_16,
                 'sigma_p': q_84-q_50,
-                'trace': trace,
+                'trace': all_trace,
                 'mean': mean
             }
             result_dict[f'{param}_derived'] = derived

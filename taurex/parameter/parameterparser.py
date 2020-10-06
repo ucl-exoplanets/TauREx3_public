@@ -1,7 +1,7 @@
 import configobj
 from taurex.log import Logger
 from .factory import *
-
+from taurex.optimizer import Optimizer
 
 class ParameterParser(Logger):
 
@@ -87,10 +87,10 @@ class ParameterParser(Logger):
         if not os.path.isfile(filename):
             raise Exception('Input file {} does not exist'.format(filename))
         self._raw_config = configobj.ConfigObj(filename)
-        self.debug('Raw Config file is {}, filename is {}'.format(self._raw_config,filename))
+        self.debug('Raw Config file is {}, filename is {}'.format(self._raw_config, filename))
         self._raw_config.walk(self.transform)
         config = self._raw_config.dict()
-        self.debug('Config file is {}, filename is {}'.format(config,filename))
+        self.debug('Config file is {}, filename is {}'.format(config, filename))
 
     def generate_lightcurve(self):
         config = self._raw_config.dict()
@@ -98,7 +98,7 @@ class ParameterParser(Logger):
             from taurex.model.lightcurve.lightcurve import LightCurveModel
             model = self.generate_model()
             lightcurvefile = config['Lightcurve']['lc_pickle']
-            return LightCurveModel(model,lightcurvefile)
+            return LightCurveModel(model, lightcurvefile)
         else:
             raise KeyError
 
@@ -148,6 +148,48 @@ class ParameterParser(Logger):
             return create_optimizer(config['Optimizer'])
         else:
             None
+
+    def setup_optimizer(self, optimizer: Optimizer):
+        """
+        Setup fitting parameters for optimizer
+        """
+        fitting_parameters = self.generate_fitting_parameters()
+
+        self.info('Setting up optimizer')
+
+        for key, value in fitting_parameters.items():
+            fit = value['fit']
+            bounds = value['bounds']
+            mode = value['mode']
+            factor = value['factor']
+            prior = value['prior']
+
+            if fit:
+                self.info('Fitting: %s', key)
+                optimizer.enable_fit(key)
+            else:
+                optimizer.disable_fit(key)
+
+            if factor:
+                optimizer.set_factor_boundary(key, factor)
+
+            if bounds:
+                optimizer.set_boundary(key, bounds)
+
+            if mode:
+                optimizer.set_mode(key, mode.lower())
+
+            if prior is not None:
+                optimizer.set_prior(key, prior)
+
+        fitting_parameters = self.generate_derived_parameters()
+
+        for key, value in fitting_parameters.items():
+            compute = value['compute']
+
+            if compute:
+                self.info('Deriving %s', key)
+                optimizer.enable_derived(key)
 
     def generate_observation(self):
 
@@ -335,7 +377,6 @@ class ParameterParser(Logger):
         else:
             return None
 
-
     def generate_fitting_parameters(self):
         from .factory import create_prior
         config = self._raw_config.dict()
@@ -344,17 +385,36 @@ class ParameterParser(Logger):
 
             fitting_params = {}
 
-            for key,value in fitting_config.items():
-                fit_param,fit_type=key.split(':')
-                if not fit_param in fitting_params:
-                    fitting_params[fit_param] = {'fit':None,'bounds':None,'mode':None,'factor':None, 'prior': None}
+            for key, value in fitting_config.items():
+                fit_param, fit_type = key.split(':')
+                if fit_param not in fitting_params:
+                    fitting_params[fit_param] = {'fit': False,
+                                                 'bounds': None,
+                                                 'mode': None,
+                                                 'factor': None,
+                                                 'prior': None}
 
-                if fit_type=='prior':
+                if fit_type == 'prior':
                     value = create_prior(value)
-                fitting_params[fit_param][fit_type]=value
+                fitting_params[fit_param][fit_type] = value
 
-        return fitting_params
+            return fitting_params
+        else:
+            return {}
 
+    def generate_derived_parameters(self):
+        config = self._raw_config.dict()
+        if 'Derive' in config:
+            fitting_config = config['Derive']
 
+            fitting_params = {}
 
+            for key, value in fitting_config.items():
+                fit_param, fit_type = key.split(':')
+                if fit_param not in fitting_params:
+                    fitting_params[fit_param] = {'compute': False}
+                fitting_params[fit_param][fit_type] = value
 
+            return fitting_params
+        else:
+            return {}
