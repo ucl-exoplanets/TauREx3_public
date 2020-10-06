@@ -721,7 +721,6 @@ class Optimizer(Logger):
         num_procs = mpi.nprocs()
 
         count = 0
-        weights = []
 
         derived_param = {p: [] for p in self.derived_names}
 
@@ -739,12 +738,10 @@ class Optimizer(Logger):
             disableLogging()
 
             parameters = samples[idx]
-            weight = weights[idx]
             self.update_model(parameters)
             self._model.initialize_profiles()
             for p, v in zip(self.derived_names, self.derived_values):
                 derived_param[p].append(v)
-            weights.append(weight)
 
         result_dict = {}
 
