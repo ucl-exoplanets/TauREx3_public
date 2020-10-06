@@ -80,6 +80,90 @@ def parse_keywords(keywords):
         print(tabulate.tabulate(table, headers=['profile_type','Class', 'Source'], tablefmt="fancy_grid"))
         print('\n')
 
+
+def show_parameters(model):
+    import tabulate
+    print('')
+    print('-----------------------------------------------')
+    print('------Available Retrieval Parameters-----------')
+    print('-----------------------------------------------')
+    print('')
+
+    keywords = [k for k, v in model.fittingParameters.items()]
+
+    short_desc = []
+    for k, v in model.fittingParameters.items():
+        doc = v[2].__doc__
+        if doc is None or doc == 'None':
+            short_desc.append('')
+        else:
+            split = doc.split('\n')
+            for spl in split:
+                if len(spl) > 0:
+                    s = spl
+                    break
+
+            short_desc.append(s)
+
+    output = tabulate.tabulate(zip(keywords,  short_desc),
+                            headers=['Param Name', 'Short Desc'],
+                            tablefmt="fancy_grid")
+    print(output)
+    print('\n\n')
+
+
+    import tabulate
+    print('')
+    print('-----------------------------------------------')
+    print('------Available Computable Parameters----------')
+    print('-----------------------------------------------')
+    print('')
+
+    keywords = [k for k, v in model.derivedParameters.items()]
+
+    short_desc = []
+    for k, v in model.derivedParameters.items():
+        doc = v[2].__doc__
+        if doc is None or doc == 'None':
+            short_desc.append('')
+        else:
+            split = doc.split('\n')
+            for spl in split:
+                if len(spl) > 0:
+                    s = spl
+                    break
+
+            short_desc.append(s)
+
+    output = tabulate.tabulate(zip(keywords,  short_desc),
+                            headers=['Param Name', 'Short Desc'],
+                            tablefmt="fancy_grid")
+    print(output)
+    print('\n\n')
+
+
+def show_plugins():
+    from taurex.parameter.classfactory import ClassFactory
+    from taurex.log import setLogLevel
+    import logging
+    setLogLevel(logging.ERROR)
+
+    successful_plugins, failed_plugins = ClassFactory().discover_plugins()
+
+    print('\nSuccessfully loaded plugins')
+    print('---------------------------')
+    for k, v in successful_plugins.items():
+        print(k)
+
+    print('\n\nFailed plugins')
+    print('---------------------------')
+    for k, v in failed_plugins.items():
+        print(k)
+        print(f'Reason: {v}')
+    
+    print('\n')
+
+
 def main():
     import argparse
     import datetime
@@ -150,33 +234,12 @@ def main():
         return
 
     if args.plugins:
-        from taurex.parameter.classfactory import ClassFactory
-
-        setLogLevel(logging.ERROR)
-
-        successful_plugins, failed_plugins = ClassFactory().discover_plugins()
-
-        
-        print('\nSuccessfully loaded plugins')
-        print('---------------------------')
-        for k,v in successful_plugins.items():
-            print(k)
-
-        print('\n\nFailed plugins')
-        print('---------------------------')
-        for k,v in failed_plugins.items():
-            print(k)
-            print(f'Reason: {v}')
-        
-        print('\n')
+        show_plugins()
         return
 
     if args.keywords:
         parse_keywords(args.keywords)
         return
-
-
-
 
     if args.input_file is None:
         print('Fatal: No input file specified.')
@@ -208,36 +271,7 @@ def main():
     model.build()
 
     if args.fitparams:
-        import tabulate
-        print('')
-        print('-----------------------------------------------')
-        print('------Available Retrieval Parameters-----------')
-        print('-----------------------------------------------')
-        print('')
-
-        keywords = [k for k,v in model.fittingParameters.items()]
-        current_values = [v[2]() for k,v in model.fittingParameters.items()]
-
-        short_desc = []
-        for k,v in model.fittingParameters.items():
-            doc = v[2].__doc__
-            if doc is None or doc is 'None':
-                short_desc.append('')
-            else:
-                split = doc.split('\n')
-                for spl in split:
-                    if len(spl) > 0:
-                        s = spl
-                        break
-
-                short_desc.append(s)
-
-
-        output = tabulate.tabulate(zip(keywords,  short_desc),
-                              headers=['Param Name', 'Short Desc'],
-                              tablefmt="fancy_grid")
-        print(output)
-        print('\n\n')
+        show_parameters(model)
         return
 
     # Get the spectrum
@@ -316,33 +350,7 @@ def main():
         optimizer = pp.generate_optimizer()
         optimizer.set_model(model)
         optimizer.set_observed(observation)
-
-        fitting_parameters = pp.generate_fitting_parameters()
-
-        for key, value in fitting_parameters.items():
-            fit = value['fit']
-            bounds = value['bounds']
-            mode = value['mode']
-            factor = value['factor']
-            prior = value['prior']
-
-            if fit:
-                logging.info('Fitting: {}'.format(key))
-                optimizer.enable_fit(key)
-            else:
-                optimizer.disable_fit(key)
-
-            if factor:
-                optimizer.set_factor_boundary(key, factor)
-
-            if bounds:
-                optimizer.set_boundary(key, bounds)
-
-            if mode:
-                optimizer.set_mode(key, mode.lower())
-
-            if prior is not None:
-                optimizer.set_prior(key, prior)
+        pp.setup_optimizer(optimizer)
 
         start_time = time.time()
         solution = optimizer.fit(output_size=output_size)

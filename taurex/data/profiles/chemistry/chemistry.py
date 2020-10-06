@@ -1,6 +1,6 @@
 from taurex.log import Logger
 from taurex.util import get_molecular_weight
-from taurex.data.fittable import Fittable
+from taurex.data.fittable import Fittable, derivedparam
 import numpy as np
 from taurex.output.writeable import Writeable
 from taurex.cache import OpacityCache, GlobalCache
@@ -223,6 +223,15 @@ class Chemistry(Fittable, Logger, Writeable):
             for idx, gasname in enumerate(self.inactiveGases):
                 self.mu_profile += self.inactiveGasMixProfile[idx] * \
                     get_molecular_weight(gasname)
+
+    @derivedparam(param_name='mu', param_latex='$\mu$', compute=True)
+    def mu(self):
+        """
+        Mean molecular weight at surface (amu)
+        """
+        
+        from taurex.constants import AMU
+        return self.muProfile[0]/AMU
 
     def write(self, output):
         """

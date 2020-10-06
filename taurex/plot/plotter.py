@@ -60,8 +60,7 @@ class Plotter(object):
         mu_derived = None
         for idx,sol in self.solution_iter():
             
-            if mu:
-                mu_derived = self.get_mu_parameters(sol)
+            mu_derived = self.get_derived_parameters(sol)
 
 
             fitting_names = self.fittingNames
@@ -77,21 +76,22 @@ class Plotter(object):
 
                 param_list.append([val,val- 5.0*sigma_m,val+5.0*sigma_p])
             
-            if mu_derived is not None and mu:
-                sigma_m = mu_derived['sigma_m'][()]
-                sigma_p = mu_derived['sigma_p'][()]
-                val = mu_derived['value'][()]     
-                param_list.append([val, val- 5.0*sigma_m,val+5.0*sigma_p])
+            for d in mu_derived:
+                sigma_m = d['sigma_m'][()]
+                sigma_p = d['sigma_p'][()]
+                val = d['value'][()]     
+                param_list.append([val, val - 5.0 * sigma_m, val+5.0*sigma_p])
+
             
             solution_ranges.append(param_list)
-
 
         fitting_boundary_low = self.fittingBoundaryLow
         fitting_boundary_high = self.fittingBoundaryHigh
 
-        if mu_derived is not None and mu:
-            fitting_boundary_low = np.concatenate((fitting_boundary_low, [-1e99]))
-            fitting_boundary_high = np.concatenate((fitting_boundary_high, [1e99]))
+        if len(mu_derived) > 0:
+            fitting_boundary_low = np.concatenate((fitting_boundary_low, [-1e99]*len(mu_derived)))
+            fitting_boundary_high = np.concatenate((fitting_boundary_high, [1e99]*len(mu_derived)))
+
 
 
         range_all = np.array(solution_ranges)
@@ -344,13 +344,17 @@ class Plotter(object):
         plt.close()
 
 
-    def get_mu_parameters(self, solution):
-        if 'mu_derived' not in solution['fit_params'].keys():
-            return None
+    # def get_mu_parameters(self, solution):
+    #     if 'mu_derived' not in solution['fit_params'].keys():
+    #         return None
+    #     else:
+    #         return solution['fit_params']['mu_derived']
+
+    def get_derived_parameters(self, solution):
+        if 'derived_params' in solution:
+            return [c for k, c in solution['derived_params'].items()]
         else:
-            return solution['fit_params']['mu_derived']
-
-
+            return []
 
     def plot_posteriors(self , fig=None, save=True, ranges=None, plot_mu=True, color=None, truth=None):
         if not self.is_retrieval:
@@ -363,8 +367,9 @@ class Plotter(object):
         for solution_idx, solution_val in self.solution_iter():
 
             # print(solution_idx)
-            if plot_mu:
-                mu_derived = self.get_mu_parameters(solution_val)
+
+            mu_derived = self.get_derived_parameters(solution_val)
+
 
             tracedata = solution_val['tracedata']
             weights = solution_val['weights']
@@ -374,9 +379,15 @@ class Plotter(object):
 
             latex_names = self.fittingLatex
 
-            if mu_derived is not None and plot_mu:
-                latex_names.append('$\mu$ (derived)')
-                tracedata = np.column_stack((tracedata, mu_derived['trace']))
+            latex_derived = self.derivedLatex
+
+            if mu_derived is not None:
+                for param in mu_derived:
+                    
+                    index = self.derivedNames.index(param.name.split('/')[-1])
+                    latex_names.append(self.derivedLatex[index])
+                    tracedata = np.column_stack((tracedata, param['trace']))
+
 
             if color is None:
                 color_idx = np.float(solution_idx)/self.num_solutions
@@ -782,6 +793,29 @@ class Plotter(object):
         if not self.is_retrieval:
             raise Exception('HDF5 was not generated from retrieval, no fitting latex found')
         return decode_string_array(self.fd['Optimizer']['fit_parameter_latex'])
+
+    @property
+    def derivedNames(self):
+        from taurex.util.util import decode_string_array
+        if not self.is_retrieval:
+            raise Exception('HDF5 was not generated from retrieval, no fitting latex found')
+        try:
+            array = decode_string_array(self.fd['Optimizer']['derived_parameter_names'])
+            return [f'{c}_derived' for c in array]
+        except KeyError:
+            return ['mu_derived']
+
+
+    @property
+    def derivedLatex(self):
+        from taurex.util.util import decode_string_array
+        if not self.is_retrieval:
+            raise Exception('HDF5 was not generated from retrieval, no fitting latex found')
+        try:
+            array = decode_string_array(self.fd['Optimizer']['derived_parameter_latex'])
+            return [f'{c} (derived)' for c in array]
+        except KeyError:
+            return ['$\mu$ (derived)']
 
     @property
     def fittingBoundaryLow(self):

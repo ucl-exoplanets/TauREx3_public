@@ -182,6 +182,30 @@ class SimpleForwardModel(ForwardModel):
         self.debug('Available Fitting params: %s',
                    list(self._fitting_parameters.keys()))
 
+    def collect_derived_parameters(self):
+        """
+        Collects all derived parameters from all
+        profiles within the forward model
+        """
+
+        self._derived_parameters = {}
+        self._derived_parameters.update(self.derived_parameters())
+        self._derived_parameters.update(self._planet.derived_parameters())
+        if self._star is not None:
+            self._derived_parameters.update(self._star.derived_parameters())
+        self._derived_parameters.update(self.pressure.derived_parameters())
+
+        self._derived_parameters.update(
+            self._temperature_profile.derived_parameters())
+
+        self._derived_parameters.update(self._chemistry.derived_parameters())
+
+        for contrib in self.contribution_list:
+            self._derived_parameters.update(contrib.derived_parameters())
+
+        self.debug('Available derived params: %s',
+                   list(self._derived_parameters.keys()))
+
     def build(self):
         """
         Build the forward model. Must be called at least
@@ -194,6 +218,7 @@ class SimpleForwardModel(ForwardModel):
         self._compute_inital_mu()
         self.info('Collecting paramters')
         self.collect_fitting_parameters()
+        self.collect_derived_parameters()
         self.info('Setting up profiles')
         self.initialize_profiles()
 

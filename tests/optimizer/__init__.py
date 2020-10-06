@@ -1,5 +1,5 @@
 from taurex.model import ForwardModel
-from taurex.core import fitparam
+from taurex.core import fitparam, derivedparam
 import numpy as np
 from taurex.spectrum import BaseSpectrum
 from taurex.binning import Binner
@@ -50,6 +50,10 @@ class LineModel(ForwardModel):
 
         test = Dummy()
         return test
+
+    @derivedparam(param_name='mplusc')
+    def mplusc(self):
+        return self._m + self._c
 
 class LineObs(BaseSpectrum):
 
