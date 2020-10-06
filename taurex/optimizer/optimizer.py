@@ -698,7 +698,8 @@ class Optimizer(Logger):
                 optimized_median, values in self.get_solution():
 
             derived_dict = self.compute_derived_trace(solution)
-
+            if derived_dict is None:
+                continue
             solution_dict['solution{}'.format(
                 solution)]['fit_params'].update(derived_dict)
 
@@ -724,7 +725,8 @@ class Optimizer(Logger):
 
         derived_param = {p: [] for p in self.derived_names}
 
-
+        if len(derived_param) == 0:
+            return
 
         self.info('Computing derived parameters......')
         disableLogging()
