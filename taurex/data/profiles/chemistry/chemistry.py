@@ -226,6 +226,10 @@ class Chemistry(Fittable, Logger, Writeable):
 
     @derivedparam(param_name='mu', param_latex='$\mu$', compute=True)
     def mu(self):
+        """
+        Mean molecular weight at surface (amu)
+        """
+        
         from taurex.constants import AMU
         return self.muProfile[0]/AMU
 

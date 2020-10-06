@@ -152,6 +152,9 @@ class BasePlanet(Fittable, Logger, Writeable):
 
     @derivedparam(param_name='logg', param_latex='log(g)', compute=False)
     def logg(self):
+        """
+        Surface gravity (m2/s) in log10
+        """ 
         return math.log10(self.gravity)
 
     @classmethod

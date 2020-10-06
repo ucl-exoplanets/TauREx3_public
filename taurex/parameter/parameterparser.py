@@ -187,9 +187,12 @@ class ParameterParser(Logger):
         for key, value in fitting_parameters.items():
             compute = value['compute']
 
-            if compute:
-                self.info('Deriving %s', key)
-                optimizer.enable_derived(key)
+            if compute is not None:
+                if compute:
+                    self.info('Deriving %s', key)
+                    optimizer.enable_derived(key)
+                else:
+                    optimizer.disable_derived(key)
 
     def generate_observation(self):
 
@@ -412,7 +415,7 @@ class ParameterParser(Logger):
             for key, value in fitting_config.items():
                 fit_param, fit_type = key.split(':')
                 if fit_param not in fitting_params:
-                    fitting_params[fit_param] = {'compute': False}
+                    fitting_params[fit_param] = {'compute': None}
                 fitting_params[fit_param][fit_type] = value
 
             return fitting_params

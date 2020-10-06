@@ -66,6 +66,9 @@ class TemperatureProfile(Fittable, Logger, Writeable):
 
     @derivedparam(param_name='avg_T', param_latex='$\\bar{T}$', compute=False)
     def averageTemperature(self):
+        """
+        Average temperature across all layers
+        """
         return np.mean(self.profile)
     
     @classmethod

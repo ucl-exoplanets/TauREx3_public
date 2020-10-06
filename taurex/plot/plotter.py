@@ -351,7 +351,10 @@ class Plotter(object):
     #         return solution['fit_params']['mu_derived']
 
     def get_derived_parameters(self, solution):
-        return [c for k, c in solution['derived_params'].items()]
+        if 'derived_params' in solution:
+            return [c for k, c in solution['derived_params'].items()]
+        else:
+            return []
 
     def plot_posteriors(self , fig=None, save=True, ranges=None, plot_mu=True, color=None, truth=None):
         if not self.is_retrieval:
