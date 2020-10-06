@@ -70,8 +70,11 @@ class ForwardModel(Logger, Fittable, Writeable):
         Must return a dictionary of profiles you want to
         store after modeling
         """
-        from taurex.util.output import generate_profiles
-        return generate_profiles(self)   # To ensure this change does not break anything
+        from taurex.util.output import generate_profile_dict
+        if hasattr(self, 'temperatureProfile'):
+            return generate_profile_dict(self)   # To ensure this change does not break anything
+        else:
+            return {}
 
     @classmethod
     def input_keywords(self):
