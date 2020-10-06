@@ -368,7 +368,7 @@ class EmissionModel(SimpleForwardModel):
         return ['emission', 'eclipse', ]
 
 
-    @derivedparam(param_name='log_F_bol', param_latex='log(F$_\{bol\}$)')
+    @derivedparam(param_name='log_F_bol', param_latex='log(F$_\{bol\}$)', compute=False)
     def logBolometricFlux(self):
         """
         log10 Flux integrated over all wavelengths (W m-2)
