@@ -154,3 +154,22 @@ def test_optimizer_olduniform(bounds, dolog):
             assert prior._low_bounds == min(*b)
             assert prior._up_bounds == max(*b)
 
+@given(m=st.floats(0.1, 100, allow_nan=False),
+       c=st.floats(0.1, 100, allow_nan=False))
+def test_optimizer_derived(m, c):
+    lm = LineModel()
+    lm.m = m
+    lm.c = c
+    lo = LineObs(m=m, c=c, N=10)
+
+    opt = Optimizer('test', observed=lo, model=lm)
+
+    opt.enable_derived('mplusc')
+    opt.enable_fit('m')
+    opt.compile_params()
+
+    assert 'mplusc' in opt.derived_names
+    assert opt.derived_values[opt.derived_names.index('mplusc')] == m+c
+    assert 'mplusc_derived' not in opt.fit_names
+    
+    

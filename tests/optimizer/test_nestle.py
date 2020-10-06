@@ -10,10 +10,10 @@ def test_optimizer(m, c):
     lm.m = 1.0
     lm.c = 10.0
     lo = LineObs(m=m, c=c, N=5)
-    opt = NestleOptimizer(num_live_points=5,observed=lo, model=lm)
+    opt = NestleOptimizer(num_live_points=5, observed=lo, model=lm)
     opt.enable_fit('m')
     opt.enable_fit('c')
-
+    opt.enable_derived('mplusc')
     opt.set_boundary('m', [0.8*m, 1.2*m])
     opt.set_boundary('c', [0.8*c, 1.2*c])
 

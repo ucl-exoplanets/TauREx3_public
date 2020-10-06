@@ -122,8 +122,15 @@ def derivedparam(f=None, param_name=None, param_latex=None, compute=False):
     def wrapper(self, *args, **kwargs):
         return f(self, *args, **kwargs)
     
+
+    if param_name is None:
+        raise ValueError('Derived parameter must have a name')
+
     wrapper.param_name = param_name
+
     wrapper.param_latex = param_latex
+    if param_latex is None:
+        wrapper.param_latex = param_name
     wrapper.compute = compute
     wrapper.decorated = 'derivedparam'
     pwrap = property(wrapper)

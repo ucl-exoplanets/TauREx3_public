@@ -38,6 +38,7 @@ class Optimizer(Logger):
         self._fit_priors = {}
         self.fitting_parameters = []
         self.fitting_priors = []
+
     def set_model(self, model):
         """
         Sets the model to be optimized/fit
@@ -693,15 +694,17 @@ class Optimizer(Logger):
 
             solution_dict['solution{}'.format(solution)] = sol_values
 
-        # Compute mu derived
-        for solution, optimized_map, \
-                optimized_median, values in self.get_solution():
 
-            derived_dict = self.compute_derived_trace(solution)
-            if derived_dict is None:
-                continue
-            solution_dict['solution{}'.format(
-                solution)]['fit_params'].update(derived_dict)
+        if len(self.derived_names) > 0:
+            solution_dict[f'solution{solution}']['derived_params'] = {}
+            # Compute derived
+            for solution, optimized_map, \
+                    optimized_median, values in self.get_solution():
+
+                derived_dict = self.compute_derived_trace(solution)
+                if derived_dict is None:
+                    continue
+                solution_dict[f'solution{solution}']['derived_params'].update(derived_dict)
 
         return solution_dict
 
@@ -724,7 +727,7 @@ class Optimizer(Logger):
 
         derived_param = {p: [] for p in self.derived_names}
 
-        if len(derived_param) == 0:
+        if len(self.derived_names) == 0:
             return
 
         self.info('Computing derived parameters......')
