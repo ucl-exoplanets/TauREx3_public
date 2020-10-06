@@ -2,6 +2,7 @@ import numpy as np
 from .simplemodel import SimpleForwardModel
 from taurex.constants import PI
 from taurex.util.emission import black_body
+from taurex.core import derivedparam
 import numba
 
 @numba.jit(nopython=True, nogil=True,fastmath=True)
@@ -365,3 +366,21 @@ class EmissionModel(SimpleForwardModel):
     @classmethod
     def input_keywords(self):
         return ['emission', 'eclipse', ]
+
+
+    @derivedparam(param_name='log_F_bol', param_latex='log(F$_\{bol\}$)')
+    def logBolometricFlux(self):
+        """
+        log10 Flux integrated over all wavelengths (W m-2)
+
+        """
+        from scipy.integrate import simps
+        import math
+        I,_mu,_w,tau = self.partial_model()
+        
+        flux_total = 2.0*np.pi*sum(I*(_w/_mu))
+        
+        flux_wl = flux_total[::-1]
+        wlgrid = 10000/self.nativeWavenumberGrid[::-1]
+
+        return math.log10(simps(flux_wl, wlgrid))
