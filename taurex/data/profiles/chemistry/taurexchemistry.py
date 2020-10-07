@@ -61,7 +61,7 @@ class TaurexChemistry(Chemistry):
 
     """
 
-    def __init__(self, fill_gases=['H2', 'He'], ratio=0.17567):
+    def __init__(self, fill_gases=['H2', 'He'], ratio=0.17567, derived_ratios=[]):
         super().__init__('ChemistryModel')
 
         self._gases = []
@@ -91,6 +91,7 @@ class TaurexChemistry(Chemistry):
         self.debug('MOLECULES I HAVE %s', self.availableActive)
         self.setup_fill_params()
         self.determine_mix_mask()
+        self.setup_derived_params(derived_ratios)
     
     def determine_mix_mask(self):
 
@@ -114,6 +115,7 @@ class TaurexChemistry(Chemistry):
 
         self._active_mask = np.array(self._active_mask)
         self._inactive_mask = np.array(self._inactive_mask)
+
 
     def setup_fill_params(self):
         if not hasattr(self._fill_gases, '__len__') or \
@@ -146,6 +148,27 @@ class TaurexChemistry(Chemistry):
             default_fit = False
             self.add_fittable_param(param_name, param_tex, fget,
                                     fset, 'log', default_fit, bounds)
+
+    def setup_derived_params(self, ratio_list):
+
+        for elem_ratio in ratio_list:
+            elem1, elem2 = elem_ratio.split('/')
+            mol_name = '{}_{}'.format(elem1, elem2)
+            param_name = mol_name
+            param_tex = '{}/{}'.format(molecule_texlabel(elem1),
+                                       molecule_texlabel(elem2))
+
+            def read_mol(self, elem=elem_ratio):
+                return np.mean(self.get_element_ratio(elem))
+
+
+            fget = read_mol
+
+            fget.__doc__ = f'{elem_ratio} ratio (volume)'
+
+            compute = True
+            self.add_derived_param(param_name, param_tex, fget, compute)
+
 
     def compute_mu_profile(self, nlayers):
         """
@@ -227,6 +250,47 @@ class TaurexChemistry(Chemistry):
     @property
     def inactiveGases(self):
         return self._inactive
+
+
+    def compute_elements_mix(self):
+        from taurex.util.util import split_molecule_elements
+        element_dict = {}
+
+        for g,m in zip(self.gases, self.mixProfile):
+            avg_mix = m
+            s = [],[]
+            if g is not 'e-':
+                s = split_molecule_elements(g)
+            else:
+                s = ['e-'], [1]
+            
+            for elements, count in s:
+                count = int(count or '1')
+                if elements not in element_dict:
+                    element_dict[elements] = 0.0
+                element_dict[elements] += count*avg_mix
+        
+        return element_dict
+
+    
+    def get_element_ratio(self, elem_ratio):
+        element_dict = self.compute_elements_mix()
+        elem1, elem2 = elem_ratio.split('/')
+
+        if elem1 not in element_dict:
+            self.error(f'None of the gases have the element {elem1}')
+            raise ValueError(f'No gas has element {elem1}')
+        if elem2 not in element_dict:
+            self.error(f'None of the gases have the element {elem2}')
+            raise ValueError(f'No gas has element {elem2}')
+        
+        return element_dict[elem1]/element_dict[elem2]
+
+
+
+
+
+
 
     def fitting_parameters(self):
         """
