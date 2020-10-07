@@ -376,7 +376,7 @@ class EmissionModel(SimpleForwardModel):
         """
         from scipy.integrate import simps
         import math
-        I,_mu,_w,tau = self.partial_model()
+        I, _mu, _w, tau = self.partial_model()
         
         flux_total = 2.0*np.pi*sum(I*(_w/_mu))
         

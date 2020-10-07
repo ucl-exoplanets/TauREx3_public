@@ -153,7 +153,7 @@ class TaurexChemistry(Chemistry):
 
         for elem_ratio in ratio_list:
             elem1, elem2 = elem_ratio.split('/')
-            mol_name = '{}_{}'.format(elem1, elem2)
+            mol_name = '{}_{}_ratio'.format(elem1, elem2)
             param_name = mol_name
             param_tex = '{}/{}'.format(molecule_texlabel(elem1),
                                        molecule_texlabel(elem2))

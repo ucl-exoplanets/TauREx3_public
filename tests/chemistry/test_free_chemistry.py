@@ -1,10 +1,12 @@
 import pytest
-from hypothesis import given, settings
+from hypothesis import given, settings, note
 from hypothesis.strategies import floats, lists
 from ..strategies import molecule_vmr, TPs
 from taurex.chemistry import TaurexChemistry
 from taurex.chemistry import ConstantGas
 from taurex.exceptions import InvalidModelException
+import numpy as np
+
 
 @given(ratio=floats(min_value=0.0, max_value=0.9),tp=TPs())
 @settings(deadline=None)
@@ -107,3 +109,61 @@ def test_constant_profile(mols, tp):
         ind = tc.gases.index(m)
         assert params[m][2]() == v
         assert tc.mixProfile[ind, 0] == v
+
+
+@given(H2_He_ratio=floats(0.1, 2.0, allow_nan=False),
+       H2O_mix=floats(1e-6, 1e-1, allow_nan=False),
+       CH4_mix=floats(1e-6, 1e-1, allow_nan=False),
+       tp=TPs(max_layers=4))
+@settings(deadline=None)
+def test_derived_params(H2_He_ratio, H2O_mix, CH4_mix, tp):
+
+    expected_CO_ratio = CH4_mix/H2O_mix
+    expected_H_He_ratio = H2_He_ratio/2
+
+    tc = TaurexChemistry(ratio=H2_He_ratio,
+                         derived_ratios=['He/H', 'C/O', 'P/O'])
+
+    h2o = ConstantGas('H2O',mix_ratio=H2O_mix)
+    ch4 = ConstantGas('CH4', mix_ratio=CH4_mix)
+
+    tc.addGas(h2o)
+    tc.addGas(ch4)
+
+    T, P, nlayers = tp
+
+    tc.initialize_chemistry(nlayers, T, P)
+
+    assert np.all(tc.get_element_ratio('H/H') == 1.0)
+    assert np.all(tc.get_element_ratio('C/C') == 1.0)
+    assert np.all(tc.get_element_ratio('O/O') == 1.0)
+
+    #assert np.mean(tc.get_element_ratio('He/H')) == pytest.approx(expected_H_He_ratio, rel=1e-2)
+    #assert np.mean(tc.get_element_ratio('H/He')) == pytest.approx(1/expected_H_He_ratio, rel=1e-2)
+    assert np.mean(tc.get_element_ratio('C/O')) == pytest.approx(expected_CO_ratio, rel=1e-2)
+    assert np.mean(tc.get_element_ratio('O/C')) == pytest.approx(1/expected_CO_ratio, rel=1e-2)
+
+    with pytest.raises(ValueError):
+        tc.get_element_ratio('P/O')
+    
+    deriv = tc.derived_parameters()
+
+    note(deriv.keys())
+
+    assert 'He_H_ratio' in deriv
+    assert 'C_O_ratio' in deriv
+    assert 'P_O_ratio' in deriv
+
+    #assert deriv['He_H_ratio'][2]() == pytest.approx(expected_H_He_ratio, rel=1e-2)
+    assert deriv['C_O_ratio'][2]() == pytest.approx(expected_CO_ratio, rel=1e-2)
+    with pytest.raises(ValueError):
+        assert deriv['P_O_ratio'][2]()
+
+
+
+
+
+
+
+
+
