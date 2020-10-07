@@ -124,8 +124,8 @@ def test_derived_params(H2_He_ratio, H2O_mix, CH4_mix, tp):
     tc = TaurexChemistry(ratio=H2_He_ratio,
                          derived_ratios=['He/H', 'C/O', 'P/O'])
 
-    h2o = ConstantGas('H2O',mix_ratio=H2O_mix)
-    ch4 = ConstantGas('CH4', mix_ratio=CH4_mix)
+    h2o = ConstantGas('O2',mix_ratio=H2O_mix)
+    ch4 = ConstantGas('C2', mix_ratio=CH4_mix)
 
     tc.addGas(h2o)
     tc.addGas(ch4)
@@ -138,8 +138,8 @@ def test_derived_params(H2_He_ratio, H2O_mix, CH4_mix, tp):
     assert np.all(tc.get_element_ratio('C/C') == 1.0)
     assert np.all(tc.get_element_ratio('O/O') == 1.0)
 
-    #assert np.mean(tc.get_element_ratio('He/H')) == pytest.approx(expected_H_He_ratio, rel=1e-2)
-    #assert np.mean(tc.get_element_ratio('H/He')) == pytest.approx(1/expected_H_He_ratio, rel=1e-2)
+    assert np.mean(tc.get_element_ratio('He/H')) == pytest.approx(expected_H_He_ratio, rel=1e-2)
+    assert np.mean(tc.get_element_ratio('H/He')) == pytest.approx(1/expected_H_He_ratio, rel=1e-2)
     assert np.mean(tc.get_element_ratio('C/O')) == pytest.approx(expected_CO_ratio, rel=1e-2)
     assert np.mean(tc.get_element_ratio('O/C')) == pytest.approx(1/expected_CO_ratio, rel=1e-2)
 
@@ -154,7 +154,7 @@ def test_derived_params(H2_He_ratio, H2O_mix, CH4_mix, tp):
     assert 'C_O_ratio' in deriv
     assert 'P_O_ratio' in deriv
 
-    #assert deriv['He_H_ratio'][2]() == pytest.approx(expected_H_He_ratio, rel=1e-2)
+    assert deriv['He_H_ratio'][2]() == pytest.approx(expected_H_He_ratio, rel=1e-2)
     assert deriv['C_O_ratio'][2]() == pytest.approx(expected_CO_ratio, rel=1e-2)
     with pytest.raises(ValueError):
         assert deriv['P_O_ratio'][2]()
