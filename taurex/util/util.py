@@ -129,6 +129,13 @@ def calculate_weight(chem):
             return 0.0
     return compoundweight
 
+def split_molecule_elements(chem):
+    s = re.findall('([A-Z][a-z]?)([0-9]*)', chem)
+    return s
+
+
+
+
 
 def sanitize_molecule_string(molecule):
     """
