@@ -36,6 +36,9 @@ class Optimizer(Logger):
         self._model_callback = None
         self._sigma_fraction = sigma_fraction
         self._fit_priors = {}
+        self.fitting_parameters = []
+        self.fitting_priors = []
+
     def set_model(self, model):
         """
         Sets the model to be optimized/fit
@@ -73,6 +76,7 @@ class Optimizer(Logger):
 
         self.info('Initializing parameters')
         self.fitting_parameters = []
+        self.derived_parameters = []
         self.fitting_priors = []
         # param_name,param_latex,
         #                 fget.__get__(self),fset.__get__(self),
@@ -83,6 +87,7 @@ class Optimizer(Logger):
             self.debug('Checking fitting parameter {}'.format(params))
             if to_fit:
                 self.fitting_parameters.append(params)
+
                 if name not in self._fit_priors:
                     prior = None
                     if mode == 'log':
@@ -94,6 +99,12 @@ class Optimizer(Logger):
                     self._fit_priors[name] = prior
                 else:
                     self.fitting_priors.append(self._fit_priors[name])
+
+        for params in self._model.derivedParameters.values():
+            name, latex, fget, compute = params
+            if compute:
+                self.derived_parameters.append(params)
+
         self.info('-------FITTING---------------')
         self.info('Parameters to be fit:')
         for params, priors in zip(self.fitting_parameters, self.fitting_priors):
@@ -114,6 +125,15 @@ class Optimizer(Logger):
 
 
         """
+
+        if len(fit_params) != len(self.fitting_parameters):
+            self.error('Trying to update model with more fitting parameters'
+                       ' than enabled')
+            self.error(f'No. enabled parameters:{len(self.fitting_parameters)}'
+                       f' Update length: {len(fit_params)}')
+            raise ValueError('Trying to update model with more fitting'
+                             ' parameters than enabled')
+
 
         for value, param, priors in zip(fit_params, self.fitting_parameters, self.fitting_priors):
             name, latex, fget, fset, mode, to_fit, bounds = param
@@ -204,6 +224,56 @@ class Optimizer(Logger):
         return [c[1] if self._fit_priors[c[0]].priorMode is PriorMode.LINEAR else 'log({})'.format(c[1])
                 for c in self.fitting_parameters]
 
+
+    @property
+    def derived_names(self):
+        """ 
+
+        Returns a list of the current values of a fitting parameter. This 
+        respects the ``mode`` setting
+
+        Returns
+        -------
+        :obj:`list`:
+            List of each value of a fitting parameter
+
+        """
+
+        return [c[0] for c in self.derived_parameters]
+
+
+    @property
+    def derived_latex(self):
+        """ 
+
+        Returns a list of the current values of a fitting parameter. This 
+        respects the ``mode`` setting
+
+        Returns
+        -------
+        :obj:`list`:
+            List of each value of a fitting parameter
+
+        """
+
+        return [c[1] for c in self.derived_parameters]
+
+    @property
+    def derived_values(self):
+        """ 
+
+        Returns a list of the current values of a fitting parameter. This 
+        respects the ``mode`` setting
+
+        Returns
+        -------
+        :obj:`list`:
+            List of each value of a fitting parameter
+
+        """
+
+        return [c[2]() for c in self.derived_parameters]
+
     def enable_fit(self, parameter):
         """
         Enables fitting of the parameter
@@ -223,6 +293,14 @@ class Optimizer(Logger):
         self._model.fittingParameters[parameter] = (
             name, latex, fget, fset, mode, to_fit, bounds)
 
+    def enable_derived(self, parameter):
+        name, latex, fget, compute = \
+            self._model.derivedParameters[parameter]
+        compute = True
+        self._model.derivedParameters[parameter] = (
+            name, latex, fget, compute
+        )
+
     def disable_fit(self, parameter):
         """
         Disables fitting of the parameter
@@ -240,6 +318,15 @@ class Optimizer(Logger):
 
         self._model.fittingParameters[parameter] = (
             name, latex, fget, fset, mode, to_fit, bounds)
+
+    def disable_derived(self, parameter):
+        name, latex, fget, compute = \
+            self._model.derivedParameters[parameter]
+        compute = False
+        self._model.derivedParameters[parameter] = (
+            name, latex, fget, compute
+        )
+
 
     def set_boundary(self, parameter, new_boundaries):
         """
@@ -460,8 +547,11 @@ class Optimizer(Logger):
         output.write_string_array('fit_parameter_latex', self.fit_latex)
         output.write_array('fit_boundary_low', np.array(
             [x.boundaries()[0] for x in self.fitting_priors]))
-        output.write_array('fit_boundary_high', np.array(
-            [x.boundaries()[1] for x in self.fitting_priors]))
+        output.write_array('fit_boundary_high', np.array([x.boundaries()[1] for x in self.fitting_priors]))
+        if len(self.derived_names) > 0:
+            output.write_string_array('derived_parameter_names', self.derived_names)
+            output.write_string_array('derived_parameter_latex', self.derived_latex)
+
         return output
 
 
@@ -551,13 +641,14 @@ class Optimizer(Logger):
 
         solution_dict = {}
 
-        self.info('Generating spectra and profiles')
+        self.info('Post-processing - Generating spectra and profiles')
 
         # Loop through each solution, grab optimized parameters and anything 
         # else we want to store
         for solution, optimized_map, \
                 optimized_median, values in self.get_solution():
 
+            enableLogging()
             self.info('Computing solution %s', solution)
             sol_values = {}
 
@@ -586,7 +677,7 @@ class Optimizer(Logger):
             self._model.model(cutoff_grid=False)
 
             # Store profiles here
-            sol_values['Profiles'] = generate_profile_dict(self._model)
+            sol_values['Profiles'] = self._model.generate_profiles()
             profile_dict, spectrum_dict = self.generate_profiles(
                 solution, self._observed.wavenumberGrid)
 
@@ -604,23 +695,28 @@ class Optimizer(Logger):
 
             solution_dict['solution{}'.format(solution)] = sol_values
 
-        # Compute mu derived
-        for solution, optimized_map, \
-                optimized_median, values in self.get_solution():
 
-            mu = self.compute_mu_derived_trace(solution)
+        if len(self.derived_names) > 0:
+            solution_dict[f'solution{solution}']['derived_params'] = {}
+            # Compute derived
+            for solution, optimized_map, \
+                    optimized_median, values in self.get_solution():
 
-            solution_dict['solution{}'.format(
-                solution)]['fit_params']['mu_derived'] = mu
+                derived_dict = self.compute_derived_trace(solution)
+                if derived_dict is None:
+                    continue
+                solution_dict[f'solution{solution}']['derived_params'].update(derived_dict)
+
+        enableLogging()
+        self.info('Post-processing - Complete')
 
         return solution_dict
 
-    def compute_mu_derived_trace(self, solution):
+    def compute_derived_trace(self, solution):
         from taurex.util.util import quantile_corner
         from taurex.constants import AMU
         from taurex import mpi
         enableLogging()
-        self.info('Computing derived mu......')
 
         samples = self.get_samples(solution)
         weights = self.get_weights(solution)
@@ -630,8 +726,16 @@ class Optimizer(Logger):
 
         num_procs = mpi.nprocs()
 
-        mu_trace = np.zeros(shape=len_samples)
         count = 0
+
+        derived_param = {p: ([],[]) for p in self.derived_names}
+
+        weight_comb = []
+
+        if len(self.derived_names) == 0:
+            return
+
+        self.info('Computing derived parameters......')
         disableLogging()
         for idx in range(rank, len_samples, num_procs):
             enableLogging()
@@ -642,35 +746,43 @@ class Optimizer(Logger):
             disableLogging()
 
             parameters = samples[idx]
+            weight = weights[idx]
             self.update_model(parameters)
             self._model.initialize_profiles()
-            mu_trace[idx] = self._model.chemistry.muProfile[0]/AMU
-            count += 1
-        # for parameters, weight in self.sample_parameters(solution):
-        #     self.update_model(parameters)
-        #     self._model.initialize_profiles()
-        #     mu_trace.append(self._model.chemistry.muProfile[0]/AMU)
-        #     weights.append(weight)
-        enableLogging()
+            for p, v in zip(self.derived_names, self.derived_values):
+                derived_param[p][0].append(v)
+                derived_param[p][1].append(weight)
+            
+        result_dict = {}
 
-        mu_trace = mpi.allreduce(mu_trace, op='SUM')
+        sorted_weights = weights.argsort()
 
-        self.info('Done!')
+        for param, (trace, w) in derived_param.items():
+            
+            all_trace = np.array(mpi.allreduce(trace, op='SUM'))  # I cant remember why this works
+            all_weight = np.array(mpi.allreduce(w, op='SUM'))  # I cant remember why this works
 
-        q_16, q_50, q_84 = \
-            quantile_corner(np.array(mu_trace), [0.16, 0.5, 0.84],
-                            weights=np.array(weights))
+            all_weight_sort = all_weight.argsort()
 
-        mean = np.average(mu_trace, weights=weights, axis=0)
+            # Sort them into the right order
+            all_weight[sorted_weights] = all_weight[all_weight_sort]
+            all_trace[sorted_weights] = all_trace[all_weight_sort]
 
-        mu_derived = {
-            'value': q_50,
-            'sigma_m': q_50-q_16,
-            'sigma_p': q_84-q_50,
-            'trace': mu_trace,
-            'mean': mean
-        }
-        return mu_derived
+            q_16, q_50, q_84 = \
+                quantile_corner(np.array(all_trace), [0.16, 0.5, 0.84],
+                                weights=np.array(all_weight))
+
+            mean = np.average(all_trace, weights=all_weight, axis=0)
+
+            derived = {
+                'value': q_50,
+                'sigma_m': q_50-q_16,
+                'sigma_p': q_84-q_50,
+                'trace': all_trace,
+                'mean': mean
+            }
+            result_dict[f'{param}_derived'] = derived
+        return result_dict
 
     def sample_parameters(self, solution):
         """

@@ -14,7 +14,8 @@ class ForwardModel(Logger, Fittable, Writeable):
 
         self._native_grid = None
 
-        self._fitting_parameters = {}
+        self._derived_parameters = self.derived_parameters()
+        self._fitting_parameters = self.fitting_parameters()
 
         self.contribution_list = []
 
@@ -53,6 +54,10 @@ class ForwardModel(Logger, Fittable, Writeable):
     def fittingParameters(self):
         return self._fitting_parameters
 
+    @property
+    def derivedParameters(self):
+        return self._derived_parameters
+
     def compute_error(self,  samples, wngrid=None, binner=None):
         return {}, {}
 
@@ -65,6 +70,16 @@ class ForwardModel(Logger, Fittable, Writeable):
 
         return model
 
+    def generate_profiles(self):
+        """
+        Must return a dictionary of profiles you want to
+        store after modeling
+        """
+        from taurex.util.output import generate_profile_dict
+        if hasattr(self, 'temperatureProfile'):
+            return generate_profile_dict(self)   # To ensure this change does not break anything
+        else:
+            return {}
 
     @classmethod
     def input_keywords(self):

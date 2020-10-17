@@ -10,6 +10,39 @@ class HDF5Opacity(InterpolatingOpacity):
 
     """
 
+    @classmethod
+    def priority(cls):
+        return 5
+
+    @classmethod
+    def discover(cls):
+        import os
+        import glob
+        import pathlib
+        from taurex.cache import GlobalCache
+        from taurex.util.util import sanitize_molecule_string
+
+        path = GlobalCache()['xsec_path']
+        if path is None:
+            return []
+        path = [os.path.join(path, '*.h5'), os.path.join(path, '*.hdf5')]
+        file_list = [f for glist in path for f in glob.glob(glist)]
+
+        discovery = []
+
+        interp = GlobalCache()['xsec_interpolation'] or 'linear'
+        mem = GlobalCache()['xsec_in_memory'] or True
+
+        for f in file_list:
+            op = HDF5Opacity(f, interpolation_mode='linear', in_memory=False)
+            mol_name = op.moleculeName
+            discovery.append((mol_name, [f, interp, mem]))
+            #op._spec_dict.close()
+            del op
+
+        return discovery
+
+
     def __init__(self, filename, interpolation_mode='exp', in_memory=False):
         super().__init__('HDF5Opacity:{}'.format(pathlib.Path(filename).stem[0:10]),
                          interpolation_mode=interpolation_mode)

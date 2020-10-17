@@ -10,8 +10,8 @@ def validate_priors(prior_string):
     if count_left_bracket != count_right_bracket:
         raise MalformedPriorInput("Parenthesis are not balanced")
 
-    if count_left_bracket != 1:
-        raise MalformedPriorInput("Only a single parenthesis pair allowed")
+    # if count_left_bracket != 1:
+    #     raise MalformedPriorInput("Only a single parenthesis pair allowed")
 
 
 def parse_priors(prior_string):

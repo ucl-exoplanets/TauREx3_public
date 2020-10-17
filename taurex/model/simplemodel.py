@@ -146,6 +146,9 @@ class SimpleForwardModel(ForwardModel):
 
             self._initialized = True
 
+        # Setup any photochemistry
+        self._chemistry.set_star_planet(self.star, self.planet)
+
         # Now initialize the gas profile real
         self._chemistry.initialize_chemistry(self.pressure.nLayers,
                                              self.temperatureProfile,
@@ -179,6 +182,30 @@ class SimpleForwardModel(ForwardModel):
         self.debug('Available Fitting params: %s',
                    list(self._fitting_parameters.keys()))
 
+    def collect_derived_parameters(self):
+        """
+        Collects all derived parameters from all
+        profiles within the forward model
+        """
+
+        self._derived_parameters = {}
+        self._derived_parameters.update(self.derived_parameters())
+        self._derived_parameters.update(self._planet.derived_parameters())
+        if self._star is not None:
+            self._derived_parameters.update(self._star.derived_parameters())
+        self._derived_parameters.update(self.pressure.derived_parameters())
+
+        self._derived_parameters.update(
+            self._temperature_profile.derived_parameters())
+
+        self._derived_parameters.update(self._chemistry.derived_parameters())
+
+        for contrib in self.contribution_list:
+            self._derived_parameters.update(contrib.derived_parameters())
+
+        self.debug('Available derived params: %s',
+                   list(self._derived_parameters.keys()))
+
     def build(self):
         """
         Build the forward model. Must be called at least
@@ -191,6 +218,7 @@ class SimpleForwardModel(ForwardModel):
         self._compute_inital_mu()
         self.info('Collecting paramters')
         self.collect_fitting_parameters()
+        self.collect_derived_parameters()
         self.info('Setting up profiles')
         self.initialize_profiles()
 
@@ -544,6 +572,12 @@ class SimpleForwardModel(ForwardModel):
 
     def path_integral(self, wngrid, return_contrib):
         raise NotImplementedError
+
+    def generate_profiles(self):
+        from taurex.util.output import generate_profile_dict
+        return generate_profile_dict(self)
+
+
 
     def write(self, output):
         # Run a model if needed

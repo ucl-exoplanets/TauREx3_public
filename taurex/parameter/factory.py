@@ -180,11 +180,10 @@ def planet_factory(planet_type):
     cf = ClassFactory()
     for klass in cf.planetKlasses:
         try:
-            print(klass, klass.input_keywords())
             if planet_type in klass.input_keywords():
                 return klass
         except NotImplementedError:
-            log.warning('%s',klass)
+            log.warning('%s', klass)
 
             
     raise NotImplementedError('Planet {} not implemented'.format(planet_type))

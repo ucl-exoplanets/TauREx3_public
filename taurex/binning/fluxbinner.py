@@ -83,6 +83,7 @@ class FluxBinner(Binner):
         """
 
         sorted_input = wngrid.argsort()
+        wngrid = wngrid[sorted_input]
         spectrum = spectrum[..., sorted_input]
         if error is not None:
             error = error[..., sorted_input]

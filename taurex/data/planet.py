@@ -1,8 +1,8 @@
 from taurex.log import Logger
 from taurex.constants import G, RJUP, MJUP, AU
-from .fittable import fitparam, Fittable
+from .fittable import fitparam, Fittable, derivedparam
 from taurex.output.writeable import Writeable
-
+import math
 
 class BasePlanet(Fittable, Logger, Writeable):
     """Holds information on a planet and its properties and
@@ -99,6 +99,9 @@ class BasePlanet(Fittable, Logger, Writeable):
     @fitparam(param_name='planet_distance', param_latex='$D_{planet}$',
               default_fit=False, default_bounds=[1, 2])
     def distance(self):
+        """
+        Planet semi major axis from parent star (AU)
+        """
         return self._distance
 
     @distance.setter
@@ -146,6 +149,13 @@ class BasePlanet(Fittable, Logger, Writeable):
         planet.write_scalar('radius_m', self.radius)
         planet.write_scalar('surface_gravity', self.gravity)
         return planet
+
+    @derivedparam(param_name='logg', param_latex='log(g)', compute=False)
+    def logg(self):
+        """
+        Surface gravity (m2/s) in log10
+        """ 
+        return math.log10(self.gravity)
 
     @classmethod
     def input_keywords(self):

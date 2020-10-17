@@ -1,6 +1,6 @@
 from taurex.log import Logger
 from taurex.util import get_molecular_weight
-from taurex.data.fittable import Fittable
+from taurex.data.fittable import Fittable, derivedparam
 import numpy as np
 from taurex.output.writeable import Writeable
 from taurex.cache import OpacityCache, GlobalCache
@@ -52,6 +52,25 @@ class Chemistry(Fittable, Logger, Writeable):
         deactive_list = GlobalCache()['deactive_molecules']
         if deactive_list is not None:
             self._avail_active = [k for k in self._avail_active if k not in deactive_list]
+
+    def set_star_planet(self, star, planet):
+        """
+
+        Supplies the star and planet to chemistry
+        for photochemistry reasons. Does nothing by default
+
+        Parameters
+        ----------
+
+        star: :class:`~taurex.data.stellar.star.Star`
+            A star object
+
+        planet: :class:`~taurex.data.planet.Planet`
+            A planet object
+
+
+        """
+        pass
 
     @property
     def availableActive(self):
@@ -204,6 +223,15 @@ class Chemistry(Fittable, Logger, Writeable):
             for idx, gasname in enumerate(self.inactiveGases):
                 self.mu_profile += self.inactiveGasMixProfile[idx] * \
                     get_molecular_weight(gasname)
+
+    @derivedparam(param_name='mu', param_latex='$\mu$', compute=True)
+    def mu(self):
+        """
+        Mean molecular weight at surface (amu)
+        """
+        
+        from taurex.constants import AMU
+        return self.muProfile[0]/AMU
 
     def write(self, output):
         """

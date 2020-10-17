@@ -28,6 +28,7 @@ class ClassFactory(Singleton):
         from taurex import temperature, chemistry, pressure, planet, \
             stellar, instruments, model, contributions, optimizer, opacity, \
             spectrum
+        from taurex.opacity import ktables
         from taurex.core import priors
 
         self._temp_klasses = set()
@@ -41,6 +42,7 @@ class ClassFactory(Singleton):
         self._contrib_klasses = set()
         self._opt_klasses = set()
         self._opac_klasses = set()
+        self._ktab_klasses = set()
         self._obs_klasses = set()
         self._prior_klasses = set()
 
@@ -58,6 +60,7 @@ class ClassFactory(Singleton):
 
         self._opt_klasses.update(self._collect_optimizer(optimizer))
         self._opac_klasses.update(self._collect_opacity(opacity))
+        self._ktab_klasses.update(self._collect_ktables(ktables))
         self._prior_klasses.update(self._collect_priors(priors))
 
     def load_plugin(self, plugin_module):
@@ -76,10 +79,11 @@ class ClassFactory(Singleton):
         self._opt_klasses.update(self._collect_optimizer(plugin_module))
         self._opac_klasses.update(self._collect_opacity(plugin_module))
         self._prior_klasses.update(self._collect_priors(plugin_module))
+        self._ktab_klasses.update(self._collect_ktables(plugin_module))
 
     def discover_plugins(self):
         plugins = {}
-
+        failed_plugins = {}
         for entry_point in pkg_resources.iter_entry_points('taurex.plugins'):
 
             entry_point_name = entry_point.name
@@ -90,16 +94,17 @@ class ClassFactory(Singleton):
                 # For whatever reason do not attempt to load the plugin
                 self.log.warning('Could not load plugin %s', entry_point_name)
                 self.log.warning('Reason: %s', str(e))
+                failed_plugins[entry_point_name] = str(e)
                 continue
 
             plugins[entry_point_name] = module
 
-        return plugins
+        return plugins, failed_plugins
 
     def load_plugins(self):
-        plugins = self.discover_plugins()
+        plugins, failed_plugins = self.discover_plugins()
         self.log.info('----------Plugin loading---------')
-        self.log.info('Discovered plugins %s', plugins.values())
+        self.log.debug('Discovered plugins %s', plugins.values())
 
         for k, v in plugins.items():
             self.log.info('Loading %s', k)
@@ -161,8 +166,13 @@ class ClassFactory(Singleton):
 
     def _collect_opacity(self, module):
         from taurex.opacity import Opacity, InterpolatingOpacity
+        from taurex.opacity.ktables import KTable
         return [c for c in self._collect_classes(module, Opacity)
-                if c is not InterpolatingOpacity]
+                if c is not InterpolatingOpacity and not issubclass(c, KTable)]
+
+    def _collect_ktables(self, module):
+        from taurex.opacity.ktables import KTable
+        return [c for c in self._collect_classes(module, KTable)]
 
     def _collect_observation(self, module):
         from taurex.spectrum import BaseSpectrum
@@ -215,6 +225,10 @@ class ClassFactory(Singleton):
     @property
     def opacityKlasses(self):
         return self._opac_klasses
+
+    @property
+    def ktableKlasses(self):
+        return self._ktab_klasses
 
     @property
     def observationKlasses(self):

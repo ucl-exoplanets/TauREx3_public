@@ -123,8 +123,18 @@ def calculate_weight(chem):
 
     for element, count in s:
         count = int(count or '1')
-        compoundweight += mass[element] * count
+        try:
+            compoundweight += mass[element] * count
+        except KeyError:
+            return 0.0
     return compoundweight
+
+def split_molecule_elements(chem):
+    s = re.findall('([A-Z][a-z]?)([0-9]*)', chem)
+    return s
+
+
+
 
 
 def sanitize_molecule_string(molecule):
@@ -581,3 +591,46 @@ def compute_dz(altitude):
     dz[-1] = altitude[-1] - altitude[-2]
 
     return dz
+
+def has_duplicates(arr):
+
+    return len(arr) != len(set(arr))
+
+
+def find_closest_pair(arr, value) -> (int, int):
+    """
+    Will find the indices that lie to the left and right
+    of the value
+
+    arr[left] <= value <= arr[right]
+
+    If the value is less than the array minimum then it will
+    always return left=0 and right=1
+
+    If the value is above the maximum 
+
+    Parameters
+    ----------
+    arr: :obj:`array`
+        Array to search, must be sorted
+    
+    value: float
+        Value to find in array
+
+
+    Returns
+    -------
+    left: int
+    
+    right: int
+
+    """
+
+
+    right = arr.searchsorted(value)
+    right = max(min(arr.shape[0]-1, right),1)
+
+    left = right-1
+    left = max(0, left)
+
+    return left, right
