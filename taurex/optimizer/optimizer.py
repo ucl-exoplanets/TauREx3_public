@@ -697,11 +697,11 @@ class Optimizer(Logger):
 
 
         if len(self.derived_names) > 0:
-            solution_dict[f'solution{solution}']['derived_params'] = {}
+            #solution_dict[f'solution{solution}']['derived_params'] = {}
             # Compute derived
             for solution, optimized_map, \
                     optimized_median, values in self.get_solution():
-
+                solution_dict[f'solution{solution}']['derived_params'] = {}
                 derived_dict = self.compute_derived_trace(solution)
                 if derived_dict is None:
                     continue
