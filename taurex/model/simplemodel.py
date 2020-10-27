@@ -575,7 +575,9 @@ class SimpleForwardModel(ForwardModel):
 
     def generate_profiles(self):
         from taurex.util.output import generate_profile_dict
-        return generate_profile_dict(self)
+        prof = generate_profile_dict(self)
+        prof['mu_profile'] = self.chemistry.muProfile
+        return prof
 
 
 
