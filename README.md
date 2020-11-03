@@ -1,4 +1,7 @@
 # TauREx 3
+
+![Python package](https://github.com/ucl-exoplanets/TauREx3/workflows/Python%20package/badge.svg)
+
 TauREx 3 is the newest version of the TauREx retrieval code.
 
 Documentation can be found [here](https://taurex3-public.readthedocs.io/en/latest/)
