@@ -380,7 +380,7 @@ def detect_and_return_klass(python_file, baseclass):
                is not baseclass and issubclass(m[1],baseclass)]
 
     if len(classes) == 0:
-        self.error('Could not find class of type %s in file %s',baseclass, python_file)
+        log.error('Could not find class of type %s in file %s',baseclass, python_file)
         raise Exception(f'No class inheriting from {baseclass} in '
                         f'{python_file}')
     return classes[0]

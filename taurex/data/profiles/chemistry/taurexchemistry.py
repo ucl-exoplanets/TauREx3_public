@@ -256,10 +256,10 @@ class TaurexChemistry(Chemistry):
         from taurex.util.util import split_molecule_elements
         element_dict = {}
 
-        for g,m in zip(self.gases, self.mixProfile):
+        for g, m in zip(self.gases, self.mixProfile):
             avg_mix = m
-            s = [],[]
-            if g is not 'e-':
+            s = [], []
+            if g != 'e-':
                 s = split_molecule_elements(g)
             else:
                 s = ['e-'], [1]

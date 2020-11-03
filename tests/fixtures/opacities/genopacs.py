@@ -1,4 +1,5 @@
 import pytest
+import numpy as np
 
 def gen_opacity(T, P, grid_size, mol_name):
     opacity = {'t': T,
