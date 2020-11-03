@@ -38,6 +38,10 @@ def load_generic_profile_from_hdf5(loc, module, identifier,
             if kw in repl_dict:
                 args_dict[kw] = repl_dict[kw]
             else:
+                try:
+                    v = v.decode()
+                except (AttributeError, UnicodeDecodeError,):
+                    pass
                 args_dict[kw] = v
             
 
