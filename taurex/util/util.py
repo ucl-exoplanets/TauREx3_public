@@ -538,6 +538,12 @@ def class_for_name(module_name, class_name):
                        list(cf.modelKlasses) + \
                        list(cf.contributionKlasses)
     
+    try:
+        class_name = class_name.decode()
+    except (UnicodeDecodeError, AttributeError):
+        pass
+
+
     combined_classes_name = [c.__name__ for c in combined_classes]
 
     if class_name in combined_classes_name:
