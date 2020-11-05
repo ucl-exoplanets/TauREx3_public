@@ -640,3 +640,14 @@ def find_closest_pair(arr, value) -> (int, int):
     left = max(0, left)
 
     return left, right
+
+
+def ensure_string_utf8(val):
+    output = val
+
+    try:
+        output = val.decode()
+    except (UnicodeDecodeError, AttributeError,):
+        pass
+    
+    return output

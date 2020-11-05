@@ -1,6 +1,6 @@
 import pytest
 import hypothesis
-from hypothesis.strategies import integers, floats
+from hypothesis.strategies import integers, floats,text
 import numpy as np
 from ..strategies import molecules, hyp_wngrid
 from hypothesis.extra.numpy import arrays
@@ -203,4 +203,10 @@ def test_closest_pair(arr, value):
         assert value >= arr[left]
         assert value <= arr[right]
 
+@hypothesis.given(string=text(min_size=1))
+def test_ensure_string(string):
+    from taurex.util.util import ensure_string_utf8
+
+    assert string == ensure_string_utf8(string)
+    assert string == ensure_string_utf8(string.encode())
 
