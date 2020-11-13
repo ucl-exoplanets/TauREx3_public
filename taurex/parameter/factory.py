@@ -216,7 +216,7 @@ def create_chemistry(config):
     obj = create_profile(config, chemistry_factory, Chemistry,
                          keyword_type='chemistry_type')
 
-    if isinstance(obj, (TaurexChemistry, MakeFreeMixin),):
+    if hasattr(obj, 'addGas'):
         for g in gases:
             obj.addGas(g)
 
