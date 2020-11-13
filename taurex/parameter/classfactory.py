@@ -382,53 +382,48 @@ class ClassFactory(Singleton):
     def priorKlasses(self):
         return self._prior_klasses
 
-
-   # Mixins
+    # Mixins
 
     @property
     def temperatureMixinKlasses(self):
-        return self._temp_klasses_mixin
+        return self._temp_mixin_klasses
 
     @property
     def chemistryMixinKlasses(self):
-        return self._chem_klasses_mixin
+        return self._chem_mixin_klasses
 
     @property
     def gasMixinKlasses(self):
-        return self._gas_klasses_mixin
+        return self._gas_mixin_klasses
 
     @property
     def pressureMixinKlasses(self):
-        return self._press_klasses_mixin
+        return self._press_mixin_klasses
 
     @property
     def planetMixinKlasses(self):
-        return self._planet_klasses_mixin
+        return self._planet_mixin_klasses
 
     @property
     def starMixinKlasses(self):
-        return self._star_klasses_mixin
+        return self._star_mixin_klasses
 
     @property
     def instrumentMixinKlasses(self):
-        return self._inst_klasses_mixin
+        return self._inst_mixin_klasses
 
     @property
     def modelMixinKlasses(self):
-        return self._model_klasses_mixin
+        return self._model_mixin_klasses
 
     @property
     def contributionMixinKlasses(self):
-        return self._contrib_klasses_mixin
+        return self._contrib_mixin_klasses
 
     @property
     def optimizerMixinKlasses(self):
-        return self._opt_klasses_mixin
+        return self._opt_mixin_klasses
 
     @property
     def observationMixinKlasses(self):
-        return self._obs_klasses_mixin
-
-    @property
-    def priorMixinKlasses(self):
-        return self._prior_klasses_mixin
+        return self._obs_mixin_klasses
