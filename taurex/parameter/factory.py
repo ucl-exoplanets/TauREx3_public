@@ -383,7 +383,7 @@ def generate_contributions(config):
         for klass in cf.contributionKlasses:
             try:
                 if key in klass.input_keywords():
-                    contributions.append(create_klass(config[key], klass))
+                    contributions.append(create_klass(config[key], klass,False))
                     check_key.pop(check_key.index(key))
                     break
             except NotImplementedError:
