@@ -16,11 +16,14 @@ class Mixin(Fittable):
 
     def __init__(self):
         old_fitting_parameters = {}
-        if hasattr(self, '_fitting_parameters'):
-            old_fitting_parameters = self._fitting_parameters
+        old_derived_parameters = {}
+        if hasattr(self, '_param_dict'):
+            old_fitting_parameters = self._param_dict
+            old_derived_parameters = self._derived_dict
         super().__init__()
             
-        self._fitting_parameters.update(old_fitting_parameters)
+        self._param_dict.update(old_fitting_parameters)
+        self._derived_dict.update(old_derived_parameters)
 
     @classmethod
     def input_keywords(self):
@@ -86,6 +89,9 @@ def determine_mixin_args(klasses):
 
 
 def build_new_mixed_class(base_klass, mixins):
+    if not hasattr(mixins, '__len__'):
+        mixins = [mixins]
+
     all_classes = tuple(mixins) + tuple([base_klass])
     new_name = '+'.join([x.__name__[:10] for x in all_classes])
     new_klass = type(new_name, all_classes, {'__init__': mixed_init})
@@ -93,8 +99,7 @@ def build_new_mixed_class(base_klass, mixins):
 
 
 def enhance_class(base_klass, mixins, **kwargs):
-    if not hasattr(mixins, '__len__'):
-        mixins = [mixins]
+
 
     all_classes = tuple(mixins) + tuple([base_klass])
     all_kwargs = determine_mixin_args(all_classes)
