@@ -189,6 +189,7 @@ def create_pressure_profile(config):
 
 def create_chemistry(config):
     from taurex.data.profiles.chemistry.chemistry import Chemistry
+    from taurex.mixin.mixins import MakeFreeMixin
     from taurex.data.profiles.chemistry import TaurexChemistry
     from taurex.data.profiles.chemistry.gas.gas import Gas
 
@@ -215,7 +216,7 @@ def create_chemistry(config):
     obj = create_profile(config, chemistry_factory, Chemistry,
                          keyword_type='chemistry_type')
 
-    if isinstance(obj, TaurexChemistry):
+    if isinstance(obj, (TaurexChemistry, MakeFreeMixin),):
         for g in gases:
             obj.addGas(g)
 
@@ -407,7 +408,7 @@ def create_prior(prior):
         raise ValueError('Unknown Prior Type in input file')
 
 
-def create_model(config,gas,temperature,pressure,planet,star):
+def create_model(config, gas, temperature, pressure, planet, star):
     from taurex.model import ForwardModel
     log.debug(config)
     config, klass, is_mixin = determine_klass(config, 'model_type', model_factory,
