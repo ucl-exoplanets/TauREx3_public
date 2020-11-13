@@ -21,7 +21,7 @@ def load_generic_profile_from_hdf5(loc, module, identifier,
         profile_type = loc[identifier][()]
 
     temp_keys = list(loc.keys())
-    klass = class_for_name(module, profile_type)
+    klass = class_for_name(profile_type)
 
     klass_kwargs = get_klass_args(klass)
 
