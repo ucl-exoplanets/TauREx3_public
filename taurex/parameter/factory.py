@@ -50,7 +50,7 @@ def mixin_factory(profile_type, baseclass):
         'Chemistry': 'chemistryMixinKlasses',
         'Gas': 'gasMixinKlasses',
         'PressureProfile': 'pressureMixinKlasses',
-        'BasePlanet': 'planetMixinKlasses',
+        'Planet': 'planetMixinKlasses',
         'Star': 'starMixinKlasses',
         'Instrument': 'instrumentMixinKlasses',
         'ForwardModel': 'modelMixinKlasses',

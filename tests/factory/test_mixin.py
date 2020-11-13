@@ -37,23 +37,23 @@ def test_creation():
     from taurex.mixin.mixins import TempScaler
     from taurex.mixin.core import build_new_mixed_class
     import numpy as np
-    config = {'profile_type': 'tempscalar+isothermal', 'T': 1500.0, 'scale_factor': 20.0}
+    config = {'profile_type': 'tempscalar+isothermal', 'T': 1000.0, 'scale_factor': 20.0}
 
     temp = create_temperature_profile(config)
 
     assert temp.__class__ is not Isothermal
-    assert temp.isoTemperature == 1500.0
+    assert temp.isoTemperature == 1000.0
     assert temp.scaleFactor == 20.0
 
     temp.initialize_profile(nlayers=100, pressure_profile=np.ones(100))
 
-    assert np.all(temp.profile == 1500.0*20.0)
+    assert np.all(temp.profile == 1000.0*20.0)
     params = temp.fitting_parameters()
 
     assert 'T_scale' in params
     assert 'T' in params
     assert params['T_scale'][2]() == 20
-    assert params['T'][2]() == 1500.0
+    assert params['T'][2]() == 1000.0
 
     params['T_scale'][3](5.0)
     params['T'][3](1000)
