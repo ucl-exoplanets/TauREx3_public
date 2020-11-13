@@ -182,6 +182,44 @@ class ClassFactory(Singleton):
         from taurex.core.priors import Prior
         return [c for c in self._collect_classes(module, Prior)]
 
+    def list_from_base(self, klass_type):
+
+        from taurex.temperature import TemperatureProfile
+        from taurex.chemistry import Chemistry
+        from taurex.chemistry import Gas
+        from taurex.pressure import PressureProfile
+        from taurex.planet import BasePlanet
+        from taurex.stellar import Star
+        from taurex.instruments import Instrument
+        from taurex.model import ForwardModel
+        from taurex.contributions import Contribution
+        from taurex.optimizer import Optimizer
+        from taurex.opacity import Opacity
+
+        from taurex.opacity.ktables import KTable
+        from taurex.spectrum import BaseSpectrum
+        from taurex.core.priors import Prior
+
+        klass_dict = {
+            TemperatureProfile: self.temperatureKlasses,
+            Chemistry: self.chemistryKlasses,
+            Gas: self.gasKlasses,
+            PressureProfile: self.pressureKlasses,
+            BasePlanet: self.planetKlasses,
+            Star: self.starKlasses,
+            Instrument: self.instrumentKlasses,
+            ForwardModel: self.modelKlasses,
+            Contribution: self.contributionKlasses,
+            Optimizer: self.optimizerKlasses,
+            Opacity: self.opacityKlasses,
+            KTable: self.ktableKlasses,
+            BaseSpectrum: self.observationKlasses,
+            Prior: self.priorKlasses,
+
+        }
+
+        return klass_dict[klass_type]
+
     @property
     def temperatureKlasses(self):
         return self._temp_klasses

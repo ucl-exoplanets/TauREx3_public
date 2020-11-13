@@ -519,12 +519,44 @@ def clip_native_to_wngrid(native_grid, wngrid):
     native_filter = (native_grid >= wn_min) & (native_grid <= wn_max)
     return native_grid[native_filter]
 
+
 def wnwidth_to_wlwidth(wngrid, wnwidth):
     return 10000*wnwidth/(wngrid**2)
 
 
+def class_from_keyword(keyword, class_filter=None):
+    from ..parameter.classfactory import ClassFactory
 
-def class_for_name(module_name, class_name):
+    cf = ClassFactory()
+
+    combined_classes = []
+    if class_filter is None:
+
+        combined_classes = list(cf.temperatureKlasses) + \
+                    list(cf.pressureKlasses) + \
+                    list(cf.chemistryKlasses) + \
+                    list(cf.gasKlasses) + \
+                    list(cf.planetKlasses) + \
+                    list(cf.starKlasses) + \
+                    list(cf.modelKlasses) + \
+                    list(cf.contributionKlasses)
+    else:
+        if hasattr(class_filter, '__len__'):
+            for x in class_filter:
+                combined_classes += list(cf.list_from_base(x))
+        else:
+            combined_classes = list(cf.list_from_base(class_filter))
+
+    for x in combined_classes:
+        try:
+            if keyword in x.input_keywords():
+                return x
+        except NotImplementedError:
+            continue
+    
+    return None
+
+def class_for_name(class_name):
     from ..parameter.classfactory import ClassFactory
 
     cf = ClassFactory()
