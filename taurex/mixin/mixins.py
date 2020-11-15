@@ -105,19 +105,19 @@ class MakeFreeMixin(ChemistryMixin):
 
     def initialize_chemistry(self, nlayers=100, temperature_profile=None,
                              pressure_profile=None, altitude_profile=None):
-        
+        self._run = False
         super().initialize_chemistry(nlayers, temperature_profile,
                                      pressure_profile, altitude_profile)
         
         for g in self._mixin_new_gas_list:
             g.initialize_profile(nlayers, temperature_profile,
                                    pressure_profile, altitude_profile)
-
+        self._run = True
         self.norm_factor = 1.0
 
         self.norm_factor = np.sum(self.activeGasMixProfile, axis=0) + \
             np.sum(self.inactiveGasMixProfile, axis=0)
-        
+        self.compute_mu_profile(nlayers)
     
     def compute_mu_profile(self, nlayers):
         """
@@ -130,6 +130,8 @@ class MakeFreeMixin(ChemistryMixin):
             Number of layers
         """
         from taurex.util.util import get_molecular_weight
+        if not self._run:
+            return
         super().compute_mu_profile(nlayers)
         self._mu_profile = super().muProfile
 
