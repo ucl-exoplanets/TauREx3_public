@@ -100,7 +100,11 @@ def determine_mixin_args(klasses):
         argspec = inspect.getfullargspec(klass.__init__)
         if issubclass(klass, Mixin):
             argspec = inspect.getfullargspec(klass.__init_mixin__)
+        if not argspec.defaults:
+            continue
+        
         args = argspec.args
+
         defaults.extend(argspec.defaults)
         num_defaults = len(argspec.defaults)
         all_kwargs.extend(args[-num_defaults:])
