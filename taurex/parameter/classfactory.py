@@ -18,7 +18,42 @@ class ClassFactory(Singleton):
     def reload_plugins(self):
         self.log.info('Reloading all modules and plugins')
         self.setup_batteries_included()
+        self.setup_batteries_included_mixin()
         self.load_plugins()
+
+
+    def setup_batteries_included_mixin(self):
+        """
+        Collect all the classes that are built into
+        TauREx 3
+        """
+        from taurex.mixin import mixins
+
+        self._temp_mixin_klasses = set()
+        self._chem_mixin_klasses = set()
+        self._gas_mixin_klasses = set()
+        self._press_mixin_klasses = set()
+        self._planet_mixin_klasses = set()
+        self._star_mixin_klasses = set()
+        self._inst_mixin_klasses = set()
+        self._model_mixin_klasses = set()
+        self._contrib_mixin_klasses = set()
+        self._opt_mixin_klasses = set()
+        self._obs_mixin_klasses = set()
+
+        self._temp_mixin_klasses.update(self._collect_temperatures_mixin(mixins))
+        self._chem_mixin_klasses.update(self._collect_chemistry_mixin(mixins))
+        self._gas_mixin_klasses.update(self._collect_gas_mixin(mixins))
+        self._press_mixin_klasses.update(self._collect_pressure_mixin(mixins))
+        self._planet_mixin_klasses.update(self._collect_planets_mixin(mixins))
+        self._star_mixin_klasses.update(self._collect_star_mixin(mixins))
+        self._inst_mixin_klasses.update(self._collect_instrument_mixin(mixins))
+        self._model_mixin_klasses.update(self._collect_model_mixin(mixins))
+        self._obs_mixin_klasses.update(self._collect_observation_mixin(mixins))
+        self._contrib_mixin_klasses.update(
+            self._collect_contributions_mixin(mixins))
+
+        self._opt_mixin_klasses.update(self._collect_optimizer_mixin(mixins))
 
     def setup_batteries_included(self):
         """
@@ -80,6 +115,32 @@ class ClassFactory(Singleton):
         self._opac_klasses.update(self._collect_opacity(plugin_module))
         self._prior_klasses.update(self._collect_priors(plugin_module))
         self._ktab_klasses.update(self._collect_ktables(plugin_module))
+
+        # Load any mixins
+
+        self._temp_mixin_klasses.update(
+            self._collect_temperatures_mixin(plugin_module))
+        self._chem_mixin_klasses.update(
+            self._collect_chemistry_mixin(plugin_module))
+        self._gas_mixin_klasses.update(
+            self._collect_gas_mixin(plugin_module))
+        self._press_mixin_klasses.update(
+            self._collect_pressure_mixin(plugin_module))
+        self._planet_mixin_klasses.update(
+            self._collect_planets_mixin(plugin_module))
+        self._star_mixin_klasses.update(
+            self._collect_star_mixin(plugin_module))
+        self._inst_mixin_klasses.update(
+            self._collect_instrument_mixin(plugin_module))
+        self._model_mixin_klasses.update(
+            self._collect_model_mixin(plugin_module))
+        self._obs_mixin_klasses.update(
+            self._collect_observation_mixin(plugin_module))
+        self._contrib_mixin_klasses.update(
+            self._collect_contributions_mixin(plugin_module))
+
+        self._opt_mixin_klasses.update(
+            self._collect_optimizer_mixin(plugin_module))
 
     def discover_plugins(self):
         plugins = {}
@@ -182,6 +243,89 @@ class ClassFactory(Singleton):
         from taurex.core.priors import Prior
         return [c for c in self._collect_classes(module, Prior)]
 
+    # Mixins
+    def _collect_temperatures_mixin(self, module):
+        from taurex.mixin import TemperatureMixin
+        return self._collect_classes(module, TemperatureMixin)
+
+    def _collect_chemistry_mixin(self, module):
+        from taurex.mixin import ChemistryMixin
+        return self._collect_classes(module, ChemistryMixin)
+
+    def _collect_gas_mixin(self, module):
+        from taurex.mixin import GasMixin
+        return self._collect_classes(module, GasMixin)
+
+    def _collect_pressure_mixin(self, module):
+        from taurex.mixin import PressureMixin
+        return self._collect_classes(module, PressureMixin)
+
+    def _collect_planets_mixin(self, module):
+        from taurex.mixin import PlanetMixin
+        return self._collect_classes(module, PlanetMixin)
+
+    def _collect_star_mixin(self, module):
+        from taurex.mixin import StarMixin
+        return self._collect_classes(module, StarMixin)
+
+    def _collect_instrument_mixin(self, module):
+        from taurex.mixin import InstrumentMixin
+        return self._collect_classes(module, InstrumentMixin)
+
+    def _collect_model_mixin(self, module):
+        from taurex.mixin import ForwardModelMixin
+        return self._collect_classes(module, ForwardModelMixin)
+
+    def _collect_contributions_mixin(self, module):
+        from taurex.mixin import ContributionMixin
+        return self._collect_classes(module, ContributionMixin)
+
+    def _collect_optimizer_mixin(self, module):
+        from taurex.mixin import OptimizerMixin
+        return self._collect_classes(module, OptimizerMixin)
+
+    def _collect_observation_mixin(self, module):
+        from taurex.mixin import ObservationMixin
+        return self._collect_classes(module, ObservationMixin)
+
+    def list_from_base(self, klass_type):
+
+        from taurex.temperature import TemperatureProfile
+        from taurex.chemistry import Chemistry
+        from taurex.chemistry import Gas
+        from taurex.pressure import PressureProfile
+        from taurex.planet import BasePlanet
+        from taurex.stellar import Star
+        from taurex.instruments import Instrument
+        from taurex.model import ForwardModel
+        from taurex.contributions import Contribution
+        from taurex.optimizer import Optimizer
+        from taurex.opacity import Opacity
+
+        from taurex.opacity.ktables import KTable
+        from taurex.spectrum import BaseSpectrum
+        from taurex.core.priors import Prior
+
+        klass_dict = {
+            TemperatureProfile: self.temperatureKlasses,
+            Chemistry: self.chemistryKlasses,
+            Gas: self.gasKlasses,
+            PressureProfile: self.pressureKlasses,
+            BasePlanet: self.planetKlasses,
+            Star: self.starKlasses,
+            Instrument: self.instrumentKlasses,
+            ForwardModel: self.modelKlasses,
+            Contribution: self.contributionKlasses,
+            Optimizer: self.optimizerKlasses,
+            Opacity: self.opacityKlasses,
+            KTable: self.ktableKlasses,
+            BaseSpectrum: self.observationKlasses,
+            Prior: self.priorKlasses,
+
+        }
+
+        return klass_dict[klass_type]
+
     @property
     def temperatureKlasses(self):
         return self._temp_klasses
@@ -237,3 +381,49 @@ class ClassFactory(Singleton):
     @property
     def priorKlasses(self):
         return self._prior_klasses
+
+    # Mixins
+
+    @property
+    def temperatureMixinKlasses(self):
+        return self._temp_mixin_klasses
+
+    @property
+    def chemistryMixinKlasses(self):
+        return self._chem_mixin_klasses
+
+    @property
+    def gasMixinKlasses(self):
+        return self._gas_mixin_klasses
+
+    @property
+    def pressureMixinKlasses(self):
+        return self._press_mixin_klasses
+
+    @property
+    def planetMixinKlasses(self):
+        return self._planet_mixin_klasses
+
+    @property
+    def starMixinKlasses(self):
+        return self._star_mixin_klasses
+
+    @property
+    def instrumentMixinKlasses(self):
+        return self._inst_mixin_klasses
+
+    @property
+    def modelMixinKlasses(self):
+        return self._model_mixin_klasses
+
+    @property
+    def contributionMixinKlasses(self):
+        return self._contrib_mixin_klasses
+
+    @property
+    def optimizerMixinKlasses(self):
+        return self._opt_mixin_klasses
+
+    @property
+    def observationMixinKlasses(self):
+        return self._obs_mixin_klasses
