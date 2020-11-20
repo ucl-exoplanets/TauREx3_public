@@ -1,31 +1,58 @@
 import numpy as np
 
 
-def normalize(v):
-    norm = np.linalg.norm(v)
-    if norm == 0: 
-       return v
-    return v / norm
+def normalize(v, axis=0):
+    norm = np.linalg.norm(v, axis=axis)
+    solution = v/norm
+    solution[:, norm == 0] = v[:, norm == 0]
+    return solution
 
 
-def compute_line_3d(v, t):
+def sphere_to_cartesian(R, vec):
+    result = np.zeros_like(vec)
+    result[0] = (R+vec[0])*np.sin(vec[1])*np.cos(vec[2]),
+    result[1] = (R+vec[0])*np.sin(vec[1])*np.sin(vec[2])
+    result[3] = (R+vec[0])*np.cos(vec[1])
+    return result
+
+def compute_line_3d(v, t,axis=0):
     """
     Generates a line given two cartesian points
     """
     v = np.array(v)
     t = np.array(t)
     o = v[...]
-    u = normalize(t-v)
+    u = normalize(t-v, axis=axis)
     return o, u
 
 
-def parallel_vector(R, alt, max_alt):
-    return np.array([-R+max_alt*2, R+alt, 0]), np.array([0.0, R+alt, 0])
+def parallel_vector(R, alt, max_alt=1e5):
+    """
+    Generates a viewing and tangent vectors
+    parallel to the surface of a sphere
+    """
+
+    if not hasattr(alt, '__len__'):
+        alt = np.array([alt])
+    viewer = np.zeros(shape=(3, len(alt)))
+    tangent = np.zeros_like(viewer)
+    viewer[0] = -(R+max_alt*2)
+    viewer[1] = R+alt
+    tangent[1] = R+alt
+
+    return viewer, tangent
 
 
-def perpendicular_vector(R,max_alt):
-    return np.array([0, R+max_alt*2, 0]),np.array([0.0, 0, 0])
+def perpendicular_vector(R, max_alt):
+    """
+    Generates a viewing and tangent vectors
+    perpendicular to a sphere of radius R
+    """
+    return np.array([0, R+max_alt*2, 0]).reshape(3, 1), \
+        np.array([0.0, 0, 0]).reshape(3, 1)
 
+def multi_dot(a, b):
+    return np.sum(a*b, axis=0)
 
 def compute_intersection_3d(R, h, u, o, c=np.zeros(3)):
     """
@@ -36,52 +63,61 @@ def compute_intersection_3d(R, h, u, o, c=np.zeros(3)):
     ----------
     R: float
         Radius
-    
-    h: float or array_like
+
+    h: float or array_like of shape (m)
         height above radius
     
-    u: vector
+    u: array with shape (3,n)
         normalized direction vector
-    
-    o: vector
+
+    o: array with shape (3,n)
         origin vector
-    
+
     c: vector, optional
         center position of sphere default is (0,0,0)
-    
+
     Returns
     --------
-    solution: array of shape (2,3,len(h))
+    solution: array of shape (2,3,m,n)
         Array containing points that intersect the sphere
         First index is always the point closest to origin vector
 
 
     """
-
     if not hasattr(h, '__len__'):
         h = np.array([h])
     else:
         h = np.array(h)
-
-    dot_res = (np.dot(u, o))**2 - (o**2).sum()
-    delta = dot_res + (R+h)**2
-    solution = np.zeros(shape=(2, 3, h.shape[0]))
-    sol1 = np.zeros(shape=(3, h.shape[0]))
-    sol2 = np.zeros(shape=(3, h.shape[0]))
+    
+    if len(u.shape) == 1:
+        u = u.reshape(-1, 1)
+        o = u.reshape(-1, 1)
+    
+    single_dot = multi_dot(u, o)
+    dot_res = (single_dot)**2 - (o**2).sum(axis=0)
+    delta = dot_res + (R+h[..., None])**2
+    solution = np.zeros(shape=(2, 3,h.shape[0], u.shape[1]))
+    sol1 = np.zeros(shape=(3, h.shape[0], u.shape[1]))
+    sol2 = np.zeros(shape=(3, h.shape[0], u.shape[1]))
     solution[...] = np.nan
     filt = delta > 0
-    if np.all(~filt):
+    if filt.sum() == 0:
         return None
-    d1 = -(np.dot(u, o-c)) + np.sqrt(delta[filt])
-    sol1[:, filt] = o[:, None] + d1*u[:, None]
-    d2 = -(np.dot(u, o-c)) - np.sqrt(delta[filt])
-    sol2[:, filt] = o[:, None] + d2*u[:, None]
-    v1 = np.sum((o[:, None]-sol1)**2, axis=0)
-    v2 = np.sum((o[:, None]-sol2)**2, axis=0)
-    max_filter = v2 > v1
+    with np.errstate(divide='ignore', invalid='ignore'):
 
-    a_filter = filt & max_filter
-    b_filter = filt & ~max_filter
+        d1 = -(single_dot) + np.sqrt(delta)
+        sol1 = o[:, None, :] + d1*u[:, None]
+        d2 = -(single_dot) - np.sqrt(delta)
+        sol2 = o[:, None, :] + d2*u[:, None]
+        v1 = np.sum((o[:, None, :]-sol1)**2, axis=0)
+        v2 = np.sum((o[:, None, :]-sol2)**2, axis=0)
+    #
+    #print(v1.shape)
+    max_filter = v2 > v1
+    #print(max_filter.shape)
+    a_filter = max_filter
+    b_filter = ~max_filter
+    #print(solution.shape)
     if a_filter.sum() > 0:
         solution[0, :, a_filter] = sol1[:, a_filter].T
         solution[1, :, a_filter] = sol2[:, a_filter].T
@@ -89,56 +125,70 @@ def compute_intersection_3d(R, h, u, o, c=np.zeros(3)):
         solution[0, :, b_filter] = sol2[:, b_filter].T
 
         solution[1, :, b_filter] = sol1[:, b_filter].T
-
+    
     # Detect planet crossings
     delta = dot_res + (R)**2
-    if delta > 0:
-        d1 = -(np.dot(u, o-c)) + np.sqrt(delta)
-        sol1 = o + d1*u
-        d2 = -(np.dot(u, o-c)) - np.sqrt(delta)
-        sol2 = o + d2*u
-        v1 = ((o-sol1)**2).sum()
-        v2 = ((o-sol2)**2).sum()
+
+    filt = delta > 0
+    tang = np.where(filt)[0]
+    if filt.sum() > 0:
+        d1 = -(single_dot[filt]) + np.sqrt(delta[filt])
+        sol1 = o[:, filt] + d1*u[:, filt]
+        d2 = -(single_dot[filt]) - np.sqrt(delta[filt])
+        sol2 = o[:, filt] + d2*u[:, filt]
+        v1 = ((o[:, filt]-sol1)**2).sum()
+        v2 = ((o[:, filt]-sol2)**2).sum()
         if v2 > v1:
-            solution[1, ...] = sol1[:, None]
+            solution[1, ..., tang] = sol1.T[..., None]
         else:
-            solution[1, ...] = sol2[:, None]
-            
-        
+            solution[1, ..., tang] = sol2.T[..., None]
+
     return solution
-        
-def compute_path_length_3d(R, altitudes, viewer, tangent,coordinates='cartesian'):
+
+
+def compute_path_length_3d(R, altitudes, viewer, tangent,
+                           coordinates='cartesian'):
+    """
+    Given a viewing and tangent vector, computes the path length for a sphere
+    """
+
     _viewer = viewer[...]
     _tangent = tangent[...]
 
     if not hasattr(altitudes, '__len__'):
         altitudes = np.array([altitudes])
     else:
-        altitudes = np.array(altitudes)    
-    
+        altitudes = np.array(altitudes)
+
     if not isinstance(coordinates, (list, tuple,)):
-        
+
         coordinates = [coordinates, coordinates]
-    
+
     if coordinates[0] in ('spherical'):
         _viewer = sphere_to_cartesian(R, _viewer)
     if coordinates[1] in ('spherical'):
         _tangent = sphere_to_cartesian(R, _tangent)
-    
+
     o, u = compute_line_3d(_viewer,
                            _tangent)
     intersections = compute_intersection_3d(R, altitudes, u, o)
-    good_solutions = np.isfinite(intersections[0,0,:])
-#     print(good_solutions)
-#     print(solution)
-    good_indices = np.where(good_solutions)[0]
-    intersections = intersections[..., good_solutions]
-    distances = np.linalg.norm(intersections[1,...]-intersections[0,...],axis=0)
-    
-    final_distances = np.zeros_like(distances)
-    final_distances[0] = distances[0]
-    final_distances[1:] = distances[1:]-distances[:-1]
-    
-    
-    return good_indices, final_distances
-    
+
+    if intersections is not None:
+
+        distances = (np.linalg.norm(intersections[1] - intersections[0],
+                                    axis=0))
+        filt = np.isfinite(distances)
+        all_distances = []
+
+        for i in range(viewer.shape[1]):
+            layer_filt = filt[:, i]
+            good_indices = np.where(layer_filt)[0]
+            dists = distances[layer_filt, i]
+            final_distances = np.zeros_like(dists)
+            final_distances[0] = dists[0]
+            final_distances[1:] = dists[1:]-dists[:-1]
+
+            all_distances.append((good_indices, final_distances))
+        return all_distances
+    else:
+        return None
