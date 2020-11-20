@@ -240,43 +240,52 @@ class SimpleForwardModel(ForwardModel):
 
         """
 
-        from taurex.constants import KBOLTZ
+        # from taurex.constants import KBOLTZ
         if mu_profile is None:
             mu_profile = self._chemistry.muProfile
 
-        # build the altitude profile from the bottom up
-        nlayers = self.pressure.nLayers
-        H = np.zeros(nlayers)
-        g = np.zeros(nlayers)
-        z = np.zeros(nlayers)
+        # # build the altitude profile from the bottom up
+        # nlayers = self.pressure.nLayers
+        # H = np.zeros(nlayers)
+        # g = np.zeros(nlayers)
+        # z = np.zeros(nlayers)
+        # z_center = np.zeros(nlayers)
+        # deltaz = np.zeros(nlayers+1)
+        # zb = np.zeros(nlayers+1)
 
-        # surface gravity (0th layer)
-        g[0] = self._planet.gravity
-        # scaleheight at the surface (0th layer)
-        H[0] = (KBOLTZ*self.temperatureProfile[0])/(mu_profile[0]*g[0])
-        #####
-        ####
-        ####
-        # TODO: CHANGE TO LOG10
-        for i in range(1, nlayers):
-            deltaz = (-1.)*H[i-1]*np.log(
-                self.pressure.pressure_profile_levels[i] /
-                self.pressure.pressure_profile_levels[i-1])
+        # # surface gravity (0th layer)
+        # g[0] = self._planet.gravity
+        # # scaleheight at the surface (0th layer)
+        # H[0] = (KBOLTZ*self.temperatureProfile[0])/(mu_profile[0]*g[0])
+        # #####
+        # ####
+        # ####
 
-            z[i] = z[i-1] + deltaz  # altitude at the i-th layer
+        # for i in range(1, nlayers+1):
+        #     deltaz[i] = (-1.)*H[i-1]*np.log(
+        #         self.pressure.pressure_profile_levels[i] /
+        #         self.pressure.pressure_profile_levels[i-1])
+        #     zb[i] = zb[i-1] + deltaz[i]
+        #     if i < nlayers:
+        #         z[i] = z[i-1] + deltaz[i]  # altitude at the i-th layer
 
-            with np.errstate(over='ignore'):
-                # gravity at the i-th layer
-                g[i] = self._planet.gravity_at_height(z[i])
-                self.debug('G[%s] = %s', i, g[i])
+        #         with np.errstate(over='ignore'):
+        #             # gravity at the i-th layer
+        #             g[i] = self._planet.gravity_at_height(z[i])
+        #             self.debug('G[%s] = %s', i, g[i])
 
-            with np.errstate(divide='ignore'):
-                H[i] = (KBOLTZ*self.temperatureProfile[i])/(mu_profile[i]*g[i])
-
-        self.altitude_profile = z
-        self.scaleheight_profile = H
-        self.gravity_profile = g
-
+        #         with np.errstate(divide='ignore'):
+        #             H[i] = (KBOLTZ*self.temperatureProfile[i])/(mu_profile[i]*g[i])
+        Pl = self.pressure.pressure_profile_levels
+        z, H, g, deltaz = \
+            self.planet.calculate_scale_properties(self.temperatureProfile,
+                                                   Pl,
+                                                   mu_profile)
+        self.altitude_profile = z[:-1]
+        self.scaleheight_profile = H[:-1]
+        self.gravity_profile = g[:-1]
+        self.altitude_boundaries = z
+        self.deltaz = deltaz
     @property
     def pressureProfile(self):
         """
