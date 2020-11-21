@@ -10,9 +10,9 @@ def normalize(v, axis=0):
 
 def sphere_to_cartesian(R, vec):
     result = np.zeros_like(vec)
-    result[0] = (R+vec[0])*np.sin(vec[1])*np.cos(vec[2]),
+    result[0] = (R+vec[0])*np.sin(vec[1])*np.cos(vec[2])
     result[1] = (R+vec[0])*np.sin(vec[1])*np.sin(vec[2])
-    result[3] = (R+vec[0])*np.cos(vec[1])
+    result[2] = (R+vec[0])*np.cos(vec[1])
     return result
 
 def compute_line_3d(v, t,axis=0):
@@ -54,7 +54,7 @@ def perpendicular_vector(R, max_alt):
 def multi_dot(a, b):
     return np.sum(a*b, axis=0)
 
-def compute_intersection_3d(R, h, u, o, c=np.zeros(3)):
+def compute_intersection_3d(R, h, u, o, c=np.zeros(3), allow_single=False):
     """
     Computes line-sphere intersection for a range of radius offsets
     Will detect if path crosses R and cutoff the point
@@ -91,23 +91,29 @@ def compute_intersection_3d(R, h, u, o, c=np.zeros(3)):
     
     if len(u.shape) == 1:
         u = u.reshape(-1, 1)
-        o = u.reshape(-1, 1)
+        o = o.reshape(-1, 1)
     
     single_dot = multi_dot(u, o)
     dot_res = (single_dot)**2 - (o**2).sum(axis=0)
     delta = dot_res + (R+h[..., None])**2
-    solution = np.zeros(shape=(2, 3,h.shape[0], u.shape[1]))
+    solution = np.zeros(shape=(2, 3, h.shape[0], u.shape[1]))
     sol1 = np.zeros(shape=(3, h.shape[0], u.shape[1]))
     sol2 = np.zeros(shape=(3, h.shape[0], u.shape[1]))
     solution[...] = np.nan
     filt = delta > 0
+    if allow_single:
+        filt = delta >= 0
     if filt.sum() == 0:
         return None
+    
     with np.errstate(divide='ignore', invalid='ignore'):
 
         d1 = -(single_dot) + np.sqrt(delta)
+        d1[d1 < 0] = 0.0
         sol1 = o[:, None, :] + d1*u[:, None]
+
         d2 = -(single_dot) - np.sqrt(delta)
+        d2[d2 < 0] = 0.0
         sol2 = o[:, None, :] + d2*u[:, None]
         v1 = np.sum((o[:, None, :]-sol1)**2, axis=0)
         v2 = np.sum((o[:, None, :]-sol2)**2, axis=0)
@@ -169,10 +175,14 @@ def compute_path_length_3d(R, altitudes, viewer, tangent,
     if coordinates[1] in ('spherical'):
         _tangent = sphere_to_cartesian(R, _tangent)
 
+    if len(_viewer.shape) == 1:
+        _viewer = _viewer.reshape(-1, 1)
+        _tangent = _viewer.reshape(-1, 1)
+
     o, u = compute_line_3d(_viewer,
                            _tangent)
     intersections = compute_intersection_3d(R, altitudes, u, o)
-
+    
     if intersections is not None:
 
         distances = (np.linalg.norm(intersections[1] - intersections[0],
@@ -180,7 +190,7 @@ def compute_path_length_3d(R, altitudes, viewer, tangent,
         filt = np.isfinite(distances)
         all_distances = []
 
-        for i in range(viewer.shape[1]):
+        for i in range(_viewer.shape[1]):
             layer_filt = filt[:, i]
             good_indices = np.where(layer_filt)[0]
             dists = distances[layer_filt, i]
