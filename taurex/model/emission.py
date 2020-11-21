@@ -267,7 +267,7 @@ class EmissionModel(SimpleForwardModel):
         if self.usingKTables:
             return self.evaluate_emission_ktables(wngrid, return_contrib)
 
-        dz = compute_dz(self.altitudeProfile)
+        dz = self.deltaz
 
         total_layers = self.nLayers
 
