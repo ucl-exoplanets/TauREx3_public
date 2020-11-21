@@ -1,6 +1,4 @@
 """General utility functions"""
-
-from taurex.constants import AMU
 import math
 import re
 import numpy as np
@@ -211,6 +209,7 @@ def get_molecular_weight(gasname):
         molecular weight in amu or 0 if not found
     
     """
+    from taurex.constants import AMU
     mu = calculate_weight(gasname)
 
 
