@@ -59,7 +59,7 @@ class TransmissionModel(SimpleForwardModel):
                          atm_min_pressure,
                          atm_max_pressure)
 
-    def compute_path_length(self, dz):
+    def compute_path_length_old(self, dz):
 
         dl = []
 
@@ -86,20 +86,35 @@ class TransmissionModel(SimpleForwardModel):
             dl.append(k*2.0)
         return dl
 
-    def path_integral(self, wngrid, return_contrib):
-        from taurex.util.util import compute_dz
+    def compute_path_length(self):
+        from taurex.util.geometry import parallel_vector
+        altitude_boundaries = self.altitude_boundaries
+        radius = self.planet.fullRadius
 
-        dz = compute_dz(self.altitudeProfile)
+        # Generate our line of sight paths
+        viewer, tangent = parallel_vector(radius, self.altitude_profile + self.deltaz/2,
+                                          altitude_boundaries.max())
+
+        path_lengths = self.planet.compute_path_length(altitude_boundaries,
+                                                       viewer, tangent)
+        
+        return [l for idx, l in path_lengths]
+
+
+
+
+    def path_integral(self, wngrid, return_contrib):
+
+        dz = self.deltaz
 
         total_layers = self.nLayers
 
         wngrid_size = wngrid.shape[0]
 
-        path_length = self.compute_path_length(dz)
 
         density_profile = self.densityProfile
 
-        path_length = self.compute_path_length(dz)
+        path_length = self.compute_path_length()
         self.path_length = path_length
 
         tau = np.zeros(shape=(total_layers, wngrid_size), dtype=np.float64)
