@@ -36,7 +36,7 @@ class RayleighContribution(Contribution):
         self._ngrid = wngrid.shape[0]
         self._nmols = 1
         self._nlayers = model.nLayers
-        molecules = model.chemistry.activeGases + model.chemistry.inactiveGases
+        molecules = list(model.chemistry.activeGases) + list(model.chemistry.inactiveGases)
 
         for gasname in molecules:
 
