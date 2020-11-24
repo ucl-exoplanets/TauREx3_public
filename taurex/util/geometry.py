@@ -8,14 +8,17 @@ def normalize(v, axis=0):
     return solution
 
 
-def sphere_to_cartesian(R, vec):
+def sphere_to_cartesian(R, vec, degrees=True):
     result = np.zeros_like(vec)
-    result[0] = (R+vec[0])*np.sin(vec[1])*np.cos(vec[2])
-    result[1] = (R+vec[0])*np.sin(vec[1])*np.sin(vec[2])
-    result[2] = (R+vec[0])*np.cos(vec[1])
+    _vec = vec[...]
+    if degrees:
+        _vec[1:] = np.radians(_vec[1:])
+    result[0] = (R+_vec[0])*np.sin(_vec[1])*np.cos(_vec[2])
+    result[1] = (R+_vec[0])*np.sin(_vec[1])*np.sin(_vec[2])
+    result[2] = (R+_vec[0])*np.cos(_vec[1])
     return result
 
-def compute_line_3d(v, t,axis=0):
+def compute_line_3d(v, t, axis=0):
     """
     Generates a line given two cartesian points
     """
@@ -182,7 +185,7 @@ def compute_path_length_3d(R, altitudes, viewer, tangent,
     o, u = compute_line_3d(_viewer,
                            _tangent)
     intersections = compute_intersection_3d(R, altitudes, u, o)
-    
+
     if intersections is not None:
 
         distances = (np.linalg.norm(intersections[1] - intersections[0],
