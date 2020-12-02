@@ -30,14 +30,14 @@ class BasePlanet(Fittable, Logger, Writeable):
     """
 
     def __init__(self, planet_mass=1.0, planet_radius=1.0,
-                 planet_sma=None, planet_distance=1.0, 
+                 planet_sma=None, planet_distance=1.0,
                  impact_param=0.5, orbital_period=2.0, albedo=0.3,
                  transit_time=3000.0):
         Logger.__init__(self, 'Planet')
         Fittable.__init__(self)
-        self._mass = planet_mass*MJUP
-        self._radius = planet_radius*RJUP
-        self._distance = (planet_sma or planet_distance)*AU
+        self.set_planet_mass(planet_mass, 'Mjup')
+        self.set_planet_radius(planet_radius, 'Rjup')
+        self.set_planet_semimajoraxis(planet_sma or planet_distance)
         self._impact = impact_param
         self._orbit_period = orbital_period
         self._albedo = albedo
