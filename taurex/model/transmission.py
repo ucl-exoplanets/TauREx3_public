@@ -48,7 +48,8 @@ class TransmissionModel(SimpleForwardModel):
                  chemistry=None,
                  nlayers=100,
                  atm_min_pressure=1e-4,
-                 atm_max_pressure=1e6):
+                 atm_max_pressure=1e6,
+                 new_path_method=False):
 
         super().__init__(self.__class__.__name__, planet,
                          star,
@@ -58,7 +59,7 @@ class TransmissionModel(SimpleForwardModel):
                          nlayers,
                          atm_min_pressure,
                          atm_max_pressure)
-
+        self.new_method = new_path_method
     def compute_path_length_old(self, dz):
 
         dl = []
@@ -114,7 +115,10 @@ class TransmissionModel(SimpleForwardModel):
 
         density_profile = self.densityProfile
 
-        path_length = self.compute_path_length()
+        if self.new_method:
+            path_length = self.compute_path_length()
+        else:
+            path_length = self.compute_path_length_old(dz)
         self.path_length = path_length
 
         tau = np.zeros(shape=(total_layers, wngrid_size), dtype=np.float64)
