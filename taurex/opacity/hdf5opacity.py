@@ -94,6 +94,15 @@ class HDF5Opacity(InterpolatingOpacity):
 
         if isinstance(self._molecule_name, np.ndarray):
             self._molecule_name = self._molecule_name[0]
+        
+        try:
+            self._molecule_name = self._molecule_name.decode()
+        except (UnicodeDecodeError, AttributeError,):
+            pass
+
+        from taurex.util.util import ensure_string_utf8
+
+        self._molecule_name = ensure_string_utf8(self._molecule_name)
 
         self._min_pressure = self._pressure_grid.min()
         self._max_pressure = self._pressure_grid.max()

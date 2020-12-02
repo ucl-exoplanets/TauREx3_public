@@ -43,7 +43,7 @@ def interp_exp_and_lin(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax):
         """
         2D interpolation
 
-        Applies linear interpolation across P and natural exp interpolation
+        Applies linear interpolation across P and e interpolation
         across T between Pmin,Pmax and Tmin,Tmax
 
         Parameters
@@ -80,7 +80,7 @@ def interp_exp_and_lin(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax):
         
         """
 
-        return ne.evaluate('((x11*(Pmax - Pmin) - (P - Pmin)*(x11 - x21))*exp(Tmax*(-T + Tmin)*log((x11*(Pmax - Pmin) - (P - Pmin)*(x11 - x21))/(x12*(Pmax - Pmin) - (P - Pmin)*(x12 - x22)))/(T*(Tmax - Tmin)))/(Pmax - Pmin))')
+        return ((x11*(Pmax - Pmin) - (P - Pmin)*(x11 - x21))*np.exp(Tmax*(-T + Tmin)*np.log((x11*(Pmax - Pmin) - (P - Pmin)*(x11 - x21))/(x12*(Pmax - Pmin) - (P - Pmin)*(x12 - x22)))/(T*(Tmax - Tmin)))/(Pmax - Pmin))
 
 
 def interp_exp_only(x11,x12,T,Tmin,Tmax):
@@ -268,13 +268,18 @@ class OnlineVariance(object):
 
         averages = mpi.allgather(mean)
         counts = mpi.allgather(self.wcount)
+        all_counts = mpi.allgather(self.count)
+
+        
         #all_data = [(v,m,c) for v,m,c in zip(variances,averages,counts) if not v is 0 and not averages is 0.0 and not counts is 0.0]        
         #print('VARIANCES',variances)
         #print('AVERAGES',averages)
         #print('COUNTS',counts)
-        
-        finalvariance = self.combine_variance(averages,variances,counts)
-        return finalvariance[-1]
+        if sum(all_counts) < 2:
+            return np.nan
+        else:
+            finalvariance = self.combine_variance(averages,variances,counts)
+            return finalvariance[-1]
 
         
         

@@ -129,6 +129,13 @@ def calculate_weight(chem):
             return 0.0
     return compoundweight
 
+def split_molecule_elements(chem):
+    s = re.findall('([A-Z][a-z]?)([0-9]*)', chem)
+    return s
+
+
+
+
 
 def sanitize_molecule_string(molecule):
     """
@@ -512,12 +519,44 @@ def clip_native_to_wngrid(native_grid, wngrid):
     native_filter = (native_grid >= wn_min) & (native_grid <= wn_max)
     return native_grid[native_filter]
 
+
 def wnwidth_to_wlwidth(wngrid, wnwidth):
     return 10000*wnwidth/(wngrid**2)
 
 
+def class_from_keyword(keyword, class_filter=None):
+    from ..parameter.classfactory import ClassFactory
 
-def class_for_name(module_name, class_name):
+    cf = ClassFactory()
+
+    combined_classes = []
+    if class_filter is None:
+
+        combined_classes = list(cf.temperatureKlasses) + \
+                    list(cf.pressureKlasses) + \
+                    list(cf.chemistryKlasses) + \
+                    list(cf.gasKlasses) + \
+                    list(cf.planetKlasses) + \
+                    list(cf.starKlasses) + \
+                    list(cf.modelKlasses) + \
+                    list(cf.contributionKlasses)
+    else:
+        if hasattr(class_filter, '__len__'):
+            for x in class_filter:
+                combined_classes += list(cf.list_from_base(x))
+        else:
+            combined_classes = list(cf.list_from_base(class_filter))
+
+    for x in combined_classes:
+        try:
+            if keyword in x.input_keywords():
+                return x
+        except NotImplementedError:
+            continue
+    
+    return None
+
+def class_for_name(class_name):
     from ..parameter.classfactory import ClassFactory
 
     cf = ClassFactory()
@@ -531,6 +570,12 @@ def class_for_name(module_name, class_name):
                        list(cf.modelKlasses) + \
                        list(cf.contributionKlasses)
     
+    try:
+        class_name = class_name.decode()
+    except (UnicodeDecodeError, AttributeError):
+        pass
+
+
     combined_classes_name = [c.__name__ for c in combined_classes]
 
     if class_name in combined_classes_name:
@@ -584,3 +629,57 @@ def compute_dz(altitude):
     dz[-1] = altitude[-1] - altitude[-2]
 
     return dz
+
+def has_duplicates(arr):
+
+    return len(arr) != len(set(arr))
+
+
+def find_closest_pair(arr, value) -> (int, int):
+    """
+    Will find the indices that lie to the left and right
+    of the value
+
+    arr[left] <= value <= arr[right]
+
+    If the value is less than the array minimum then it will
+    always return left=0 and right=1
+
+    If the value is above the maximum 
+
+    Parameters
+    ----------
+    arr: :obj:`array`
+        Array to search, must be sorted
+    
+    value: float
+        Value to find in array
+
+
+    Returns
+    -------
+    left: int
+    
+    right: int
+
+    """
+
+
+    right = arr.searchsorted(value)
+    right = max(min(arr.shape[0]-1, right),1)
+
+    left = right-1
+    left = max(0, left)
+
+    return left, right
+
+
+def ensure_string_utf8(val):
+    output = val
+
+    try:
+        output = val.decode()
+    except (UnicodeDecodeError, AttributeError,):
+        pass
+    
+    return output

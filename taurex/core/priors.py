@@ -43,7 +43,7 @@ class Prior(Logger):
 
 class Uniform(Prior):
 
-    def __init__(self, bounds=None):
+    def __init__(self, bounds=[0.0, 1.0]):
         super().__init__()
         if bounds is None:
             self.error('No bounds defined')
@@ -72,7 +72,7 @@ class Uniform(Prior):
 
 class LogUniform(Uniform):
 
-    def __init__(self, bounds=None, lin_bounds=None):
+    def __init__(self, bounds=[0.0, 1.0], lin_bounds=None):
         if lin_bounds is not None:
             bounds = [math.log10(x) for x in lin_bounds]
         super().__init__(bounds=bounds)
@@ -98,7 +98,7 @@ class Gaussian(Prior):
         return self.sample(0.1), self.sample(0.9)
 class LogGaussian(Gaussian):
 
-    def __init__(self, mean=-2, std=0.25,
+    def __init__(self, mean=0.5, std=0.25,
                  lin_mean=None, lin_std=None):
         if lin_mean is not None:
             mean = math.log10(lin_mean)

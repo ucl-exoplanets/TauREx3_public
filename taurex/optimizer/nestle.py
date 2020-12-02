@@ -112,6 +112,8 @@ class NestleOptimizer(Optimizer):
     def get_weights(self, solution_idx):
         return self._nestle_output['solution']['weights']
 
+
+
     def get_solution(self):
         """
 
@@ -140,8 +142,8 @@ class NestleOptimizer(Optimizer):
         opt_map = self.fit_values
         opt_values = self.fit_values
         for k, v in self._nestle_output['solution']['fitparams'].items():
-            if k in ('mu_derived',):
-                continue
+            # if k.endswith('_derived'):
+            #     continue
             idx = names.index(k)
             opt_map[idx] = v['map']
             opt_values[idx] = v['value']
@@ -214,6 +216,7 @@ class NestleOptimizer(Optimizer):
         max_weight = weights.argmax()
 
         table_data = []
+        
 
         for idx, param_name in enumerate(fit_param):
             param = {}

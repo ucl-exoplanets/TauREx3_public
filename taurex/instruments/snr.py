@@ -46,3 +46,7 @@ class SNRInstrument(Instrument):
 
         return wngrid, spectrum, \
             noise / math.sqrt(num_observations), grid_width
+
+    @classmethod
+    def input_keywords(cls):
+        return ['snr', 'SNR', 'signal-noise-ratio']

@@ -110,4 +110,4 @@ class ChemistryFile(Chemistry):
 
     @classmethod
     def input_keywords(cls):
-        return ['file ', 'fromfile', ]
+        return ['file', 'fromfile', ]

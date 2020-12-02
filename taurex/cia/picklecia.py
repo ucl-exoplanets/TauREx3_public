@@ -97,9 +97,9 @@ class PickleCIA(CIA):
             index on temprature grid to the right of ``temperature``
 
         """
-        t_min = self.temperatureGrid.searchsorted(temperature,
-                                                  side='right')-1
-        t_max = t_min+1
+        from taurex.util.util import find_closest_pair
+
+        t_min, t_max = find_closest_pair(self.temperatureGrid, temperature)
         return t_min, t_max
 
     def interp_linear_grid(self, T, t_idx_min, t_idx_max):
