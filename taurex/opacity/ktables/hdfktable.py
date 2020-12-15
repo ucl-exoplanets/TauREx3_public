@@ -60,7 +60,7 @@ class HDF5KTable(KTable, InterpolatingOpacity):
         return self._xsec_grid
 
     def _load_pickle_file(self, filename):
-
+        import astropy.units as u
         #Load the pickle file
         self.info('Loading opacity from {}'.format(filename))
 
@@ -69,7 +69,18 @@ class HDF5KTable(KTable, InterpolatingOpacity):
         self._wavenumber_grid = self._spec_dict['bin_centers'][...].astype(np.float64)
         self._ngauss = self._spec_dict['ngauss'][()]
         self._temperature_grid = self._spec_dict['t'][...].astype(np.float64)
-        self._pressure_grid = self._spec_dict['p'][...].astype(np.float64)
+
+        pressure_units = self._spec_dict['p'].attrs['units']
+        try:
+            p_conversion = u.Unit(pressure_units).to(u.Pa)
+        except:
+            p_conversion = u.Unit(pressure_units, format="cds").to(u.Pa)
+
+
+        self._pressure_grid = self._spec_dict['p'][...].astype(np.float64)*p_conversion
+
+
+
         if self.in_memory:
             self._xsec_grid = self._spec_dict['kcoeff'][...].astype(np.float64)
         else:

@@ -251,8 +251,7 @@ class OpacityCache(Singleton):
             molecules.extend([x[0] for x in c.discover()])
         
         forced = self._force_active or []
-
-        return set(molecules+forced)
+        return set(molecules+forced+list(self.opacity_dict.keys()))
 
     def load_opacity_from_path(self, path, molecule_filter=None):
         """
