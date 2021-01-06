@@ -1,5 +1,5 @@
 from .optimizer import Optimizer
-import pymultinest
+
 import numpy as np
 import os
 from taurex.mpi import get_rank, barrier
@@ -71,7 +71,7 @@ class MultiNestOptimizer(Optimizer):
         self.verbose = verbose_output
 
     def compute_fit(self):
-
+        import pymultinest
         data = self._observed.spectrum
         datastd = self._observed.errorBar
         sqrtpi = np.sqrt(2*np.pi)
@@ -181,7 +181,7 @@ class MultiNestOptimizer(Optimizer):
     # This function is so big and I cannot be arsed to rewrite this in a nicer way, if some angel does it
     # for me then I will buy them TWO beers.
     def store_nest_solutions(self):
-
+        import pymultinest
         self.warning('Store the multinest results')
         NEST_out = {'solutions': {}}
         data = np.loadtxt(os.path.join(self.dir_multinest,
