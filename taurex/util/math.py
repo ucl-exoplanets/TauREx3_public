@@ -325,7 +325,7 @@ class OnlineVariance(object):
 
 
 interp_lin_only = interp_lin_numba
-intepr_bilin = intepr_bilin_numba
+intepr_bilin = intepr_bilin_numba_II
         
         
 #(T - Tmin)*(-(P - Pmin)*(x11 - x21) + (P - Pmin)*(x12 - x22) + (Pmax - Pmin)*(x11 - x12))
