@@ -38,6 +38,19 @@ def interp_exp_and_lin_broken(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax):
         res[i] = x7[i]*math.exp(x6[i])
     return res 
 
+@numba.njit
+def interp_lin_numba(x11, x12, P, Pmin, Pmax):
+    #return (x11*(Pmax - Pmin) - (P - Pmin)*(x11 - x12))/(Pmax - Pmin)
+    N = x11.shape[0]
+    diff = (Pmax - Pmin)
+    scale = (P - Pmin)/diff
+    out = np.zeros_like(x11)
+    for n in range(N):
+        out[n] = (x11[n] - scale*(x11[n]-x12[n]))
+
+    return out
+
+
 
 def interp_exp_and_lin(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax):
         """
@@ -86,8 +99,37 @@ def interp_exp_and_lin(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax):
 def interp_exp_only(x11,x12,T,Tmin,Tmax):
     return x11*np.exp(Tmax*(-T + Tmin)*np.log(x11/x12)/(T*(Tmax - Tmin)))
 
-def interp_lin_only(x11,x12,P,Pmin,Pmax):
+def interp_lin_numpy(x11,x12,P,Pmin,Pmax):
     return (x11*(Pmax - Pmin) - (P - Pmin)*(x11 - x12))/(Pmax - Pmin)
+
+def intepr_bilin_numexpr(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax):
+    import numexpr as ne
+    return ne.evaluate('(x11*(Pmax - Pmin)*(Tmax - Tmin) - (P - Pmin)*(Tmax - Tmin)*(x11 - x21) - (T - Tmin)*(-(P - Pmin)*(x11 - x21) + (P - Pmin)*(x12 - x22) + (Pmax - Pmin)*(x11 - x12)))/((Pmax - Pmin)*(Tmax - Tmin))')
+
+@numba.njit
+def intepr_bilin_numba_II(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax):
+    N = x11.shape[0]
+    Pdiff = (Pmax - Pmin)
+    Tdiff = (Tmax - Tmin)
+    Pscale = (P-Pmin)/Pdiff
+    Tscale = (T-Tmin)/Tdiff
+
+    out = np.zeros_like(x11)
+    
+    for n in range(N):
+
+        out[n] = x11[n] - Pscale*(x11[n] - x21[n]) - Pscale * Tscale*(x21[n] - x11[n] + x12[n] - x22[n] ) - Tscale*(x11[n]-x12[n])  
+
+    return out
+    #(x11*(Pmax - Pmin)*(Tmax - Tmin) - (P - Pmin)*(Tmax - Tmin)*(x11 - x21) - (T - Tmin)*(-(P - Pmin)*(x11 - x21) + (P - Pmin)*(x12 - x22) + (Pmax - Pmin)*(x11 - x12)))/((Pmax - Pmin)*(Tmax - Tmin))
+
+
+
+
+def intepr_bilin_double(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax):
+    return interp_lin_only(interp_lin_only(x11, x12, T, Tmin, Tmax),
+                            interp_lin_only(x21, x22, T, Tmin, Tmax),
+                            P, Pmin, Pmax)
 
 
 def intepr_bilin_old(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax):
@@ -119,7 +161,7 @@ def _linstage0(x11,x21,x):
     return x*(x11-x21)
 
 @numba.njit(nogil=True,fastmath=True)
-def intepr_bilin(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax):
+def intepr_bilin_numba(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax):
     x0 = -Pmin    
     x1 = Pmax + x0
     x2 = -Tmin    
@@ -281,5 +323,9 @@ class OnlineVariance(object):
             finalvariance = self.combine_variance(averages,variances,counts)
             return finalvariance[-1]
 
+
+interp_lin_only = interp_lin_numba
+intepr_bilin = intepr_bilin_numba
         
         
+#(T - Tmin)*(-(P - Pmin)*(x11 - x21) + (P - Pmin)*(x12 - x22) + (Pmax - Pmin)*(x11 - x12))
