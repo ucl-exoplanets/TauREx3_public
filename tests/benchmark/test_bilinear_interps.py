@@ -1,6 +1,6 @@
 
 
-ARRAY_SIZE = 60000
+ARRAY_SIZE = 100000
 
 def test_bilin_interp_numpy(benchmark):
     import numpy as np
@@ -12,7 +12,8 @@ def test_bilin_interp_numpy(benchmark):
     x21 = np.random.rand(ARRAY_SIZE)
     x22 = np.random.rand(ARRAY_SIZE)
 
-    benchmark(intepr_bilin_old, x11, x12, x21, x22, 0.5,0.1,1.0,0.5,0.1,1.0)
+    benchmark(intepr_bilin_old, x11, x12, x21, x22, 0.5,
+              0.1, 1.0, 0.5, 0.1, 1.0)
 
 
 def test_bilin_interp_numba(benchmark):
