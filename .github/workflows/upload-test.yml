@@ -1,8 +1,4 @@
-name: Upload Python Package
-
-on:
-  release:
-    types: [created]
+name: Upload TestPyPI Python Package
 
 jobs:
   deploy:
