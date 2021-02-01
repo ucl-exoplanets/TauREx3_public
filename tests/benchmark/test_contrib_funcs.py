@@ -64,23 +64,23 @@ def test_contribute_tau_numba_II(benchmark, setup):
     benchmark(contribute_tau_II, 0, NLAYERS, 0, sigma, density, path, NLAYERS, 
               WNGRID_SIZE, 0, tau)
 
-def test_contribute_tau_cython(benchmark, setup):
-    from taurex.external.contrib import contrib_tau_cython
-    sigma, density, path = setup
-    # # startK, endK, density_offset, sigma, density, path, nlayers,
-    #                ngrid, layer, tau
-    tau = np.zeros(shape=(NLAYERS, WNGRID_SIZE))
-    benchmark(contrib_tau_cython, 0, NLAYERS, 0, sigma, density, path, NLAYERS, 
-              WNGRID_SIZE, 0, tau)
-    tau_1  = np.zeros(shape=(1, WNGRID_SIZE))
-    tau_2  = np.zeros(shape=(1, WNGRID_SIZE))
-    contrib_tau_cython(0, NLAYERS, 0, sigma, density, path, NLAYERS, 
-              WNGRID_SIZE, 0, tau_1)
+# def test_contribute_tau_cython(benchmark, setup):
+#     from taurex.external.contrib import contrib_tau_cython
+#     sigma, density, path = setup
+#     # # startK, endK, density_offset, sigma, density, path, nlayers,
+#     #                ngrid, layer, tau
+#     tau = np.zeros(shape=(NLAYERS, WNGRID_SIZE))
+#     benchmark(contrib_tau_cython, 0, NLAYERS, 0, sigma, density, path, NLAYERS, 
+#               WNGRID_SIZE, 0, tau)
+#     tau_1  = np.zeros(shape=(1, WNGRID_SIZE))
+#     tau_2  = np.zeros(shape=(1, WNGRID_SIZE))
+#     contrib_tau_cython(0, NLAYERS, 0, sigma, density, path, NLAYERS, 
+#               WNGRID_SIZE, 0, tau_1)
 
-    contribute_tau(0, NLAYERS, 0, sigma, density, path, NLAYERS, 
-              WNGRID_SIZE, 0, tau_2)
+#     contribute_tau(0, NLAYERS, 0, sigma, density, path, NLAYERS, 
+#               WNGRID_SIZE, 0, tau_2)
 
-    np.testing.assert_array_almost_equal(tau_1,tau_2)
+#     np.testing.assert_array_almost_equal(tau_1,tau_2)
 
 def test_contribute_tau_numpy(benchmark, setup):
     sigma, density, path = setup
