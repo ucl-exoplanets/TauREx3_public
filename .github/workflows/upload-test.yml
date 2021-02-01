@@ -1,7 +1,10 @@
 name: Upload TestPyPI Python Package
 
+on: [push, pull_request]
+
 jobs:
   deploy:
+    if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
