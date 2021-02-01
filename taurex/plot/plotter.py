@@ -51,7 +51,7 @@ class Plotter(object):
     def forward_output(self):
         return self.fd['Output']
 
-    def compute_ranges(self, mu=True):
+    def compute_ranges(self, mu=True, selected_fitparams=None):
 
         solution_ranges = []
 
@@ -63,31 +63,32 @@ class Plotter(object):
             mu_derived = self.get_derived_parameters(sol)
 
 
-            fitting_names = self.fittingNames
+            fitting_names = selected_fitparams or self.fittingNames
+
 
 
             fit_params = sol['fit_params']
             param_list = []
-            for fit_names in self.fittingNames:
+            for fit_names in selected_fitparams:
+                if fit_names not in self.fittingNames:
+                    continue
                 param_values = fit_params[fit_names]
                 sigma_m = param_values['sigma_m'][()]
                 sigma_p = param_values['sigma_p'][()]
                 val = param_values['value'][()]
 
                 param_list.append([val,val- 5.0*sigma_m,val+5.0*sigma_p])
-            
+
             for d in mu_derived:
                 sigma_m = d['sigma_m'][()]
                 sigma_p = d['sigma_p'][()]
                 val = d['value'][()]     
                 param_list.append([val, val - 5.0 * sigma_m, val+5.0*sigma_p])
-
             
             solution_ranges.append(param_list)
 
-        fitting_boundary_low = self.fittingBoundaryLow
-        fitting_boundary_high = self.fittingBoundaryHigh
-
+        fitting_boundary_low = [self.fittingBoundaryLow[self.fittingNames.index(name)] for name in selected_fitparams]
+        fitting_boundary_high = [self.fittingBoundaryHigh[self.fittingNames.index(name)] for name in selected_fitparams]
         if len(mu_derived) > 0:
             fitting_boundary_low = np.concatenate((fitting_boundary_low, [-1e99]*len(mu_derived)))
             fitting_boundary_high = np.concatenate((fitting_boundary_high, [1e99]*len(mu_derived)))
@@ -101,13 +102,16 @@ class Plotter(object):
 
         range_min = np.where(range_min < fitting_boundary_low, fitting_boundary_low,range_min)
         range_max = np.where(range_max > fitting_boundary_high, fitting_boundary_high,range_max)
-
         return list(zip(range_min,range_max)) 
             
 
     @property
     def activeGases(self):
         return decode_string_array(self.fd['ModelParameters']['Chemistry']['active_gases'])
+
+    @property
+    def condensates(self):
+        return decode_string_array(self.fd['ModelParameters']['Chemistry']['condensates'])
 
     @property
     def inactiveGases(self):
@@ -284,6 +288,55 @@ class Plotter(object):
         plt.savefig(os.path.join(self.out_folder, '%s_fit_inactive_mixratio.pdf' % (self.prefix)))
         plt.close()
 
+    def plot_forward_cprofile(self):
+
+
+
+        solution_val = self.forward_output()
+
+        try:
+            self.condensates
+        except KeyError:
+            print('No condensates in chemistry/file, ignoring plot')
+            return
+
+
+        profiles = solution_val['Profiles']
+        pressure_profile = profiles['pressure_profile'][:]/1e5
+        active_profile = profiles['condensate_profile']
+
+        cols_mol = {}
+
+        fig = plt.figure(figsize=(7,7/self.phi))
+        ax = fig.add_subplot(111)
+        num_moles = len(self.condensates)
+
+        for mol_idx,mol_name in enumerate(self.condensates):
+            cols_mol[mol_name] = self.cmap(mol_idx/num_moles)
+
+            prof = active_profile[mol_idx]
+
+            plt.plot(prof,pressure_profile,color=cols_mol[mol_name], label=mol_name)
+
+
+
+        plt.yscale('log')
+        plt.gca().invert_yaxis()
+        plt.xscale('log')
+        plt.xlim(1e-12, 3)
+        plt.xlabel('Mixing ratio')
+        plt.ylabel('Pressure (bar)')
+        plt.tight_layout()
+        box = ax.get_position()
+        ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+        ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), ncol=1, prop={'size':11}, frameon=False)
+        if self.title:
+            plt.title(self.title, fontsize=14)
+        plt.savefig(os.path.join(self.out_folder, '%s_fit_condensate_mixratio.pdf' % (self.prefix)))
+        plt.close()
+
+
+
 
     def plot_fitted_tp(self):
 
@@ -354,13 +407,16 @@ class Plotter(object):
         if 'derived_params' in solution:
             return [c for k, c in solution['derived_params'].items()]
         else:
-            return []
+            return [solution['fit_params']['mu_derived']]
 
-    def plot_posteriors(self , fig=None, save=True, ranges=None, plot_mu=True, color=None, truth=None):
+    def plot_posteriors(self , fig=None, save=True, ranges=None, plot_mu=True, color=None, truth=None,
+                        selected_fitparams=None):
         if not self.is_retrieval:
             raise Exception('HDF5 was not generated from retrieval, no posteriors found')
+        if selected_fitparams is None:
+            selected_fitparams = self.fittingNames
         if ranges is None:
-            ranges = self.compute_ranges(plot_mu)
+            ranges = self.compute_ranges(mu=plot_mu, selected_fitparams=selected_fitparams)
 
         figs = []
 
@@ -376,8 +432,9 @@ class Plotter(object):
 
             figure_past = fig
 
-
-            latex_names = self.fittingLatex
+            indices = np.array([self.fittingNames.index(x) for x in selected_fitparams])
+            _tracedata = tracedata[...,indices]
+            latex_names = [self.fittingLatex[idx] for idx in indices]
 
             latex_derived = self.derivedLatex
 
@@ -386,8 +443,7 @@ class Plotter(object):
                     
                     index = self.derivedNames.index(param.name.split('/')[-1])
                     latex_names.append(self.derivedLatex[index])
-                    tracedata = np.column_stack((tracedata, param['trace']))
-
+                    _tracedata = np.column_stack((_tracedata, param['trace']))
 
             if color is None:
                 color_idx = np.float(solution_idx)/self.num_solutions
@@ -400,11 +456,12 @@ class Plotter(object):
             plt.rc('axes.formatter', limits=( -4, 5 )) #scientific notation..
 
 
-            fig =  corner.corner(tracedata,
+
+            fig =  corner.corner(_tracedata,
                                     weights=weights,
                                     labels=latex_names,
                                     label_kwargs=dict(fontsize=20),
-                                    smooth=True,
+                                    smooth=1.5,
                                     scale_hist=True,
                                     quantiles=[0.16, 0.5, 0.84],
                                     show_titles=True,
@@ -416,7 +473,7 @@ class Plotter(object):
                                     fill_contours=True,
                                     color=color,
                                     top_ticks=False,
-                                    bins=30,
+                                    bins=100,
                                     fig = figure_past)
             if self.title:
                 fig.gca().annotate(self.title, xy=(0.5, 1.0), xycoords="figure fraction",
@@ -695,7 +752,9 @@ class Plotter(object):
             plt.fill_between(wlgrid, binned_spectrum-2*binned_error,
                                 binned_spectrum+2*binned_error,
                                 alpha=0.2, zorder=-3, color=color, edgecolor='none')
-        
+    
+    def close(self):
+        self.fd.close()
 
     def plot_forward_tau(self):
 
@@ -856,6 +915,7 @@ def main():
     parser.add_argument("-i", "--input",dest='input_file',type=str,required=True,help="Input hdf5 file from taurex")
     parser.add_argument("-P","--plot-posteriors",dest="posterior",default=False,help="Plot fitting posteriors",action='store_true')
     parser.add_argument("-x","--plot-xprofile",dest="xprofile",default=False,help="Plot molecular profiles",action='store_true')
+    parser.add_argument("-D","--plot-cprofile",dest="cprofile",default=False,help="Plot condensate profiles",action='store_true')
     parser.add_argument("-t","--plot-tpprofile",dest="tpprofile",default=False,help="Plot Temperature profiles",action='store_true')
     parser.add_argument("-d","--plot-tau",dest="tau",default=False,help="Plot optical depth contribution",action="store_true")
     parser.add_argument("-s","--plot-spectrum",dest="spectrum",default=False,help="Plot spectrum",action='store_true')
@@ -876,6 +936,7 @@ def main():
     plot_fullcontrib = args.full_contrib or args.all
     plot_posteriors = args.posterior or args.all
     plot_tau = args.tau or args.all
+    plot_cond = args.cprofile or args.all
 
     plot=Plotter(args.input_file,cmap=args.cmap,
                     title=args.title,prefix=args.prefix,out_folder=args.output_dir)
@@ -899,6 +960,13 @@ def main():
             plot.plot_fitted_tp()
         else:
             plot.plot_forward_tp()
+
+    if plot_cond:
+        if plot.is_retrieval:
+            pass
+        else:
+            plot.plot_forward_cprofile()
+
 
     if plot_contrib:
         if plot.is_retrieval:
