@@ -14,8 +14,8 @@ import hypothesis.extra.numpy as hnum
     ])
 def test_lin(test_input, expected):
     from taurex.util.math import interp_lin_only
-
-    val = interp_lin_only(*test_input)
+    x11,x12,P, Pmin,Pmax = test_input
+    val = interp_lin_only(np.array([x11]), np.array([x12]),*test_input[2:] )
 
     assert val == expected
 
@@ -30,8 +30,8 @@ def test_bilin(T, P, x11, x12, x21, x22):
     Tmin, Tmax = 0.0, 1.0
     val = intepr_bilin(np.array([x11]), np.array([x12]), np.array([x21]),np.array([x22]), 
                        T, Tmin, Tmax, P, Pmin, Pmax)
-    assert pytest.approx(val[0]) == interp_lin_only(interp_lin_only(x11, x12, T, Tmin, Tmax),
-                                     interp_lin_only(x21, x22, T, Tmin, Tmax),
+    assert pytest.approx(val[0]) == interp_lin_only(interp_lin_only(np.array([x11]), np.array([x12]), T, Tmin, Tmax),
+                                     interp_lin_only(np.array([x21]), np.array([x22]), T, Tmin, Tmax),
                                      P, Pmin, Pmax)
 
 
@@ -48,17 +48,18 @@ def test_exp_lin(T, P, a, b, c, d):
     x22 = d
     Tmin, Tmax = 1.0, 2.0
     Pmin, Pmax = 1.0, 2.0
-    val = interp_exp_and_lin(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax)
+    val = interp_exp_and_lin(np.array([x11]), np.array([x12]), np.array([x21]), np.array([x22]), T, Tmin, Tmax, P, Pmin, Pmax)
 
     if T == Tmin or T == Tmax:
-        assert val == interp_lin_only(x11, x21, P, Pmin, Pmax)
+        assert val == interp_lin_only(np.array([x11]), np.array([x21]), P, Pmin, Pmax)
     elif P == Pmin or P == Pmax:
-        assert val == interp_exp_only(x11, x12, T, Tmin, Tmax)
+        assert val == interp_exp_only(np.array([x11]), np.array([x12]), T, Tmin, Tmax)
     else:
-        assert val == interp_exp_only(interp_lin_only(x11, x21, P, Pmin, Pmax),
-                                      interp_lin_only(x12, x22, P, Pmin, Pmax),
+        assert val == interp_exp_only(interp_lin_only(np.array([x11]), np.array([x21]), P, Pmin, Pmax),
+                                      interp_lin_only(np.array([x12]), np.array([x22]), P, Pmin, Pmax),
                                       T, Tmin, Tmax)
 
+@hypothesis.settings(deadline=500)
 @hypothesis.given(hnum.arrays(np.float64, hnum.array_shapes(),
                   elements=floats(0.0, 1000)))
 @hypothesis.example(np.array([[0.0, 0.0]]))

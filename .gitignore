@@ -113,3 +113,6 @@ taurex/external/acemodule.c
 *.prof
 .DS_Store
 pytest.ini
+taurex/external/__init__.py
+taurex/external/contrib_tau.c
+taurex/external/contrib_tau.pyx
