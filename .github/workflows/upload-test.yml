@@ -21,9 +21,9 @@ jobs:
       run: |
         python setup.py sdist bdist_wheel
 
-    - uses: actions/upload-artifact@v2
-        with:
-          path: ./wheelhouse/*.whl
+      uses: actions/upload-artifact@v2
+      with:
+        path: ./wheelhouse/*.whl
 
   upload_pypi:
     needs: [deploy]
