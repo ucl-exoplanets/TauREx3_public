@@ -52,7 +52,7 @@ def interp_lin_numba(x11, x12, P, Pmin, Pmax):
 
 
 
-def interp_exp_and_lin(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax):
+def interp_exp_and_lin_numpy(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax):
         """
         2D interpolation
 
@@ -96,8 +96,18 @@ def interp_exp_and_lin(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax):
         return ((x11*(Pmax - Pmin) - (P - Pmin)*(x11 - x21))*np.exp(Tmax*(-T + Tmin)*np.log((x11*(Pmax - Pmin) - (P - Pmin)*(x11 - x21))/(x12*(Pmax - Pmin) - (P - Pmin)*(x12 - x22)))/(T*(Tmax - Tmin)))/(Pmax - Pmin))
 
 
-def interp_exp_only(x11,x12,T,Tmin,Tmax):
+def interp_exp_numpy(x11,x12,T,Tmin,Tmax):
     return x11*np.exp(Tmax*(-T + Tmin)*np.log(x11/x12)/(T*(Tmax - Tmin)))
+
+@numba.njit(fastmath=True)
+def interp_exp_numba(x11, x12, T, Tmin, Tmax):
+    N = x11.shape[0]
+    scale = Tmax*(Tmin - T)/(Tmax - Tmin)
+    out = np.zeros_like(x11)
+    for n in range(N):
+        out[n] = x11[n]*np.exp(scale*np.log(x11[n]/x12[n]))
+
+    return out
 
 def interp_lin_numpy(x11,x12,P,Pmin,Pmax):
     return (x11*(Pmax - Pmin) - (P - Pmin)*(x11 - x12))/(Pmax - Pmin)
@@ -178,6 +188,15 @@ def intepr_bilin_numba(x11, x12, x21, x22, T, Tmin, Tmax, P, Pmin, Pmax):
         res[i] = (x1*x11[i]*x3 - x3*x5[i] - (T + x2)*(x6[i] + x7[i] - x5[i]))*factor
     
     return res
+
+
+
+# Choose the best functions for the task
+interp_lin_only = interp_lin_numba
+intepr_bilin = intepr_bilin_numba_II
+interp_exp_and_lin = interp_exp_and_lin_numpy
+interp_exp_only = interp_exp_numpy    
+
 
 
 class OnlineVariance(object):
@@ -324,8 +343,6 @@ class OnlineVariance(object):
             return finalvariance[-1]
 
 
-interp_lin_only = interp_lin_numba
-intepr_bilin = intepr_bilin_numba_II
-        
+
         
 #(T - Tmin)*(-(P - Pmin)*(x11 - x21) + (P - Pmin)*(x12 - x22) + (Pmax - Pmin)*(x11 - x12))
