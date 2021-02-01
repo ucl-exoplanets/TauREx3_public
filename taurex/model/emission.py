@@ -297,6 +297,8 @@ class EmissionModel(SimpleForwardModel):
         _w = self._wi_quads[:, None]
         I = BB * (np.exp(-surface_tau*_mu))
 
+    
+
         self.debug('I1_pre %s', I)
         # Loop upwards
         for layer in range(total_layers):
