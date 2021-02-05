@@ -160,7 +160,6 @@ class Chemistry(Fittable, Logger, Writeable):
         **Requires implementation**
 
         Should return profiles of shape ``(ninactivegases,nlayers)``.
-        These general refer to gases: ``H2``, ``He`` and ``N2``
 
 
         """
@@ -224,6 +223,15 @@ class Chemistry(Fittable, Logger, Writeable):
                 self.mu_profile += self.inactiveGasMixProfile[idx] * \
                     get_molecular_weight(gasname)
 
+    @property
+    def gases(self):
+        return self.activeGases + self.inactiveGases
+
+    @property
+    def mixProfile(self):
+        return np.concatenate((self.activeGasMixProfile,
+                               self.inactiveGasMixProfile))
+    
     @derivedparam(param_name='mu', param_latex='$\mu$', compute=True)
     def mu(self):
         """
@@ -246,4 +254,58 @@ class Chemistry(Fittable, Logger, Writeable):
         gas_entry.write_string('chemistry_type', self.__class__.__name__)
         gas_entry.write_string_array('active_gases', self.activeGases)
         gas_entry.write_string_array('inactive_gases', self.inactiveGases)
+        if self.hasCondensates:
+            gas_entry.write_string_array('condensates', self.condensates)
         return gas_entry
+
+    @property
+    def condensates(self):
+        """
+        Returns a list of condensates in the atmosphere.
+
+        Returns
+        -------
+        active : :obj:`list`
+            List of condensates
+
+        """
+
+        return []
+    
+    @property
+    def hasCondensates(self):
+        return len(self.condensates) > 0
+
+    @property
+    def condensateMixProfile(self):
+        """
+        **Requires implementation**
+
+        Should return profiles of shape ``(ncondensates,nlayers)``.
+        """
+        if len(self.condensates) == 0:
+            return None
+        else:
+            raise NotImplementedError
+
+
+    def get_condensate_mix_profile(self, condensate_name):
+        """
+        Returns the mix profile of a particular condensate
+
+        Parameters
+        ----------
+        condensate_name : str
+            Name of condensate
+
+        Returns
+        -------
+        mixprofile : :obj:`array`
+            Mix profile of condensate with shape ``(nlayer)``
+
+        """
+        if condensate_name in self.condensates:
+            index = self.condensates.index(condensate_name)
+            return self.condensateMixProfile[index]
+        else:
+            raise KeyError(f'Condensate {condensate_name} not found in chemistry')
