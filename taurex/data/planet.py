@@ -74,11 +74,11 @@ class BasePlanet(Fittable, Logger, Writeable):
         """
         Planet mass in Jupiter mass
         """
-        return self._mass/MJUP
+        return self.get_planet_mass(unit='Mjup')
 
     @mass.setter
     def mass(self, value):
-        self._mass = value*MJUP
+        self.set_planet_mass(value, unit='Mjup')
 
     @fitparam(param_name='planet_radius', param_latex='$R_p$',
               default_fit=True, default_bounds=[0.9, 1.1])
@@ -86,11 +86,11 @@ class BasePlanet(Fittable, Logger, Writeable):
         """
         Planet radius in Jupiter radii
         """
-        return self._radius/RJUP
+        return self.get_planet_radius(unit='Rjup')
 
     @radius.setter
     def radius(self, value):
-        self._radius = value*RJUP
+        self.set_planet_radius(value, unit='Rjup')
 
     @property
     def fullRadius(self):
@@ -128,11 +128,11 @@ class BasePlanet(Fittable, Logger, Writeable):
         """
         Planet semi major axis from parent star (AU)
         """
-        return self._distance/AU
+        return self.get_planet_semimajoraxis(unit='AU')
 
     @distance.setter
     def distance(self, value):
-        self._distance = value*AU
+        self.set_planet_semimajoraxis(value, unit='AU')
 
     @fitparam(param_name='planet_sma', param_latex='$D_{planet}$',
               default_fit=False, default_bounds=[1, 2])
@@ -140,11 +140,11 @@ class BasePlanet(Fittable, Logger, Writeable):
         """
         Planet semi major axis from parent star (AU) (ALIAS)
         """
-        return self.distance/AU
+        return self.get_planet_semimajoraxis(unit='AU')
 
     @semiMajorAxis.setter
     def semiMajorAxis(self, value):
-        self.distance = value*AU
+        self.set_planet_semimajoraxis(value, unit='AU')
 
 
     @property
