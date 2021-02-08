@@ -17,10 +17,10 @@ def _convert_lamb(lamb):
 def _black_body_vec(wl,temp):
     return (PI* (2.0*PLANCK*SPDLIGT**2)/(wl)**5) * (1.0/(np.exp((PLANCK * SPDLIGT) / (wl * KBOLTZ * temp))-1))*1e-6
 
-@numba.njit(fastmath=True, parallel=True)
+@numba.njit(fastmath=True, parallel=False)
 def black_body_numba(lamb,temp):
     
-    res = np.empty(lamb.shape, dtype=lamb.dtype)
+    res = np.empty_like(lamb)
     wl = _convert_lamb(lamb)
 #    for i in range(lamb.shape[0]):
 #
@@ -29,7 +29,7 @@ def black_body_numba(lamb,temp):
     
     return _black_body_vec(wl,temp)
 
-@numba.njit(fastmath=True,parallel=True)
+@numba.njit(fastmath=True,parallel=False)
 def black_body_numba_II(lamb, temp):
     N = lamb.shape[0]
     out = np.zeros_like(lamb)
@@ -40,7 +40,7 @@ def black_body_numba_II(lamb, temp):
     factor = PI*(2.0*PLANCK*SPDLIGT**2)*1e-6/conversion**5
     c2 = PLANCK * SPDLIGT/(KBOLTZ*temp)/conversion
     
-    for n in numba.prange(N):
+    for n in range(N):
         out[n] = factor*lamb[n]**5/(math.exp(c2*lamb[n])-1)
 
     return out
