@@ -64,7 +64,7 @@ class BasePlanet(Fittable, Logger, Writeable):
         return self._mass*factor
 
     def get_planet_semimajoraxis(self, unit='AU'):
-        factor = conversion_factor('AU', unit)
+        factor = conversion_factor('m', unit)
         return self._distance*factor
 
 
