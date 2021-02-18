@@ -340,7 +340,7 @@ def determine_klass(config, field, factory, baseclass=None):
     is_mixin = False
     if klass_field == 'custom':
         try:
-            python_file = config.pop('python_file').lower()
+            python_file = config.pop('python_file')
         except KeyError:
             log.error('No python file for custom profile/model')
             raise KeyError
