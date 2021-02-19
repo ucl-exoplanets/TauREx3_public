@@ -180,6 +180,10 @@ class ClassFactory(Singleton):
         for _, c in clsmembers:
             if issubclass(c, base_klass) and (c is not base_klass):
                 self.log.debug(f' Found class {c.__name__}')
+                if(not hasattr(c, 'input_keywords')):
+                    self.log.debug(f' Ignoring class {c.__name__}')
+                    continue
+
                 klasses.append(c)
 
         return klasses
