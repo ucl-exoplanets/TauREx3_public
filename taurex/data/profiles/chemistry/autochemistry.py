@@ -99,8 +99,14 @@ class AutoChemistry(Chemistry):
         active_mix_profile : :obj:`array`
 
         """
+
+        if self.mixProfile is None:
+            raise Exception('No mix profile computed.')
+
         if self._active_mask is None:
             return None
+
+
         return self.mixProfile[self._active_mask]
 
     @property
@@ -113,6 +119,8 @@ class AutoChemistry(Chemistry):
         inactive_mix_profile : :obj:`array`
 
         """
+        if self.mixProfile is None:
+            raise Exception('No mix profile computed.')
         if self._inactive_mask is None:
             return None
         return self.mixProfile[self._inactive_mask]
