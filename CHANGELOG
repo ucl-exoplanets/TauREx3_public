@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Active and inactive gases are plotted seperately
 - H- absorption included
 - Mixin classes to enhance existing modules
+- AutoChemistry class to simplify implementing new chemistries
 
 
 ## [3.0.10] - 2020-02-25
