@@ -8,21 +8,21 @@ from taurex.parameter.factory import pressure_factory, planet_factory, \
 cf = ClassFactory()
 
 test_parameters = [(t.input_keywords(), t, temp_factory) for t in
-                   cf.temperatureKlasses] + \
+                   cf.temperatureKlasses if hasattr(t, 'input_keywords')] + \
                   [(t.input_keywords(), t, pressure_factory) for t in
-                   cf.pressureKlasses] + \
+                   cf.pressureKlasses if hasattr(t, 'input_keywords')] + \
                   [(t.input_keywords(), t, star_factory) for t in
-                   cf.starKlasses] + \
+                   cf.starKlasses if hasattr(t, 'input_keywords')] + \
                   [(t.input_keywords(), t, gas_factory) for t in
-                   cf.gasKlasses] + \
+                   cf.gasKlasses if hasattr(t, 'input_keywords')] + \
                   [(t.input_keywords(), t, chemistry_factory) for t in
-                   cf.chemistryKlasses] + \
+                   cf.chemistryKlasses if hasattr(t, 'input_keywords')] + \
                   [(t.input_keywords(), t, planet_factory) for t in
-                   cf.planetKlasses] + \
+                   cf.planetKlasses if hasattr(t, 'input_keywords')] + \
                   [(t.input_keywords(), t, optimizer_factory) for t in
-                   cf.optimizerKlasses] + \
+                   cf.optimizerKlasses if hasattr(t, 'input_keywords')] + \
                   [(t.input_keywords(), t, observation_factory) for t in
-                   cf.observationKlasses]
+                   cf.observationKlasses if hasattr(t, 'input_keywords')]
 for i in cf.instrumentKlasses:
     try:
         test_parameters.append((i.input_keywords(), i, instrument_factory))
