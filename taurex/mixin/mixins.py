@@ -72,13 +72,20 @@ class MakeFreeMixin(ChemistryMixin):
 
         """
         mix_profile = super().activeGasMixProfile
-        for g, idx in self.active_exist:
-            mix_profile[idx] = g.mixProfile
+
+        if mix_profile is not None:
+            for g, idx in self.active_exist:
+                mix_profile[idx] = g.mixProfile
         
         if len(self.active_nonexist) > 0:
             nonexist_profile = np.array([g.mixProfile for g in self.active_nonexist])
-            return np.concatenate((mix_profile, nonexist_profile))/self.norm_factor
+            if mix_profile is None:
+                return nonexist_profile
+            else:
+                return np.concatenate((mix_profile, nonexist_profile))/self.norm_factor
         else:
+            if mix_profile is None:
+                return None
             return mix_profile/self.norm_factor
             
 
@@ -114,9 +121,20 @@ class MakeFreeMixin(ChemistryMixin):
                                    pressure_profile, altitude_profile)
         self._run = True
         self.norm_factor = 1.0
+        
+        active_norm = 0.0
+        inactive_norm = 0.0
+        active_mix = self.activeGasMixProfile
+        inactive_mix = self.inactiveGasMixProfile
 
-        self.norm_factor = np.sum(self.activeGasMixProfile, axis=0) + \
-            np.sum(self.inactiveGasMixProfile, axis=0)
+        if active_mix is not None:
+            active_norm = np.sum(self.activeGasMixProfile, axis=0)
+        if inactive_mix is not None:
+            inactive_norm = np.sum(self.inactiveGasMixProfile, axis=0)
+        
+
+
+        self.norm_factor = active_norm + inactive_norm
         self.compute_mu_profile(nlayers)
     
     def compute_mu_profile(self, nlayers):
