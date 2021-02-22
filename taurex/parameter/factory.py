@@ -67,6 +67,8 @@ def mixin_factory(profile_type, baseclass):
                 return klass
         except NotImplementedError:
             log.warning('%s', klass)
+        except AttributeError:
+            pass
 
     raise NotImplementedError('{} {} not implemented'.format(baseclass.__name__, profile_type))
 
@@ -95,6 +97,8 @@ def generic_factory(profile_type, baseclass):
                 return klass
         except NotImplementedError:
             log.warning('%s', klass)
+        except AttributeError:
+            pass
 
     raise NotImplementedError('{} {} not implemented'.format(baseclass.__name__, profile_type))
 
@@ -119,6 +123,8 @@ def gas_factory(profile_type):
                 return klass
         except NotImplementedError:
             log.warning('%s', klass)
+        except AttributeError:
+            pass
 
     raise NotImplementedError('Gas profile {} not implemented'.format(profile_type))
 
@@ -132,6 +138,8 @@ def temp_factory(profile_type):
                 return klass
         except NotImplementedError:
             log.warning('%s', klass)
+        except AttributeError:
+            pass
 
     raise NotImplementedError('Temperature profile {} not implemented'.format(profile_type))
 
@@ -144,6 +152,8 @@ def chemistry_factory(profile_type):
                 return klass
         except NotImplementedError:
             log.warning('%s',klass)
+        except AttributeError:
+            pass
 
     raise NotImplementedError('Chemistry {} not implemented'.format(profile_type))
 
@@ -156,6 +166,8 @@ def pressure_factory(profile_type):
                 return klass
         except NotImplementedError:
             log.warning('%s',klass)
+        except AttributeError:
+            pass
 
     raise NotImplementedError('Pressure profile {} not implemented'.format(profile_type))
 
@@ -168,6 +180,8 @@ def star_factory(star_type):
                 return klass
         except NotImplementedError:
             log.warning('%s',klass)
+        except AttributeError:
+            pass
 
     raise NotImplementedError('Star of type {} not implemented'.format(star_type))
 
@@ -231,6 +245,8 @@ def model_factory(model_type):
                 return klass
         except NotImplementedError:
             log.warning('%s',klass)
+        except AttributeError:
+            pass
 
     raise NotImplementedError('Model {} not implemented'.format(model_type))
 
@@ -243,6 +259,8 @@ def planet_factory(planet_type):
                 return klass
         except NotImplementedError:
             log.warning('%s', klass)
+        except AttributeError:
+            pass
 
             
     raise NotImplementedError('Planet {} not implemented'.format(planet_type))
@@ -256,6 +274,8 @@ def optimizer_factory(optimizer):
                 return klass
         except NotImplementedError:
             log.warning('%s',klass)
+        except AttributeError:
+            pass
 
     raise NotImplementedError('Optimizer {} not implemented'.format(optimizer))
 
@@ -267,6 +287,8 @@ def observation_factory(observation):
                 return klass
         except NotImplementedError:
             log.warning('%s', klass)
+        except AttributeError:
+            pass
 
     raise NotImplementedError('Observation {} not implemented'.format(observation))
 
@@ -280,6 +302,8 @@ def instrument_factory(instrument):
                 return klass
         except NotImplementedError:
             log.warning('%s',klass)
+        except AttributeError:
+            pass
 
     raise NotImplementedError('Instrument {} not implemented'.format(instrument))
 
@@ -388,6 +412,8 @@ def generate_contributions(config):
                     break
             except NotImplementedError:
                 log.warning('%s',klass)
+            except AttributeError:
+                pass
 
     if len(check_key) > 0:
         log.error(f'Unknown Contributions {check_key}')

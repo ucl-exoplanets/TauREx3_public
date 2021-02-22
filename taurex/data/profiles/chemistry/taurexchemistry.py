@@ -1,4 +1,4 @@
-from .chemistry import Chemistry
+from .autochemistry import AutoChemistry
 import numpy as np
 from taurex.util import molecule_texlabel
 from taurex.util.util import has_duplicates
@@ -14,7 +14,7 @@ class InvalidChemistryException(InvalidModelException):
     pass
 
 
-class TaurexChemistry(Chemistry):
+class TaurexChemistry(AutoChemistry):
 
     """
     The standard chemical model used in Taurex. This allows for the combination
@@ -90,31 +90,31 @@ class TaurexChemistry(Chemistry):
         self._mix_profile = None
         self.debug('MOLECULES I HAVE %s', self.availableActive)
         self.setup_fill_params()
-        self.determine_mix_mask()
+        self.determine_active_inactive()
         self.setup_derived_params(derived_ratios)
     
-    def determine_mix_mask(self):
+    # def determine_mix_mask(self):
 
-        try:
-            self._active, self._active_mask = zip(*[(m, i) for i, m in
-                                                        enumerate(self.gases)
-                                                        if m in
-                                                        self.availableActive])
-        except ValueError:
-            self.debug('No active gases detected')
-            self._active, self._active_mask = [], None
+    #     try:
+    #         self._active, self._active_mask = zip(*[(m, i) for i, m in
+    #                                                     enumerate(self.gases)
+    #                                                     if m in
+    #                                                     self.availableActive])
+    #     except ValueError:
+    #         self.debug('No active gases detected')
+    #         self._active, self._active_mask = [], None
 
-        try:
-            self._inactive, self._inactive_mask = zip(*[(m, i) for i, m in
-                                                            enumerate(self.gases)
-                                                            if m not in
-                                                            self.availableActive])
-        except ValueError:
-            self.debug('No inactive gases detected')
-            self._inactive, self._inactive_mask = [], None
+    #     try:
+    #         self._inactive, self._inactive_mask = zip(*[(m, i) for i, m in
+    #                                                         enumerate(self.gases)
+    #                                                         if m not in
+    #                                                         self.availableActive])
+    #     except ValueError:
+    #         self.debug('No inactive gases detected')
+    #         self._inactive, self._inactive_mask = [], None
 
-        self._active_mask = np.array(self._active_mask)
-        self._inactive_mask = np.array(self._inactive_mask)
+    #     self._active_mask = np.array(self._active_mask)
+    #     self._inactive_mask = np.array(self._inactive_mask)
 
 
     def setup_fill_params(self):
@@ -170,23 +170,23 @@ class TaurexChemistry(Chemistry):
             self.add_derived_param(param_name, param_tex, fget, compute)
 
 
-    def compute_mu_profile(self, nlayers):
-        """
-        Computes molecular weight of atmosphere
-        for each layer
+    # def compute_mu_profile(self, nlayers):
+    #     """
+    #     Computes molecular weight of atmosphere
+    #     for each layer
 
-        Parameters
-        ----------
-        nlayers: int
-            Number of layers
-        """
-        from taurex.util.util import get_molecular_weight
-        self.mu_profile = np.zeros(shape=(nlayers,))
-        if self.mixProfile is not None:
-            mix_profile = self.mixProfile
-            for idx, gasname in enumerate(self.gases):
-                self.mu_profile += mix_profile[idx] * \
-                    get_molecular_weight(gasname)
+    #     Parameters
+    #     ----------
+    #     nlayers: int
+    #         Number of layers
+    #     """
+    #     from taurex.util.util import get_molecular_weight
+    #     self.mu_profile = np.zeros(shape=(nlayers,))
+    #     if self.mixProfile is not None:
+    #         mix_profile = self.mixProfile
+    #         for idx, gasname in enumerate(self.gases):
+    #             self.mu_profile += mix_profile[idx] * \
+    #                 get_molecular_weight(gasname)
 
     def isActive(self, gas):
         """
@@ -233,7 +233,7 @@ class TaurexChemistry(Chemistry):
 
         self._gases.append(gas)
 
-        self.determine_mix_mask()
+        self.determine_active_inactive()
 
 
         return self
@@ -246,13 +246,13 @@ class TaurexChemistry(Chemistry):
     def mixProfile(self):
         return self._mix_profile
 
-    @property
-    def activeGases(self):
-        return self._active
+    # @property
+    # def activeGases(self):
+    #     return self._active
 
-    @property
-    def inactiveGases(self):
-        return self._inactive
+    # @property
+    # def inactiveGases(self):
+    #     return self._inactive
 
 
     def compute_elements_mix(self):
@@ -288,12 +288,6 @@ class TaurexChemistry(Chemistry):
             raise ValueError(f'No gas has element {elem2}')
         
         return element_dict[elem1]/element_dict[elem2]
-
-
-
-
-
-
 
     def fitting_parameters(self):
         """
@@ -371,29 +365,29 @@ class TaurexChemistry(Chemistry):
                 fill.append(second_molecule)
         return fill
 
-    @property
-    def activeGasMixProfile(self):
-        """
-        Active gas layer by layer mix profile
+    # @property
+    # def activeGasMixProfile(self):
+    #     """
+    #     Active gas layer by layer mix profile
 
-        Returns
-        -------
-        active_mix_profile : :obj:`array`
+    #     Returns
+    #     -------
+    #     active_mix_profile : :obj:`array`
 
-        """
-        return self.mixProfile[self._active_mask]
+    #     """
+    #     return self.mixProfile[self._active_mask]
 
-    @property
-    def inactiveGasMixProfile(self):
-        """
-        Inactive gas layer by layer mix profile
+    # @property
+    # def inactiveGasMixProfile(self):
+    #     """
+    #     Inactive gas layer by layer mix profile
 
-        Returns
-        -------
-        inactive_mix_profile : :obj:`array`
+    #     Returns
+    #     -------
+    #     inactive_mix_profile : :obj:`array`
 
-        """
-        return self.mixProfile[self._inactive_mask]
+    #     """
+    #     return self.mixProfile[self._inactive_mask]
 
     def write(self, output):
         gas_entry = super().write(output)

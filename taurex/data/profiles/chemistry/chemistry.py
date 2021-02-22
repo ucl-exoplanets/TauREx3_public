@@ -217,11 +217,11 @@ class Chemistry(Fittable, Logger, Writeable):
         if self.activeGasMixProfile is not None:
             for idx, gasname in enumerate(self.activeGases):
                 self.mu_profile += self.activeGasMixProfile[idx] * \
-                    get_molecular_weight(gasname)
+                    self.get_molecular_mass(gasname)
         if self.inactiveGasMixProfile is not None:
             for idx, gasname in enumerate(self.inactiveGases):
                 self.mu_profile += self.inactiveGasMixProfile[idx] * \
-                    get_molecular_weight(gasname)
+                    self.get_molecular_mass(gasname)
 
     @property
     def gases(self):
@@ -309,3 +309,8 @@ class Chemistry(Fittable, Logger, Writeable):
             return self.condensateMixProfile[index]
         else:
             raise KeyError(f'Condensate {condensate_name} not found in chemistry')
+
+
+    def get_molecular_mass(self, molecule):
+        from taurex.util import get_molecular_weight
+        return get_molecular_weight(molecule)
