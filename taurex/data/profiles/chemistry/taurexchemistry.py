@@ -235,6 +235,9 @@ class TaurexChemistry(AutoChemistry):
 
         self.determine_active_inactive()
 
+
+        return self
+        
     @property
     def gases(self):
         return self._fill_gases + [g.molecule for g in self._gases]
