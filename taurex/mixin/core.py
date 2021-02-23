@@ -36,7 +36,7 @@ class Mixin(Fittable):
             old_fitting_parameters = self._param_dict
             old_derived_parameters = self._derived_dict
         super().__init__(**kwargs)
-            
+
         self._param_dict.update(old_fitting_parameters)
         self._derived_dict.update(old_derived_parameters)
 
@@ -102,7 +102,7 @@ def determine_mixin_args(klasses):
             argspec = inspect.getfullargspec(klass.__init_mixin__)
         if not argspec.defaults:
             continue
-        
+
         args = argspec.args
 
         defaults.extend(argspec.defaults)
@@ -119,25 +119,20 @@ def build_new_mixed_class(base_klass, mixins):
     all_classes = tuple(mixins) + tuple([base_klass])
     new_name = '+'.join([x.__name__[:10] for x in all_classes])
 
-
     new_klass = type(new_name, all_classes, {'__init__': mixed_init})
 
     return new_klass
 
 
 def enhance_class(base_klass, mixins, **kwargs):
-
-
     new_klass = build_new_mixed_class(base_klass, mixins)
-    print(new_klass.__bases__)
     all_kwargs = determine_mixin_args(new_klass.__bases__)
 
     for k in kwargs:
         if k not in all_kwargs:
-            log.error('Object {} does not have parameter {}'.format(new_klass, k))
+            log.error('Object {} does not have '
+                      'parameter {}'.format(new_klass, k))
             log.error('Available parameters are %s', all_kwargs)
             raise KeyError(f'Object {new_klass} does not have parameter {k}')
 
     return new_klass(**kwargs)
-
-
