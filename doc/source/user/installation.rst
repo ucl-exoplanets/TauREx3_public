@@ -8,12 +8,6 @@ Installation
 
 TauREx3 only works with Python 3. If you need to use Python 2.7 consider using TauREx2_.
 
-Prerequisites
-~~~~~~~~~~~~~
-
-The only prerequisite is numpy_.
-All other prerequisites are downloaded and installed automatically.
-
 Installing from PyPi
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -24,6 +18,15 @@ Simply do::
 To test for correct setup you can do::
 
     python -c "import taurex; print(taurex.__version__)"
+
+
+Additionally, to restore the equilbrium chemistry and BHMie from TauREx 3.0 you can 
+run::
+
+    pip install taurex_ace taurex_bhmie
+
+
+
 
 Installing from git source directly (platform-independent)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -63,9 +66,10 @@ The output can be found in the ``doc/build`` directory
 Dependencies
 ------------
 
-numpy_ is the bare minimum required to install TauREx3.
+As TauREx3 is pure python ,there are no prerequisites.
 Additionally these packages are also download and installed during setup:
 
+- numpy_
 - numba_
 - numexpr_
 - configobj_ for parsing input files
@@ -84,14 +88,6 @@ installing additional dependancies:
 - Retrieval using PolyChord_ requires pypolychord_
 
     - The dynamic version requires dypolychord_ as well
-
-Other extras (like equilibrium chemistry)
-use external FORTRAN and C++ code. They
-require cython_ before installation to compile. Additionally
-a FORTRAN compiler and/or C++ compiler must be installed.
-
-.. tip::
-    For Windows this can be easily achieved using Anaconda3 and doing ``conda install libpython m2w64-toolchain``
 
 
 .. _numpy: http://numpy.org/

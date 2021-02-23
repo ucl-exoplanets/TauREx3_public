@@ -15,7 +15,7 @@ of having retrieval parameters. Classes that inherit from this include:
     - :class:`~taurex.data.profiles.chemistry.chemistry.Chemistry`
     - :class:`~taurex.data.profiles.chemistry.gas.gas.Gas`
     - :class:`~taurex.data.profiles.pressure.pressureprofile.PressureProfile`
-    - :class:`~taurex.data.stellar.star.Star`ß
+    - :class:`~taurex.data.stellar.star.Star`
     - :class:`~taurex.data.planet.Planet`
     - :class:`~taurex.model.model.ForwardModel`
     - :class:`~taurex.contributions.contribution.Contribution`
