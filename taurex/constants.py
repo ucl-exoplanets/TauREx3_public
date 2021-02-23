@@ -10,11 +10,12 @@ RSOL = conversion_factor('Rsun', 'm')
 RJUP = conversion_factor('Rjup', 'm')
 PI = np.pi
 MSOL = conversion_factor('Msun', 'kg')
-#RJUP = 7.1492e7 # Jo's radius
+
 MJUP = conversion_factor('Mjup', 'kg')
 AU = conversion_factor('AU', 'm')
 PLANCK = c.h.value
-SPDLIGT = conversion_factor('c','m/s')
+SPDLIGT = conversion_factor('c', 'm/s')
+
 
 def get_constant(name, unit=None):
     from taurex.util.util import conversion_factor

@@ -2,13 +2,18 @@ from taurex.log import Logger
 from .classfactory import ClassFactory
 log = Logger('Factory')
 
+
 def get_keywordarg_dict(klass, is_mixin=False):
+
     import inspect
     init_dicts = {}
     if not is_mixin:
         init_dicts = {}
         args, varargs, varkw, defaults = inspect.getargspec(klass.__init__)
-        log.debug('Inpection {} {} {} {}'.format(args, varargs, varkw, defaults))
+        log.debug('Inpection {} {} {} {}'.format(args,
+                                                 varargs,
+                                                 varkw,
+                                                 defaults))
         if defaults is None:
             return init_dicts
 
@@ -31,8 +36,10 @@ def create_klass(config, klass, is_mixin):
             value = config[key]
             kwargs[key] = value
         else:
-            log.error('Object {} does not have parameter {}'.format(klass.__name__,key))
-            log.error('Available parameters are %s',kwargs.keys())
+            log.error(
+                'Object {} does not have parameter {}'.format(klass.__name__,
+                                                              key))
+            log.error('Available parameters are %s', kwargs.keys())
             raise KeyError
     obj = klass(**kwargs)
     # for key,value in config.items():
@@ -70,7 +77,9 @@ def mixin_factory(profile_type, baseclass):
         except AttributeError:
             pass
 
-    raise NotImplementedError('{} {} not implemented'.format(baseclass.__name__, profile_type))
+    raise NotImplementedError('{} {} not '
+                              'implemented'.format(baseclass.__name__,
+                                                   profile_type))
 
 
 def generic_factory(profile_type, baseclass):
@@ -100,14 +109,17 @@ def generic_factory(profile_type, baseclass):
         except AttributeError:
             pass
 
-    raise NotImplementedError('{} {} not implemented'.format(baseclass.__name__, profile_type))
+    raise NotImplementedError('{} {} not '
+                              'implemented'.format(baseclass.__name__,
+                                                   profile_type))
 
 
 def create_profile(config, factory, baseclass=None,
                    keyword_type='profile_type'):
-    config, klass, mixin = determine_klass(config, keyword_type,
-                                    lambda x: generic_factory(x, baseclass),
-                                    baseclass=baseclass)
+    config, klass, mixin = \
+        determine_klass(config, keyword_type,
+                        lambda x: generic_factory(x, baseclass),
+                        baseclass=baseclass)
 
     obj = create_klass(config, klass, mixin)
 
@@ -126,7 +138,8 @@ def gas_factory(profile_type):
         except AttributeError:
             pass
 
-    raise NotImplementedError('Gas profile {} not implemented'.format(profile_type))
+    raise NotImplementedError('Gas profile {} not '
+                              'implemented'.format(profile_type))
 
 
 def temp_factory(profile_type):
@@ -141,7 +154,8 @@ def temp_factory(profile_type):
         except AttributeError:
             pass
 
-    raise NotImplementedError('Temperature profile {} not implemented'.format(profile_type))
+    raise NotImplementedError('Temperature profile {} not '
+                              'implemented'.format(profile_type))
 
 
 def chemistry_factory(profile_type):
@@ -151,11 +165,12 @@ def chemistry_factory(profile_type):
             if profile_type in klass.input_keywords():
                 return klass
         except NotImplementedError:
-            log.warning('%s',klass)
+            log.warning('%s', klass)
         except AttributeError:
             pass
 
-    raise NotImplementedError('Chemistry {} not implemented'.format(profile_type))
+    raise NotImplementedError('Chemistry {} not '
+                              'implemented'.format(profile_type))
 
 
 def pressure_factory(profile_type):
@@ -165,11 +180,12 @@ def pressure_factory(profile_type):
             if profile_type in klass.input_keywords():
                 return klass
         except NotImplementedError:
-            log.warning('%s',klass)
+            log.warning('%s', klass)
         except AttributeError:
             pass
 
-    raise NotImplementedError('Pressure profile {} not implemented'.format(profile_type))
+    raise NotImplementedError('Pressure profile {} not '
+                              'implemented'.format(profile_type))
 
 
 def star_factory(star_type):
@@ -179,11 +195,12 @@ def star_factory(star_type):
             if star_type in klass.input_keywords():
                 return klass
         except NotImplementedError:
-            log.warning('%s',klass)
+            log.warning('%s', klass)
         except AttributeError:
             pass
 
-    raise NotImplementedError('Star of type {} not implemented'.format(star_type))
+    raise NotImplementedError('Star of type {} not '
+                              'implemented'.format(star_type))
 
 
 def create_gas_profile(config):
@@ -203,8 +220,6 @@ def create_pressure_profile(config):
 
 def create_chemistry(config):
     from taurex.data.profiles.chemistry.chemistry import Chemistry
-    from taurex.mixin.mixins import MakeFreeMixin
-    from taurex.data.profiles.chemistry import TaurexChemistry
     from taurex.data.profiles.chemistry.gas.gas import Gas
 
     gases = []
@@ -244,7 +259,7 @@ def model_factory(model_type):
             if model_type in klass.input_keywords():
                 return klass
         except NotImplementedError:
-            log.warning('%s',klass)
+            log.warning('%s', klass)
         except AttributeError:
             pass
 
@@ -262,7 +277,6 @@ def planet_factory(planet_type):
         except AttributeError:
             pass
 
-            
     raise NotImplementedError('Planet {} not implemented'.format(planet_type))
 
 
@@ -273,11 +287,12 @@ def optimizer_factory(optimizer):
             if optimizer in klass.input_keywords():
                 return klass
         except NotImplementedError:
-            log.warning('%s',klass)
+            log.warning('%s', klass)
         except AttributeError:
             pass
 
     raise NotImplementedError('Optimizer {} not implemented'.format(optimizer))
+
 
 def observation_factory(observation):
     cf = ClassFactory()
@@ -290,8 +305,8 @@ def observation_factory(observation):
         except AttributeError:
             pass
 
-    raise NotImplementedError('Observation {} not implemented'.format(observation))
-
+    raise NotImplementedError('Observation {} not '
+                              'implemented'.format(observation))
 
 
 def instrument_factory(instrument):
@@ -301,11 +316,12 @@ def instrument_factory(instrument):
             if instrument in klass.input_keywords():
                 return klass
         except NotImplementedError:
-            log.warning('%s',klass)
+            log.warning('%s', klass)
         except AttributeError:
             pass
 
-    raise NotImplementedError('Instrument {} not implemented'.format(instrument))
+    raise NotImplementedError('Instrument {} not '
+                              'implemented'.format(instrument))
 
 
 def create_star(config):
@@ -324,8 +340,9 @@ def create_planet(config):
     if 'planet_type' not in config:
         config['planet_type'] = 'simple'
 
-    config, klass, mixin = determine_klass(config, 'planet_type', planet_factory,
-                                    Planet)
+    config, klass, mixin = \
+        determine_klass(config, 'planet_type',
+                        planet_factory, Planet)
 
     obj = klass(**config)
 
@@ -334,21 +351,23 @@ def create_planet(config):
 
 def create_optimizer(config):
     from taurex.optimizer.optimizer import Optimizer
-    config, klass, mixin = determine_klass(config, 'optimizer', optimizer_factory,
-                                    Optimizer)
+    config, klass, mixin = \
+        determine_klass(config, 'optimizer',
+                        optimizer_factory, Optimizer)
 
     obj = klass(**config)
-    
+
     return obj
 
 
 def create_observation(config):
     from taurex.spectrum import BaseSpectrum
-    config, klass, mixin = determine_klass(config, 'observation', observation_factory,
-                                    BaseSpectrum)
+    config, klass, mixin = \
+        determine_klass(config, 'observation',
+                        observation_factory, BaseSpectrum)
 
     obj = klass(**config)
-    
+
     return obj
 
 
@@ -375,27 +394,28 @@ def determine_klass(config, field, factory, baseclass=None):
         if len(split) == 1:
             klass = factory(klass_field)
         else:
-            
             is_mixin = True
             base_klass = factory(split[-1])
-            the_mixin_factory = lambda x: mixin_factory(x, baseclass)
+
+            def the_mixin_factory(x):
+                return mixin_factory(x, baseclass)
+
             mixins = [the_mixin_factory(s) for s in split[:-1]]
             klass = build_new_mixed_class(base_klass, mixins)
-
-
-
 
     return config, klass, is_mixin
 
 
 def create_instrument(config):
     from taurex.instruments.instrument import Instrument
-    config, klass, is_mixin = determine_klass(config, 'instrument', instrument_factory,
-                                    Instrument)
+    config, klass, is_mixin = \
+        determine_klass(config, 'instrument',
+                        instrument_factory, Instrument)
 
     obj = klass(**config)
-    
+
     return obj
+
 
 def generate_contributions(config):
 
@@ -407,11 +427,13 @@ def generate_contributions(config):
         for klass in cf.contributionKlasses:
             try:
                 if key in klass.input_keywords():
-                    contributions.append(create_klass(config[key], klass,False))
+                    contributions.append(create_klass(config[key],
+                                                      klass,
+                                                      False))
                     check_key.pop(check_key.index(key))
                     break
             except NotImplementedError:
-                log.warning('%s',klass)
+                log.warning('%s', klass)
             except AttributeError:
                 pass
 
@@ -437,13 +459,15 @@ def create_prior(prior):
 def create_model(config, gas, temperature, pressure, planet, star):
     from taurex.model import ForwardModel
     log.debug(config)
-    config, klass, is_mixin = determine_klass(config, 'model_type', model_factory,
-                                    ForwardModel)
+    config, klass, is_mixin = \
+        determine_klass(config, 'model_type',
+                        model_factory, ForwardModel)
 
     log.debug('Chosen_model is {}'.format(klass))
     kwargs = get_keywordarg_dict(klass, is_mixin)
     log.debug('Model kwargs {}'.format(kwargs))
-    log.debug('---------------{} {}--------------'.format(gas,gas.activeGases))
+    log.debug('---------------{} {}--------------'.format(gas,
+                                                          gas.activeGases))
     if 'planet' in kwargs:
         kwargs['planet'] = planet
     if 'star' in kwargs:
@@ -451,34 +475,36 @@ def create_model(config, gas, temperature, pressure, planet, star):
     if 'chemistry' in kwargs:
         kwargs['chemistry'] = gas
     if 'temperature_profile' in kwargs:
-        kwargs['temperature_profile'] =temperature
+        kwargs['temperature_profile'] = temperature
     if 'pressure_profile' in kwargs:
         kwargs['pressure_profile'] = pressure
     log.debug('New Model kwargs {}'.format(kwargs))
     log.debug('Creating model---------------')
-    
-    kwargs.update(dict([(k,v) for k,v in config.items() if not isinstance(v,dict)]))
+
+    kwargs.update(dict([(k, v) for k, v in config.items()
+                  if not isinstance(v, dict)]))
     obj = klass(**kwargs)
-    
+
     contribs = generate_contributions(config)
 
     for c in contribs:
         obj.add_contribution(c)
 
+    return obj
 
-    return obj       
 
 def detect_and_return_klass(python_file, baseclass):
-    import importlib.util 
+    import importlib.util
     import inspect
-    spec = importlib.util.spec_from_file_location("foo", python_file) 
-    foo = importlib.util.module_from_spec(spec) 
-    spec.loader.exec_module(foo) 
-    classes = [m[1] for m in inspect.getmembers(foo, inspect.isclass) if m[1] \
-               is not baseclass and issubclass(m[1],baseclass)]
+    spec = importlib.util.spec_from_file_location("foo", python_file)
+    foo = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(foo)
+    classes = [m[1] for m in inspect.getmembers(foo, inspect.isclass) if m[1]
+               is not baseclass and issubclass(m[1], baseclass)]
 
     if len(classes) == 0:
-        log.error('Could not find class of type %s in file %s',baseclass, python_file)
+        log.error('Could not find class of type %s in file %s',
+                  baseclass, python_file)
         raise Exception(f'No class inheriting from {baseclass} in '
                         f'{python_file}')
     return classes[0]

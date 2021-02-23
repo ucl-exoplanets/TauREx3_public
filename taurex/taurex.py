@@ -1,5 +1,6 @@
 """The main taurex program"""
 
+
 def parse_keywords(keywords):
     import tabulate
     from taurex.parameter.classfactory import ClassFactory
@@ -11,8 +12,13 @@ def parse_keywords(keywords):
         print('-------------Available Contributions-----------')
         print('-----------------------------------------------')
         print('')
-        table = [(f'[[{c.__name__}]]', c.__module__.split('.')[0].split('_')[-1]) for c in cf.contributionKlasses  if hasattr(c, 'input_keywords')]
-        print(tabulate.tabulate(table, headers=['Header','Source'],tablefmt="fancy_grid"))
+        table = [(f'[[{c.__name__}]]',
+                  c.__module__.split('.')[0].split('_')[-1])
+                 for c in cf.contributionKlasses
+                 if hasattr(c, 'input_keywords')]
+        print(tabulate.tabulate(table,
+                                headers=['Header', 'Source'],
+                                tablefmt="fancy_grid"))
 
     elif keywords in ('chemistry', ):
         print('')
@@ -20,8 +26,13 @@ def parse_keywords(keywords):
         print('-------------Available [Chemistry]-------------')
         print('-----------------------------------------------')
         print('')
-        table = [(' / '.join(c.input_keywords()),f'{c.__name__}', c.__module__.split('.')[0].split('_')[-1]) for c in cf.chemistryKlasses if hasattr(c, 'input_keywords')]
-        print(tabulate.tabulate(table, headers=['chemistry_type','Class', 'Source'], tablefmt="fancy_grid"))
+        table = [(' / '.join(c.input_keywords()),
+                  f'{c.__name__}',
+                  c.__module__.split('.')[0].split('_')[-1])
+                 for c in cf.chemistryKlasses if hasattr(c, 'input_keywords')]
+        print(tabulate.tabulate(table,
+              headers=['chemistry_type', 'Class', 'Source'],
+              tablefmt="fancy_grid"))
         print('\n')
     elif keywords in ('temperature', ):
         print('')
@@ -29,8 +40,14 @@ def parse_keywords(keywords):
         print('-------------Available [Temperature]-----------')
         print('-----------------------------------------------')
         print('')
-        table = [(' / '.join(c.input_keywords()),f'{c.__name__}', c.__module__.split('.')[0].split('_')[-1]) for c in cf.temperatureKlasses if hasattr(c, 'input_keywords')]
-        print(tabulate.tabulate(table, headers=['profile_type','Class', 'Source'], tablefmt="fancy_grid"))
+        table = [(' / '.join(c.input_keywords()),
+                  f'{c.__name__}',
+                  c.__module__.split('.')[0].split('_')[-1])
+                 for c in cf.temperatureKlasses
+                 if hasattr(c, 'input_keywords')]
+        print(tabulate.tabulate(table, 
+                                headers=['profile_type', 'Class', 'Source'],
+                                tablefmt="fancy_grid"))
         print('\n')
     elif keywords in ('gas', ):
         print('')
@@ -38,8 +55,13 @@ def parse_keywords(keywords):
         print('-------------Available Gas Profiles------------')
         print('-----------------------------------------------')
         print('')
-        table = [(' / '.join(c.input_keywords()),f'{c.__name__}', c.__module__.split('.')[0].split('_')[-1]) for c in cf.gasKlasses if hasattr(c, 'input_keywords')]
-        print(tabulate.tabulate(table, headers=['gas_type','Class', 'Source'], tablefmt="fancy_grid"))
+        table = [(' / '.join(c.input_keywords()),
+                  f'{c.__name__}',
+                  c.__module__.split('.')[0].split('_')[-1])
+                 for c in cf.gasKlasses if hasattr(c, 'input_keywords')]
+
+        print(tabulate.tabulate(table, headers=['gas_type', 'Class', 'Source'],
+                                tablefmt="fancy_grid"))
         print('\n')
     elif keywords in ('optimizer', ):
         print('')
@@ -47,8 +69,14 @@ def parse_keywords(keywords):
         print('-------------Available Optimizers--------------')
         print('-----------------------------------------------')
         print('')
-        table = [(' / '.join(c.input_keywords()),f'{c.__name__}', c.__module__.split('.')[0].split('_')[-1]) for c in cf.optimizerKlasses if hasattr(c, 'input_keywords')]
-        print(tabulate.tabulate(table, headers=['optimizer','Class', 'Source'], tablefmt="fancy_grid"))
+        table = [(' / '.join(c.input_keywords()),
+                 f'{c.__name__}',
+                  c.__module__.split('.')[0].split('_')[-1])
+                 for c in cf.optimizerKlasses if hasattr(c, 'input_keywords')]
+        print(tabulate.tabulate(table, headers=['optimizer',
+                                                'Class',
+                                                'Source'],
+                                tablefmt="fancy_grid"))
         print('\n')
     elif keywords in ('prior', ):
         print('')
@@ -56,8 +84,13 @@ def parse_keywords(keywords):
         print('-------------Available Priors------------------')
         print('-----------------------------------------------')
         print('')
-        table = [(f'{c.__name__}', c.__module__.split('.')[0].split('_')[-1]) for c in cf.priorKlasses if hasattr(c, 'input_keywords')]
-        print(tabulate.tabulate(table, headers=['prior','Class', 'Source'], tablefmt="fancy_grid"))
+        table = [(f'{c.__name__}',
+                 c.__module__.split('.')[0].split('_')[-1])
+                 for c in cf.priorKlasses
+                 if hasattr(c, 'input_keywords')]
+        print(tabulate.tabulate(table, 
+                                headers=['prior', 'Class', 'Source'],
+                                tablefmt="fancy_grid"))
         print('\n')
     elif keywords in ('model', ):
         print('')
@@ -65,8 +98,12 @@ def parse_keywords(keywords):
         print('-------------Available Forward [Model]s--------')
         print('-----------------------------------------------')
         print('')
-        table = [(' / '.join(c.input_keywords()),f'{c.__name__}', c.__module__.split('.')[0].split('_')[-1]) for c in cf.modelKlasses if hasattr(c, 'input_keywords')]
-        print(tabulate.tabulate(table, headers=['model_type','Class', 'Source'], tablefmt="fancy_grid"))
+        table = [(' / '.join(c.input_keywords()),
+                  f'{c.__name__}', c.__module__.split('.')[0].split('_')[-1])
+                 for c in cf.modelKlasses if hasattr(c, 'input_keywords')]
+        print(tabulate.tabulate(table,
+                                headers=['model_type', 'Class', 'Source'],
+                                tablefmt="fancy_grid"))
         print('\n')
     elif keywords in ('pressure', ):
         print('')
@@ -77,7 +114,9 @@ def parse_keywords(keywords):
         table = [(' / '.join(c.input_keywords()), f'{c.__name__}',
                  c.__module__.split('.')[0].split('_')[-1])
                  for c in cf.pressureKlasses]
-        print(tabulate.tabulate(table, headers=['profile_type','Class', 'Source'], tablefmt="fancy_grid"))
+        print(tabulate.tabulate(table,
+                                headers=['profile_type', 'Class', 'Source'], 
+                                tablefmt="fancy_grid"))
         print('\n')
 
 
@@ -106,11 +145,10 @@ def show_parameters(model):
             short_desc.append(s)
 
     output = tabulate.tabulate(zip(keywords,  short_desc),
-                            headers=['Param Name', 'Short Desc'],
-                            tablefmt="fancy_grid")
+                               headers=['Param Name', 'Short Desc'],
+                               tablefmt="fancy_grid")
     print(output)
     print('\n\n')
-
 
     import tabulate
     print('')
@@ -136,8 +174,8 @@ def show_parameters(model):
             short_desc.append(s)
 
     output = tabulate.tabulate(zip(keywords,  short_desc),
-                            headers=['Param Name', 'Short Desc'],
-                            tablefmt="fancy_grid")
+                               headers=['Param Name', 'Short Desc'],
+                               tablefmt="fancy_grid")
     print(output)
     print('\n\n')
 
@@ -174,7 +212,7 @@ def main():
     from taurex.log.logger import root_logger
     from taurex.parameter import ParameterParser
     from taurex.output.hdf5 import HDF5Output
-    from taurex.util.output import generate_profile_dict, store_contributions
+    from taurex.util.output import store_contributions
     from .taurexdefs import OutputSize
     from . import __version__ as version
 
@@ -221,7 +259,8 @@ def main():
                         help="Display plugins", action='store_true')
 
     parser.add_argument("--fitparams", dest='fitparams', default=False,
-                        help="Display available fitting params", action='store_true')
+                        help="Display available fitting params", 
+                        action='store_true')
 
     parser.add_argument("--keywords", dest="keywords", type=str)
 
