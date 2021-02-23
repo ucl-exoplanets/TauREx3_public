@@ -31,7 +31,6 @@ entry_points = {'console_scripts': console_scripts, }
 classifiers = [
     'Development Status :: 4 - Beta',
     'Environment :: Console',
-    'Environment :: Win32 (MS Windows)',
     'Intended Audience :: Developers',
     'Intended Audience :: Science/Research',
     'License :: OSI Approved :: BSD License',
@@ -43,6 +42,7 @@ classifiers = [
     'Programming Language :: Python',
     'Topic :: Scientific/Engineering',
     'Topic :: Software Development :: Libraries',
+    'Framework :: TauREx'
 ]
 
 # Handle versioning
