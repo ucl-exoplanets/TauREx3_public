@@ -151,7 +151,7 @@ def allocate_as_shared(arr, logger=None, force_shared=False):
         return arr
     from taurex.cache import GlobalCache
     if GlobalCache()['mpi_use_shared'] or force_shared:
-        if logger:
+        if logger is not None:
             logger.info('Moving to shared memory')
         comm = shared_comm()
         nbytes = arr.size*arr.itemsize
