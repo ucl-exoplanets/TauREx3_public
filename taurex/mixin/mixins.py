@@ -10,35 +10,37 @@ class MakeFreeMixin(ChemistryMixin):
     to become a :class:`~taurex.data.profiles.chemistry.gas.gas.Gas`
     object. Allowing them to be freely changed or retrieved.
 
-    For example we can force TiO into ACE:
+    For example lets enhance ACE:
 
     >>> from taurex_ace import ACEChemistry
     >>> from taurex.mixin import enhance_class, MakeFreeMixin
     >>> old_ace = ACEChemistry()
     >>> new_ace = enhance_class(ACEChemistry, MakeFreeMixin)
 
-    ``new_ace`` behaves the same as ACE:
+    ``new_ace`` behaves the same as ``old_ace``:
 
     >>> new_ace.ace_metallicity
     1.0
 
-    And we see the same molecules exist:
+    And we see the same molecules and fitting parameters exist:
 
     >>> old_ace.gases == new_ace.gases
+    True
     >>> new_ace.gases
     ['CH3COOOH', 'C4H9O', ... 'HNC', 'HON', 'NCN']
-    
     >>> new_ace.fitting_parameters().keys()
-    dict_keys(['ace_metallicity', 'metallicity', 'ace_co', 'C_O_ratio']) 
+    dict_keys(['ace_metallicity', 'metallicity', 'ace_co', 'C_O_ratio'])
 
-    Now we we can include TiO and VO:
+    ``new_ace`` is embued with the 
 
     >>> from taurex.chemistry import ConstantGas
     >>> new_ace.addGas(ConstantGas('TiO',1e-8)).addGas(ConstantGas('VO',1e-8))
+    >>> new_ace.gases == old_ace.gases
+    False
     >>> new_ace.gases
     ['CH3COOOH', 'C4H9O', ... 'HNC', 'HON', 'NCN', 'TiO', 'VO']
 
-    And indeed see that they are includes. We can also retrieve them:
+    And indeed see that they are included. We can also retrieve them:
 
     >>> new_ace.fitting_parameters().keys()
     dict_keys(['TiO', 'VO', 'ace_metallicity', 'metallicity', 'ace_co', 'C_O_ratio'])

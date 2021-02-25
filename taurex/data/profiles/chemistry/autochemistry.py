@@ -6,7 +6,7 @@ class AutoChemistry(Chemistry):
     Chemistry class that automatically seperates out
     active and inactive gases
 
-    Has a helper function that can be called
+    Has a helper function that should be called when
 
 
 

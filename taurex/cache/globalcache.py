@@ -5,7 +5,7 @@ from taurex.log import Logger
 class GlobalCache(Singleton):
     """
 
-    Allows for the storage of global variables
+    Allows for the storage of global variables.
 
     """
     def init(self):

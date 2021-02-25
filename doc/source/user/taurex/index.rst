@@ -34,6 +34,7 @@ a help can be accessed by doing::
     Binning <binning>
     Instrument <instrument>
     Fitting <fitting>
+    Mixins <mixins>
     Optimizer <optimizer>
     Plotting <plotting>
 

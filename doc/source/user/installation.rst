@@ -6,7 +6,7 @@
 Installation
 ============
 
-TauREx3 only works with Python 3. If you need to use Python 2.7 consider using TauREx2_.
+TauREx3 only works with Python 3.5+. If you need to use Python 2.7 consider using TauREx2_.
 
 Installing from PyPi
 ~~~~~~~~~~~~~~~~~~~~

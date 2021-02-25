@@ -1,7 +1,10 @@
+.. _plugins:
+
 =======
 Plugins
 =======
 
+.. versionadded:: 3.1
 
 Plugins are a new feature since version 3.1. Inspired by Flask extensions, plugins are extra packages that add
 new functionality to TauREx. They allow anyone to improve and expand TauRExs capabilities
@@ -13,7 +16,7 @@ Finding Plugins
 
 TauREx plugins usually are named as 'taurex_foo' or 'taurex-bar'. The Plugin Catalogue contains 
 a list of plugins developed by us here :ref:`pluginscata` . You can also
-search PyPI for packages tagged with `Framework :: TauREx <pypi_>`_.
+search PyPI for packages with keywords `taurex <pypi_>`_.
 
 
 Using Plugins
@@ -90,4 +93,4 @@ you can try building your own! Read :ref:`buildplugin` to learn how
 to develop your own and extend TauREx!
 
 
-.. _pypi: https://pypi.org/search/?c=Framework+%3A%3A+TauREx
+.. _pypi: https://pypi.org/search/?q=taurex

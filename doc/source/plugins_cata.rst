@@ -5,6 +5,7 @@
 Plugins Catalogue
 =================
 
+.. versionadded:: 3.1
 
 Here is a list of plugins that can be installed to give
 TauREx 3 new features and components. Plugins are usually hosted on PyPi

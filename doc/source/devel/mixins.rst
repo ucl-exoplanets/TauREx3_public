@@ -1,0 +1,6 @@
+.. _mixinsdevel:
+
+======
+Mixins
+======
+

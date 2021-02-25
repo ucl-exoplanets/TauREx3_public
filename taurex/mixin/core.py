@@ -49,6 +49,10 @@ class Mixin(Fittable):
 
 
 class StarMixin(Mixin):
+    """
+    A mixin that enhances :class:`~taurex.data.stellar.star.Star`
+    """
+
     pass
 
 
