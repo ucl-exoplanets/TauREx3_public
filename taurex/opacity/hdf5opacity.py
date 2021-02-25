@@ -2,7 +2,7 @@ from .interpolateopacity import InterpolatingOpacity
 import pickle
 import numpy as np
 import pathlib
-
+from taurex.mpi import allocate_as_shared
 
 class HDF5Opacity(InterpolatingOpacity):
     """
@@ -85,7 +85,7 @@ class HDF5Opacity(InterpolatingOpacity):
         self._pressure_grid = self._spec_dict['p'][:]*p_conversion
 
         if self.in_memory:
-            self._xsec_grid = self._spec_dict['xsecarr'][...]
+            self._xsec_grid = allocate_as_shared(self._spec_dict['xsecarr'][...], logger=self)
         else:
             self._xsec_grid = self._spec_dict['xsecarr']
 
