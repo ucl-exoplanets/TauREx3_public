@@ -3,7 +3,7 @@ import pickle
 import numpy as np
 import pathlib
 from taurex.util.util import sanitize_molecule_string
-
+from taurex.mpi import allocate_as_shared
 
 class PickleOpacity(InterpolatingOpacity):
     """
@@ -71,7 +71,7 @@ class PickleOpacity(InterpolatingOpacity):
 
         self._temperature_grid = self._spec_dict['t']
         self._pressure_grid = self._spec_dict['p']*1e5
-        self._xsec_grid = self._spec_dict['xsecarr']
+        self._xsec_grid = allocate_as_shared(self._spec_dict['xsecarr'])
         self._resolution = np.average(np.diff(self._wavenumber_grid))
 
         splits = pathlib.Path(filename).stem.split('.')

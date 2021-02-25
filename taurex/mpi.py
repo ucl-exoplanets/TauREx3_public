@@ -1,6 +1,8 @@
 """Module for wrapping MPI functions (future use)"""
 from functools import lru_cache
 from functools import wraps
+import numpy as np
+
 
 def convert_op(operation):
     from mpi4py import MPI
@@ -8,6 +10,12 @@ def convert_op(operation):
         return MPI.SUM
     else:
         raise NotImplementedError
+
+@lru_cache(maxsize=10)
+def shared_comm():
+    from mpi4py import MPI
+    return MPI.COMM_WORLD.Split_type(MPI.COMM_TYPE_SHARED)
+
 
 
 @lru_cache(maxsize=2)
@@ -129,3 +137,37 @@ def only_master_rank(f):
         if get_rank() == 0:
             return f(*args, **kwargs)
     return wrapper
+
+
+@lru_cache(maxsize=10)
+def shared_rank():
+    return shared_comm().Get_rank()
+
+
+def allocate_as_shared(arr, logger=None, force_shared=False):
+    try:
+        from mpi4py import MPI
+    except ImportError:
+        return arr
+    from taurex.cache import GlobalCache
+    if GlobalCache()['mpi_use_shared'] or force_shared:
+        if logger:
+            logger.info('Moving to shared memory')
+        comm = shared_comm()
+        nbytes = arr.size*arr.itemsize
+
+        window = MPI.Win.Allocate_shared(nbytes, arr.itemsize, comm=comm)
+        buf, itemsize = window.Shared_query(0)
+        if itemsize != arr.itemsize:
+            raise Exception(f'Shared memory size {itemsize} != array itemsize {arr.itemsize}')
+
+        shared_array = np.ndarray(buffer=buf, dtype='d', shape=arr.shape)
+
+        if shared_rank() == 0:
+            shared_array[...] = arr[...]
+
+        comm.Barrier()
+
+        return shared_array
+    else:
+        return arr
