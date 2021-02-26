@@ -26,10 +26,10 @@ Unit-testing
 
 Unittesting is important in preserving sanity
 and code integrity. For TauREx 3 we employ the
-standard unittest_ module. When bugfixing, ensure 
+pytest_ . When bugfixing, ensure 
 unittests pass. In the root directory do::
 
-    python -m unittest discover
+    pytest tests/
 
 To run all unit tests in TauREx3
 
@@ -41,9 +41,10 @@ something to easily test against.
 
 Some rules:
 
-- Tests must be quick (in the order of seconds)
 - No `extra` files should be included. Instead
   have the unit test generate them on the spot.
+
+- We recommended hypothesis_ for bug finding
 
 Coding conventions
 ==================
@@ -89,4 +90,5 @@ For contributions we employ the Fork-and-Pull_ model:
 .. _Fork-and-Pull: https://en.wikipedia.org/wiki/Fork_and_pull_model
 .. _forks: https://help.github.com/articles/fork-a-repo/
 .. _Pull-Request: https://help.github.com/articles/creating-a-pull-request/
-.. _unittest: https://docs.python.org/3/library/unittest.html
+.. _pytest: https://docs.pytest.org/en/stable/
+.. _hypothesis: https://hypothesis.readthedocs.io/en/latest/quickstart.html

@@ -24,6 +24,15 @@ The available ``chemistry_type`` are:
 
 ACE Equlibrium Chemistry
 ========================
+
+.. warning::
+
+    Since version 3.1 this has been removed from the base TauREx package. You can
+    restore this chemical scheme by writing::
+
+        pip install taurex_ace
+
+
 ``chemistry_type = ace``
 ``chemistry_type = equilibrium``
 
@@ -92,7 +101,7 @@ gas list like::
 
     fill_gases = H2,He,CO2,
 
-then ``[Gas-1]_[Gas-0] == He_H2``
+then ``[Gas-1]_[Gas-0] == He_H2`` and ``[Gas-2]_[Gas-0] == CO2_H2``:
 
 +-----------------------+-----------------------------+---------------------------+
 | Parameter             | Type                        | Description               |

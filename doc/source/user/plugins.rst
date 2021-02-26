@@ -6,7 +6,7 @@ Plugins
 
 .. versionadded:: 3.1
 
-Plugins are a new feature since version 3.1. Inspired by Flask extensions, plugins are extra packages that add
+Inspired by Flask extensions, plugins are extra packages that add
 new functionality to TauREx. They allow anyone to improve and expand TauRExs capabilities
 without modifying the main codebase. For example, new forward models, opacity formats,
 chemistry and optimizers.
@@ -15,7 +15,7 @@ Finding Plugins
 ===============
 
 TauREx plugins usually are named as 'taurex_foo' or 'taurex-bar'. The Plugin Catalogue contains 
-a list of plugins developed by us here :ref:`pluginscata` . You can also
+a list of plugins developed by us in the :ref:`pluginscata` . You can also
 search PyPI for packages with keywords `taurex <pypi_>`_.
 
 

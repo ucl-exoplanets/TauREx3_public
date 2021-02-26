@@ -18,11 +18,6 @@ Equilibrium Chemistry (ACE)
    This is no longer available in the base TauREx 3 since version 3.1.
    To use this you must install the ``taurex_ace`` plugin.
 
-.. automodule:: taurex.data.profiles.chemistry.acechemistry
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Free chemistry
 --------------
 

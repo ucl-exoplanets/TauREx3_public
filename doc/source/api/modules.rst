@@ -23,3 +23,4 @@ Taurex API Documentation
    taurex.util
    taurex.parameter
    taurex.mixin
+   taurex.mpi

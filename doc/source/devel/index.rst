@@ -10,6 +10,7 @@ Developers guide
 
     Overview <overview>
     Guidelines <guidelines>
+    Basics <basics>
     Fitting Parameters <fittingparameters>
     Writing Temperature <temperature>
     Plugins <plugins>

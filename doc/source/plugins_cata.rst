@@ -1,4 +1,4 @@
-.. _plguincata:
+.. _pluginscata:
 
 
 =================

@@ -49,12 +49,14 @@ class OpacityCache(Singleton):
 
     
 
-    Lastly if you've got a hot new opacity format, you can try out
-    by manually adding it into the cache:
+    Lastly you can manually add an opacity directly for a molecule
+    into the cache:
 
     >>> new_h2o = MyNewOpacityFormat()
+    >>> new_h2o.molecule
+    H2O
     >>> opt.add_opacity(new_h2o)
-    >>> opt['H2O]
+    >>> opt['H2O']
     <MyNewOpacityFormat at 0x107a60be0>
 
     

@@ -26,3 +26,10 @@ The global section generally handles settings that affect the whole program.
     - str or list of str
     - Defines the path(s) that contain CIA cross-sections
     - e.g ``cia_path = path/to/xsec``
+
+- ``mpi_use_shared``
+    - ``True`` or ``False``
+    - Exploit MPI 3.0 shared memory to significantly reduce memory usage per node
+    - When running under MPI, will only allocate arrays once in a node rather than each process
+    - Works on allocations that use this feature (i.e pickle and HDF5 opacities)
+    - e.g ``mpi_use_shared = True``

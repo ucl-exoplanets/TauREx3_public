@@ -9,11 +9,11 @@ Cross-sections
 ~~~~~~~~~~~~~~
 Supported formats are:
 
-- ``.pickle`` *Taurex2* pickle format
+- ``.pickle`` *TauREx2* pickle format
 - ``.hdf5``, ``.h5`` New HDF5 format
 - ``.dat``,  ExoTransmit_ format
 
-More formats can be included through :ref:`plugins`_
+More formats can be included through :ref:`plugins`
 
 .. tip::
 
@@ -29,11 +29,11 @@ K-Tables
 
 Supported formats are:
 
-- ``.pickle`` *Taurex2* pickle format
+- ``.pickle`` *TauREx2* pickle format
 - ``.hdf5``, ``.h5`` petitRADTRANS HDF5 format
 - ``.kta``,  NEMESIS format
 
-More formats can be included through :ref:`plugins`_
+More formats can be included through :ref:`plugins`
 
 
 Observation
@@ -45,7 +45,7 @@ are:
 - Text based 3/4-column data
 - ``.pickle`` Outputs from Iraclis_
 
-More formats can be included through :ref:`plugins`_
+More formats can be included through :ref:`plugins`
 
 
 Collisionally Induced Absorption
@@ -53,7 +53,7 @@ Collisionally Induced Absorption
 
 Only a few formats are supported
 
-- ``.db`` *Taurex2* CIA pickle files
+- ``.db`` *TauREx2* CIA pickle files
 - ``.cia`` HITRAN_ cia files
 
 .. _HITRAN: https://hitran.org/cia/
