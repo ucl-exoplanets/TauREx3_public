@@ -227,9 +227,9 @@ def only_bibtex(filename, pp):
     optimizer = pp.generate_optimizer()
 
     bib_tex, citation_string = output_citations(model, instrument, optimizer)
-
-    with open(filename, 'w') as f:
-        f.write(bib_tex)
+    if bib_tex:
+        with open(filename, 'w') as f:
+            f.write(bib_tex)
 
 
 
