@@ -214,7 +214,7 @@ class TwoLayerGas(Gas):
 
     @classmethod
     def input_keywords(self):
-        return ['twolayer', '2layer' ]
+        return ['twolayer', '2layer', ]
 
     BIBTEX_ENTRIES = [
         """
