@@ -1,4 +1,5 @@
 from ..core import Fittable
+from ..core import Citable
 from ..parameter.factory import log
 
 
@@ -27,7 +28,7 @@ def mixed_init(self, **kwargs):
         klass.__init_mixin__(self, **new_kwargs)
 
 
-class Mixin(Fittable):
+class Mixin(Fittable, Citable):
 
     def __init__(self, **kwargs):
         old_fitting_parameters = {}

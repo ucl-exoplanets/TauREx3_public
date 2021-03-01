@@ -223,6 +223,9 @@ def main():
     parser.add_argument("--fitparams", dest='fitparams', default=False,
                         help="Display available fitting params", action='store_true')
 
+    parser.add_argument("--bibtex", dest='bibtex', type=str,
+                        help="Output bibliography to filepath")
+
     parser.add_argument("--keywords", dest="keywords", type=str)
 
     args = parser.parse_args()
@@ -430,6 +433,63 @@ def main():
 
             if optimizer:
                 optimizer.write(o)
+
+
+    print('\n\n----------------------------------------------------------')
+    print('----------------------Bibiliography-----------------------')
+    print('----------------------------------------------------------')
+
+    print('If you use any of the results from this run please cite')
+    print('the following publications:')
+    
+    citation_string = ''
+    all_citations = []
+    print('\n')
+    print('TauREx-Related')
+    print('--------------\n')
+    from taurex._citation import __citations__, taurex_citation
+    citation_string += __citations__
+    all_citations.extend(taurex_citation.citations())
+    print(__citations__)
+
+    print('Forward model')
+    print('-------------\n')
+
+    cite = model.nice_citation()
+    all_citations.extend(model.citations())
+    citation_string += cite
+    print(cite)
+
+    if optimizer is not None:
+        cite = optimizer.nice_citation()
+        all_citations.extend(optimizer.citations())
+        if len(cite) > 0:
+            citation_string += cite
+            print('Optimizer')
+            print('---------\n')
+            print(cite)
+
+    if instrument is not None:
+        cite = instrument.nice_citation()
+        all_citations.extend(instrument.citations())
+        if len(cite) > 0:
+            citation_string += cite
+            print('Instrument')
+            print('---------\n')
+            print(cite)
+
+    from taurex.core import to_bibtex
+    bib_tex = to_bibtex(all_citations)
+
+    if args.output_file:
+        with HDF5Output(args.output_file, append=True) as o:
+            bib = o.create_group('Bibliography')
+            bib.write_string('short_form', citation_string)
+            bib.write_string('bibtex', bib_tex)
+
+    if args.bibtex and get_rank() == 0:
+        with open(args.bibtex, 'w') as f:
+            f.write(bib_tex)
 
     root_logger.info('TauREx PROGRAM END AT %s s', datetime.datetime.now())
 

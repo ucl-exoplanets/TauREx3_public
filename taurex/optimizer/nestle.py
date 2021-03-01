@@ -241,13 +241,13 @@ class NestleOptimizer(Optimizer):
         return ['nestle', ]
 
     BIBTEX_ENTRIES = [
-        """@misc{nestle,"""
+        """@misc{nestle,
 
-        """author = {Kyle Barbary},"""
-        """title = {Nestle sampling library},"""
-        """publisher = {GitHub},"""
-        """journal = {GitHub repository},"""
-        """year = 2015,"""
-        """howpublished = {https://github.com/kbarbary/nestle},"""
-        """}"""
+        author = {Kyle Barbary},
+        title = {Nestle sampling library},
+        publisher = {GitHub},
+        journal = {GitHub repository},
+        year = 2015,
+        howpublished = {https://github.com/kbarbary/nestle},
+        }"""
     ]

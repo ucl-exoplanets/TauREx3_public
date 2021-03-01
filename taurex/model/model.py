@@ -1,7 +1,7 @@
 from taurex.log import Logger
 from taurex.data.fittable import Fittable
 from taurex.output.writeable import Writeable
-from taurex.data.citation import Citable
+from taurex.core import Citable
 
 class ForwardModel(Logger, Fittable, Writeable, Citable):
     """A base class for producing forward models"""
@@ -84,3 +84,11 @@ class ForwardModel(Logger, Fittable, Writeable, Citable):
     @classmethod
     def input_keywords(self):
         raise NotImplementedError
+
+    def citations(self):
+        from taurex.core import unique_citations_only
+        model_citations = super().citations()
+        for c in self.contribution_list:
+            model_citations.extend(c.citations())
+
+        return unique_citations_only(model_citations)

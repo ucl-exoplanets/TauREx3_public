@@ -22,6 +22,15 @@ def unique_citations_only(citations):
             current_citations.append(c)
     return current_citations
 
+def to_bibtex(citations):
+    import uuid
+    from pybtex.database import BibliographyData
+    entries = {str(uuid.uuid4())[:8]: b for b in citations}
+    bib_data = BibliographyData(entries=entries)
+
+    return bib_data.to_string('bibtex')
+
+
 
 def handle_publication(fields):
     journal = []
