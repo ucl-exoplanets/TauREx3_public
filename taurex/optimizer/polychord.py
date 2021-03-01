@@ -302,5 +302,5 @@ class PolyChordOptimizer(Optimizer):
             url = {https://doi.org/10.1093/mnras/stv1911},
             eprint = {http://oup.prod.sis.lan/mnras/article-pdf/453/4/4384/8034904/stv1911.pdf},
         }
-        """
+        """,
     ]

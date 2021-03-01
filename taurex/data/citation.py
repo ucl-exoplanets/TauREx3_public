@@ -62,11 +62,15 @@ class Citable:
     
 
     def citations(self, prefix='', start_idx=0):
+        from itertools import chain
+        entries = [b.BIBTEX_ENTRIES for b in self.__class__.__bases__ if hasattr(b, 'BIBTEX_ENTRIES')]
 
-        bases = [b.BIBTEX_ENTRIES for b in self.__class__.__bases__ if hasattr(b, 'BIBTEX_ENTRIES')]
+        entries.append(self.BIBTEX_ENTRIES)
+
+        
 
         return [Entry.from_string(b, 'bibtex')
-                for idx, b in enumerate(self.BIBTEX_ENTRIES + bases)]
+                for b in chain.from_iterable(reversed(entries))]
 
     def nice_citation(self, prefix='', start_idx=0, indent=0):
 
