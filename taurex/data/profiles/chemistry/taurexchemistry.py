@@ -404,3 +404,11 @@ class TaurexChemistry(AutoChemistry):
     @classmethod
     def input_keywords(cls):
         return ['taurex', 'free', ]
+
+    def citations(self):
+        from taurex.data.citation import unique_citations_only
+        old = super().citations()
+        for g in self._gases:
+            old.append(g.citations())
+
+        return unique_citations_only(old)
