@@ -204,3 +204,19 @@ class Guillot2010(TemperatureProfile):
         Return all input keywords
         """
         return ['guillot', 'guillot2010', ]
+
+    BIBTEX_ENTRIES = [
+        """
+        @article{guillot,
+        author = {{Guillot, T.}},
+        title = {On the radiative equilibrium of irradiated planetary atmospheres},
+        DOI= "10.1051/0004-6361/200913396",
+        url= "https://doi.org/10.1051/0004-6361/200913396",
+        journal = {A\&A},
+        year = 2010,
+        volume = 520,
+        pages = "A27",
+        month = "",
+        }
+        """
+    ]

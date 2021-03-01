@@ -348,3 +348,21 @@ class PhoenixStar(BlackbodyStar):
     @classmethod
     def input_keywords(self):
         return ['phoenix', ]
+
+    BIBTEX_ENTRIES = [
+        """
+        @article{ refId0,
+            author = {{Husser, T.-O.} and {Wende-von Berg, S.} and {Dreizler, S.} and {Homeier, D.} and {Reiners, A.} and {Barman, T.} and {Hauschildt, P. H.}},
+            title = {A new extensive library of PHOENIX stellar atmospheres and
+                synthetic spectra},
+            DOI= "10.1051/0004-6361/201219058",
+            url= "https://doi.org/10.1051/0004-6361/201219058",
+            journal = {A\&A},
+            year = 2013,
+            volume = 553,
+            pages = "A6",
+            month = "",
+        }
+        """
+
+    ]

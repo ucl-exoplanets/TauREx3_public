@@ -284,3 +284,23 @@ class PolyChordOptimizer(Optimizer):
     @classmethod
     def input_keywords(self):
         return ['polychord', 'pypolychord', ]
+
+    BIBTEX_ENTRIES = [
+        """
+        @article{polychord,
+            author = {Handley, W. J. and Hobson, M. P. and Lasenby, A. N.},
+            title = "{polychord: next-generation nested sampling}",
+            journal = {Monthly Notices of the Royal Astronomical Society},
+            volume = {453},
+            number = {4},
+            pages = {4384-4398},
+            year = {2015},
+            month = {09},
+            abstract = "{polychord is a novel nested sampling algorithm tailored for high-dimensional parameter spaces. This paper coincides with the release of polychord v1.6, and provides an extensive account of the algorithm. polychord utilizes slice sampling at each iteration to sample within the hard likelihood constraint of nested sampling. It can identify and evolve separate modes of a posterior semi-independently, and is parallelized using openmpi. It is capable of exploiting a hierarchy of parameter speeds such as those present in cosmomc and camb, and is now in use in the cosmochord and modechord codes. polychord is available for download from http://ccpforge.cse.rl.ac.uk/gf/project/polychord/.}",
+            issn = {0035-8711},
+            doi = {10.1093/mnras/stv1911},
+            url = {https://doi.org/10.1093/mnras/stv1911},
+            eprint = {http://oup.prod.sis.lan/mnras/article-pdf/453/4/4384/8034904/stv1911.pdf},
+        }
+        """
+    ]

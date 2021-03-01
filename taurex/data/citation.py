@@ -1,17 +1,14 @@
-
-
-
-
 from pybtex.database import Entry
 
 
 def cleanup_string(string):
-    return string.replace('{', '').replace('}', '').replace('\\','')
+    return string.replace('{', '').replace('}', '').replace('\\', '')
 
 
 def stringify_people(authors):
 
     return ', '.join([cleanup_string(str(p)) for p in authors])
+
 
 def handle_publication(fields):
     journal = []
@@ -24,10 +21,10 @@ def handle_publication(fields):
         journal.append(cleanup_string(fields['volume']))
     if 'pages' in fields:
         journal.append(cleanup_string(fields['pages']))
-    
+
     if 'month' in fields:
         journal.append(cleanup_string(fields['month']))
-    
+
     if 'year' in fields:
         journal.append(cleanup_string(fields['year']))
 
@@ -58,14 +55,25 @@ class Citable:
     information.
     """
 
-    BIBTEX_ENTIRES=[]
+    BIBTEX_ENTRIES = []
     """
     List of bibtext entries
     """
+    
 
     def citations(self, prefix='', start_idx=0):
 
-        return [(f'{prefix}{self.__class__.__name__.lower()[:10]}-{idx+start_idx}', Entry.from_string(b, 'bibtex'))
-                for idx, b in enumerate(self.BIBTEX_ENTIRES)]
+        bases = [b.BIBTEX_ENTRIES for b in self.__class__.__bases__ if hasattr(b, 'BIBTEX_ENTRIES')]
 
+        return [Entry.from_string(b, 'bibtex')
+                for idx, b in enumerate(self.BIBTEX_ENTRIES + bases)]
 
+    def nice_citation(self, prefix='', start_idx=0, indent=0):
+
+        entries = self.citations(prefix=prefix, start_idx=start_idx)
+
+        if len(entries) == 0:
+            return ''
+
+        return '\n'.join([construct_nice_printable_string(e)
+                          for e in entries])
