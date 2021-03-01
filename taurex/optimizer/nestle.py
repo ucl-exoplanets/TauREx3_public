@@ -236,7 +236,18 @@ class NestleOptimizer(Optimizer):
 
         return nestle_output
 
-
     @classmethod
     def input_keywords(self):
         return ['nestle', ]
+
+    BIBTEX_ENTRIES = [
+        """@misc{nestle,
+
+        author = {Kyle Barbary},
+        title = {Nestle sampling library},
+        publisher = {GitHub},
+        journal = {GitHub repository},
+        year = 2015,
+        howpublished = {https://github.com/kbarbary/nestle},
+        }"""
+    ]

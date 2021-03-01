@@ -53,3 +53,14 @@ class RayleighContribution(Contribution):
     @classmethod
     def input_keywords(self):
         return ['Rayleigh', ]
+    
+    BIBTEX_ENTRIES = [
+        """
+        @book{cox_allen_rayleigh,
+        title={Allen’s astrophysical quantities},
+        author={Cox, Arthur N},
+        year={2015},
+        publisher={Springer}
+        }
+        """
+    ]

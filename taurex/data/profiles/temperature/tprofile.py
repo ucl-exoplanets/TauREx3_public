@@ -2,8 +2,8 @@ from taurex.log import Logger
 from taurex.data.fittable import Fittable, derivedparam
 from taurex.output.writeable import Writeable
 import numpy as np
-
-class TemperatureProfile(Fittable, Logger, Writeable):
+from taurex.data.citation import Citable
+class TemperatureProfile(Fittable, Logger, Writeable, Citable):
     """
 
     *Abstract Class*

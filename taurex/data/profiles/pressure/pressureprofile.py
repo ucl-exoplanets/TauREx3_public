@@ -3,8 +3,9 @@ from taurex.data.fittable import fitparam, Fittable
 import numpy as np
 from taurex.output.writeable import Writeable
 import math
+from taurex.data.citation import Citable
 
-class PressureProfile(Fittable, Logger, Writeable):
+class PressureProfile(Fittable, Logger, Writeable, Citable):
     """
     *Abstract Class*
 

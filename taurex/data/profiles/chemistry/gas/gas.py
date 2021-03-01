@@ -1,9 +1,10 @@
 from taurex.log import Logger
 from taurex.data.fittable import Fittable
 from taurex.output.writeable import Writeable
+from taurex.data.citation import Citable
 
 
-class Gas(Fittable, Logger, Writeable):
+class Gas(Fittable, Logger, Writeable, Citable):
     """
 
     *Abstract Class*

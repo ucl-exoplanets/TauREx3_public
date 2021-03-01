@@ -616,3 +616,13 @@ class SimpleForwardModel(ForwardModel):
         self._planet.write(model)
         self._star.write(model)
         return model
+
+    def citations(self):
+        model_citations = super().citations()
+        model_citations.extend(self.chemistry.citations())
+        model_citations.extend(self.temperature.citations())
+        model_citations.extend(self.pressure.citations())
+        model_citations.extend(self.planet.citations())
+        model_citations.extend(self.star.citations())
+
+        return model_citations

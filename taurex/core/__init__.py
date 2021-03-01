@@ -1,4 +1,5 @@
 from taurex.data.fittable import fitparam, Fittable, derivedparam
+from taurex.data.citation import Citable, unique_citations_only, to_bibtex
 from taurex.output.output import Output
 
 

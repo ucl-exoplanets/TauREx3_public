@@ -7,7 +7,7 @@ from taurex.data.fittable import Fittable
 import numpy as np
 from taurex.output.writeable import Writeable
 import numba
-
+from taurex.data.citation import Citable
 
 @numba.jit(nopython=True, nogil=True)
 def contribute_tau(startK, endK, density_offset, sigma, density, path, nlayers,
@@ -71,7 +71,8 @@ def contribute_tau(startK, endK, density_offset, sigma, density, path, nlayers,
             tau[layer, wn] += sigma[k+layer, wn]*_path*_density
 
 
-class Contribution(Fittable, Logger, Writeable):
+
+class Contribution(Fittable, Logger, Writeable, Citable):
     """
 
     *Abstract class*

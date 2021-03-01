@@ -189,3 +189,22 @@ class LeeMieContribution(Contribution):
     @classmethod
     def input_keywords(self):
         return ['LeeMie', ]
+    
+    BIBTEX_ENTRIES = [
+        """
+        @article{Lee_2013,
+            doi = {10.1088/0004-637x/778/2/97},
+            url = {https://doi.org/10.1088%2F0004-637x%2F778%2F2%2F97},
+            year = 2013,
+            month = {nov},
+            publisher = {{IOP} Publishing},
+            volume = {778},
+            number = {2},
+            pages = {97},
+            author = {Jae-Min Lee and Kevin Heng and Patrick G. J. Irwin},
+            title = {{ATMOSPHERIC} {RETRIEVAL} {ANALYSIS} {OF} {THE} {DIRECTLY} {IMAGED} {EXOPLANET} {HR} 8799b},
+            journal = {The Astrophysical Journal},
+            abstract = {Directly imaged exoplanets are unexplored laboratories for the application of the spectral and temperature retrieval method, where the chemistry and composition of their atmospheres are inferred from inverse modeling of the available data. As a pilot study, we focus on the extrasolar gas giant HR 8799b, for which more than 50 data points are available. We upgrade our non-linear optimal estimation retrieval method to include a phenomenological model of clouds that requires the cloud optical depth and monodisperse particle size to be specified. Previous studies have focused on forward models with assumed values of the exoplanetary properties; there is no consensus on the best-fit values of the radius, mass, surface gravity, and effective temperature of HR 8799b. We show that cloud-free models produce reasonable fits to the data if the atmosphere is of super-solar metallicity and non-solar elemental abundances. Intermediate cloudy models with moderate values of the cloud optical depth and micron-sized particles provide an equally reasonable fit to the data and require a lower mean molecular weight. We report our best-fit values for the radius, mass, surface gravity, and effective temperature of HR 8799b. The mean molecular weight is about 3.8, while the carbon-to-oxygen ratio is about unity due to the prevalence of carbon monoxide. Our study emphasizes the need for robust claims about the nature of an exoplanetary atmosphere to be based on analyses involving both photometry and spectroscopy and inferred from beyond a few photometric data points, such as are typically reported for hot Jupiters.}
+        }
+        """,
+    ]
