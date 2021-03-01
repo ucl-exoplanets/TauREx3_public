@@ -243,3 +243,21 @@ class HydrogenIon(Contribution):
     @classmethod
     def input_keywords(self):
         return ['HydrogenIon', ]
+
+    BIBTEX_ENTRIES = [
+        """
+        @ARTICLE{John88,
+       author = {{John}, T.~L.},
+                title = "{Continuous absorption by the negative hydrogen ion reconsidered}",
+            journal = {\aap},
+            keywords = {Absorption Spectra, Astronomical Spectroscopy, Hydrogen Ions, Negative Ions, Photodetachment, Absorptivity, Electron Transitions, Wave Functions, Astrophysics},
+                year = 1988,
+                month = mar,
+            volume = {193},
+            number = {1-2},
+                pages = {189-192},
+            adsurl = {https://ui.adsabs.harvard.edu/abs/1988A&A...193..189J},
+            adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+        }
+        """
+    ]
