@@ -3,9 +3,9 @@ import numpy as np
 import math
 from taurex import OutputSize
 from taurex.core.priors import PriorMode
+from taurex.data.citation import Citable
 
-
-class Optimizer(Logger):
+class Optimizer(Logger, Citable):
     """
     A base class that handles fitting and optimization of forward models.
     The class handles the compiling and management of fitting parameters in 

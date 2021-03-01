@@ -1,9 +1,9 @@
 from taurex.log import Logger
 from taurex.data.fittable import Fittable
 from taurex.output.writeable import Writeable
+from taurex.data.citation import Citable
 
-
-class ForwardModel(Logger, Fittable, Writeable):
+class ForwardModel(Logger, Fittable, Writeable, Citable):
     """A base class for producing forward models"""
 
     def __init__(self, name):

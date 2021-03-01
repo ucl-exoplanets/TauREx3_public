@@ -17,7 +17,7 @@ def _integrate(x1,x2):
     return x1*x2
 
 
-@numba.jit(nopython=True, nogil=True, parallel=True)
+@numba.jit(nopython=True, nogil=True, parallel=False)
 def contribute_tau_II(startK, endK, density_offset, sigma, density, path, nlayers,
                    ngrid, layer, tau):
     _d = density[density_offset:]

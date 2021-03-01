@@ -3,9 +3,10 @@ from taurex.constants import G, RJUP, MJUP, AU
 from .fittable import fitparam, Fittable, derivedparam
 from taurex.output.writeable import Writeable
 import math
+from .citation import Citable
 from taurex.util.util import conversion_factor
 
-class BasePlanet(Fittable, Logger, Writeable):
+class BasePlanet(Fittable, Logger, Writeable, Citable):
     """Holds information on a planet and its properties and
     derived properties
 
