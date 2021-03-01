@@ -4,10 +4,23 @@ from pybtex.database import Entry
 def cleanup_string(string):
     return string.replace('{', '').replace('}', '').replace('\\', '')
 
+def recurse_bibtex(obj, entries):
+    for b in obj.__class__.__bases__:
+        if issubclass(b, Citable):
+            entries.extend(b.BIBTEX_ENTRIES)
+            recurse_bibtex(b, entries)
 
 def stringify_people(authors):
 
     return ', '.join([cleanup_string(str(p)) for p in authors])
+
+def unique_citations_only(citations):
+
+    current_citations = []
+    for c in citations:
+        if c not in current_citations:
+            current_citations.append(c)
+    return current_citations
 
 
 def handle_publication(fields):
@@ -59,22 +72,17 @@ class Citable:
     """
     List of bibtext entries
     """
-    
+    def citations(self):
+        entries = self.BIBTEX_ENTRIES[:]
+        recurse_bibtex(self, entries)
+        all_citations = [Entry.from_string(b, 'bibtex')
+                         for b in entries]
 
-    def citations(self, prefix='', start_idx=0):
-        from itertools import chain
-        entries = [b.BIBTEX_ENTRIES for b in self.__class__.__bases__ if hasattr(b, 'BIBTEX_ENTRIES')]
-
-        entries.append(self.BIBTEX_ENTRIES)
-
-        
-
-        return [Entry.from_string(b, 'bibtex')
-                for b in chain.from_iterable(reversed(entries))]
+        return unique_citations_only(all_citations)
 
     def nice_citation(self, prefix='', start_idx=0, indent=0):
 
-        entries = self.citations(prefix=prefix, start_idx=start_idx)
+        entries = self.citations()
 
         if len(entries) == 0:
             return ''
