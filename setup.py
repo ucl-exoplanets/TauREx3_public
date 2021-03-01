@@ -17,7 +17,7 @@ install_requires = ['numpy',
                     'numba',
                     'astropy',
                     'numexpr',
-                    'numpy',
+                    'pybtex',
                     'nestle',
                     'h5py',
                     'tabulate', ]
