@@ -221,6 +221,17 @@ def output_citations(model, instrument, optimizer):
 
     return bib_tex, citation_string
 
+def only_bibtex(filename, pp):
+    model = pp.generate_appropriate_model()
+    instrument = pp.generate_instrument()[0]
+    optimizer = pp.generate_optimizer()
+
+    bib_tex, citation_string = output_citations(model, instrument, optimizer)
+
+    with open(filename, 'w') as f:
+        f.write(bib_tex)
+
+
 
 def main():
     import argparse
@@ -282,7 +293,10 @@ def main():
                         help="Display available fitting params", action='store_true')
 
     parser.add_argument("--bibtex", dest='bibtex', type=str,
-                        help="Output bibliography to filepath")
+                        help="Output bibliography .bib to filepath")
+
+    parser.add_argument("--only-bib", dest='no_run',
+                        help="Do not run anything, only store bibtex (must have --bibtex)", default=False, action='store_true')
 
     parser.add_argument("--keywords", dest="keywords", type=str)
 
@@ -325,6 +339,10 @@ def main():
 
     # Setup global parameters
     pp.setup_globals()
+
+    if args.no_run and args.bibtex:
+        return only_bibtex(args.bibtex, pp)
+
     # Generate a model from the input
     model = pp.generate_appropriate_model()
 
