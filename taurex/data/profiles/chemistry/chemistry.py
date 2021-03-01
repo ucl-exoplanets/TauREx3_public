@@ -5,11 +5,11 @@ import numpy as np
 from taurex.output.writeable import Writeable
 from taurex.cache import OpacityCache, GlobalCache
 from taurex.cache.ktablecache import KTableCache
+from taurex.data.citation import Citable
 
 
 
-
-class Chemistry(Fittable, Logger, Writeable):
+class Chemistry(Fittable, Logger, Writeable, Citable):
     """
     *Abstract Class*
 

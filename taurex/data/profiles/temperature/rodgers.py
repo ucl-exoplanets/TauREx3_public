@@ -115,3 +115,18 @@ class Rodgers2000(TemperatureProfile):
         Return all input keywords
         """
         return ['rodgers', 'rodgers2010', ]
+
+    BIBTEX_ENTRIES = [
+        """
+        @MISC{rodger_retrievals,
+            author = {{Rodgers}, Clive D.},
+                title = "{Inverse Methods for Atmospheric Sounding - Theory and Practice}",
+        howpublished = {Inverse Methods for Atmospheric Sounding - Theory and Practice. Series: Series on Atmospheric Oceanic and Planetary Physics},
+                year = "2000",
+                month = "Jan",
+                doi = {10.1142/9789812813718},
+            adsurl = {https://ui.adsabs.harvard.edu/abs/2000SAOPP...2.....R},
+            adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+        }
+        """,
+    ]

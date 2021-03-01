@@ -1,7 +1,7 @@
 from taurex.log import Logger
+from taurex.data.citation import Citable
 
-
-class Instrument(Logger):
+class Instrument(Logger, Citable):
     """
     *Abstract class*
 

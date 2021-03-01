@@ -338,3 +338,40 @@ class MultiNestOptimizer(Optimizer):
     @classmethod
     def input_keywords(self):
         return ['multinest','pymultinest', ]
+
+    BIBTEX_ENTRIES = [
+        """
+        @article{ refId0,
+        author = {{Buchner, J.} and {Georgakakis, A.} and {Nandra, K.} and {Hsu, L.} and {Rangel, C.} and {Brightman, M.} and {Merloni, A.} and {Salvato, M.} and {Donley, J.} and {Kocevski, D.}},
+        title = {X-ray spectral modelling of the AGN obscuring region in the
+            CDFS: Bayesian model selection and catalogue},
+        DOI= "10.1051/0004-6361/201322971",
+        url= "https://doi.org/10.1051/0004-6361/201322971",
+        journal = {A\&A},
+        year = 2014,
+        volume = 564,
+        pages = "A125",
+        month = "",
+        }
+        """,
+        """
+        @ARTICLE{Feroz_multinest,
+            author = {{Feroz}, F. and {Hobson}, M.~P. and {Bridges}, M.},
+                title = "{MULTINEST: an efficient and robust Bayesian inference tool for cosmology and particle physics}",
+            journal = {MNRAS},
+            keywords = {methods: data analysis, methods: statistical, Astrophysics},
+                year = "2009",
+                month = "Oct",
+            volume = {398},
+            number = {4},
+                pages = {1601-1614},
+                doi = {10.1111/j.1365-2966.2009.14548.x},
+        archivePrefix = {arXiv},
+            eprint = {0809.3437},
+        primaryClass = {astro-ph},
+            adsurl = {https://ui.adsabs.harvard.edu/abs/2009MNRAS.398.1601F},
+            adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+        }
+        """
+
+    ]

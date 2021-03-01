@@ -112,3 +112,33 @@ class dyPolyChordOptimizer(PolyChordOptimizer):
     @classmethod
     def input_keywords(self):
         return ['dypolychord', 'dynamic-polychord', ]
+    
+    BIBTEX_ENTRIES = [
+        """
+        @article{dypolychord2,
+        author={Higson, Edward and Handley, Will and Hobson, Michael and Lasenby, Anthony},
+        title={Dynamic nested sampling: an improved algorithm for parameter estimation and evidence calculation},
+        year={2019},
+        volume={29},
+        number={5},
+        pages={891--913},
+        journal={Statistics and Computing},
+        doi={10.1007/s11222-018-9844-0},
+        url={https://doi.org/10.1007/s11222-018-9844-0},
+        archivePrefix={arXiv},
+        arxivId={1704.03459}}
+        """,
+        """
+        @article{dypolychord1,
+        title={dyPolyChord: dynamic nested sampling with PolyChord},
+        author={Higson, Edward},
+        year={2018},
+        journal={Journal of Open Source Software},
+        number={29},
+        pages={916},
+        volume={3},
+        doi={10.21105/joss.00965},
+        url={http://joss.theoj.org/papers/10.21105/joss.00965}}
+        """
+
+    ]

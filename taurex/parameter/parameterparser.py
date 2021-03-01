@@ -118,7 +118,7 @@ class ParameterParser(Logger):
         return self.generate_model()
 
     def generate_instrument(self, binner=None):
-
+        from taurex.binning import NativeBinner
         config = self._raw_config.dict()
         if 'Instrument' in config:
             inst_config = config['Instrument']
@@ -129,11 +129,10 @@ class ParameterParser(Logger):
                 num_obs = 1
 
             if 'instrument' in inst_config:
-
+                _bin = binner or NativeBinner
                 if inst_config['instrument'].lower() in \
                         ('snr', 'signalnoise', ):
-
-                    inst = self.create_snr(binner, inst_config)
+                    inst = self.create_snr(_bin, inst_config)
                     return inst, num_obs
             inst = create_instrument(inst_config)
             return inst, num_obs
