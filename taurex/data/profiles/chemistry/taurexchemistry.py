@@ -409,6 +409,6 @@ class TaurexChemistry(AutoChemistry):
         from taurex.data.citation import unique_citations_only
         old = super().citations()
         for g in self._gases:
-            old.append(g.citations())
+            old.extend(g.citations())
 
         return unique_citations_only(old)
