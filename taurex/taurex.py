@@ -164,6 +164,64 @@ def show_plugins():
     print('\n')
 
 
+def output_citations(model, instrument, optimizer):
+    from taurex.mpi import barrier, get_rank
+
+    barrier()
+    bib_tex = None
+    citation_string = None
+    if get_rank() == 0:
+        print('\n\n----------------------------------------------------------')
+        print('----------------------Bibiliography-----------------------')
+        print('----------------------------------------------------------')
+
+        print('If you use any of the results from this run please cite')
+        print('the following publications:')
+        
+        citation_string = ''
+        all_citations = []
+        print('\n')
+        print('TauREx-Related')
+        print('--------------\n')
+        from taurex._citation import __citations__, taurex_citation
+        citation_string += __citations__
+        all_citations.extend(taurex_citation.citations())
+        print(__citations__)
+
+        print('Forward model')
+        print('-------------\n')
+
+        cite = model.nice_citation()
+        all_citations.extend(model.citations())
+        citation_string += cite
+        print(cite)
+
+        if optimizer is not None:
+            cite = optimizer.nice_citation()
+            all_citations.extend(optimizer.citations())
+            if len(cite) > 0:
+                citation_string += cite
+                print('Optimizer')
+                print('---------\n')
+                print(cite)
+
+        if instrument is not None:
+            cite = instrument.nice_citation()
+            all_citations.extend(instrument.citations())
+            if len(cite) > 0:
+                citation_string += cite
+                print('Instrument')
+                print('---------\n')
+                print(cite)
+
+        from taurex.core import to_bibtex
+        bib_tex = to_bibtex(all_citations)
+    
+    barrier()
+
+    return bib_tex, citation_string
+
+
 def main():
     import argparse
     import datetime
@@ -434,60 +492,15 @@ def main():
             if optimizer:
                 optimizer.write(o)
 
+    bib_tex, citation_string = output_citations(model, instrument, optimizer)
 
-    print('\n\n----------------------------------------------------------')
-    print('----------------------Bibiliography-----------------------')
-    print('----------------------------------------------------------')
-
-    print('If you use any of the results from this run please cite')
-    print('the following publications:')
-    
-    citation_string = ''
-    all_citations = []
-    print('\n')
-    print('TauREx-Related')
-    print('--------------\n')
-    from taurex._citation import __citations__, taurex_citation
-    citation_string += __citations__
-    all_citations.extend(taurex_citation.citations())
-    print(__citations__)
-
-    print('Forward model')
-    print('-------------\n')
-
-    cite = model.nice_citation()
-    all_citations.extend(model.citations())
-    citation_string += cite
-    print(cite)
-
-    if optimizer is not None:
-        cite = optimizer.nice_citation()
-        all_citations.extend(optimizer.citations())
-        if len(cite) > 0:
-            citation_string += cite
-            print('Optimizer')
-            print('---------\n')
-            print(cite)
-
-    if instrument is not None:
-        cite = instrument.nice_citation()
-        all_citations.extend(instrument.citations())
-        if len(cite) > 0:
-            citation_string += cite
-            print('Instrument')
-            print('---------\n')
-            print(cite)
-
-    from taurex.core import to_bibtex
-    bib_tex = to_bibtex(all_citations)
-
-    if args.output_file:
+    if args.output_file and bib_tex and citation_string:
         with HDF5Output(args.output_file, append=True) as o:
             bib = o.create_group('Bibliography')
             bib.write_string('short_form', citation_string)
             bib.write_string('bibtex', bib_tex)
 
-    if args.bibtex and get_rank() == 0:
+    if args.bibtex and bib_tex and citation_string:
         with open(args.bibtex, 'w') as f:
             f.write(bib_tex)
 
