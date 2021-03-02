@@ -14,6 +14,7 @@ def wngrid():
 def T():
     yield np.linspace(1500, 1000, NLAYERS)
 
+@pytest.mark.bench
 def test_integrate_emission(benchmark, wngrid, T):
     from taurex.util.emission import integrate_emission_layer
     from taurex.util.emission import black_body
@@ -26,7 +27,7 @@ def test_integrate_emission(benchmark, wngrid, T):
 
     benchmark(integrate_nlayers)
 
-
+@pytest.mark.bench
 def test_integrate_emission_numba(benchmark, wngrid, T):
     from taurex.util.emission import integrate_emission_numba
     from taurex.util.emission import black_body
