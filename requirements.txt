@@ -10,3 +10,4 @@ numpy
 scipy
 six
 tabulate
+pybtex
