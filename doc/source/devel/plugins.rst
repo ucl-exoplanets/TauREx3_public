@@ -40,7 +40,8 @@ Importantly, open-source plugins should be registered to PyPI installable with a
     > pip install taurex_myplugin
 
 If they rely on an external FORTRAN/C++ code then they should be packaged into
-a binary wheel distribution. After install the plugin will be automatically detected by TauREx::
+a binary wheel distribution. We recommoned `cibuildwheel <cibuildwheel_>`_ for building these wheels.
+After install the plugin will be automatically detected by TauREx::
 
     > taurex --plugins
     Successfully loaded plugins
@@ -264,12 +265,13 @@ Which gives us
 
    *Still* terrible
 
+This is a minimal guide to developing plugins but we always
+recommend looking at plugin projects and seeing how they accomplish
+their tasks. We also include a :ref:`recipe` section which contains
+some useful plugin related codes.
 
 
-
-
-
-
+.. _cibuildwheel: https://cibuildwheel.readthedocs.io/en/stable/
 
 
 
