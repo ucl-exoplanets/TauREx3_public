@@ -14,3 +14,4 @@ Developers guide
     Fitting Parameters <fittingparameters>
     Writing Temperature <temperature>
     Plugins <plugins>
+    Recipes <recipes>

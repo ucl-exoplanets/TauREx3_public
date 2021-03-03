@@ -170,15 +170,18 @@ This is our random temperature profile, we will steal the implementation from
             return self._base_temp + \
                         np.random.rand(self.nlayers) * self._random_scale
         
+        BIBTEX_ENTRIES = [
+            """
+            @article{myart,
+                title={School of Life}, 
+            """
+        ]
+
         # -----Plugin related------------------
 
         @classmethod
         def input_keywords(cls):
             return ['helloworld', 'helloearth', 'hello-world',]
-
-        @property
-        def citation(self):
-            return ['School of Life 2020']
 
 As before a terrible temperature profile we now include two extra parameters.
 The class method ``input_keywords`` informs TauREx on how this temperature profile
@@ -191,15 +194,75 @@ If this plugin is installed we can use the profile through one of those keywords
     # profile_type = hello-world # Also valid
 
 
-The ``citation`` parameter is used by TauREx to list relevant publications
-involved with the atmospheric compoenent. These citations are printed at the
-end of a TauREx calculation and stored in the HDF5 output file. Each element in the list
-must refer to a single publication. Theres no fixed
-format so dx.doi.org links, bibtex entries and simply the publication name, journal
-and year are all allowed.
+The ``BIBTEX_ENTRIES`` parameter is used by TauREx to list relevant publications
+involved with the atmospheric compoenent. See :ref:`basics` for more information.
+
 
 __init__.py
 -----------
+
+We can use :file:`__init__.py` to expose the temperature profile to TauREx
+by importing it like so:
+
+.. code-block:: python
+
+    from .randomtemp import RandomTemperature
+
+.. tip::
+
+    You could also just point the ``entry_point`` to ``taurex_helloworld.randomtemp``.
+    However we recommend either putting it in an :file:`__init__.py` or defining
+    another python file that includes these imports. This allows you to include
+    components from different files and allows you to be selective on what to 
+    expose to TauREx
+
+
+Using our plugin
+----------------
+
+To use our plugin we can now do::
+
+    pip install .
+
+Running ``taurex --plugins`` we see::
+
+    Successfully loaded plugins
+    ---------------------------
+    helloworld
+
+Our plugin has now been loaded into TauREx! We can also see that our temperature
+profile was detected as well by doing ``taurex --keywords temperature``::
+
+    ╒═══════════════════════════════════════╤═══════════════════╤════════════╕
+    │ profile_type                          │ Class             │ Source     │
+    ╞═══════════════════════════════════════╪═══════════════════╪════════════╡
+    │ file / fromfile                       │ TemperatureFile   │ taurex     │
+    ├───────────────────────────────────────┼───────────────────┼────────────┤
+    │ isothermal                            │ Isothermal        │ taurex     │
+    ├───────────────────────────────────────┼───────────────────┼────────────┤
+    │ guillot / guillot2010                 │ Guillot2010       │ taurex     │
+    ├───────────────────────────────────────┼───────────────────┼────────────┤
+    │ npoint                                │ NPoint            │ taurex     │
+    ├───────────────────────────────────────┼───────────────────┼────────────┤
+    │ helloworld / helloearth / hello-world │ RandomTemperature │ helloworld │
+    ├───────────────────────────────────────┼───────────────────┼────────────┤
+    │ rodgers / rodgers2010                 │ Rodgers2000       │ taurex     │
+    ╘═══════════════════════════════════════╧═══════════════════╧════════════╛
+
+
+Now we can write in the input file::
+
+    [Temperature]
+    profile_type = helloworld
+    base_temp = 500.0
+    random_scale = 100.0
+
+Which gives us
+
+.. figure::  _static/random_tp_500.png
+   :align:   center
+
+   *Still* terrible
 
 
 

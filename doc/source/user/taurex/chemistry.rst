@@ -235,7 +235,7 @@ Fitting Parameters
 
 Chemsitry File
 ==============
-``profile_type = file``
+``chemistry_type = file``
 
 Reads a multi-column text file. Order must be
 from BOA to TOA. Each column must represent a unique

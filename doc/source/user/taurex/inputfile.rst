@@ -102,3 +102,59 @@ However setting ``T`` will throw an error as it doesn't exist anymore::
 
 This also applies to fitting parameters, profiles provide certain fitting parameters
 and changing the model means that these parameters may not exist anymore.
+
+
+Mixins
+------
+
+.. versionadded:: 3.1
+
+:ref:`mixin` can be applied to any base component through the ``+``
+operator::
+
+    [Temperature]
+    profile_type = mixin1+mixin2+base
+
+Where we apply ``mixin1`` and ``mixin2`` to a ``base``.
+Including mixins will also include their keywords as well. If ``mixin1``
+has the keyword ``param1``, ``mixin2`` has ``param2`` and ``base`` has
+``another_param`` then we can define in the input file::
+
+    [Temperature]
+    profile_type = mixin1+mixin2+base
+    param1 = "Hello"       # From mixin 1
+    param2 = "World"       # From mixin 2 
+    another_param = 10.0   # From base
+
+Mixins are evaluated in reverse, the last must be a *non-mixin*
+for example if we have a ``doubler`` mixin that doubles temperature profiles 
+then this is valid::
+
+    [Temperature]
+    profile_type = doubler+isothermal
+
+but this is *not valid*::
+
+    [Temperature]
+    profile_type = isothermal+doubler
+
+Additionally we cannot have more than one base class so this is *invalid*::
+
+    [Temeprature]
+    profile_type = doubler+isothermal+guillot
+
+The reverse evaluation means that the first mixin will be *applied last*.
+If we have another mixin called ``add50`` which adds 50 K to the profile,
+then::
+
+    [Temperature]
+    profile_type = doubler+add50+isothermal
+    T = 1000
+
+Will result in a temperature profile of :math:`2100~K`. If we instead do this::
+
+    [Temperature]
+    profile_type = add50+doubler+isothermal
+    T = 1000
+
+Then the resultant temperature will be :math:`2050~K`.
