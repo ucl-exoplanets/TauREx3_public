@@ -11,6 +11,14 @@ Here we describe the development guidelines for
 TauREx 3 and some advice for those wishing to contribute.
 Since TauREx 3 is open-source, all contributions are welcome!!!
 
+Development on TauREx 3 should be focused on building and improving the framework.
+New components (i.e. chemistries, profiles etc.) are generally not built directly
+into the TauREx 3 codebase.
+
+We recommend building new components as Plugins. You can refer to the :ref:`buildplugin`
+guide.
+
+
 Documentation
 -------------
 
@@ -25,8 +33,8 @@ Unit-testing
 ------------
 
 Unittesting is important in preserving sanity
-and code integrity. For TauREx 3 we employ the
-pytest_ . When bugfixing, ensure 
+and code integrity. For TauREx 3 we employ
+pytest_. When bugfixing, ensure 
 unittests pass. In the root directory do::
 
     pytest tests/

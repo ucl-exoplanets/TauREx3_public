@@ -57,7 +57,7 @@ This can also work for equlibrium schemes, for example using ACE::
     TiO:fit = True
     metallicity:fit = True
 
-Only ``free`` chemical schemes do not work as it is redundant.
+Only the ``free`` chemical scheme does not work as it is redundant.
 
 
 .. _wiki: https://en.wikipedia.org/wiki/Mixin
