@@ -1,6 +1,11 @@
-==================
-Fitting Parameters
-==================
+.. _retreivaldev:
+
+====================
+Retreival Parameters
+====================
+
+Fitting
+-------
 
 TauREx 3 employs dynamic discovery of retrieval parameters.
 When a new profile/chemistry etc is loaded into a forward model,

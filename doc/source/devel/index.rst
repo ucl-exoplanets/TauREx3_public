@@ -11,7 +11,8 @@ Developers guide
     Overview <overview>
     Guidelines <guidelines>
     Basics <basics>
-    Fitting Parameters <fittingparameters>
-    Writing Temperature <temperature>
+    Retrieval Parameters <fittingparameters>
+    Building Components <components>
+    Mixins <mixins>
     Plugins <plugins>
     Recipes <recipes>

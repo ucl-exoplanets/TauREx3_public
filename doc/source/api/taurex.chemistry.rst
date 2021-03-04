@@ -10,6 +10,14 @@ Base
    :undoc-members:
    :show-inheritance:
 
+Base (Auto)
+-----------
+
+.. automodule:: taurex.data.profiles.chemistry.autochemistry
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 
 Equilibrium Chemistry (ACE)
 ---------------------------

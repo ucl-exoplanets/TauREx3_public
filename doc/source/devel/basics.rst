@@ -5,9 +5,9 @@ Basics
 ======
 
 There are some common rules when developing new components for TauREx 3.
-These apply for the majority of components in the TauREx pipeline. The 
+These apply to the majority of components in the TauREx pipeline. The 
 only major exception is the :class:`~taurex.opacity.opacity.Opacity` related
-classes which have a different system in place.
+classes that have a different system in place.
 
 
 Automatic Input Arguments
@@ -54,13 +54,89 @@ Which when run will produce::
 We recommend defining all ``__init__`` arguments as keywords if you intend
 for your components to be used through the input file.
 
+Input keywords
+==============
+
+Most classes in TauREx include the class method ``input_keywords``. This
+function returns a list of words used to identify the component
+in the input file. Under most headers in the input file there is a selection
+keyword (i.e :ref:`useroptimizer` has ``optimizer``, :ref:`userchemistry` has ``chemistry_type`` etc.)
+used to select the correct class for the job. This selection is made
+by searching for the values ``input_keywords`` from all components of that type
+until a match is found. So, for example, if we have a new sampler:
+
+.. code-block:: python
+
+    from taurex.optimizer import Optimizer
+    class MyOptimizer(Optimizer):
+        #....
+        @classmethod
+        def input_keywords(cls):
+            return ['myoptimizer', ]
+
+We can select it in the input file as::
+
+    [Optimizer]
+    optimizer = myoptimizer
+
+You can also alias the class by including multiple words:
+
+.. code-block:: python
+
+    from taurex.optimizer import Optimizer
+    class MyOptimizer(Optimizer):
+    #....
+        @classmethod
+        def input_keywords(cls):
+            return ['myoptimizer', 'my-optimizer', 
+            'hello-optimizer']
+
+We can select the class using one of the three values::
+
+    [Optimizer]
+    optimizer = myoptimizer # Valid
+    optimizer = my-optimizer # Also Valid
+    optimizer = hello-optimizer # Valid as well
+
+Developers implementing this must follow a few rules:
+
+    - The values must be *lowercase* only
+    - *Commas* are not allowed
+    - They must be *unique*; if two components have the same values, then one may never be selected
+
+.. tip::
+
+    This is only necessary if you intend to have your component usable from the input file.
+    If you only indent for it to work when used in a python script, you can omit this.
+
+
+Logging
+=======
+
+Every component has access to :meth:`~taurex.log.logger.Logger.info`
+:meth:`~taurex.log.logger.Logger.warning`, :meth:`~taurex.log.logger.Logger.debug`
+:meth:`~taurex.log.logger.Logger.error` and :meth:`~taurex.log.logger.Logger.critical`
+methods:
+
+.. code-block:: python
+
+    from taurex.chemistry import Chemistry
+    class MyChemistry(Chemistry):
+
+        def do_things(self):
+            self.info('I am Info')
+            self.warning('I am warning!!')
+
+
+
+
 
 Bibliography
 ============
 
 .. versionadded:: 3.1
 
-It is important to recognise works involved for each component during a TauREx run.
+It is important to recognise the works involved in each component during a TauREx run.
 TauREx includes a basic bibliography system that will collect and parse bibtex entries
 embedded in each component.
 
@@ -87,7 +163,7 @@ class variable as a list of bibtex entries:
         @classmethod
         def input_keywords(cls):
             return ['myprofile']
-        
+
         BIBTEX_ENTRIES = [
             """
             @article{myprof,
@@ -116,10 +192,10 @@ class variable as a list of bibtex entries:
 
 .. warning::
 
-    If your bibtex entry includes non-unicode characters then Python will refuse
-    to run or your plugin may not be able to load into the TauREx pipeline.
+    If your BibTeX entry includes non-Unicode characters, then Python will refuse
+    to run, or your plugin may not be able to load into the TauREx pipeline.
 
-Running TauREx, on program end we get::
+Running TauREx, on program end, we get::
 
     A New Addition to the Stellar Metamorphsis. the Merlin Hypothesis
     Ben S. Dover, Micheal T Hunt, Christopher S Peacock
@@ -161,14 +237,14 @@ export the citation as a ``.bib`` file::
         primaryClass = "stat.AP"
     }
 
-Bibliographies are additive as well, if we decided to build on top of this class
+Bibliographies are additive as well; if we decided to build on top of this class
 we do not need to redefine the older bibliographic information as all parent
 bibliographic information is also inherited:
 
 .. code-block:: python:
 
     class AnotherProfile(MyNewTemperatureProfile):
-        # ...
+    # ...
 
         BIBTEX_ENTRIES = [
             """
@@ -179,8 +255,8 @@ bibliographic information is also inherited:
                 eprint={1504.00108},
                 archivePrefix={arXiv},
                 primaryClass={astro-ph.CO}
-            }
-        ]
+                }
+            ]
 
 Will yield::
 
@@ -203,13 +279,13 @@ method which will output a :obj:`list` of parsed bibtex entries::
     >>> t = MyNewTemperatureProfile()
     >>> t.citations()
     [Entry('article',
-   fields=[
-     ('url', 'https://vixra.org/abs/1512.0013'), 
-     ('year', '2015'), 
-     ('month', 'dec'), 
-     ('volume', '1512'), 
-     ('number', '0013'), 
-     ('title', 'A New Addi.....etc
+    fields=[
+    ('url', 'https://vixra.org/abs/1512.0013'), 
+    ('year', '2015'), 
+    ('month', 'dec'), 
+    ('volume', '1512'), 
+    ('number', '0013'), 
+    ('title', 'A New Addi.....etc
 
 
 
@@ -226,3 +302,27 @@ method::
     Vale, Richard
     arXiv, 1409.5830, 2014
 
+If you're developing a :class:`~taurex.model.model.ForwardModel` then
+:py:meth:`~taurex.data.citation.Citable.citations` should include
+its own ``BIBTEX_ENTRIES`` as well as every component in the model
+itself (i.e Temperature, Contributions etc.) we have a nice recipe to accomplish this:
+
+.. code-block:: python:
+
+    def citations(self):
+
+        all_citiations = [
+            super().citations(),
+            self.tp.citations(),
+            self.chem.citations(),
+            # Other components 
+            # ...etc...
+        ]
+
+        return unique_citiations_only(
+        sum(all_citiations,[])
+
+Here ``self.tp`` and ``self.chem`` are temperature and chemistry
+components used in our implementation of a forward model. :func:`~taurex.data.citation.unique_citations_only`
+will remove any repeat bibliography information and ``sum(all_citiations,[])``
+combines all citation lists into a single list.
