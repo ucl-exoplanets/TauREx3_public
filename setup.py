@@ -1,8 +1,6 @@
 #!/usr/bin/env python
-import setuptools
 from setuptools import find_packages
 from setuptools import setup
-import re, os
 
 packages = find_packages(exclude=('tests', 'doc'))
 provides = ['taurex', ]
@@ -42,7 +40,6 @@ classifiers = [
     'Programming Language :: Python',
     'Topic :: Scientific/Engineering',
     'Topic :: Software Development :: Libraries',
-    'Framework :: TauREx'
 ]
 
 # Handle versioning
@@ -52,22 +49,25 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(name='taurex',
-    author='Ahmed Faris Al-Refaie',
-    author_email='ahmed.al-refaie.12@ucl.ac.uk',
-    license="BSD",
-    version=version,
-    description='TauREx 3 retrieval framework',
-    classifiers=classifiers,
-    packages=packages,
-    long_description=long_description,
-    url='https://github.com/ucl-exoplanets/TauREx3_public/',
-    long_description_content_type="text/markdown",
-    keywords = ['exoplanet','retrieval','taurex','taurex3','atmosphere','atmospheric'],
-    include_package_data=True,
-    entry_points=entry_points,
-    provides=provides,
-    requires=requires,
-    install_requires=install_requires,
-    extras_require={
-        'Plot':  ["matplotlib"], },
-    )
+      author='Ahmed Faris Al-Refaie',
+      author_email='ahmed.al-refaie.12@ucl.ac.uk',
+      license="BSD",
+      version=version,
+      description='TauREx 3 retrieval framework',
+      classifiers=classifiers,
+      packages=packages,
+      long_description=long_description,
+      url='https://github.com/ucl-exoplanets/TauREx3_public/',
+      long_description_content_type="text/markdown",
+      keywords=['exoplanet',
+                'retrieval',
+                'taurex',
+                'taurex3',
+                'atmosphere',
+                'atmospheric'],
+      entry_points=entry_points,
+      provides=provides,
+      requires=requires,
+      install_requires=install_requires,
+      extras_require={
+        'Plot':  ["matplotlib"], },)

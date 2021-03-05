@@ -20,7 +20,6 @@ required for a later part for ``H2-He`` and ``H2-H2``, you can get these from th
     A starter set of these cross-sections and cia can be found in this dropbox: https://www.dropbox.com/sh/13y33d02vh56jh2/AABxuHdrZI83bSgoLz1Wzb2Fa?dl=0
 
 
-
 Setup
 ------
 In order to begin running forward models we need to tell *TauREx3* where our cross-sections are.

@@ -19,24 +19,23 @@ class OpacityCache(Singleton):
 
     >>> opt == opt2
     True
-    
+
     Importantly this class will automatically search directories for cross-sections
     set using the :func:`set_opacity_path` method:
 
     >>> opt.set_opacity_path('path/to/crossections')
+    
 
     Multiple paths can be set as well
 
     >>> opt.set_opacity_path(['/path/to/crosssections','/another/path/to/crosssections'])
-
-    Currently only :obj:`.pickle` files are supported.
 
     To get the cross-section object for a particular molecule use the square bracket operator:
 
     >>> opt['H2O']
     <taurex.opacity.pickleopacity.PickleOpacity at 0x107a60be0>
 
-    This returns a :class:`~taurex.opacity.pickleopacity.PickleOpacity` object for you to compute H2O cross sections from.
+    This returns a :class:`~taurex.opacity.opacity.Opacity` object for you to compute H2O cross sections from.
     When called for the first time, a directory search is performed and, if found, the appropriate cross-section is loaded. Subsequent calls will immediately
     return the already loaded object:
 
@@ -45,13 +44,23 @@ class OpacityCache(Singleton):
     >>> h2o_a == h2o_b
     True
 
-    Lastly if you've got a hot new opacity format, you can try out
-    by manually adding it into the cache:
+    If you have any plugins that include new opacity formats, the cache
+    will automatically detect them. 
+
+    
+
+    Lastly you can manually add an opacity directly for a molecule
+    into the cache:
 
     >>> new_h2o = MyNewOpacityFormat()
+    >>> new_h2o.molecule
+    H2O
     >>> opt.add_opacity(new_h2o)
-    >>> opt['H2O]
+    >>> opt['H2O']
     <MyNewOpacityFormat at 0x107a60be0>
+
+    
+
 
     Now TauREx3 will use it instead in all calculations!
 
@@ -326,7 +335,7 @@ class OpacityCache(Singleton):
                 self.add_opacity(opacities, molecule_filter=molecule_filter)
             else:
                 self.log.error('Unknown type %s passed into opacities, should be a list, single \
-                     opacity or None if reading a path',type(opacities))
+                     opacity or None if reading a path', type(opacities))
                 raise Exception('Unknown type passed into opacities')
         else:
             self.load_opacity_from_path(opacity_path, molecule_filter=molecule_filter)

@@ -4,3 +4,5 @@ from .core import StarMixin, TemperatureMixin, PlanetMixin, \
     OptimizerMixin, GasMixin, InstrumentMixin
 
 from .core import enhance_class
+
+from .mixins import MakeFreeMixin

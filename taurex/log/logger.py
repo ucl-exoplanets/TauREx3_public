@@ -70,12 +70,21 @@ class Logger:
 
     def debug(self, message, *args, **kwargs):
         """ See :class:`logging.Logger` """
-        self._logger.debug(message, *args, **kwargs)
+        import inspect
+        func = inspect.currentframe().f_back.f_code
+        new_message = f'In: {func.co_name}()/line:{func.co_firstlineno} - {message}'
+        self._logger.debug(new_message, *args, **kwargs)
 
     def error(self, message, *args, **kwargs):
         """ See :class:`logging.Logger` """
-        self._logger.error(message, *args, **kwargs)
+        import inspect
+        func = inspect.currentframe().f_back.f_code
+        new_message = f'In: {func.co_name}()/line:{func.co_firstlineno} - {message}'
+        self._logger.error(new_message, *args, **kwargs)
 
     def critical(self, message, *args, **kwargs):
         """ See :class:`logging.Logger` """
-        self._logger.critical(message, *args, **kwargs)
+        import inspect
+        func = inspect.currentframe().f_back.f_code
+        new_message = f'In: {func.co_name}()/line:{func.co_firstlineno} - {message}'
+        self._logger.critical(new_message, *args, **kwargs)

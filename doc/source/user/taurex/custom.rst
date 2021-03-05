@@ -6,6 +6,9 @@
 Custom Types
 ============
 
+Direct Method
+-------------
+
 Across many of the atmospheric parameters/sections you'll
 come across the ``custom`` type. These allow you to inject your
 own code to be used in the forward model and retrieval scheme.
@@ -227,3 +230,61 @@ Here is the full ``input.par`` file::
     rand_scale:mode = log
     rand_scale:fit = True
     rand_scale:bounds = 1e-10, 1000.0
+
+
+Extension Path Method
+---------------------
+
+Another way to include your own code is by setting the ``extension_path``
+variable under :ref:`userglobal`. If our python file exists in a folder say::
+
+    mycodes/
+        rand_temperature.py
+
+We can set the path to ``extension_path`` variable to point to the folder::
+
+    [Global]
+    extension_path = /path/to/mycodes/
+
+We will need to make one small modification and add the ``input_keywords`` class method
+to our temperature profile. (See :ref:`basics`):
+
+.. code-block:: python
+
+    @classmethod
+    def input_keywords(cls):
+        return ['my-random-temperature',]
+
+TauREx will now search for ``.py`` files in the directory, attempt to load them and then automatically
+integrate them into the TauREx pipeline!!! We can use the value return by ``input_keywords`` to select our
+profile::
+
+    [Temperature]
+    profile_type = my-random-temperature
+    base_temp = 1000.0
+    random_scale = 100.0
+
+
+Cool!!!
+
+Limitations
+-----------
+
+The custom system is intended for quick development and inclusion of new components or file formats. There are
+as few limitations when using it.
+
+First each file is loaded in isolation, therefore referencing another python file in the same directory will yield errors,
+for example if we have this directory::
+
+    mycodes/
+        rand_temperature.py
+        util.py
+
+And we attempt to import :file:`util` in :file:`rand_temperature.py` then it will fail.
+
+The *Direct Method* does not support loading in :class:`~taurex.opacity.opacity.Opacity` and
+:class:`~taurex.contributions.contribution.Contribution` types.
+
+If you feel like you need more control and flexibility with your extensions or if it is useful to the community as a whole
+then we suggest trying :ref:`buildplugin`
+

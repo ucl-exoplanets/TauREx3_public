@@ -22,4 +22,5 @@ Taurex API Documentation
    taurex.output
    taurex.util
    taurex.parameter
-   taurex.model.lightcurve
+   taurex.mixin
+   taurex.mpi

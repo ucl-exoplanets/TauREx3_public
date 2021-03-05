@@ -28,7 +28,6 @@ class ClassFactory(Singleton):
         self.load_plugins()
         self.load_extension_paths()
 
-
     def setup_batteries_included_mixin(self):
         """
         Collect all the classes that are built into
@@ -48,7 +47,8 @@ class ClassFactory(Singleton):
         self._opt_mixin_klasses = set()
         self._obs_mixin_klasses = set()
 
-        self._temp_mixin_klasses.update(self._collect_temperatures_mixin(mixins))
+        self._temp_mixin_klasses.update(
+            self._collect_temperatures_mixin(mixins))
         self._chem_mixin_klasses.update(self._collect_chemistry_mixin(mixins))
         self._gas_mixin_klasses.update(self._collect_gas_mixin(mixins))
         self._press_mixin_klasses.update(self._collect_pressure_mixin(mixins))

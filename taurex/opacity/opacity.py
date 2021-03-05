@@ -44,6 +44,9 @@ class Opacity(Logger):
         raise NotImplementedError
 
     def compute_opacity(self, temperature, pressure, wngrid=None):
+        """
+        Must return in units of cm2
+        """
         raise NotImplementedError
 
     def opacity(self, temperature, pressure, wngrid=None):

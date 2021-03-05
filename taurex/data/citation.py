@@ -38,9 +38,13 @@ def handle_publication(fields):
         journal.append(cleanup_string(fields['journal']))
     elif 'booktitle' in fields:
         journal.append(cleanup_string(fields['booktitle']))
+    elif 'archivePrefix' in fields:
+        journal.append(cleanup_string(fields['archivePrefix']))
 
     if 'volume' in fields:
         journal.append(cleanup_string(fields['volume']))
+    elif 'eprint' in fields:
+        journal.append(cleanup_string(fields['eprint']))
     if 'pages' in fields:
         journal.append(cleanup_string(fields['pages']))
 

@@ -36,7 +36,7 @@ HDF5 Format (``.hdf5``)
 ExoTransmit Format (``.dat``)
 -----------------------------------
 
-.. automodule:: taurex.opacity.hdf5opacity
+.. automodule:: taurex.opacity.exotransmit
    :members:
    :undoc-members:
    :show-inheritance:
