@@ -48,6 +48,7 @@ def contribute_tau_numexpr(startK, endK, density_offset, sigma, density, path, n
     tau[layer] += ne.evaluate('sum(_path*_density*_sigma, axis=0)')
 
 
+@pytest.mark.bench
 def test_contribute_tau_numba(benchmark, setup):
     sigma, density, path = setup
     # # startK, endK, density_offset, sigma, density, path, nlayers,
@@ -55,7 +56,7 @@ def test_contribute_tau_numba(benchmark, setup):
     tau = np.zeros(shape=(NLAYERS, WNGRID_SIZE))
     benchmark(contribute_tau, 0, NLAYERS, 0, sigma, density, path, NLAYERS, 
               WNGRID_SIZE, 0, tau)
-
+@pytest.mark.bench
 def test_contribute_tau_numba_II(benchmark, setup):
     sigma, density, path = setup
     # # startK, endK, density_offset, sigma, density, path, nlayers,
@@ -81,7 +82,7 @@ def test_contribute_tau_numba_II(benchmark, setup):
 #               WNGRID_SIZE, 0, tau_2)
 
 #     np.testing.assert_array_almost_equal(tau_1,tau_2)
-
+@pytest.mark.bench
 def test_contribute_tau_numpy(benchmark, setup):
     sigma, density, path = setup
     # # startK, endK, density_offset, sigma, density, path, nlayers,
@@ -89,7 +90,7 @@ def test_contribute_tau_numpy(benchmark, setup):
     tau = np.zeros(shape=(NLAYERS, WNGRID_SIZE))
     benchmark(contribute_tau_numpy, 0, NLAYERS, 0, sigma, density, path, NLAYERS, 
               WNGRID_SIZE, 0, tau)
-
+@pytest.mark.bench
 def test_contribute_tau_numexpr(benchmark, setup):
     sigma, density, path = setup
     # # startK, endK, density_offset, sigma, density, path, nlayers,

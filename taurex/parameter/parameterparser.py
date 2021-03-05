@@ -22,11 +22,9 @@ class ParameterParser(Logger):
             except Exception:
                 pass
         elif isinstance(val, (str)):
-            if val.lower() in ['true',  'yes', 'yeah',
-                               'yup', 'certainly', 'uh-huh', ]:
+            if val.lower() in ['true',  'yes', 'yeah', 'yup', 'certainly', 'uh-huh', ]:
                 newval = True
-            elif val.lower() in ['false',  'no', 'nope',
-                                 'no-way', 'hell-no', ]:
+            elif val.lower() in ['false',  'no', 'nope', 'no-way', 'hell-no', ]:
                 newval = False
             else:
                 try:
@@ -81,6 +79,18 @@ class ParameterParser(Logger):
                                                     wn_points)
             except KeyError:
                 self.warning('Radis default grid will be used')
+
+            try:
+
+                extension_paths = config['Global']['extension_paths']
+                if isinstance(extension_paths, str):
+                    extension_paths = [extension_paths, ]
+
+                from .classfactory import ClassFactory
+                ClassFactory().set_extension_paths(paths=extension_paths)
+            except KeyError:
+                pass
+
 
             gc = GlobalCache()
 

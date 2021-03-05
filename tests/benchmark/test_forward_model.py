@@ -20,7 +20,7 @@ def opacities():
 
 
 
-
+@pytest.mark.bench
 def test_transmission_model(benchmark, opacities):
     from taurex.model import TransmissionModel
 
@@ -30,6 +30,7 @@ def test_transmission_model(benchmark, opacities):
 
     benchmark(tm.model)
 
+@pytest.mark.bench
 def test_emission_model(benchmark, opacities):
     from taurex.model import EmissionModel
 

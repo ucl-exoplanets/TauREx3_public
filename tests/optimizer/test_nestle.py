@@ -1,7 +1,8 @@
 from . import LineModel, LineObs
-from hypothesis import given,settings, strategies as st
+from hypothesis import given, settings, strategies as st
 import pytest
 
+@pytest.mark.slow
 @given(m=st.floats(1.0, 2.0), c=st.floats(1.0, 30.0))
 @settings(deadline=None)
 def test_optimizer(m, c):
