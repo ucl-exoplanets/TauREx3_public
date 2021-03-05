@@ -2,6 +2,11 @@
 Components
 ==========
 
+.. warning::
+    
+    This is still under construction as I try to figure out how best to convey this.
+
+
 Here we present the most basic form of each component. See
 basic features under :ref:`basics` and retrieval features under 
 :ref:`retrievaldev`
@@ -32,10 +37,9 @@ The most basic temperature class has this form:
         def profile(self):
             return self.myprofile
 
-Required
-~~~~~~~~
-
 :meth:`~taurex.data.profiles.temperature.tprofile.Temperature.__init__`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 Used to build the component and only called once. Must include ``super()`` call. 
 Decorator fitting parameters are also collected here automatically. 
@@ -43,6 +47,7 @@ Use keyword arguments to setup the class and load any necessary files. You can a
 parameters here as well.
  
 :meth:`~taurex.data.profiles.temperature.tprofile.Temperature.initialize_profile`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Used to initialize and compute the temperature profile.
 It is run on each :meth:`~taurex.model.simplemodel.SimpleForwardModel.model` call
@@ -77,6 +82,9 @@ as a base as it greatly simplifies implementation of active and inactive species
             super().__init__(self.__class__.__name__)
 
             # Perform setup here
+            
+            # Populate gases here
+            self.mygases = ['H2', 'He', 'H2O', 'CH4', 'NO', 'H2S','TiO',]
 
             # Call when gases has been populated
             self.determine_active_inactive()
@@ -98,14 +106,49 @@ as a base as it greatly simplifies implementation of active and inactive species
 
         @property
         def gases(self):
-            return ['H2', 'He', 'H2O', 'CH4', 'NO', 'H2S','TiO',]
+            return self.mygases
     
         @property
         def mixProfile(self):
             return self.mixprofile
 
+For chemistry whats important is the the method :meth:`~taurex.data.profiles.chemistry.autochemistry.AutoChemistry.determine_active_inactive`
+must be called once :meth:`~taurex.data.profiles.chemistry.AutoChemistry.gases` has been populated with the species.
+
+:meth:`~taurex.data.profiles.chemistry.autochemistry.AutoChemistry.__init__`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Used to build the component and only called once. Must include ``super()`` call. 
+Decorator fitting parameters are also collected here automatically. 
+Use keyword arguments to setup the class and load any necessary files. You can also build new fitting
+parameters here as well. We recommend determining your chemical species at this point.
+ 
+:meth:`~taurex.data.profiles.chemistry.autochemistry.AutoChemistry.initialize_chemistry`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
+Used to initialize and compute the chemical model. The :math:`\mu` profile should be computed
+as well. It is run on each :meth:`~taurex.model.simplemodel.SimpleForwardModel.model` call
+
+Arguments: 
+    - ``nlayers``: Number of Layers
+    - ``temperature_profile``: ``nlayer`` array of temperature.
+        - BOA to TOA
+        - Units: :math:`K`
+    - ``pressure_profile``: ``nlayer`` array of pressures.
+        - BOA to TOA
+        - Units: :math:`Pa`
+
+:meth:`~taurex.data.profiles.chemistry.autochemistry.AutoChemistry.gases`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Must be decorated with `@property <decorator_>`_. Must return a list of species
+in the chemical model
+
+:meth:`~taurex.data.profiles.chemistry.autochemistry.AutoChemistry.mixProfile`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Return volume mixing ratios. Must be decorated with `@property <decorator_>`_. Must return an array of shape
+(number of species, number of layers). The ordering of species must be 1:1 with :meth:`~taurex.data.profiles.chemistry.autochemistry.AutoChemistry.gases`
 
 
 

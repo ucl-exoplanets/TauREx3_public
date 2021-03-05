@@ -61,7 +61,7 @@ by name! Another splices UV data into stellar models.
 
 
 Developing Mixins
-=================
+-----------------
 
 Each TauREx component has a mixin equivalent, developing mixins means
 choosing what mixin type to inherit from. (i.e :class:`~taurex.data.stellar.Star` has :class:`~taurex.mixin.core.StarMixin`).
@@ -90,7 +90,7 @@ mixins:
 
     class Denoiser(StarMixin):
 
-        def __init_mixin_(self, kernel_size=3):
+        def __init_mixin__(self, kernel_size=3):
             self.kernel_size = kernel_size
 
         @classmethod
@@ -111,8 +111,7 @@ and exploiting `super() <super_>`_:
 
     class Noiser(StarMixin):
 
-        def __init_mixin__(self, noise_level=1.0):
-            self.noise_level = noise_level
+        ...
 
         @property
         def spectralEmissionDensity(self):
@@ -126,8 +125,7 @@ and exploiting `super() <super_>`_:
 
     class Denoiser(StarMixin):
 
-        def __init_mixin_(self, kernel_size=3):
-            self.kernel_size = kernel_size
+        ...
 
         @property
         def spectralEmissionDensity(self):
@@ -137,12 +135,86 @@ and exploiting `super() <super_>`_:
 
             return new_sed
 
+`super() <super_>`_ is key to mixins. It allows use to evaluate the method of the super class, or in other words. 
+*The class that came before us*. Using this, we can get the original spectrum and then modify it and return it.
+It can also be chained as well. If we apply two mixins that modify this, then calling super will evaluate the previous mixin which,
+evaluates the original class. Nicely, this tangent leads us to the next point, how do we actually use the mixin?
+The :func:`~taurex.mixin.core.enhance_class` function does exactly this! It takes our *base*, a list of mixins
+and arguments and generates a new instance of the class! Lets try it for the noiser and modify the black body star::
 
+    >>> from taurex.mixin import enhance_class
+    >>> from taurex.stellar import BlackbodyStar
+    >>> new_star = enhance_class(BlackbodyStar, [Noiser, ], temperature=5800,
+                                                            radius=1.0,
+                                                            noise_level=1e6)
+    >>> new_star
+    <taurex.mixin.core.Noiser+BlackbodyS at 0x7fdb93de4c70>
 
+The class is neither a Noiser or Blackbody but a combination of both. What you might notice is
+arguments from both :class:`~taurex.data.stellar.star.BlackbodyStar` and ``Noiser`` passed in.
+Each argument is automatically passed to the correct class for you! Anyway lets plot it and see::
+    
+    >>> import matplotlib.pyplot as plt
+    >>> wngrid = np.linspace(300,30000,10000)
+    >>> new_star.initialize(wngrid)
+    >>> plt.figure()
+    >>> plt.plot(10000/wngrid,new_star.spectralEmissionDensity)
+    >>> plt.xscale('log')
+    >>> plt.show()
 
+.. figure::  _static/bbnoise.png
+    :align:   center
 
+    Blackbody spectrum with ``Noiser``
 
+Nice! Now whats makes them special is that we can apply it to the Phoenix model
+with no additional effort::
 
+    >>> from taurex.stellar import PhoenixStar
+    >>> new_star = enhance_class(PhoenixStar, [Noiser, ], temperature=5800, radius=1.0, 
+                                 phoenix_path='/path/to/phoenix', noise_level=1e6)
+
+.. figure::  _static/phoenixnoise.png
+    :align:   center
+
+    Phoenix spectrum with ``Noiser``
+
+We can do the same with the ``Denoiser``::
+
+    >>> new_star = enhance_class(PhoenixStar, [Denoiser, ], temperature=5800, radius=1.0, 
+                                phoenix_path='/path/to/phoenix', kernel_size=11)
+
+.. figure::  _static/phoenixdenoise.png
+    :align:   center
+
+    Phoenix spectrum with ``Denoiser``
+
+The real magic is combining both!! We could heavily denoise the spectrum and then add noise::
+
+    >>> new_star = enhance_class(PhoenixStar, [Noiser, Denoiser, ], temperature=5800, radius=1.0, 
+        phoenix_path='/path/to/phoenix', kernel_size=21, noise_level=1e6)
+
+*OR*, add noise and then denoise it::
+
+    >>> new_star = enhance_class(PhoenixStar, [Denoiser, Noiser, ], temperature=5800, radius=1.0, 
+        phoenix_path='/path/to/phoenix', kernel_size=21, noise_level=1e6)
+
+.. list-table::
+
+    * - .. figure:: _static/phoenixa.png
+            :align: center
+            :scale: 40
+
+            Denoise then add noise
+
+      - .. figure:: _static/phoenixb.png
+            :align: center
+            :scale: 40
+
+            Add Noise and then denoise
+
+Whats important is the list of mixins is applied in *reverse*. ``[Denoiser, Noiser]``
+does ``Noiser`` first *and then* ``Denoiser``
 
 .. _wiki: https://en.wikipedia.org/wiki/Mixin
 .. _super: https://docs.python.org/3/library/functions.html#super
