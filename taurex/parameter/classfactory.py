@@ -13,13 +13,20 @@ class ClassFactory(Singleton):
     def init(self):
         self.log = Logger('ClassFactory')
 
+        self.extension_paths = []
         self.reload_plugins()
+
+    def set_extension_paths(self, paths=None, reload=True):
+        self.extension_paths = paths
+        if reload:
+            self.reload_plugins()
 
     def reload_plugins(self):
         self.log.info('Reloading all modules and plugins')
         self.setup_batteries_included()
         self.setup_batteries_included_mixin()
         self.load_plugins()
+        self.load_extension_paths()
 
 
     def setup_batteries_included_mixin(self):
@@ -170,6 +177,30 @@ class ClassFactory(Singleton):
         for k, v in plugins.items():
             self.log.info('Loading %s', k)
             self.load_plugin(v)
+
+    def load_extension_paths(self):
+        import glob
+        import os
+        import pathlib
+        import importlib
+        paths = self.extension_paths
+        if paths:
+            # Make sure they're unique
+            all_files = set(sum([glob.glob(
+                                os.path.join(os.path.abspath(p), '*.py'))
+                             for p in paths], []))
+
+            for f in all_files:
+                module_name = pathlib.Path(f).stem
+                spec = importlib.util.spec_from_file_location(module_name, f)
+                foo = importlib.util.module_from_spec(spec)
+                try:
+                    spec.loader.exec_module(foo)
+                    self.load_plugin(foo)
+                except Exception as e:
+                    self.log.warning('Could not load extension from file %s',
+                                     f)
+                    self.log.warning('Reason: %s', str(e))
 
     def _collect_classes(self, module, base_klass):
         """
