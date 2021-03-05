@@ -267,8 +267,7 @@ Which gives us
 
 This is a minimal guide to developing plugins but we always
 recommend looking at plugin projects and seeing how they accomplish
-their tasks. We also include a :ref:`recipe` section which contains
-some useful plugin related codes.
+their tasks.
 
 
 .. _cibuildwheel: https://cibuildwheel.readthedocs.io/en/stable/

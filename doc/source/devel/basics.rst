@@ -52,7 +52,11 @@ Which when run will produce::
     B: Another string
 
 We recommend defining all ``__init__`` arguments as keywords if you intend
-for your components to be used through the input file.
+for your components to be used through the input file. The input file only supports arguments that accept:
+
+    - scalars or strings
+    - lists of scalars and/or strings 
+        - i.e ``my_arg = 1, 3.14, hello-world!``
 
 Input keywords
 ==============
@@ -124,8 +128,21 @@ methods:
     class MyChemistry(Chemistry):
 
         def do_things(self):
-            self.info('I am Info')
+            self.info('I am info')
             self.warning('I am warning!!')
+            self.error("I am error!!!")
+
+Calling ``do_things`` will output::
+
+    taurex.MyChemistry - INFO - I am info
+    taurex.MyChemistry - WARNING - I am warning!!
+    taurex.MyChemistry - ERROR - In: do_things()/line:7 - I am error!!!
+
+While you can use your own printing methods. We recommend using these built in methods for logging
+as:
+    - They can be automatically hidden during retrievals
+    - They will only output once under MPI
+    - They automatically include the class, function and line number for :meth:`~taurex.log.logger.Logger.debug`, :meth:`~taurex.log.logger.Logger.error` and :meth:`~taurex.log.logger.Logger.critical`.
 
 
 
