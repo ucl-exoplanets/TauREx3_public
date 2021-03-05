@@ -8,21 +8,19 @@ class ParameterParser(Logger):
     def __init__(self):
         super().__init__('ParamParser')
         self._read = False
-    
 
     def transform(self, section, key):
         val = section[key]
         newval = val
         if isinstance(val, list):
             try:
-                newval = list(map(float,val))
-
+                newval = list(map(float, val))
             except:
                 pass
         elif isinstance(val, (str)):
-            if val.lower() in ['true',  'yes', 'yeah', 'yup', 'certainly', 'uh-huh',]:
+            if val.lower() in ['true',  'yes', 'yeah', 'yup', 'certainly', 'uh-huh', ]:
                 newval = True
-            elif val.lower() in ['false',  'no', 'nope', 'no-way', 'hell-no',]:
+            elif val.lower() in ['false',  'no', 'nope', 'no-way', 'hell-no', ]:
                 newval = False
             else:
                 try:
@@ -37,7 +35,6 @@ class ParameterParser(Logger):
         from taurex.cache import GlobalCache
         from taurex.cache import CIACache, OpacityCache
         config = self._raw_config.dict()
-    
 
         if 'Global' in config:
             global_config = config['Global']
@@ -74,6 +71,18 @@ class ParameterParser(Logger):
                                                     wn_points)
             except KeyError:
                 self.warning('Radis default grid will be used')
+
+            try:
+
+                extension_paths = config['Global']['extension_paths']
+                if isinstance(extension_paths, str):
+                    extension_paths = [extension_paths, ]
+
+                from .classfactory import ClassFactory
+                ClassFactory().set_extension_paths(paths=extension_paths)
+            except KeyError:
+                pass
+
 
             gc = GlobalCache()
 

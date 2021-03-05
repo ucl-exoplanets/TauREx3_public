@@ -191,6 +191,7 @@ class ClassFactory(Singleton):
                              for p in paths], []))
 
             for f in all_files:
+                self.info('Loading extensions from %s', f)
                 module_name = pathlib.Path(f).stem
                 spec = importlib.util.spec_from_file_location(module_name, f)
                 foo = importlib.util.module_from_spec(spec)
