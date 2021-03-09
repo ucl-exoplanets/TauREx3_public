@@ -389,7 +389,7 @@ def main():
 
 
     # Generate a model from the input
-    model = pp.generate_appropriate_model()
+    model = pp.generate_appropriate_model(obs=observation)
 
     # build the model
     model.build()
