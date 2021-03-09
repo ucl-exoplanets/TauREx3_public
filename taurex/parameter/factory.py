@@ -456,7 +456,7 @@ def create_prior(prior):
         raise ValueError('Unknown Prior Type in input file')
 
 
-def create_model(config, gas, temperature, pressure, planet, star):
+def create_model(config, gas, temperature, pressure, planet, star, observation=None):
     from taurex.model import ForwardModel
     log.debug(config)
     config, klass, is_mixin = \
@@ -478,6 +478,8 @@ def create_model(config, gas, temperature, pressure, planet, star):
         kwargs['temperature_profile'] = temperature
     if 'pressure_profile' in kwargs:
         kwargs['pressure_profile'] = pressure
+    if 'observation' in kwargs:
+        kwargs['observation'] = observation
     log.debug('New Model kwargs {}'.format(kwargs))
     log.debug('Creating model---------------')
 

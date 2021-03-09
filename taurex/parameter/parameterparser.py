@@ -119,13 +119,13 @@ class ParameterParser(Logger):
         else:
             raise KeyError
 
-    def generate_appropriate_model(self):
+    def generate_appropriate_model(self, obs=None):
 
         try:
             return self.generate_lightcurve()
         except KeyError:
             pass
-        return self.generate_model()
+        return self.generate_model(obs=obs)
 
     def generate_instrument(self, binner=None):
         from taurex.binning import NativeBinner
@@ -307,7 +307,7 @@ class ParameterParser(Logger):
 
     def generate_model(self, chemistry=None, pressure=None,
                        temperature=None, planet=None,
-                       star=None):
+                       star=None, obs=None):
         config = self._raw_config.dict()
         if 'Model' in config:
             if chemistry is None:
@@ -321,7 +321,7 @@ class ParameterParser(Logger):
             if star is None:
                 star = self.generate_star()
             model = create_model(config['Model'], chemistry,
-                                 temperature, pressure, planet, star)
+                                 temperature, pressure, planet, star, observation=obs)
         else:
             return None
 

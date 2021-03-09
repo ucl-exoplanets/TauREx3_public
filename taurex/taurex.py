@@ -382,6 +382,12 @@ def main():
     if args.no_run and args.bibtex:
         return only_bibtex(args.bibtex, pp)
 
+    # Get the spectrum
+    observation = pp.generate_observation()
+
+    binning = pp.generate_binning()
+
+
     # Generate a model from the input
     model = pp.generate_appropriate_model()
 
@@ -392,10 +398,7 @@ def main():
         show_parameters(model)
         return
 
-    # Get the spectrum
-    observation = pp.generate_observation()
 
-    binning = pp.generate_binning()
 
     wngrid = None
 
