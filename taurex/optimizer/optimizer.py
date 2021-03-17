@@ -451,7 +451,7 @@ class Optimizer(Logger, Citable):
             _, final_model, _, _ = self._binner.bin_model(
                 self._model.model(wngrid=obs_bins))
         except InvalidModelException:
-            return 1e100
+            return np.nan
 
         res = (data.ravel() - final_model.ravel()) / datastd.ravel()
         res = np.nansum(res*res)
