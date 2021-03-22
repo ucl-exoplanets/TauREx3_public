@@ -284,9 +284,8 @@ class TaurexChemistry(AutoChemistry):
         from taurex.util.util import mass, get_molecular_weight
         from taurex.constants import AMU
         element_dict = self.compute_elements_mix()
-        #return element_dict
+
         total_mass = self.muProfile/AMU
-        #total_mass_2 = sum([mass[k]*v for k, v in element_dict.items()])
 
         H_mass_fraction = element_dict['H']*mass['H']/total_mass
 
@@ -294,7 +293,7 @@ class TaurexChemistry(AutoChemistry):
 
         metallicity = 1 - H_mass_fraction - He_mass_fraction
 
-        return metallicity/self._base_metallicity#, H_mass_fraction, He_mass_fraction
+        return metallicity/self._base_metallicity
 
 
     

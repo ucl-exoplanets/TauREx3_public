@@ -140,7 +140,7 @@ def merge_elements(elem1, elem2, factor=1):
 
 
 
-def split_molecule_elements(molecule=None, tokens=None, fractional=False):
+def split_molecule_elements(molecule=None, tokens=None):
     from taurex.util.util import mass
     elems = {}
     
@@ -179,10 +179,6 @@ def split_molecule_elements(molecule=None, tokens=None, fractional=False):
         elif token in '}])':
             return elems, length
         length+=1
-
-    if fractional:
-        total = sum([mass[e]*c for e,c in elems.items()])
-        elems = {k: mass[k]*v/total for k,v in elems.items()}
 
     return elems
 
