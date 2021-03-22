@@ -112,28 +112,75 @@ mass = {
   "Bh":	262,
   "Hs":	265,
   "Mt":	266,
+  "e-": 0.00054858,
 }
 
 
 def calculate_weight(chem):
-    s = re.findall('([A-Z][a-z]?)([0-9]*)', chem)
-    compoundweight = 0
-
-    for element, count in s:
-        count = int(count or '1')
-        try:
-            compoundweight += mass[element] * count
-        except KeyError:
-            return 0.0
+    s = split_molecule_elements(chem)
+    compoundweight = 0.0
+    for element, count in s.items():
+        compoundweight += mass[element] * count
     return compoundweight
 
-def split_molecule_elements(chem):
-    s = re.findall('([A-Z][a-z]?)([0-9]*)', chem)
-    return s
+# def split_molecule_elements(chem):
+#     s = re.findall('([A-Z][a-z]?)([0-9]*)', chem)
+#     return s
+
+def tokenize_molecule(molecule):
+    import re
+    return re.findall('[A-Z][a-z]?|\d+|.', molecule)
+
+def merge_elements(elem1, elem2, factor=1):
+    
+    return {elem: elem1.get(elem, 0) + elem2.get(elem,0)*factor 
+            for elem in set(elem1)| set(elem2)}
 
 
 
 
+
+def split_molecule_elements(molecule=None, tokens=None):
+    from taurex.util.util import mass
+    elems = {}
+    
+    if molecule:
+        tokens = tokenize_molecule(molecule)
+    
+    length = 0
+    
+    while length < len(tokens):
+        token = tokens[length]
+        
+        if token in mass:
+            if token not in elems:
+                elems[token] = 0
+            try:
+                peek = int(tokens[length+1])
+                
+                length +=1
+            except IndexError:
+                peek = 1
+            except ValueError:
+                peek = 1
+            elems[token] += peek
+        elif token in '{([':
+            length += 1
+            sub_elems,moved = split_molecule_elements(tokens=tokens[length:])
+            length += moved
+            try:
+                peek = int(tokens[length+1])
+                length +=1
+            except IndexError:
+                peek = 1
+            except ValueError:
+                peek = 1
+            elems = merge_elements(elems, sub_elems,peek)
+        elif token in '}])':
+            return elems, length
+        length+=1
+
+    return elems
 
 def sanitize_molecule_string(molecule):
     """

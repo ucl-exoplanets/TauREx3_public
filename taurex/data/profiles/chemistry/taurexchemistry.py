@@ -4,7 +4,7 @@ from taurex.util import molecule_texlabel
 from taurex.util.util import has_duplicates
 from taurex.cache import OpacityCache
 from taurex.exceptions import InvalidModelException
-
+from taurex.core import derivedparam
 
 class InvalidChemistryException(InvalidModelException):
     """
@@ -61,7 +61,8 @@ class TaurexChemistry(AutoChemistry):
 
     """
 
-    def __init__(self, fill_gases=['H2', 'He'], ratio=0.17567, derived_ratios=[]):
+    def __init__(self, fill_gases=['H2', 'He'], ratio=0.17567, derived_ratios=[],
+                 base_metallicty=0.013):
         super().__init__('ChemistryModel')
 
         self._gases = []
@@ -88,6 +89,7 @@ class TaurexChemistry(AutoChemistry):
         self._fill_gases = fill_gases
         self._fill_ratio = ratio
         self._mix_profile = None
+        self._base_metallicity = 0.013
         self.debug('MOLECULES I HAVE %s', self.availableActive)
         self.setup_fill_params()
         self.determine_active_inactive()
@@ -265,18 +267,38 @@ class TaurexChemistry(AutoChemistry):
             if g != 'e-':
                 s = split_molecule_elements(g)
             else:
-                s = ['e-'], [1]
+                s = {'e-': 1}
+            #total_count = sum(s.values())
             
-            for elements, count in s:
-                count = int(count or '1')
-                if elements not in element_dict:
-                    element_dict[elements] = 0.0
-                element_dict[elements] += count*avg_mix
-        
+            for elements, count in s.items():
+                val=element_dict.get(elements, 0.0)
+                element_dict[elements] = val + count*avg_mix
+
         return element_dict
+
+    @derivedparam(param_name='metallicity', param_latex='Z')
+    def metallicity(self):
+        return self.get_metallicity()
+
+    def get_metallicity(self):
+        from taurex.util.util import mass, get_molecular_weight
+        from taurex.constants import AMU
+        element_dict = self.compute_elements_mix()
+
+        total_mass = self.muProfile/AMU
+
+        H_mass_fraction = element_dict['H']*mass['H']/total_mass
+
+        He_mass_fraction = element_dict['He']*mass['He']/total_mass
+
+        metallicity = 1 - H_mass_fraction - He_mass_fraction
+
+        return metallicity/self._base_metallicity
+
 
     
     def get_element_ratio(self, elem_ratio):
+        from taurex.util.util import mass
         element_dict = self.compute_elements_mix()
         elem1, elem2 = elem_ratio.split('/')
 
@@ -286,7 +308,7 @@ class TaurexChemistry(AutoChemistry):
         if elem2 not in element_dict:
             self.error(f'None of the gases have the element {elem2}')
             raise ValueError(f'No gas has element {elem2}')
-        
+
         return element_dict[elem1]/element_dict[elem2]
 
     def fitting_parameters(self):
