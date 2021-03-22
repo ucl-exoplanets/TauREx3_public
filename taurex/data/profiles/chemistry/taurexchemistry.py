@@ -257,7 +257,7 @@ class TaurexChemistry(AutoChemistry):
     #     return self._inactive
 
 
-    def compute_elements_mix(self, fractional=False):
+    def compute_elements_mix(self):
         from taurex.util.util import split_molecule_elements
         element_dict = {}
 
@@ -265,7 +265,7 @@ class TaurexChemistry(AutoChemistry):
             avg_mix = m
             s = [], []
             if g != 'e-':
-                s = split_molecule_elements(g, fractional=fractional)
+                s = split_molecule_elements(g)
             else:
                 s = {'e-': 1}
             #total_count = sum(s.values())
