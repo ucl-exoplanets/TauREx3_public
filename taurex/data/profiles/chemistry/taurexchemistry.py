@@ -285,11 +285,11 @@ class TaurexChemistry(AutoChemistry):
         from taurex.constants import AMU
         element_dict = self.compute_elements_mix()
 
-        total_mass = self.muProfile/AMU
+        total_mass = self.muProfile.sum()/AMU
 
-        H_mass_fraction = element_dict['H']*mass['H']/total_mass
+        H_mass_fraction = element_dict['H'].sum()*mass['H']/total_mass
 
-        He_mass_fraction = element_dict['He']*mass['He']/total_mass
+        He_mass_fraction = element_dict['He'].sum()*mass['He']/total_mass
 
         metallicity = 1 - H_mass_fraction - He_mass_fraction
 
@@ -309,7 +309,7 @@ class TaurexChemistry(AutoChemistry):
             self.error(f'None of the gases have the element {elem2}')
             raise ValueError(f'No gas has element {elem2}')
 
-        return element_dict[elem1]/element_dict[elem2]
+        return element_dict[elem1].sum()/element_dict[elem2].sum()
 
     def fitting_parameters(self):
         """
