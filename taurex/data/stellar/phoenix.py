@@ -95,7 +95,7 @@ class PhoenixStar(BlackbodyStar):
 
         if self.temperature > self._T_list.max() or \
                 self.temperature < self._T_list.min():
-
+            self._logg = self.compute_logg()
             self.use_blackbody = True
         else:
             self.use_blackbody = False
