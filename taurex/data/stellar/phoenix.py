@@ -173,7 +173,7 @@ class PhoenixStar(BlackbodyStar):
     def find_nearest_file(self):
         import math
         idx = self._index_finder(
-            [self._temperature, self._logg, math.log10(self._metallicity)])
+            [self._temperature, self._logg, self._metallicity])
         return self._files[int(idx)]
 
     def get_avail_phoenix(self):
