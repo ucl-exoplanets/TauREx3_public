@@ -99,23 +99,32 @@ class FlatMieContribution(Contribution):
         self._nlayers = model.nLayers
         self._ngrid = wngrid.shape[0]
 
-        pressure_profile = model.pressureProfile
+        pressure_levels = np.log10(model.pressure.pressure_profile_levels[::-1])
 
         bottom_pressure = self.mieBottomPressure
         if bottom_pressure < 0:
-            bottom_pressure = pressure_profile[0]
 
-        top_pressure = self.mieTopPressure
+            bottom_pressure = pressure_levels.max()
+
+        top_pressure = np.log10(self.mieTopPressure)
         if top_pressure < 0:
-            top_pressure = pressure_profile[-1]
+            top_pressure = pressure_levels.min()
 
+        P_left = pressure_levels[:-1]
+        P_right = pressure_levels[1:]
+
+        P_range = sorted([top_pressure, bottom_pressure])
+
+        save_start = np.searchsorted(P_right, P_range[0], side='right')
+        save_stop = np.searchsorted(P_left[1:], P_range[1], side='right')
+        P_min = P_left[save_start:save_stop+1]
+        P_max = P_right[save_start:save_stop+1]
+        weight = np.minimum(P_range[-1], P_max) - np.maximum(P_range[0], P_min)
+        weight /= weight.max()
         sigma_xsec = np.zeros(shape=(self._nlayers, wngrid.shape[0]))
+        sigma_xsec[save_start:save_stop+1] = weight[:,  None]*self.mieMixing
 
-        cloud_filter = (pressure_profile <= bottom_pressure) & \
-                       (pressure_profile >= top_pressure)
-
-        sigma_xsec[cloud_filter, ...] = \
-            np.ones(shape=wngrid.shape) * self.mieMixing
+        sigma_xsec = sigma_xsec[::-1]
 
         self.sigma_xsec = sigma_xsec
 
