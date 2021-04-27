@@ -52,5 +52,5 @@ def test_phoenix_find_spectrum(tmpdir):
     for fn, tp, lg, mtl in test_cases:
         phoenix._logg = lg
         phoenix._temperature = tp
-        phoenix._metallicity = 10**mtl
+        phoenix._metallicity = mtl
         assert phoenix.find_nearest_file() == fn
