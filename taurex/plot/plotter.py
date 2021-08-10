@@ -742,15 +742,17 @@ class Plotter(object):
                 binned_error = spectra['binned_std'][...]
             except KeyError:
                 binned_error = None
-        plt.plot(wlgrid, binned_spectrum, label=label,alpha=alpha)          
+
+        good = binned_spectrum > 0        
+        plt.plot(wlgrid[good], binned_spectrum[good], label=label,alpha=alpha)          
         if binned_error is not None:
-            plt.fill_between(wlgrid, binned_spectrum-binned_error,
-                                binned_spectrum+binned_error,
+            plt.fill_between(wlgrid[good], binned_spectrum[good]-binned_error[good],
+                                binned_spectrum[good]+binned_error[good],
                                 alpha=0.5, zorder=-2, color=color, edgecolor='none')
 
             # 2 sigma
-            plt.fill_between(wlgrid, binned_spectrum-2*binned_error,
-                                binned_spectrum+2*binned_error,
+            plt.fill_between(wlgrid[good], binned_spectrum[good]-2*binned_error[good],
+                                binned_spectrum[good]+2*binned_error[good],
                                 alpha=0.2, zorder=-3, color=color, edgecolor='none')
     
     def close(self):
