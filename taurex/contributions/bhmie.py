@@ -40,7 +40,7 @@ class BHMieContribution(Contribution):
         self._mie_type = mie_type.lower()
 
         self._mie_radius = bh_particle_radius
-        self._mix_cloud_mix = bh_cloud_mix
+        self._mix_cloud_mix = bh_clouds_mix
         self._cloud_top_pressure = bh_clouds_topP
         self._cloud_bottom_pressure = bh_clouds_bottomP
 
