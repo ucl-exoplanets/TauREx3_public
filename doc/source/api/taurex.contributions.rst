@@ -48,10 +48,10 @@ SimpleClouds
 Mie Scattering (BH)
 ----------------------------------------
 
-.. automodule:: taurex.contributions.bhmie
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. warning::
+   This is no longer available in the base TauREx 3 since version 3.1.
+   To use this you must install the ``taurex_bhmie`` plugin.
+
 
 Mie Scattering (Lee)
 ----------------------------------------

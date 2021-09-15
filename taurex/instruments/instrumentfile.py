@@ -58,3 +58,7 @@ class InstrumentFile(Instrument):
         wngrid, spectrum, error, grid_width = self._binner.bin_model(model_res)
 
         return wngrid, spectrum, self._noise / math.sqrt(num_observations), grid_width
+
+    @classmethod
+    def input_keywords(self):
+        return ['file', 'fromfile', ]

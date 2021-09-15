@@ -1,6 +1,276 @@
 """The main taurex program"""
 
 
+def parse_keywords(keywords):
+    import tabulate
+    from taurex.parameter.classfactory import ClassFactory
+    cf = ClassFactory()
+    print('\n')
+    if keywords in ('contribs', ):
+        print('')
+        print('-----------------------------------------------')
+        print('-------------Available Contributions-----------')
+        print('-----------------------------------------------')
+        print('')
+        table = [(f'[[{c.__name__}]]',
+                  c.__module__.split('.')[0].split('_')[-1])
+                 for c in cf.contributionKlasses
+                 if hasattr(c, 'input_keywords')]
+        print(tabulate.tabulate(table,
+                                headers=['Header', 'Source'],
+                                tablefmt="fancy_grid"))
+
+    elif keywords in ('chemistry', ):
+        print('')
+        print('-----------------------------------------------')
+        print('-------------Available [Chemistry]-------------')
+        print('-----------------------------------------------')
+        print('')
+        table = [(' / '.join(c.input_keywords()),
+                  f'{c.__name__}',
+                  c.__module__.split('.')[0].split('_')[-1])
+                 for c in cf.chemistryKlasses if hasattr(c, 'input_keywords')]
+        print(tabulate.tabulate(table,
+              headers=['chemistry_type', 'Class', 'Source'],
+              tablefmt="fancy_grid"))
+        print('\n')
+    elif keywords in ('temperature', ):
+        print('')
+        print('-----------------------------------------------')
+        print('-------------Available [Temperature]-----------')
+        print('-----------------------------------------------')
+        print('')
+        table = [(' / '.join(c.input_keywords()),
+                  f'{c.__name__}',
+                  c.__module__.split('.')[0].split('_')[-1])
+                 for c in cf.temperatureKlasses
+                 if hasattr(c, 'input_keywords')]
+        print(tabulate.tabulate(table, 
+                                headers=['profile_type', 'Class', 'Source'],
+                                tablefmt="fancy_grid"))
+        print('\n')
+    elif keywords in ('gas', ):
+        print('')
+        print('-----------------------------------------------')
+        print('-------------Available Gas Profiles------------')
+        print('-----------------------------------------------')
+        print('')
+        table = [(' / '.join(c.input_keywords()),
+                  f'{c.__name__}',
+                  c.__module__.split('.')[0].split('_')[-1])
+                 for c in cf.gasKlasses if hasattr(c, 'input_keywords')]
+
+        print(tabulate.tabulate(table, headers=['gas_type', 'Class', 'Source'],
+                                tablefmt="fancy_grid"))
+        print('\n')
+    elif keywords in ('optimizer', ):
+        print('')
+        print('-----------------------------------------------')
+        print('-------------Available Optimizers--------------')
+        print('-----------------------------------------------')
+        print('')
+        table = [(' / '.join(c.input_keywords()),
+                 f'{c.__name__}',
+                  c.__module__.split('.')[0].split('_')[-1])
+                 for c in cf.optimizerKlasses if hasattr(c, 'input_keywords')]
+        print(tabulate.tabulate(table, headers=['optimizer',
+                                                'Class',
+                                                'Source'],
+                                tablefmt="fancy_grid"))
+        print('\n')
+    elif keywords in ('prior', ):
+        print('')
+        print('-----------------------------------------------')
+        print('-------------Available Priors------------------')
+        print('-----------------------------------------------')
+        print('')
+        table = [(f'{c.__name__}',
+                 c.__module__.split('.')[0].split('_')[-1])
+                 for c in cf.priorKlasses
+                 if hasattr(c, 'input_keywords')]
+        print(tabulate.tabulate(table, 
+                                headers=['prior', 'Class', 'Source'],
+                                tablefmt="fancy_grid"))
+        print('\n')
+    elif keywords in ('model', ):
+        print('')
+        print('-----------------------------------------------')
+        print('-------------Available Forward [Model]s--------')
+        print('-----------------------------------------------')
+        print('')
+        table = [(' / '.join(c.input_keywords()),
+                  f'{c.__name__}', c.__module__.split('.')[0].split('_')[-1])
+                 for c in cf.modelKlasses if hasattr(c, 'input_keywords')]
+        print(tabulate.tabulate(table,
+                                headers=['model_type', 'Class', 'Source'],
+                                tablefmt="fancy_grid"))
+        print('\n')
+    elif keywords in ('pressure', ):
+        print('')
+        print('-----------------------------------------------')
+        print('-------------Available [Pressure]s-------------')
+        print('-----------------------------------------------')
+        print('')
+        table = [(' / '.join(c.input_keywords()), f'{c.__name__}',
+                 c.__module__.split('.')[0].split('_')[-1])
+                 for c in cf.pressureKlasses]
+        print(tabulate.tabulate(table,
+                                headers=['profile_type', 'Class', 'Source'], 
+                                tablefmt="fancy_grid"))
+        print('\n')
+
+
+def show_parameters(model):
+    import tabulate
+    print('')
+    print('-----------------------------------------------')
+    print('------Available Retrieval Parameters-----------')
+    print('-----------------------------------------------')
+    print('')
+
+    keywords = [k for k, v in model.fittingParameters.items()]
+
+    short_desc = []
+    for k, v in model.fittingParameters.items():
+        doc = v[2].__doc__
+        if doc is None or doc == 'None':
+            short_desc.append('')
+        else:
+            split = doc.split('\n')
+            for spl in split:
+                if len(spl) > 0:
+                    s = spl
+                    break
+
+            short_desc.append(s)
+
+    output = tabulate.tabulate(zip(keywords,  short_desc),
+                               headers=['Param Name', 'Short Desc'],
+                               tablefmt="fancy_grid")
+    print(output)
+    print('\n\n')
+
+    import tabulate
+    print('')
+    print('-----------------------------------------------')
+    print('------Available Computable Parameters----------')
+    print('-----------------------------------------------')
+    print('')
+
+    keywords = [k for k, v in model.derivedParameters.items()]
+
+    short_desc = []
+    for k, v in model.derivedParameters.items():
+        doc = v[2].__doc__
+        if doc is None or doc == 'None':
+            short_desc.append('')
+        else:
+            split = doc.split('\n')
+            for spl in split:
+                if len(spl) > 0:
+                    s = spl
+                    break
+
+            short_desc.append(s)
+
+    output = tabulate.tabulate(zip(keywords,  short_desc),
+                               headers=['Param Name', 'Short Desc'],
+                               tablefmt="fancy_grid")
+    print(output)
+    print('\n\n')
+
+
+def show_plugins():
+    from taurex.parameter.classfactory import ClassFactory
+    from taurex.log import setLogLevel
+    import logging
+    setLogLevel(logging.ERROR)
+
+    successful_plugins, failed_plugins = ClassFactory().discover_plugins()
+
+    print('\nSuccessfully loaded plugins')
+    print('---------------------------')
+    for k, v in successful_plugins.items():
+        print(k)
+
+    print('\n\nFailed plugins')
+    print('---------------------------')
+    for k, v in failed_plugins.items():
+        print(k)
+        print(f'Reason: {v}')
+    
+    print('\n')
+
+
+def output_citations(model, instrument, optimizer):
+    from taurex.mpi import barrier, get_rank
+
+    barrier()
+    bib_tex = None
+    citation_string = None
+    if get_rank() == 0:
+        print('\n\n----------------------------------------------------------')
+        print('----------------------Bibiliography-----------------------')
+        print('----------------------------------------------------------')
+
+        print('If you use any of the results from this run please cite')
+        print('the following publications:')
+        
+        citation_string = ''
+        all_citations = []
+        print('\n')
+        print('TauREx-Related')
+        print('--------------\n')
+        from taurex._citation import __citations__, taurex_citation
+        citation_string += __citations__
+        all_citations.extend(taurex_citation.citations())
+        print(__citations__)
+
+        print('Forward model')
+        print('-------------\n')
+
+        cite = model.nice_citation()
+        all_citations.extend(model.citations())
+        citation_string += cite
+        print(cite)
+
+        if optimizer is not None:
+            cite = optimizer.nice_citation()
+            all_citations.extend(optimizer.citations())
+            if len(cite) > 0:
+                citation_string += cite
+                print('Optimizer')
+                print('---------\n')
+                print(cite)
+
+        if instrument is not None:
+            cite = instrument.nice_citation()
+            all_citations.extend(instrument.citations())
+            if len(cite) > 0:
+                citation_string += cite
+                print('Instrument')
+                print('---------\n')
+                print(cite)
+
+        from taurex.core import to_bibtex
+        bib_tex = to_bibtex(all_citations)
+    
+    barrier()
+
+    return bib_tex, citation_string
+
+def only_bibtex(filename, pp):
+    model = pp.generate_appropriate_model()
+    instrument = pp.generate_instrument()[0]
+    optimizer = pp.generate_optimizer()
+
+    bib_tex, citation_string = output_citations(model, instrument, optimizer)
+    if bib_tex:
+        with open(filename, 'w') as f:
+            f.write(bib_tex)
+
+
+
 def main():
     import argparse
     import datetime
@@ -11,7 +281,7 @@ def main():
     from taurex.log.logger import root_logger
     from taurex.parameter import ParameterParser
     from taurex.output.hdf5 import HDF5Output
-    from taurex.util.output import generate_profile_dict, store_contributions
+    from taurex.util.output import store_contributions
     from .taurexdefs import OutputSize
     from . import __version__ as version
 
@@ -20,7 +290,7 @@ def main():
     parser = argparse.ArgumentParser(description='TauREx {}'.format(version))
 
     parser.add_argument("-i", "--input", dest='input_file', type=str,
-                        required=True, help="Input par file to pass")
+                        help="Input par file to pass")
 
     parser.add_argument("-R", "--retrieval", dest='retrieval', default=False,
                         help="When set, runs retrieval", action='store_true')
@@ -50,9 +320,44 @@ def main():
 
     parser.add_argument("-S", "--save-spectrum",
                         dest='save_spectrum', type=str)
+
+    parser.add_argument('-v', "--version", dest='version', default=False,
+                        help="Display version", action='store_true')
+
+    parser.add_argument("--plugins", dest='plugins', default=False,
+                        help="Display plugins", action='store_true')
+
+    parser.add_argument("--fitparams", dest='fitparams', default=False,
+                        help="Display available fitting params", 
+                        action='store_true')
+
+    parser.add_argument("--bibtex", dest='bibtex', type=str,
+                        help="Output bibliography .bib to filepath")
+
+    parser.add_argument("--only-bib", dest='no_run',
+                        help="Do not run anything, only store bibtex (must have --bibtex)", default=False, action='store_true')
+
+    parser.add_argument("--keywords", dest="keywords", type=str)
+
     args = parser.parse_args()
 
     output_size = OutputSize.heavy
+
+    if args.version:
+        print(version)
+        return
+
+    if args.plugins:
+        show_plugins()
+        return
+
+    if args.keywords:
+        parse_keywords(args.keywords)
+        return
+
+    if args.input_file is None:
+        print('Fatal: No input file specified.')
+        return
 
     if args.light:
         output_size = OutputSize.light
@@ -73,16 +378,27 @@ def main():
 
     # Setup global parameters
     pp.setup_globals()
-    # Generate a model from the input
-    model = pp.generate_appropriate_model()
 
-    # build the model
-    model.build()
+    if args.no_run and args.bibtex:
+        return only_bibtex(args.bibtex, pp)
 
     # Get the spectrum
     observation = pp.generate_observation()
 
     binning = pp.generate_binning()
+
+
+    # Generate a model from the input
+    model = pp.generate_appropriate_model(obs=observation)
+
+    # build the model
+    model.build()
+
+    if args.fitparams:
+        show_parameters(model)
+        return
+
+
 
     wngrid = None
 
@@ -155,29 +471,7 @@ def main():
         optimizer = pp.generate_optimizer()
         optimizer.set_model(model)
         optimizer.set_observed(observation)
-
-        fitting_parameters = pp.generate_fitting_parameters()
-
-        for key, value in fitting_parameters.items():
-            fit = value['fit']
-            bounds = value['bounds']
-            mode = value['mode']
-            factor = value['factor']
-
-            if fit:
-                logging.info('Fitting: {}'.format(key))
-                optimizer.enable_fit(key)
-            else:
-                optimizer.disable_fit(key)
-
-            if factor:
-                optimizer.set_factor_boundary(key, factor)
-
-            if bounds:
-                optimizer.set_boundary(key, bounds)
-
-            if mode:
-                optimizer.set_mode(key, mode.lower())
+        pp.setup_optimizer(optimizer)
 
         start_time = time.time()
         solution = optimizer.fit(output_size=output_size)
@@ -226,7 +520,7 @@ def main():
                 obs = o.create_group('Observed')
                 observation.write(obs)
 
-            profiles = generate_profile_dict(model)
+            profiles = model.generate_profiles()
             spectrum = \
                 binning.generate_spectrum_output(result,
                                                  output_size=output_size)
@@ -238,8 +532,13 @@ def main():
                 spectrum['instrument_spectrum'] = inst_result[1]
                 spectrum['instrument_noise'] = inst_result[2]
 
-            spectrum['Contributions'] = \
-                store_contributions(binning, model, output_size=output_size-3)
+            try:
+                spectrum['Contributions'] = \
+                    store_contributions(binning, model, 
+                                        output_size=output_size-3)
+            except Exception:
+                pass
+
             if solution is not None:
                 out.store_dictionary(solution, group_name='Solutions')
                 priors = {}
@@ -252,6 +551,18 @@ def main():
 
             if optimizer:
                 optimizer.write(o)
+
+    bib_tex, citation_string = output_citations(model, instrument, optimizer)
+
+    if args.output_file and bib_tex and citation_string:
+        with HDF5Output(args.output_file, append=True) as o:
+            bib = o.create_group('Bibliography')
+            bib.write_string('short_form', citation_string)
+            bib.write_string('bibtex', bib_tex)
+
+    if args.bibtex and bib_tex and citation_string:
+        with open(args.bibtex, 'w') as f:
+            f.write(bib_tex)
 
     root_logger.info('TauREx PROGRAM END AT %s s', datetime.datetime.now())
 

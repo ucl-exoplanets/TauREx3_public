@@ -8,6 +8,18 @@ class Opacity(Logger):
 
     """
 
+    @classmethod
+    def discover(cls):
+        """
+        Class method, used to discover molecular opacities
+        of this type. 
+        """
+        raise NotImplementedError
+
+    @classmethod
+    def priority(cls):
+        return 100
+
     def __init__(self, name):
         super().__init__(name)
 
@@ -32,6 +44,9 @@ class Opacity(Logger):
         raise NotImplementedError
 
     def compute_opacity(self, temperature, pressure, wngrid=None):
+        """
+        Must return in units of cm2
+        """
         raise NotImplementedError
 
     def opacity(self, temperature, pressure, wngrid=None):

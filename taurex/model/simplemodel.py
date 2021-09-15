@@ -146,6 +146,9 @@ class SimpleForwardModel(ForwardModel):
 
             self._initialized = True
 
+        # Setup any photochemistry
+        self._chemistry.set_star_planet(self.star, self.planet)
+
         # Now initialize the gas profile real
         self._chemistry.initialize_chemistry(self.pressure.nLayers,
                                              self.temperatureProfile,
@@ -179,6 +182,30 @@ class SimpleForwardModel(ForwardModel):
         self.debug('Available Fitting params: %s',
                    list(self._fitting_parameters.keys()))
 
+    def collect_derived_parameters(self):
+        """
+        Collects all derived parameters from all
+        profiles within the forward model
+        """
+
+        self._derived_parameters = {}
+        self._derived_parameters.update(self.derived_parameters())
+        self._derived_parameters.update(self._planet.derived_parameters())
+        if self._star is not None:
+            self._derived_parameters.update(self._star.derived_parameters())
+        self._derived_parameters.update(self.pressure.derived_parameters())
+
+        self._derived_parameters.update(
+            self._temperature_profile.derived_parameters())
+
+        self._derived_parameters.update(self._chemistry.derived_parameters())
+
+        for contrib in self.contribution_list:
+            self._derived_parameters.update(contrib.derived_parameters())
+
+        self.debug('Available derived params: %s',
+                   list(self._derived_parameters.keys()))
+
     def build(self):
         """
         Build the forward model. Must be called at least
@@ -191,6 +218,7 @@ class SimpleForwardModel(ForwardModel):
         self._compute_inital_mu()
         self.info('Collecting paramters')
         self.collect_fitting_parameters()
+        self.collect_derived_parameters()
         self.info('Setting up profiles')
         self.initialize_profiles()
 
@@ -212,40 +240,52 @@ class SimpleForwardModel(ForwardModel):
 
         """
 
-        from taurex.constants import KBOLTZ
+        # from taurex.constants import KBOLTZ
         if mu_profile is None:
             mu_profile = self._chemistry.muProfile
 
-        # build the altitude profile from the bottom up
-        nlayers = self.pressure.nLayers
-        H = np.zeros(nlayers)
-        g = np.zeros(nlayers)
-        z = np.zeros(nlayers)
+        # # build the altitude profile from the bottom up
+        # nlayers = self.pressure.nLayers
+        # H = np.zeros(nlayers)
+        # g = np.zeros(nlayers)
+        # z = np.zeros(nlayers)
+        # z_center = np.zeros(nlayers)
+        # deltaz = np.zeros(nlayers+1)
+        # zb = np.zeros(nlayers+1)
 
-        # surface gravity (0th layer)
-        g[0] = self._planet.gravity
-        # scaleheight at the surface (0th layer)
-        H[0] = (KBOLTZ*self.temperatureProfile[0])/(mu_profile[0]*g[0])
+        # # surface gravity (0th layer)
+        # g[0] = self._planet.gravity
+        # # scaleheight at the surface (0th layer)
+        # H[0] = (KBOLTZ*self.temperatureProfile[0])/(mu_profile[0]*g[0])
+        # #####
+        # ####
+        # ####
 
-        for i in range(1, nlayers):
-            deltaz = (-1.)*H[i-1]*np.log(
-                self.pressure.pressure_profile_levels[i] /
-                self.pressure.pressure_profile_levels[i-1])
+        # for i in range(1, nlayers+1):
+        #     deltaz[i] = (-1.)*H[i-1]*np.log(
+        #         self.pressure.pressure_profile_levels[i] /
+        #         self.pressure.pressure_profile_levels[i-1])
+        #     zb[i] = zb[i-1] + deltaz[i]
+        #     if i < nlayers:
+        #         z[i] = z[i-1] + deltaz[i]  # altitude at the i-th layer
 
-            z[i] = z[i-1] + deltaz  # altitude at the i-th layer
+        #         with np.errstate(over='ignore'):
+        #             # gravity at the i-th layer
+        #             g[i] = self._planet.gravity_at_height(z[i])
+        #             self.debug('G[%s] = %s', i, g[i])
 
-            with np.errstate(over='ignore'):
-                # gravity at the i-th layer
-                g[i] = self._planet.gravity_at_height(z[i])
-                self.debug('G[%s] = %s', i, g[i])
-
-            with np.errstate(divide='ignore'):
-                H[i] = (KBOLTZ*self.temperatureProfile[i])/(mu_profile[i]*g[i])
-
-        self.altitude_profile = z
-        self.scaleheight_profile = H
-        self.gravity_profile = g
-
+        #         with np.errstate(divide='ignore'):
+        #             H[i] = (KBOLTZ*self.temperatureProfile[i])/(mu_profile[i]*g[i])
+        Pl = self.pressure.pressure_profile_levels
+        z, H, g, deltaz = \
+            self.planet.calculate_scale_properties(self.temperatureProfile,
+                                                   Pl,
+                                                   mu_profile)
+        self.altitude_profile = z[:-1]
+        self.scaleheight_profile = H[:-1]
+        self.gravity_profile = g[:-1]
+        self.altitude_boundaries = z
+        self.deltaz = deltaz
     @property
     def pressureProfile(self):
         """
@@ -337,11 +377,20 @@ class SimpleForwardModel(ForwardModel):
         """
         from taurex.exceptions import InvalidModelException
         from taurex.cache.opacitycache import OpacityCache
+        from taurex.cache import GlobalCache
+
+        cacher = OpacityCache()
+
+        if GlobalCache()['opacity_method'] == 'ktables':
+            from taurex.cache.ktablecache import KTableCache 
+            cacher = KTableCache()
+
+
 
         active_gases = self.chemistry.activeGases
 
         wavenumbergrid = \
-            [OpacityCache()[gas].wavenumberGrid for gas in active_gases]
+            [cacher[gas].wavenumberGrid for gas in active_gases]
 
         current_grid = None
         for wn in wavenumbergrid:
@@ -352,7 +401,7 @@ class SimpleForwardModel(ForwardModel):
 
         if current_grid is None:
             self.error('No active molecules detected')
-            self.error('Most likely no cross-sections were detected')
+            self.error('Most likely no cross-sections/ktables were detected')
             raise InvalidModelException('No active absorbing molecules')
 
         return current_grid
@@ -486,6 +535,13 @@ class SimpleForwardModel(ForwardModel):
         tp_profiles = OnlineVariance()
         active_gases = OnlineVariance()
         inactive_gases = OnlineVariance()
+        cond = None
+
+        has_condensates = self.chemistry.hasCondensates
+
+        if has_condensates:
+            cond = OnlineVariance()
+
 
         if binner is not None:
             binned_spectrum = OnlineVariance()
@@ -504,6 +560,10 @@ class SimpleForwardModel(ForwardModel):
             inactive_gases.update(self.chemistry.inactiveGasMixProfile,
                                   weight=weight)
 
+            if cond is not None:
+                cond.update(self.chemistry.condensateMixProfile,
+                            weight=weight)
+
             native_spectrum.update(native, weight=weight)
 
             if binned_spectrum is not None:
@@ -520,6 +580,9 @@ class SimpleForwardModel(ForwardModel):
         profile_dict['temp_profile_std'] = tp_std
         profile_dict['active_mix_profile_std'] = active_std
         profile_dict['inactive_mix_profile_std'] = inactive_std
+        if cond is not None:
+            profile_dict['condensate_profile_std'] = \
+                np.sqrt(cond.parallelVariance())
 
         spectrum_dict['native_std'] = \
             np.sqrt(native_spectrum.parallelVariance())
@@ -533,6 +596,14 @@ class SimpleForwardModel(ForwardModel):
     def path_integral(self, wngrid, return_contrib):
         raise NotImplementedError
 
+    def generate_profiles(self):
+        from taurex.util.output import generate_profile_dict
+        prof = generate_profile_dict(self)
+        prof['mu_profile'] = self.chemistry.muProfile
+        return prof
+
+
+
     def write(self, output):
         # Run a model if needed
         self.model()
@@ -545,3 +616,13 @@ class SimpleForwardModel(ForwardModel):
         self._planet.write(model)
         self._star.write(model)
         return model
+
+    def citations(self):
+        model_citations = super().citations()
+        model_citations.extend(self.chemistry.citations())
+        model_citations.extend(self.temperature.citations())
+        model_citations.extend(self.pressure.citations())
+        model_citations.extend(self.planet.citations())
+        model_citations.extend(self.star.citations())
+
+        return model_citations

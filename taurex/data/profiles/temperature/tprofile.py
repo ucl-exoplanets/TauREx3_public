@@ -1,9 +1,9 @@
 from taurex.log import Logger
-from taurex.data.fittable import Fittable
+from taurex.data.fittable import Fittable, derivedparam
 from taurex.output.writeable import Writeable
-
-
-class TemperatureProfile(Fittable, Logger, Writeable):
+import numpy as np
+from taurex.data.citation import Citable
+class TemperatureProfile(Fittable, Logger, Writeable, Citable):
     """
 
     *Abstract Class*
@@ -63,3 +63,17 @@ class TemperatureProfile(Fittable, Logger, Writeable):
         temperature.write_string('temperature_type', self.__class__.__name__)
 
         return temperature
+
+    @derivedparam(param_name='avg_T', param_latex='$\\bar{T}$', compute=False)
+    def averageTemperature(self):
+        """
+        Average temperature across all layers
+        """
+        return np.mean(self.profile)
+    
+    @classmethod
+    def input_keywords(cls):
+        """
+        Return all input keywords
+        """
+        raise NotImplementedError

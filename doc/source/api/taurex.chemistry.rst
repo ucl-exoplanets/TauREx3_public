@@ -10,14 +10,21 @@ Base
    :undoc-members:
    :show-inheritance:
 
+Base (Auto)
+-----------
+
+.. automodule:: taurex.data.profiles.chemistry.autochemistry
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 
 Equilibrium Chemistry (ACE)
 ---------------------------
 
-.. automodule:: taurex.data.profiles.chemistry.acechemistry
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. warning::
+   This is no longer available in the base TauREx 3 since version 3.1.
+   To use this you must install the ``taurex_ace`` plugin.
 
 Free chemistry
 --------------

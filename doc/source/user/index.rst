@@ -14,6 +14,7 @@ the standalone ``taurex`` program and the library
     MPI <mpi>
     Supported Data Formats <support_data_formats>
     taurex program <taurex/index>
+    Plugins <plugins>
     Library <library/index>
 
 

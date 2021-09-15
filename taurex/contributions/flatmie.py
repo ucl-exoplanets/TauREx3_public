@@ -136,3 +136,7 @@ class FlatMieContribution(Contribution):
         contrib.write_scalar('flat_bottomP', self._mie_bottom_pressure)
         contrib.write_scalar('flat_topP', self._mie_top_pressure)
         return contrib
+
+    @classmethod
+    def input_keywords(self):
+        return ['FlatMie', ]

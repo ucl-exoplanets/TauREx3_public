@@ -5,7 +5,34 @@ import numpy as np
 
 class ExoTransmitOpacity(InterpolatingOpacity):
 
-    def __init__(self, filename, interpolation_mode='linear', in_memory=False):
+
+    @classmethod
+    def discover(cls):
+        import os
+        import glob
+        import pathlib
+        from taurex.cache import GlobalCache
+        from taurex.util.util import sanitize_molecule_string
+
+        path = GlobalCache()['xsec_path']
+        if path is None:
+            return []
+        path = os.path.join(path, '*.dat')
+
+        files = glob.glob(path)
+
+        discovery = []
+
+        interp = GlobalCache()['xsec_interpolation'] or 'linear'
+
+        for f in files:
+            mol_name = sanitize_molecule_string(pathlib.Path(f).stem[4:])
+            discovery.append((mol_name, [f, interp]))
+
+        return discovery
+
+
+    def __init__(self, filename, interpolation_mode='linear'):
 
         super().__init__('ExoOpacity:{}'.format(
                             pathlib.Path(filename).stem[4:]),
@@ -13,7 +40,6 @@ class ExoTransmitOpacity(InterpolatingOpacity):
 
         self._filename = filename
         self._molecule_name = pathlib.Path(filename).stem[4:]
-        self.in_memory = in_memory
         self._load_exo_transmit(filename)
 
     def _load_exo_transmit(self, filename):

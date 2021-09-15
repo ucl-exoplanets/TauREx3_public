@@ -64,3 +64,7 @@ class ArrayGas(Gas):
         gas_entry.write_array('mix_ratio_array', self._mix_ratio_array)
 
         return gas_entry
+
+    @classmethod
+    def input_keywords(self):
+        return ['array', 'fromarray' ]

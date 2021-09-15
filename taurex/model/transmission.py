@@ -48,7 +48,8 @@ class TransmissionModel(SimpleForwardModel):
                  chemistry=None,
                  nlayers=100,
                  atm_min_pressure=1e-4,
-                 atm_max_pressure=1e6):
+                 atm_max_pressure=1e6,
+                 new_path_method=False):
 
         super().__init__(self.__class__.__name__, planet,
                          star,
@@ -58,8 +59,8 @@ class TransmissionModel(SimpleForwardModel):
                          nlayers,
                          atm_min_pressure,
                          atm_max_pressure)
-
-    def compute_path_length(self, dz):
+        self.new_method = new_path_method
+    def compute_path_length_old(self, dz):
 
         dl = []
 
@@ -86,19 +87,38 @@ class TransmissionModel(SimpleForwardModel):
             dl.append(k*2.0)
         return dl
 
+    def compute_path_length(self):
+        from taurex.util.geometry import parallel_vector
+        altitude_boundaries = self.altitude_boundaries
+        radius = self.planet.fullRadius
+
+        # Generate our line of sight paths
+        viewer, tangent = parallel_vector(radius, self.altitude_profile + self.deltaz/2,
+                                          altitude_boundaries.max())
+
+        path_lengths = self.planet.compute_path_length(altitude_boundaries,
+                                                       viewer, tangent)
+        
+        return [l for idx, l in path_lengths]
+
+
+
+
     def path_integral(self, wngrid, return_contrib):
 
-        dz = np.gradient(self.altitudeProfile)
-
-        wngrid_size = wngrid.shape[0]
-
-        path_length = self.compute_path_length(dz)
-
-        density_profile = self.densityProfile
+        dz = self.deltaz
 
         total_layers = self.nLayers
 
-        path_length = self.compute_path_length(dz)
+        wngrid_size = wngrid.shape[0]
+
+
+        density_profile = self.densityProfile
+
+        if self.new_method:
+            path_length = self.compute_path_length()
+        else:
+            path_length = self.compute_path_length_old(dz)
         self.path_length = path_length
 
         tau = np.zeros(shape=(total_layers, wngrid_size), dtype=np.float64)
@@ -132,3 +152,8 @@ class TransmissionModel(SimpleForwardModel):
 
         integral = np.sum((pradius+ap)*(1.0-tau)*_dz*2.0, axis=0)
         return ((pradius**2.0) + integral)/(sradius**2), tau
+
+
+    @classmethod
+    def input_keywords(self):
+        return ['transmission', 'transit' ]

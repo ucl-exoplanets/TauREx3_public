@@ -68,11 +68,9 @@ class PolyChordOptimizer(Optimizer):
             # print(type(cube))
             cube = [0.0]*ndim
 
-            for idx, bounds in enumerate(self.fit_boundaries):
+            for idx, priors in enumerate(self.fitting_priors):
                 # print(idx,self.fitting_parameters[idx])
-                bound_min, bound_max = bounds
-                cube[idx] = (hypercube[idx] *
-                             (bound_max-bound_min)) + bound_min
+                cube[idx] = priors.sample(hypercube[idx])
                 #print('CUBE idx',cube[idx])
             # print('-----------')
             return cube
@@ -255,16 +253,13 @@ class PolyChordOptimizer(Optimizer):
 
         return stats
 
-    def sample_parameters(self, solution):
-        from taurex.util.util import random_int_iter
-        solution_id = 'solution{}'.format(solution)
-        samples = self._polychord_output['solutions'][solution_id]['tracedata']
-        weights = self._polychord_output['solutions'][solution_id]['weights']
 
-        for x in random_int_iter(samples.shape[0], self._sigma_fraction):
-            w = weights[x]+1e-300
+    def get_samples(self, solution_idx):
+        return self._polychord_output['solutions'][f'solution{solution_idx}']['tracedata']
 
-            yield samples[x, :], w
+    def get_weights(self, solution_idx):
+        return self._polychord_output['solutions'][f'solution{solution_idx}']['weights']
+
 
     def get_solution(self):
         names = self.fit_names
@@ -276,8 +271,6 @@ class PolyChordOptimizer(Optimizer):
         for k, v in solutions:
             solution_idx = int(k[8:])
             for p_name, p_value in v['fit_params'].items():
-                if p_name in ('mu_derived',):
-                    continue
                 idx = names.index(p_name)
                 opt_map[idx] = p_value['nest_map']
                 opt_values[idx] = p_value['value']
@@ -286,3 +279,28 @@ class PolyChordOptimizer(Optimizer):
                 ('fit_params', v['fit_params']),
                 ('tracedata', v['tracedata']),
                 ('weights', v['weights'])]
+
+
+    @classmethod
+    def input_keywords(self):
+        return ['polychord', 'pypolychord', ]
+
+    BIBTEX_ENTRIES = [
+        """
+        @article{polychord,
+            author = {Handley, W. J. and Hobson, M. P. and Lasenby, A. N.},
+            title = "{polychord: next-generation nested sampling}",
+            journal = {Monthly Notices of the Royal Astronomical Society},
+            volume = {453},
+            number = {4},
+            pages = {4384-4398},
+            year = {2015},
+            month = {09},
+            abstract = "{polychord is a novel nested sampling algorithm tailored for high-dimensional parameter spaces. This paper coincides with the release of polychord v1.6, and provides an extensive account of the algorithm. polychord utilizes slice sampling at each iteration to sample within the hard likelihood constraint of nested sampling. It can identify and evolve separate modes of a posterior semi-independently, and is parallelized using openmpi. It is capable of exploiting a hierarchy of parameter speeds such as those present in cosmomc and camb, and is now in use in the cosmochord and modechord codes. polychord is available for download from http://ccpforge.cse.rl.ac.uk/gf/project/polychord/.}",
+            issn = {0035-8711},
+            doi = {10.1093/mnras/stv1911},
+            url = {https://doi.org/10.1093/mnras/stv1911},
+            eprint = {http://oup.prod.sis.lan/mnras/article-pdf/453/4/4384/8034904/stv1911.pdf},
+        }
+        """,
+    ]

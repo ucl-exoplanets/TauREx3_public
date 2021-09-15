@@ -2,7 +2,15 @@ from .tprofile import TemperatureProfile
 import numpy as np
 from taurex.data.fittable import fitparam
 from taurex.util import movingaverage
+from taurex.exceptions import InvalidModelException
 
+
+class InvalidTemperatureException(InvalidModelException):
+    """
+    Exception that is called when atmosphere mix is greater
+    than unity
+    """
+    pass
 
 class NPoint(TemperatureProfile):
     """
@@ -48,12 +56,15 @@ class NPoint(TemperatureProfile):
         smoothing_window : int
             smoothing window
 
+        limit_slope : int
+            
+
 
     """
 
     def __init__(self, T_surface=1500.0, T_top=200.0, P_surface=None,
                  P_top=None, temperature_points=[], pressure_points=[],
-                 smoothing_window=10):
+                 smoothing_window=10, limit_slope=9999999):
         super().__init__('{}Point'.format(len(temperature_points)+2))
 
         if not hasattr(temperature_points, '__len__'):
@@ -78,8 +89,11 @@ class NPoint(TemperatureProfile):
         self._P_surface = P_surface
         self._P_top = P_top
         self._smooth_window = smoothing_window
+        self._limit_slope = limit_slope
         self.generate_pressure_fitting_params()
         self.generate_temperature_fitting_params()
+
+    
 
     @fitparam(param_name='T_surface',
               param_latex='$T_\\mathrm{surf}$',
@@ -181,6 +195,19 @@ class NPoint(TemperatureProfile):
             self.add_fittable_param(param_name, param_latex, fget_point,
                                     fset_point, 'linear', default_fit, bounds)
 
+    def check_profile(self, Ppt, Tpt):
+        
+        if(any(Ppt[i] <= Ppt[i + 1] for i in range(len(Ppt)-1))): 
+            self.warning('Temperature profile is not valid - a pressure point is inverted')
+            raise InvalidTemperatureException
+
+        if(any(abs((Tpt[i+1]-Tpt[i])/(np.log10(Ppt[i+1])-np.log10(Ppt[i]))) >= self._limit_slope for i in range(len(Ppt)-1))): 
+            self.warning('Temperature profile is not valid - profile slope too high')
+            raise InvalidTemperatureException
+
+
+
+
     @property
     def profile(self):
 
@@ -196,10 +223,15 @@ class NPoint(TemperatureProfile):
 
         Pnodes = [Psurface, *self._p_points, Ptop]
 
+        self.check_profile(Pnodes, Tnodes)
+
         smooth_window = self._smooth_window
 
-        TP = np.interp((np.log(self.pressure_profile[::-1])),
-                       np.log(Pnodes[::-1]), Tnodes[::-1])
+        if np.all(Tnodes == Tnodes[0]):
+            return np.ones_like(self.pressure_profile)*Tnodes[0]
+
+        TP = np.interp((np.log10(self.pressure_profile[::-1])),
+                       np.log10(Pnodes[::-1]), Tnodes[::-1])
 
         # smoothing T-P profile
         wsize = int(self.nlayers*(smooth_window / 100.0))
@@ -209,7 +241,10 @@ class NPoint(TemperatureProfile):
         border = np.int((len(TP) - len(TP_smooth))/2)
 
         foo = TP[::-1]
-        foo[border:-border] = TP_smooth[::-1]
+        if len(TP_smooth) == len(foo):
+            foo = TP_smooth[::-1]
+        else:
+            foo[border:-border] = TP_smooth[::-1]
 
         return foo
 
@@ -234,3 +269,10 @@ class NPoint(TemperatureProfile):
         temperature.write_scalar('smoothing_window', self._smooth_window)
 
         return temperature
+
+    @classmethod
+    def input_keywords(cls):
+        """
+        Return all input keywords
+        """
+        return ['npoint', ]

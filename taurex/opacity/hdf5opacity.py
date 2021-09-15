@@ -2,13 +2,46 @@ from .interpolateopacity import InterpolatingOpacity
 import pickle
 import numpy as np
 import pathlib
-
+from taurex.mpi import allocate_as_shared
 
 class HDF5Opacity(InterpolatingOpacity):
     """
     This is the base class for computing opactities
 
     """
+
+    @classmethod
+    def priority(cls):
+        return 5
+
+    @classmethod
+    def discover(cls):
+        import os
+        import glob
+        import pathlib
+        from taurex.cache import GlobalCache
+        from taurex.util.util import sanitize_molecule_string
+
+        path = GlobalCache()['xsec_path']
+        if path is None:
+            return []
+        path = [os.path.join(path, '*.h5'), os.path.join(path, '*.hdf5')]
+        file_list = [f for glist in path for f in glob.glob(glist)]
+
+        discovery = []
+
+        interp = GlobalCache()['xsec_interpolation'] or 'linear'
+        mem = GlobalCache()['xsec_in_memory'] or True
+
+        for f in file_list:
+            op = HDF5Opacity(f, interpolation_mode='linear', in_memory=False)
+            mol_name = op.moleculeName
+            discovery.append((mol_name, [f, interp, mem]))
+            #op._spec_dict.close()
+            del op
+
+        return discovery
+
 
     def __init__(self, filename, interpolation_mode='exp', in_memory=False):
         super().__init__('HDF5Opacity:{}'.format(pathlib.Path(filename).stem[0:10]),
@@ -52,7 +85,7 @@ class HDF5Opacity(InterpolatingOpacity):
         self._pressure_grid = self._spec_dict['p'][:]*p_conversion
 
         if self.in_memory:
-            self._xsec_grid = self._spec_dict['xsecarr'][...]
+            self._xsec_grid = allocate_as_shared(self._spec_dict['xsecarr'][...], logger=self)
         else:
             self._xsec_grid = self._spec_dict['xsecarr']
 
@@ -67,10 +100,18 @@ class HDF5Opacity(InterpolatingOpacity):
         except (UnicodeDecodeError, AttributeError,):
             pass
 
+        from taurex.util.util import ensure_string_utf8
+
+        self._molecule_name = ensure_string_utf8(self._molecule_name)
+
         self._min_pressure = self._pressure_grid.min()
         self._max_pressure = self._pressure_grid.max()
         self._min_temperature = self._temperature_grid.min()
         self._max_temperature = self._temperature_grid.max()
+
+        if self.in_memory:
+            self._spec_dict.close()
+        
 
     @property
     def wavenumberGrid(self):

@@ -9,7 +9,7 @@ run and perform retrievals.**
 successfully and is not specific to TauREx3**
 
 There are some optimizers
-that can make use of it to significantly speed up retrievals.
+that can make use of MPI to significantly speed up retrievals.
 Specifically the Multinest and PolyChord optimizers. Considering
 most people have difficulty with installing it, this guide
 has been written to make the experience as smooth as possible.
@@ -35,10 +35,10 @@ system
 
 You should get a similar output like so::
 
-    Hello, World! I am process 0 of 4 on Ahmeds-MacBook-Pro.local.
-    Hello, World! I am process 1 of 4 on Ahmeds-MacBook-Pro.local.
-    Hello, World! I am process 2 of 4 on Ahmeds-MacBook-Pro.local.
-    Hello, World! I am process 3 of 4 on Ahmeds-MacBook-Pro.local.
+    Hello, World! I am process 0 of 4 on blahblah.
+    Hello, World! I am process 1 of 4 on blahblah.
+    Hello, World! I am process 2 of 4 on blahblah.
+    Hello, World! I am process 3 of 4 on blahblah.
 
 Then you are all set! Theres no need to reinstall TauREx3
 as it will now import it successfully when run. 
@@ -53,10 +53,10 @@ as it will now import it successfully when run.
 
 **However** if you get something like this::
 
-    Hello, World! I am process 0 of 1 on Ahmeds-MacBook-Pro.local.
-    Hello, World! I am process 0 of 1 on Ahmeds-MacBook-Pro.local.
-    Hello, World! I am process 0 of 1 on Ahmeds-MacBook-Pro.local.
-    Hello, World! I am process 0 of 1 on Ahmeds-MacBook-Pro.local.
+    Hello, World! I am process 0 of 1 on blahblah.
+    Hello, World! I am process 0 of 1 on blahblah.
+    Hello, World! I am process 0 of 1 on blahblah.
+    Hello, World! I am process 0 of 1 on blahblah.
 
 This means mpi4py has not correctly installed. This likely happens
 in cluster environments with multiple MPI libraries. You can overcome

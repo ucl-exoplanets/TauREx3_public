@@ -211,3 +211,21 @@ class TwoLayerGas(Gas):
         gas_entry.write_scalar('mix_ratio_smoothing', self.mixRatioSmoothing)
 
         return gas_entry
+
+    @classmethod
+    def input_keywords(self):
+        return ['twolayer', '2layer', ]
+
+    BIBTEX_ENTRIES = [
+        """
+        @misc{changeat2019complex,
+            title={Towards a more complex description of chemical profiles in exoplanets retrievals: A 2-layer parameterisation},
+            author={Quentin Changeat and Billy Edwards and Ingo Waldmann and Giovanna Tinetti},
+            year={2019},
+            eprint={1903.11180},
+            archivePrefix={arXiv},
+            primaryClass={astro-ph.EP}
+        }
+        """,
+        
+    ]

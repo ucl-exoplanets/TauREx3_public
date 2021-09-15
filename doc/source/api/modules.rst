@@ -4,6 +4,7 @@ Taurex API Documentation
 .. toctree::
    :maxdepth: 6
 
+   taurex.core
    taurex.binning
    taurex.cache
    taurex.cia
@@ -21,4 +22,5 @@ Taurex API Documentation
    taurex.output
    taurex.util
    taurex.parameter
-   taurex.model.lightcurve
+   taurex.mixin
+   taurex.mpi

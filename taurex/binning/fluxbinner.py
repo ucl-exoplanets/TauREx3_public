@@ -83,6 +83,7 @@ class FluxBinner(Binner):
         """
 
         sorted_input = wngrid.argsort()
+        wngrid = wngrid[sorted_input]
         spectrum = spectrum[..., sorted_input]
         if error is not None:
             error = error[..., sorted_input]
@@ -145,7 +146,7 @@ class FluxBinner(Binner):
 
             sum_weight = np.sum(weight)
 
-            sum_spectrum = np.sum(weight *
+            sum_spectrum = np.sum(weight/sum_weight *
                                   old_spect_flux[..., save_start:save_stop+1],
                                   axis=-1)
 

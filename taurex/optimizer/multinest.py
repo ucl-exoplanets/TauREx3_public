@@ -1,5 +1,5 @@
 from .optimizer import Optimizer
-import pymultinest
+
 import numpy as np
 import os
 from taurex.mpi import get_rank, barrier
@@ -71,7 +71,7 @@ class MultiNestOptimizer(Optimizer):
         self.verbose = verbose_output
 
     def compute_fit(self):
-
+        import pymultinest
         data = self._observed.spectrum
         datastd = self._observed.errorBar
         sqrtpi = np.sqrt(2*np.pi)
@@ -93,10 +93,9 @@ class MultiNestOptimizer(Optimizer):
             # prior distributions called by multinest. Implements a uniform prior
             # converting parameters from normalised grid to uniform prior
             # print(type(cube))
-            for idx, bounds in enumerate(self.fit_boundaries):
+            for idx, priors in enumerate(self.fitting_priors):
                 # print(idx,self.fitting_parameters[idx])
-                bound_min, bound_max = bounds
-                cube[idx] = (cube[idx] * (bound_max-bound_min)) + bound_min
+                cube[idx] = priors.sample(cube[idx])
                 #print('CUBE idx',cube[idx])
             # print('-----------')
         # status = None
@@ -182,7 +181,7 @@ class MultiNestOptimizer(Optimizer):
     # This function is so big and I cannot be arsed to rewrite this in a nicer way, if some angel does it
     # for me then I will buy them TWO beers.
     def store_nest_solutions(self):
-
+        import pymultinest
         self.warning('Store the multinest results')
         NEST_out = {'solutions': {}}
         data = np.loadtxt(os.path.join(self.dir_multinest,
@@ -309,16 +308,11 @@ class MultiNestOptimizer(Optimizer):
         solution['GlobalStats'] = self._multinest_output['NEST_stats']
         return solution
 
-    def sample_parameters(self, solution):
-        from taurex.util.util import random_int_iter
-        solution_id = 'solution{}'.format(solution)
-        samples = self._multinest_output['solutions'][solution_id]['tracedata']
-        weights = self._multinest_output['solutions'][solution_id]['weights']
+    def get_samples(self, solution_idx):
+        return self._multinest_output['solutions'][f'solution{solution_idx}']['tracedata']
 
-        for x in random_int_iter(samples.shape[0], self._sigma_fraction):
-            w = weights[x]+1e-300
-
-            yield samples[x, :], w
+    def get_weights(self, solution_idx):
+        return self._multinest_output['solutions'][f'solution{solution_idx}']['weights']
 
     def get_solution(self):
         names = self.fit_names
@@ -329,8 +323,6 @@ class MultiNestOptimizer(Optimizer):
         for k, v in solutions:
             solution_idx = int(k[8:])
             for p_name, p_value in v['fit_params'].items():
-                if p_name in ('mu_derived',):
-                    continue
                 idx = names.index(p_name)
                 opt_map[idx] = p_value['nest_map']
                 opt_values[idx] = p_value['value']
@@ -341,3 +333,45 @@ class MultiNestOptimizer(Optimizer):
                 ('fit_params', v['fit_params']),
                 ('tracedata', v['tracedata']),
                 ('weights', v['weights'])]
+
+
+    @classmethod
+    def input_keywords(self):
+        return ['multinest','pymultinest', ]
+
+    BIBTEX_ENTRIES = [
+        """
+        @article{ refId0,
+        author = {{Buchner, J.} and {Georgakakis, A.} and {Nandra, K.} and {Hsu, L.} and {Rangel, C.} and {Brightman, M.} and {Merloni, A.} and {Salvato, M.} and {Donley, J.} and {Kocevski, D.}},
+        title = {X-ray spectral modelling of the AGN obscuring region in the
+            CDFS: Bayesian model selection and catalogue},
+        DOI= "10.1051/0004-6361/201322971",
+        url= "https://doi.org/10.1051/0004-6361/201322971",
+        journal = {A\&A},
+        year = 2014,
+        volume = 564,
+        pages = "A125",
+        month = "",
+        }
+        """,
+        """
+        @ARTICLE{Feroz_multinest,
+            author = {{Feroz}, F. and {Hobson}, M.~P. and {Bridges}, M.},
+                title = "{MULTINEST: an efficient and robust Bayesian inference tool for cosmology and particle physics}",
+            journal = {MNRAS},
+            keywords = {methods: data analysis, methods: statistical, Astrophysics},
+                year = "2009",
+                month = "Oct",
+            volume = {398},
+            number = {4},
+                pages = {1601-1614},
+                doi = {10.1111/j.1365-2966.2009.14548.x},
+        archivePrefix = {arXiv},
+            eprint = {0809.3437},
+        primaryClass = {astro-ph},
+            adsurl = {https://ui.adsabs.harvard.edu/abs/2009MNRAS.398.1601F},
+            adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+        }
+        """
+
+    ]

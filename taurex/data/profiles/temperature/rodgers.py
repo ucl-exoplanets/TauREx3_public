@@ -108,3 +108,25 @@ class Rodgers2000(TemperatureProfile):
         temperature.write_array('temperature_layers', self._T_layers)
         temperature.write_scalar('correlation_length', self._tp_corr_length)
         return temperature
+
+    @classmethod
+    def input_keywords(cls):
+        """
+        Return all input keywords
+        """
+        return ['rodgers', 'rodgers2010', ]
+
+    BIBTEX_ENTRIES = [
+        """
+        @MISC{rodger_retrievals,
+            author = {{Rodgers}, Clive D.},
+                title = "{Inverse Methods for Atmospheric Sounding - Theory and Practice}",
+        howpublished = {Inverse Methods for Atmospheric Sounding - Theory and Practice. Series: Series on Atmospheric Oceanic and Planetary Physics},
+                year = "2000",
+                month = "Jan",
+                doi = {10.1142/9789812813718},
+            adsurl = {https://ui.adsabs.harvard.edu/abs/2000SAOPP...2.....R},
+            adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+        }
+        """,
+    ]

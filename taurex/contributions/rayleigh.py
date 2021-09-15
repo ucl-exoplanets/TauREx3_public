@@ -36,7 +36,7 @@ class RayleighContribution(Contribution):
         self._ngrid = wngrid.shape[0]
         self._nmols = 1
         self._nlayers = model.nLayers
-        molecules = model.chemistry.activeGases + model.chemistry.inactiveGases
+        molecules = list(model.chemistry.activeGases) + list(model.chemistry.inactiveGases)
 
         for gasname in molecules:
 
@@ -49,3 +49,18 @@ class RayleighContribution(Contribution):
                     model.chemistry.get_gas_mix_profile(gasname)[:, None]
                 self.sigma_xsec = final_sigma
                 yield gasname, final_sigma
+
+    @classmethod
+    def input_keywords(self):
+        return ['Rayleigh', ]
+    
+    BIBTEX_ENTRIES = [
+        """
+        @book{cox_allen_rayleigh,
+        title={Allen’s astrophysical quantities},
+        author={Cox, Arthur N},
+        year={2015},
+        publisher={Springer}
+        }
+        """
+    ]

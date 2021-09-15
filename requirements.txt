@@ -1,0 +1,13 @@
+astropy
+cached-property
+configobj
+h5py
+llvmlite
+nestle
+numba
+numexpr
+numpy
+scipy
+six
+tabulate
+pybtex

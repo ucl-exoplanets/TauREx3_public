@@ -48,3 +48,11 @@ class Isothermal(TemperatureProfile):
         temperature = super().write(output)
         temperature.write_scalar('T', self._iso_temp)
         return temperature
+
+
+    @classmethod
+    def input_keywords(cls):
+        """
+        Return all input keywords
+        """
+        return ['isothermal', ]

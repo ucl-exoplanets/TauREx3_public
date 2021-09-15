@@ -6,6 +6,7 @@
     Home <self>
     User Guide <user/index>
     Development Guide <devel/index>
+    Plugin Catalogue <plugins_cata>
     Full API <api/modules>
     Citation <citation>
     Project Page <https://github.com/ucl-exoplanets/TauREx3_public/>
@@ -34,7 +35,11 @@ For developers, TauREx3 provides a rich library of classes to
 build your own programs and any new atmospheric parameters you
 create can be used in the standalone program like it was always there!
 
+TauREx3 can be expanded
+
+
 If you use TauREx 3 in you work, please see the guide to :ref:`Citations`.
+
 
 -----------------------------------
 

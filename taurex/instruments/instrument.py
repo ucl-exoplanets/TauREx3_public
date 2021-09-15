@@ -1,7 +1,7 @@
 from taurex.log import Logger
+from taurex.data.citation import Citable
 
-
-class Instrument(Logger):
+class Instrument(Logger, Citable):
     """
     *Abstract class*
 
@@ -32,4 +32,9 @@ class Instrument(Logger):
             Number of observations to simulate
         """
 
+        raise NotImplementedError
+    
+
+    @classmethod
+    def input_keywords(self):
         raise NotImplementedError

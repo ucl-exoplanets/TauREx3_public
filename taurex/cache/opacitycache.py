@@ -4,7 +4,9 @@ Contains caching class for Molecular cross section files
 
 from .singleton import Singleton
 from taurex.log import Logger
-import pathlib
+from .globalcache import GlobalCache
+
+from taurex.core import Singleton
 class OpacityCache(Singleton):
     """
     Implements a lazy load of opacities. A singleton that
@@ -17,24 +19,23 @@ class OpacityCache(Singleton):
 
     >>> opt == opt2
     True
-    
+
     Importantly this class will automatically search directories for cross-sections
     set using the :func:`set_opacity_path` method:
 
     >>> opt.set_opacity_path('path/to/crossections')
+    
 
     Multiple paths can be set as well
 
     >>> opt.set_opacity_path(['/path/to/crosssections','/another/path/to/crosssections'])
-
-    Currently only :obj:`.pickle` files are supported.
 
     To get the cross-section object for a particular molecule use the square bracket operator:
 
     >>> opt['H2O']
     <taurex.opacity.pickleopacity.PickleOpacity at 0x107a60be0>
 
-    This returns a :class:`~taurex.opacity.pickleopacity.PickleOpacity` object for you to compute H2O cross sections from.
+    This returns a :class:`~taurex.opacity.opacity.Opacity` object for you to compute H2O cross sections from.
     When called for the first time, a directory search is performed and, if found, the appropriate cross-section is loaded. Subsequent calls will immediately
     return the already loaded object:
 
@@ -43,13 +44,23 @@ class OpacityCache(Singleton):
     >>> h2o_a == h2o_b
     True
 
-    Lastly if you've got a hot new opacity format, you can try out
-    by manually adding it into the cache:
+    If you have any plugins that include new opacity formats, the cache
+    will automatically detect them. 
+
+    
+
+    Lastly you can manually add an opacity directly for a molecule
+    into the cache:
 
     >>> new_h2o = MyNewOpacityFormat()
+    >>> new_h2o.molecule
+    H2O
     >>> opt.add_opacity(new_h2o)
-    >>> opt['H2O]
+    >>> opt['H2O']
     <MyNewOpacityFormat at 0x107a60be0>
+
+    
+
 
     Now TauREx3 will use it instead in all calculations!
 
@@ -58,10 +69,7 @@ class OpacityCache(Singleton):
         self.opacity_dict = {}
         self._opacity_path = None
         self.log = Logger('OpacityCache')
-        self._default_interpolation = 'linear'
-        self._memory_mode = True
-        self._radis = False
-        self._radis_props = (600, 30000, 10000)
+        self._force_active = []
     
     def set_opacity_path(self, opacity_path):
         """
@@ -81,11 +89,13 @@ class OpacityCache(Singleton):
         """
 
         import os
+
+        GlobalCache()['xsec_path'] = opacity_path
+
         if not os.path.isdir(opacity_path):
             self.log.error('PATH: %s does not exist!!!', opacity_path)
             raise NotADirectoryError
         self.log.debug('Path set to %s', opacity_path)
-        self._opacity_path = opacity_path
 
     def enable_radis(self, enable):
         """
@@ -105,16 +115,14 @@ class OpacityCache(Singleton):
 
         """
 
-        self._radis = enable
+        GlobalCache()['enable_radis'] = enable
 
     def set_radis_wavenumber(self, wn_start, wn_end, wn_points):
-        self._radis_props = (wn_start, wn_end, wn_points)
-
-        
+        GlobalCache()['radius_grid'] = wn_start, wn_end, wn_points
 
         self.clear_cache()
     
-    def set_memory_mode(self,in_memory):
+    def set_memory_mode(self, in_memory):
         """
         If using the HDF5 opacities, whether to stream
         opacities from file (slower, less memory) or load
@@ -129,10 +137,24 @@ class OpacityCache(Singleton):
 
         """
 
-        self._memory_mode = in_memory
+        GlobalCache()['xsec_in_memory'] = in_memory
         self.clear_cache()
 
-    def set_interpolation(self,interpolation_mode):
+    def force_active(self, molecules):
+        """
+        Allows some molecules to be forced as active.
+        Useful when using other radiative codes to do the calculation
+
+        Parameters
+        ----------
+        molecules: obj:`list`
+            List of molecules
+
+        """
+        self._force_active = molecules
+
+
+    def set_interpolation(self, interpolation_mode):
         """
         Sets the interpolation mode for all currently loaded (and future loaded) cross-sections
 
@@ -153,14 +175,12 @@ class OpacityCache(Singleton):
         
 
         """
-        return
-        self._default_interpolation = interpolation_mode
-        for values in self.opacity_dict.values():
-            values.set_interpolation_mode(self._default_interpolation)
+        GlobalCache()['xsec_interpolation'] = interpolation_mode
+        self.clear_cache()
     
     
 
-    def __getitem__(self,key):
+    def __getitem__(self, key):
         """
         For a molecule return the relevant :class:`~taurex.opacity.opacity.Opacity` object.
 
@@ -190,36 +210,14 @@ class OpacityCache(Singleton):
             if key in self.opacity_dict:
                 return self.opacity_dict[key]
             else:
-                try:
-                    if self._radis:
-                        return self.create_radis_opacity(key,molecule_filter=[key])
-                    else:
-                        raise Exception
-                except Exception as e:
-                    self.log.error('EXception thrown %s',e)
-                    #Otherwise throw an error
-                    self.log.error('Opacity for molecule %s could not be loaded',key)
-                    self.log.error('It could not be found in the local dictionary %s',list(self.opacity_dict.keys()))
-                    self.log.error('Or paths %s',self._opacity_path)
-                    self.log.error('Try loading it manually/ putting it in a path')
-                    raise Exception('Opacity could notn be loaded')
+                #Otherwise throw an error
+                self.log.error('Opacity for molecule %s could not be loaded', key)
+                self.log.error('It could not be found in the local dictionary %s', list(self.opacity_dict.keys()))
+                self.log.error('Or paths %s', GlobalCache()['xsec_path'])
+                self.log.error('Try loading it manually/ putting it in a path')
+                raise Exception('Opacity could not be loaded')
 
-    def create_radis_opacity(self,molecule,molecule_filter=None):
-        from taurex.opacity.radisopacity import RadisHITRANOpacity
-        if molecule not in self.opacity_dict:
-            self.log.info('Creating Opacity from RADIS+HITRAN')
-            wn_start,wn_end,wn_points = self._radis_props
-            radis = RadisHITRANOpacity(molecule_name=molecule, wn_start=wn_start,wn_end=wn_end,wn_points=wn_points)
-            
-            
-
-            self.add_opacity(radis,molecule_filter=molecule_filter)
-            return radis
-        else:
-            self.log.info('Opacity %s already exsits',molecule)
-
-
-    def add_opacity(self,opacity,molecule_filter=None):
+    def add_opacity(self, opacity, molecule_filter=None):
         """
 
         Adds a :class:`~taurex.opacity.opacity.Opacity` object to the cache to then be
@@ -249,95 +247,22 @@ class OpacityCache(Singleton):
             self.opacity_dict[opacity.moleculeName] = opacity   
 
 
-    def search_hdf5_molecules(self):
-        """
-        Find molecules with HDF5 opacities in set path
 
-        Returns
-        -------
-        molecules: :obj`list`
-            List of molecules with HDF5 opacities
-        
-        """
-        from glob import glob
-        import os    
-        from taurex.opacity.hdf5opacity import HDF5Opacity
-        glob_path = [os.path.join(self._opacity_path,'*.h5'),os.path.join(self._opacity_path,'*.hdf5')]
-        file_list = [f for glist in glob_path for f in glob(glist)]
-        
-        return [HDF5Opacity(f,interpolation_mode=self._default_interpolation,in_memory=False).moleculeName for f in file_list ]
-
-    def search_pickle_molecules(self):
-        """
-        Find molecules with ``.pickle`` opacities in set path
-
-        Returns
-        -------
-        molecules: :obj`list`
-            List of molecules with ``.pickle`` opacities
-        
-        """
-
-        from glob import glob
-        import os    
-        glob_path = os.path.join(self._opacity_path,'*.pickle')
-        file_list = [f for f in glob(glob_path)]
-        
-        return [pathlib.Path(f).stem.split('.')[0] for f in file_list ]
-
-    def search_exotransmit_molecules(self):
-        """
-        Find molecules with Exo-Transmit opacities in set path
-
-        Returns
-        -------
-        molecules: :obj`list`
-            List of molecules with ExoTransmit opacities
-        
-        """
-
-        from glob import glob
-        import os    
-        glob_path = os.path.join(self._opacity_path,'*.dat')
-        file_list = [f for f in glob(glob_path)]
-        
-        return [pathlib.Path(f).stem[4:] for f in file_list ]
-
-    def search_radis_molecules(self):
-        """
-        Searches for molecules in HITRAN
-
-        Returns
-        -------
-        molecules: :obj`list`
-            List of molecules available in HITRAN, if radis is enabled,
-            otherwise an empty list
-
-        """
-        trans = { '1':'H2O',    '2':'CO2',   '3':'O3',      '4':'N2O',   '5':'CO',    '6':'CH4',   '7':'O2',     
-            '9':'SO2',   '10':'NO2',  '11':'NH3',    '12':'HNO3', '13':'OH',   '14':'HF',   '15':'HCl',   '16':'HBr',
-            '17':'HI',    '18':'ClO',  '19':'OCS',    '20':'H2CO', '21':'HOCl',    '23':'HCN',   '24':'CH3Cl',
-            '25':'H2O2',  '26':'C2H2', '27':'C2H6',   '28':'PH3',  '29':'COF2', '30':'SF6',  '31':'H2S',   '32':'HCOOH',
-            '33':'HO2',   '34':'O',    '35':'ClONO2', '36':'NO+',  '37':'HOBr', '38':'C2H4',  '40':'CH3Br',
-            '41':'CH3CN', '42':'CF4',  '43':'C4H2',   '44':'HC3N',   '46':'CS',   '47':'SO3'}
-        if self._radis:
-            return list(trans.values())
-        else:
-            return []
     def find_list_of_molecules(self):
         from glob import glob
         import os
-        from taurex.opacity import PickleOpacity
-        pickles = []
-        hedef = []
-        exo = []
-        if self._opacity_path is not None:
+        from taurex.parameter.classfactory import ClassFactory
+        opacity_klasses = ClassFactory().opacityKlasses
+
+        molecules = []
+
+        for c in opacity_klasses:
+            molecules.extend([x[0] for x in c.discover()])
         
-            pickles = self.search_pickle_molecules()
-            hedef = self.search_hdf5_molecules()
-            exo = self.search_exotransmit_molecules()
-        return list(set(pickles+hedef+exo+self.search_radis_molecules()))
-    def load_opacity_from_path(self,path,molecule_filter=None):
+        forced = self._force_active or []
+        return set(molecules+forced+list(self.opacity_dict.keys()))
+
+    def load_opacity_from_path(self, path, molecule_filter=None):
         """
         Searches path for molecular cross-section files, creates and loads them into the cache
         ``.pickle`` will be loaded as :class:`~taurex.opacity.pickleopacity.PickleOpacity`
@@ -354,50 +279,27 @@ class OpacityCache(Singleton):
             :func:`__getitem__` for filtering
 
         """ 
-        from glob import glob
-        import os
-        from taurex.opacity import PickleOpacity
-        from taurex.opacity.hdf5opacity import HDF5Opacity
-        from taurex.opacity.exotransmit import ExoTransmitOpacity
-        glob_path = [os.path.join(path,'*.h5'),os.path.join(path,'*.hdf5'),os.path.join(path,'*.pickle'),os.path.join(path,'*.dat')]
-    
-        file_list = [f for glist in glob_path for f in glob(glist)]
-        self.log.debug('File list %s',file_list)
-        for files in file_list:
-            op = None
-            if files.lower().endswith(('.hdf5', '.h5')):
-                op = HDF5Opacity(files,interpolation_mode=self._default_interpolation,in_memory=False)
-                
-                if molecule_filter is not None:
-                        if not op.moleculeName in molecule_filter:
-                            continue
-                if op.moleculeName in self.opacity_dict.keys():
-                    continue
-                del op
+        from taurex.parameter.classfactory import ClassFactory
 
-                op = HDF5Opacity(files,interpolation_mode=self._default_interpolation,in_memory=self._memory_mode)
+        cf = ClassFactory()
 
-            elif files.endswith('pickle'):
-                splits = pathlib.Path(files).stem.split('.')
-                if molecule_filter is not None:
-                        if not splits[0] in molecule_filter:
-                            continue
-                if splits[0] in self.opacity_dict.keys():
-                    continue
-                op = PickleOpacity(files,interpolation_mode=self._default_interpolation)
-                op._molecule_name = splits[0]
-            elif files.endswith('dat'):
-                mol_name = pathlib.Path(files).stem[4:]
-                if molecule_filter is not None:
-                        if not mol_name in molecule_filter:
-                            continue
-                if mol_name in self.opacity_dict.keys():
-                    continue
-                op = ExoTransmitOpacity(files,interpolation_mode=self._default_interpolation)
-            if op is not None:
-                self.add_opacity(op,molecule_filter=molecule_filter)
+        opacity_klass_list = sorted(cf.opacityKlasses,
+                                    key=lambda x: x.priority()) 
 
-    def load_opacity(self,opacities=None,opacity_path=None,molecule_filter=None):
+        for c in opacity_klass_list:
+
+            for mol, args in c.discover():
+                self.log.debug('Klass: %s %s', mol, args)
+                op = None
+                if mol in molecule_filter and mol not in self.opacity_dict:
+                    if not isinstance(args, (list, tuple,)):
+                        args = [args]
+                    op = c(*args)
+
+                if op is not None and op.moleculeName not in self.opacity_dict:
+                    self.add_opacity(op, molecule_filter=molecule_filter)
+                op = None # Ensure garbage collection when run once
+    def load_opacity(self, opacities=None, opacity_path=None, molecule_filter=None):
         """
         Main function to use when loading molecular opacities. Handles both 
         cross sections and paths. Handles lists of either so lists of 
@@ -422,26 +324,26 @@ class OpacityCache(Singleton):
         from taurex.opacity import Opacity
         
         if opacity_path is None:
-            opacity_path = self._opacity_path
+            opacity_path = GlobalCache()['xsec_path']
 
         if opacities is not None:
-            if isinstance(opacities,(list,)):
+            if isinstance(opacities, (list,)):
                 self.log.debug('Opacity passed is list')
                 for opacity in opacities:
-                    self.add_opacity(opacity,molecule_filter=molecule_filter)
-            elif isinstance(opacities,Opacity):
-                self.add_opacity(opacities,molecule_filter=molecule_filter)
+                    self.add_opacity(opacity, molecule_filter=molecule_filter)
+            elif isinstance(opacities, Opacity):
+                self.add_opacity(opacities, molecule_filter=molecule_filter)
             else:
                 self.log.error('Unknown type %s passed into opacities, should be a list, single \
-                     opacity or None if reading a path',type(opacities))
+                     opacity or None if reading a path', type(opacities))
                 raise Exception('Unknown type passed into opacities')
-        elif opacity_path is not None:
-
-            if isinstance(opacity_path,str):
-                self.load_opacity_from_path(opacity_path,molecule_filter=molecule_filter)
-            elif isinstance(opacity_path,(list,)):
-                for path in opacity_path:
-                    self.load_opacity_from_path(path,molecule_filter=molecule_filter)
+        else:
+            self.load_opacity_from_path(opacity_path, molecule_filter=molecule_filter)
+            # if isinstance(opacity_path, str):
+            #     self.load_opacity_from_path(opacity_path, molecule_filter=molecule_filter)
+            # elif isinstance(opacity_path, (list,)):
+            #     for path in opacity_path:
+            #         self.load_opacity_from_path(path, molecule_filter=molecule_filter)
     
     def clear_cache(self):
         """

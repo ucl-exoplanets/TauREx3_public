@@ -30,6 +30,9 @@ The available ``profile_type`` are:
 
     - ``custom``
         - User-type temperature. See :ref:`customtypes`
+  
+More profiles can also be included using :ref:`plugins`
+
 ----------------------------
 
 Isothermal Profile
@@ -252,15 +255,32 @@ Temperature File
 ==================
 ``profile_type = file``
 
-Reads a single column text file. Order must be
-from BOA to TOA
+Reads a text file. Can support multi column files with any units
+
+If a pressure column is provided then it will interpolate the temperature
+based on the pressure. If no pressure is provided then it will assume index
+0 is BOA and the last index is TOA and interpolate according to that.
 
 --------
 Keywords
 --------
 
-+--------------+--------------+--------------------------+---------+
-| Variable     | Type         | Description              | Default |
-+--------------+--------------+--------------------------+---------+
-| ``filename`` | :obj:`str`   | Path to temperature file | None    |
-+--------------+--------------+--------------------------+---------+
++----------------+--------------+---------------------------------------------------+---------+
+| Variable       | Type         | Description                                       | Default |
++----------------+--------------+---------------------------------------------------+---------+
+| ``filename``   | :obj:`str`   | Path to temperature file                          | None    |
++----------------+--------------+---------------------------------------------------+---------+
+| ``skiprows``   | :obj:`int`   | No. of rows to ignore                             | 0       |
++----------------+--------------+---------------------------------------------------+---------+
+| ``temp_col``   | :obj:`int`   | Column number of temperature (0-based)            | 0       |
++----------------+--------------+---------------------------------------------------+---------+
+| ``press_col``  | :obj:`int`   | Column number of pressure if available (0-based)  | None    |
++----------------+--------------+---------------------------------------------------+---------+
+| ``temp_units`` | :obj:`str`   | Units of temperature (based on astropy format)    | K       |
++----------------+--------------+---------------------------------------------------+---------+
+| ``press_units``| :obj:`str`   | Units of pressure (based on astropy format)       | Pa      |
++----------------+--------------+---------------------------------------------------+---------+
+| ``delimiter``  | :obj:`str`   | Delimiter used in file. ``None`` means whitespace | None    |
++----------------+--------------+---------------------------------------------------+---------+
+| ``reverse``    | :obj:`bool`  | False = BOA-TOA, True = TOA-BOA                   | None    |
++----------------+--------------+---------------------------------------------------+---------+

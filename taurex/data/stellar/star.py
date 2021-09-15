@@ -2,11 +2,12 @@ from taurex.log import Logger
 from taurex.constants import G, RJUP, MJUP, RSOL, MSOL
 from taurex.data.fittable import fitparam, Fittable
 import numpy as np
+from ..citation import Citable
 from taurex.util.emission import black_body
 from taurex.output.writeable import Writeable
 
 
-class Star(Fittable, Logger, Writeable):
+class Star(Fittable, Logger, Writeable, Citable):
     """
     A base class that holds information on the star in the model.
     Its implementation is a star that has a blackbody spectrum.
@@ -119,7 +120,13 @@ class Star(Fittable, Logger, Writeable):
         star.write_scalar('mass_kg', self._mass)
         return star
 
+    @classmethod
+    def input_keywords(self):
+        raise NotImplementedError
+
 
 class BlackbodyStar(Star):
     """Alias for the base star type"""
-    pass
+    @classmethod
+    def input_keywords(self):
+        return ['blackbody', ]

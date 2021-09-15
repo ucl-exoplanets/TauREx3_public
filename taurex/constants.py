@@ -1,16 +1,27 @@
 """Defines constants used in taurex"""
+from taurex.util.util import conversion_factor
+import numpy as np
+import astropy.constants as c
+
+AMU = conversion_factor('u', 'kg')
+KBOLTZ = c.k_B.value
+G = c.G.value
+RSOL = conversion_factor('Rsun', 'm')
+RJUP = conversion_factor('Rjup', 'm')
+PI = np.pi
+MSOL = conversion_factor('Msun', 'kg')
+
+MJUP = conversion_factor('Mjup', 'kg')
+AU = conversion_factor('AU', 'm')
+PLANCK = c.h.value
+SPDLIGT = conversion_factor('c', 'm/s')
 
 
-AMU = 1.660538921e-27
-KBOLTZ = 1.380648813e-23
-G = 6.67384e-11
-RSOL = 6.955e8
-RJUP = 6.9911e7
-PI = 3.14159265359
-MSOL = 1.98847542e+30
-#RJUP = 7.1492e7 # Jo's radius
-MJUP = 1.898e27
-AU = 1.49597871e+11
-PLANCK = 6.62606957e-34
-SPDLIGT = 299792458
-
+def get_constant(name, unit=None):
+    from taurex.util.util import conversion_factor
+    const = getattr(c, name)
+    base_unit = str(const.unit)
+    const = const.value
+    if unit is not None:
+        const *= conversion_factor(base_unit, unit)
+    return const
