@@ -1,1 +1,1 @@
-__version__ = release = '3.0.12-alpha'
+__version__ = release = '4.0.0-alpha'
