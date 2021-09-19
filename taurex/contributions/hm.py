@@ -21,19 +21,19 @@ class HydrogenIon(Contribution):
         raise NotImplementedError
 
     def f(self, lamb):
-
         C_n = np.array([1, 52.519, 49.534, -118.858, 92.536, -34.194, 4.982])
         n = np.arange(C_n.shape[0])
-
-        return np.sum(C_n[...,None] * ((1 / lamb[None,...] - 1 / self.photo_thresh) ** (n[...,None] / 2)),axis=0)
-
-
-
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            to_ret = np.sum(C_n[...,None] * ((1 / lamb[None,...] - 1 / self.photo_thresh) ** (n[...,None] / 2)),axis=0)
+        return to_ret
         #return np.nan_to_num(sum([c * ((1 / lamb - 1 / self.photo_thresh) ** (n / 2)) for n, c in enumerate(C_n)]))
 
     def sigma_pd(self, lamb):
-
-        return np.nan_to_num(1e-18 * (lamb ** 3) * (1 / lamb - 1 / self.photo_thresh) ** (3 / 2) * self._f_res)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            to_ret = np.nan_to_num(1e-18 * (lamb ** 3) * (1 / lamb - 1 / self.photo_thresh) ** (3 / 2) * self._f_res)
+        return to_ret
 
     def k_bf(self, lamb, T):
         return 0.750 * T ** (-5 / 2) * np.exp(self.alpha / (self.photo_thresh * T)) * (
