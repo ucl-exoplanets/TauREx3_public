@@ -608,6 +608,7 @@ class SimpleForwardModel(ForwardModel):
     def citations(self):
         from taurex.cache import OpacityCache
         from taurex.cache.ktablecache import KTableCache
+        from taurex.data.citation import unique_citations_only
 
         model_citations = super().citations()
         model_citations.extend(self.chemistry.citations())
@@ -631,7 +632,6 @@ class SimpleForwardModel(ForwardModel):
                     xsec.citations()
 
                 )
-                model_citations.extend(xsec.opacityCitations())
             except KeyError:
                 continue
 
@@ -646,4 +646,4 @@ class SimpleForwardModel(ForwardModel):
         #     except KeyError:
         #         continue
 
-        return model_citations
+        return unique_citations_only(model_citations)

@@ -45,7 +45,7 @@ def parse_keywords(keywords):
                   c.__module__.split('.')[0].split('_')[-1])
                  for c in cf.temperatureKlasses
                  if hasattr(c, 'input_keywords')]
-        print(tabulate.tabulate(table, 
+        print(tabulate.tabulate(table,
                                 headers=['profile_type', 'Class', 'Source'],
                                 tablefmt="fancy_grid"))
         print('\n')
@@ -88,7 +88,7 @@ def parse_keywords(keywords):
                  c.__module__.split('.')[0].split('_')[-1])
                  for c in cf.priorKlasses
                  if hasattr(c, 'input_keywords')]
-        print(tabulate.tabulate(table, 
+        print(tabulate.tabulate(table,
                                 headers=['prior', 'Class', 'Source'],
                                 tablefmt="fancy_grid"))
         print('\n')
@@ -115,7 +115,7 @@ def parse_keywords(keywords):
                  c.__module__.split('.')[0].split('_')[-1])
                  for c in cf.pressureKlasses]
         print(tabulate.tabulate(table,
-                                headers=['profile_type', 'Class', 'Source'], 
+                                headers=['profile_type', 'Class', 'Source'],
                                 tablefmt="fancy_grid"))
         print('\n')
 
@@ -198,11 +198,12 @@ def show_plugins():
     for k, v in failed_plugins.items():
         print(k)
         print(f'Reason: {v}')
-    
+
     print('\n')
 
 
 def output_citations(model, instrument, optimizer):
+    from taurex.cache import OpacityCache
     from taurex.mpi import barrier, get_rank
 
     barrier()
@@ -215,7 +216,7 @@ def output_citations(model, instrument, optimizer):
 
         print('If you use any of the results from this run please cite')
         print('the following publications:')
-        
+
         citation_string = ''
         all_citations = []
         print('\n')
@@ -252,12 +253,36 @@ def output_citations(model, instrument, optimizer):
                 print('---------\n')
                 print(cite)
 
+        oc = OpacityCache()
+
+        active_gases = model.chemistry.activeGases
+
+        # Do cross sections
+
+        missing_citations = []
+
+        for g in active_gases:
+            try:
+                xsec = oc.opacity_dict[g]
+                if len(xsec.opacityCitation()) == 0:
+                    missing_citations.append(g)
+            except KeyError:
+                continue
+
+        if missing_citations:
+            print('Missing Opacity Citations')
+            print('------------------------\n')
+            print('These opacities do not have citation information, please')
+            print('determine their appropriate publications and cite them \n')
+            print(missing_citations)
+            print('\n')
         from taurex.core import to_bibtex
-        bib_tex = to_bibtex(all_citations)
-    
+        bib_tex = to_bibtex([a for a in all_citations if not isinstance(a, str)])
+
     barrier()
 
     return bib_tex, citation_string
+
 
 def only_bibtex(filename, pp):
     model = pp.generate_appropriate_model()
@@ -268,7 +293,6 @@ def only_bibtex(filename, pp):
     if bib_tex:
         with open(filename, 'w') as f:
             f.write(bib_tex)
-
 
 
 def main():
@@ -328,7 +352,7 @@ def main():
                         help="Display plugins", action='store_true')
 
     parser.add_argument("--fitparams", dest='fitparams', default=False,
-                        help="Display available fitting params", 
+                        help="Display available fitting params",
                         action='store_true')
 
     parser.add_argument("--bibtex", dest='bibtex', type=str,
@@ -387,7 +411,6 @@ def main():
 
     binning = pp.generate_binning()
 
-
     # Generate a model from the input
     model = pp.generate_appropriate_model(obs=observation)
 
@@ -397,8 +420,6 @@ def main():
     if args.fitparams:
         show_parameters(model)
         return
-
-
 
     wngrid = None
 
@@ -534,7 +555,7 @@ def main():
 
             try:
                 spectrum['Contributions'] = \
-                    store_contributions(binning, model, 
+                    store_contributions(binning, model,
                                         output_size=output_size-3)
             except Exception:
                 pass

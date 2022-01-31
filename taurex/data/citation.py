@@ -67,6 +67,10 @@ def construct_nice_printable_string(entry, indent=0):
     mystring = ''
     indent = ''.join(['\t']*indent)
     form = f'{indent}%s\n'
+    
+    if isinstance(entry, str):
+        return f'Found non bibtex citation: {entry}\n'
+
 
     if 'title' in entry.fields:
         mystring += form % cleanup_string(entry.fields['title'])

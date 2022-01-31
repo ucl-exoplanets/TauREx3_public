@@ -1,3 +1,5 @@
+from taurex.cache.globalcache import GlobalCache
+from taurex.data.citation import recurse_bibtex, unique_citations_only
 from .interpolateopacity import InterpolatingOpacity
 import pickle
 import numpy as np
@@ -113,9 +115,17 @@ class HDF5Opacity(InterpolatingOpacity):
         self._max_temperature = self._temperature_grid.max()
 
         try:
+            doi = self._spec_dict['DOI'][()]
+            if isinstance(doi, np.ndarray):
+                doi = doi[0]
+
+
             molecular_citation = ensure_string_utf8(
                 self._spec_dict['DOI'][()][0])
-            new_bib = doi_to_bibtex(molecular_citation)
+            new_bib = None
+            if not GlobalCache()['xsec_disable_doi']:
+                new_bib = doi_to_bibtex(molecular_citation)
+            
             self._molecular_citation = [new_bib or molecular_citation]
 
         except KeyError:
@@ -139,6 +149,22 @@ class HDF5Opacity(InterpolatingOpacity):
     @property
     def resolution(self):
         return self._resolution
+
+    def citations(self):
+        from pybtex.database import Entry
+        citations = super().citations()
+        opacities = []
+
+        for o in self.opacityCitation():
+            try:
+                e = Entry.from_string(o, 'bibtex')
+            except IndexError:
+                e = o
+            opacities.append(e)
+        
+        citations = citations + opacities
+        return unique_citations_only(citations)
+
 
     def opacityCitation(self):
         return self._molecular_citation
