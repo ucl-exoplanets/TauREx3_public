@@ -3,7 +3,7 @@ import pickle
 import numpy as np
 import pathlib
 from taurex.mpi import allocate_as_shared
-
+from astropy.units import UnitConversionError
 
 class HDF5Opacity(InterpolatingOpacity):
     """
@@ -44,13 +44,16 @@ class HDF5Opacity(InterpolatingOpacity):
         return discovery
 
     def __init__(self, filename, interpolation_mode='exp', in_memory=False):
-        super().__init__('HDF5Opacity:{}'.format(pathlib.Path(filename).stem[0:10]),
-                         interpolation_mode=interpolation_mode)
+        super().__init__(
+            'HDF5Opacity:{}'.format(pathlib.Path(filename).stem[:10]),
+            interpolation_mode=interpolation_mode,
+        )
 
         self._filename = filename
         self._molecule_name = None
         self._spec_dict = None
         self.in_memory = in_memory
+        self._molecular_citation = []
         self._load_hdf_file(filename)
 
     @property
@@ -62,6 +65,7 @@ class HDF5Opacity(InterpolatingOpacity):
         return self._xsec_grid
 
     def _load_hdf_file(self, filename):
+        from taurex.data.citation import doi_to_bibtex
         import h5py
         import astropy.units as u
         # Load the pickle file
@@ -71,15 +75,12 @@ class HDF5Opacity(InterpolatingOpacity):
 
         self._wavenumber_grid = self._spec_dict['bin_edges'][:]
 
-        #temperature_units = self._spec_dict['t'].attrs['units']
-        #t_conversion = u.Unit(temperature_units).to(u.K).value
-
         self._temperature_grid = self._spec_dict['t'][:]  # *t_conversion
 
         pressure_units = self._spec_dict['p'].attrs['units']
         try:
             p_conversion = u.Unit(pressure_units).to(u.Pa)
-        except:
+        except UnitConversionError:
             p_conversion = u.Unit(pressure_units, format="cds").to(u.Pa)
 
         self._pressure_grid = self._spec_dict['p'][:]*p_conversion
@@ -110,6 +111,15 @@ class HDF5Opacity(InterpolatingOpacity):
         self._min_temperature = self._temperature_grid.min()
         self._max_temperature = self._temperature_grid.max()
 
+        try:
+            molecular_citation = ensure_string_utf8(self._spec_dict['DOI'][()][0])
+            print(molecular_citation)
+            new_bib = doi_to_bibtex(molecular_citation)
+            self._molecular_citation = [new_bib or molecular_citation]
+
+        except KeyError:
+            self._molecular_citation = []
+
         if self.in_memory:
             self._spec_dict.close()
 
@@ -129,7 +139,8 @@ class HDF5Opacity(InterpolatingOpacity):
     def resolution(self):
         return self._resolution
 
-        # return factor*(q_11*(Pmax-P)*(Tmax-T) + q_21*(P-Pmin)*(Tmax-T) + q_12*(Pmax-P)*(T-Tmin) + q_22*(P-Pmin)*(T-Tmin))
+    def opacityCitation(self):
+        return self._molecular_citation
 
     BIBTEX_ENTRIES = [
         """
