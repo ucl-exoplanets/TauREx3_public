@@ -286,6 +286,7 @@ class SimpleForwardModel(ForwardModel):
         self.gravity_profile = g[:-1]
         self.altitude_boundaries = z
         self.deltaz = deltaz
+
     @property
     def pressureProfile(self):
         """
@@ -382,10 +383,8 @@ class SimpleForwardModel(ForwardModel):
         cacher = OpacityCache()
 
         if GlobalCache()['opacity_method'] == 'ktables':
-            from taurex.cache.ktablecache import KTableCache 
+            from taurex.cache.ktablecache import KTableCache
             cacher = KTableCache()
-
-
 
         active_gases = self.chemistry.activeGases
 
@@ -535,18 +534,11 @@ class SimpleForwardModel(ForwardModel):
         tp_profiles = OnlineVariance()
         active_gases = OnlineVariance()
         inactive_gases = OnlineVariance()
-        cond = None
-
         has_condensates = self.chemistry.hasCondensates
 
-        if has_condensates:
-            cond = OnlineVariance()
+        cond = OnlineVariance() if has_condensates else None
 
-
-        if binner is not None:
-            binned_spectrum = OnlineVariance()
-        else:
-            binned_spectrum = None
+        binned_spectrum = OnlineVariance() if binner is not None else None
         native_spectrum = OnlineVariance()
 
         for weight in samples():
@@ -570,23 +562,21 @@ class SimpleForwardModel(ForwardModel):
                 binned = binner.bindown(native_grid, native)[1]
                 binned_spectrum.update(binned, weight=weight)
 
-        profile_dict = {}
-        spectrum_dict = {}
-
         tp_std = np.sqrt(tp_profiles.parallelVariance())
         active_std = np.sqrt(active_gases.parallelVariance())
         inactive_std = np.sqrt(inactive_gases.parallelVariance())
 
-        profile_dict['temp_profile_std'] = tp_std
-        profile_dict['active_mix_profile_std'] = active_std
-        profile_dict['inactive_mix_profile_std'] = inactive_std
+        profile_dict = {
+            'temp_profile_std': tp_std,
+            'active_mix_profile_std': active_std,
+            'inactive_mix_profile_std': inactive_std,
+        }
+
         if cond is not None:
             profile_dict['condensate_profile_std'] = \
                 np.sqrt(cond.parallelVariance())
 
-        spectrum_dict['native_std'] = \
-            np.sqrt(native_spectrum.parallelVariance())
-
+        spectrum_dict = {'native_std': np.sqrt(native_spectrum.parallelVariance())}
         if binned_spectrum is not None:
             spectrum_dict['binned_std'] = \
                 np.sqrt(binned_spectrum.parallelVariance())
@@ -602,8 +592,6 @@ class SimpleForwardModel(ForwardModel):
         prof['mu_profile'] = self.chemistry.muProfile
         return prof
 
-
-
     def write(self, output):
         # Run a model if needed
         self.model()
@@ -618,11 +606,44 @@ class SimpleForwardModel(ForwardModel):
         return model
 
     def citations(self):
+        from taurex.cache import OpacityCache
+        from taurex.cache.ktablecache import KTableCache
+
         model_citations = super().citations()
         model_citations.extend(self.chemistry.citations())
         model_citations.extend(self.temperature.citations())
         model_citations.extend(self.pressure.citations())
         model_citations.extend(self.planet.citations())
         model_citations.extend(self.star.citations())
+
+        # Get cache citations
+        active_gases = self.chemistry.activeGases
+
+        opacitycache = OpacityCache()
+
+        # Do cross sections
+
+        for g in active_gases:
+
+            try:
+                xsec = opacitycache.opacity_dict[g]
+                model_citations.extend(
+                    xsec.citations()
+
+                )
+                model_citations.extend(xsec.opacityCitations())
+            except KeyError:
+                continue
+
+        # # Now Ktables
+        # for g in active_gases:
+
+        #     try:
+        #         model_citations.extend(
+        #             ktablecache.opacity_dict[g].citations()
+
+        #         )
+        #     except KeyError:
+        #         continue
 
         return model_citations
