@@ -111,7 +111,8 @@ class ExoTransmitOpacity(InterpolatingOpacity):
     def xsecGrid(self):
         return self._xsec_grid
 
-    BIBTEX_ENTRIES = ["""
+    BIBTEX_ENTRIES = [
+        """
         @ARTICLE{2017PASP..129d4402K,
             author = {{Kempton}, Eliza M. -R. and {Lupu}, Roxana and {Owusu-Asare}, Albert and {Slough}, Patrick and {Cale}, Bryson},
                 title = "{Exo-Transmit: An Open-Source Code for Calculating Transmission Spectra for Exoplanet Atmospheres of Varied Composition}",
