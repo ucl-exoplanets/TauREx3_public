@@ -136,7 +136,7 @@ class HDF5Opacity(InterpolatingOpacity):
     @ARTICLE{2021A&A...646A..21C,
         author = {{Chubb}, Katy L. and {Rocchetto}, Marco and {Yurchenko}, Sergei N. and {Min}, Michiel and {Waldmann}, Ingo and {Barstow}, Joanna K. and {Molli{\`e}re}, Paul and {Al-Refaie}, Ahmed F. and {Phillips}, Mark W. and {Tennyson}, Jonathan},
             title = "{The ExoMolOP database: Cross sections and k-tables for molecules of interest in high-temperature exoplanet atmospheres}",
-        journal = {\aap},
+        journal = {Astronomy and Astrophysics},
         keywords = {molecular data, opacity, radiative transfer, planets and satellites: atmospheres, planets and satellites: gaseous planets, infrared: planetary systems, Astrophysics - Earth and Planetary Astrophysics, Astrophysics - Instrumentation and Methods for Astrophysics, Astrophysics - Solar and Stellar Astrophysics},
             year = 2021,
             month = feb,

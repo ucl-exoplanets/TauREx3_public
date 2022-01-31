@@ -5,7 +5,6 @@ import numpy as np
 
 class ExoTransmitOpacity(InterpolatingOpacity):
 
-
     @classmethod
     def discover(cls):
         import os
@@ -31,12 +30,11 @@ class ExoTransmitOpacity(InterpolatingOpacity):
 
         return discovery
 
-
     def __init__(self, filename, interpolation_mode='linear'):
 
         super().__init__('ExoOpacity:{}'.format(
-                            pathlib.Path(filename).stem[4:]),
-                         interpolation_mode=interpolation_mode)
+            pathlib.Path(filename).stem[4:]),
+            interpolation_mode=interpolation_mode)
 
         self._filename = filename
         self._molecule_name = pathlib.Path(filename).stem[4:]
@@ -112,3 +110,25 @@ class ExoTransmitOpacity(InterpolatingOpacity):
     @property
     def xsecGrid(self):
         return self._xsec_grid
+
+    BIBTEX_ENTRIES = ["""
+        @ARTICLE{2017PASP..129d4402K,
+            author = {{Kempton}, Eliza M. -R. and {Lupu}, Roxana and {Owusu-Asare}, Albert and {Slough}, Patrick and {Cale}, Bryson},
+                title = "{Exo-Transmit: An Open-Source Code for Calculating Transmission Spectra for Exoplanet Atmospheres of Varied Composition}",
+            journal = {Publications of the Astronomical Society of the Pacific},
+            keywords = {Astrophysics - Earth and Planetary Astrophysics},
+                year = 2017,
+                month = apr,
+            volume = {129},
+            number = {974},
+                pages = {044402},
+                doi = {10.1088/1538-3873/aa61ef},
+        archivePrefix = {arXiv},
+            eprint = {1611.03871},
+        primaryClass = {astro-ph.EP},
+            adsurl = {https://ui.adsabs.harvard.edu/abs/2017PASP..129d4402K},
+            adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+        }
+
+        """,
+    ]
