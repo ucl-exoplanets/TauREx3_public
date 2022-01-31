@@ -4,6 +4,7 @@ import numpy as np
 import pathlib
 from taurex.mpi import allocate_as_shared
 
+
 class HDF5Opacity(InterpolatingOpacity):
     """
     This is the base class for computing opactities
@@ -37,11 +38,10 @@ class HDF5Opacity(InterpolatingOpacity):
             op = HDF5Opacity(f, interpolation_mode='linear', in_memory=False)
             mol_name = op.moleculeName
             discovery.append((mol_name, [f, interp, mem]))
-            #op._spec_dict.close()
+            # op._spec_dict.close()
             del op
 
         return discovery
-
 
     def __init__(self, filename, interpolation_mode='exp', in_memory=False):
         super().__init__('HDF5Opacity:{}'.format(pathlib.Path(filename).stem[0:10]),
@@ -85,7 +85,8 @@ class HDF5Opacity(InterpolatingOpacity):
         self._pressure_grid = self._spec_dict['p'][:]*p_conversion
 
         if self.in_memory:
-            self._xsec_grid = allocate_as_shared(self._spec_dict['xsecarr'][...], logger=self)
+            self._xsec_grid = allocate_as_shared(
+                self._spec_dict['xsecarr'][...], logger=self)
         else:
             self._xsec_grid = self._spec_dict['xsecarr']
 
@@ -94,7 +95,7 @@ class HDF5Opacity(InterpolatingOpacity):
 
         if isinstance(self._molecule_name, np.ndarray):
             self._molecule_name = self._molecule_name[0]
-        
+
         try:
             self._molecule_name = self._molecule_name.decode()
         except (UnicodeDecodeError, AttributeError,):
@@ -111,7 +112,6 @@ class HDF5Opacity(InterpolatingOpacity):
 
         if self.in_memory:
             self._spec_dict.close()
-        
 
     @property
     def wavenumberGrid(self):
@@ -130,3 +130,27 @@ class HDF5Opacity(InterpolatingOpacity):
         return self._resolution
 
         # return factor*(q_11*(Pmax-P)*(Tmax-T) + q_21*(P-Pmin)*(Tmax-T) + q_12*(Pmax-P)*(T-Tmin) + q_22*(P-Pmin)*(T-Tmin))
+
+    BIBTEX_ENTRIES = [
+        """
+    @ARTICLE{2021A&A...646A..21C,
+        author = {{Chubb}, Katy L. and {Rocchetto}, Marco and {Yurchenko}, Sergei N. and {Min}, Michiel and {Waldmann}, Ingo and {Barstow}, Joanna K. and {Molli{\`e}re}, Paul and {Al-Refaie}, Ahmed F. and {Phillips}, Mark W. and {Tennyson}, Jonathan},
+            title = "{The ExoMolOP database: Cross sections and k-tables for molecules of interest in high-temperature exoplanet atmospheres}",
+        journal = {\aap},
+        keywords = {molecular data, opacity, radiative transfer, planets and satellites: atmospheres, planets and satellites: gaseous planets, infrared: planetary systems, Astrophysics - Earth and Planetary Astrophysics, Astrophysics - Instrumentation and Methods for Astrophysics, Astrophysics - Solar and Stellar Astrophysics},
+            year = 2021,
+            month = feb,
+        volume = {646},
+            eid = {A21},
+            pages = {A21},
+            doi = {10.1051/0004-6361/202038350},
+    archivePrefix = {arXiv},
+        eprint = {2009.00687},
+    primaryClass = {astro-ph.EP},
+        adsurl = {https://ui.adsabs.harvard.edu/abs/2021A&A...646A..21C},
+        adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+    }
+
+        """
+
+    ]
