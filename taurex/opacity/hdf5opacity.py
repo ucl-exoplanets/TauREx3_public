@@ -5,6 +5,7 @@ import pathlib
 from taurex.mpi import allocate_as_shared
 from astropy.units import UnitConversionError
 
+
 class HDF5Opacity(InterpolatingOpacity):
     """
     This is the base class for computing opactities
@@ -112,8 +113,8 @@ class HDF5Opacity(InterpolatingOpacity):
         self._max_temperature = self._temperature_grid.max()
 
         try:
-            molecular_citation = ensure_string_utf8(self._spec_dict['DOI'][()][0])
-            print(molecular_citation)
+            molecular_citation = ensure_string_utf8(
+                self._spec_dict['DOI'][()][0])
             new_bib = doi_to_bibtex(molecular_citation)
             self._molecular_citation = [new_bib or molecular_citation]
 
