@@ -5,9 +5,10 @@ Contains the basic definition of an observed spectrum for TauRex 3
 
 from taurex.log import Logger
 from taurex.output.writeable import Writeable
+from taurex.core import Fittable
 
 
-class BaseSpectrum(Logger, Writeable):
+class BaseSpectrum(Logger, Fittable, Writeable):
     """
 
     *Abstract class*
