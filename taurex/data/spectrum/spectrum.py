@@ -26,7 +26,8 @@ class BaseSpectrum(Logger, Fittable, Writeable):
     """
 
     def __init__(self, name):
-        super().__init__(name)
+        Logger.__init__(self,name)
+        Fittable.__init__(self)
 
     def create_binner(self):
         """
@@ -140,6 +141,15 @@ class BaseSpectrum(Logger, Fittable, Writeable):
 
         """
         raise NotImplementedError
+
+    @property
+    def fittingParameters(self):
+        return self.fitting_parameters()
+
+    @property
+    def derivedParameters(self):
+        return self.derived_parameters()
+
 
     def write(self, output):
         output.write_array('wlgrid', self.wavelengthGrid)
