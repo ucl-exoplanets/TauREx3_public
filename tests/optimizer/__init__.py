@@ -66,6 +66,7 @@ class LineObs(BaseSpectrum):
         return NativeBinner()
 
     def __init__(self, m, c, N):
+        super().__init__('LineObs')
         self._m = m
         self._c = c
         self._x = np.linspace(1, 100, N)
@@ -84,3 +85,45 @@ class LineObs(BaseSpectrum):
     @property
     def errorBar(self):
         return self._yerr
+
+
+
+class LineObsWithParams(BaseSpectrum):
+
+    def create_binner(self):
+        """
+        Creates the appropriate binning object
+        """
+        from taurex.binning import NativeBinner
+
+        return NativeBinner()
+
+    def __init__(self, m, c, N):
+        super().__init__('LineObs')
+        self._m = m
+        self._c = c
+        self._lol = 40
+        self._x = np.linspace(1, 100, N)
+        self._y = self._m*self._x + self._c
+        self._yerr = 0.1+0.1*np.random.rand(N)
+        self._y += self._yerr * np.random.randn(N)
+
+    @property
+    def spectrum(self):
+        return self._y
+
+    @property
+    def wavenumberGrid(self):
+        return self._x
+
+    @property
+    def errorBar(self):
+        return self._yerr
+
+    @fitparam(param_name='lol')
+    def lol(self):
+        return self._lol
+
+    @lol.setter
+    def lol(self, value):
+        self._lol = value

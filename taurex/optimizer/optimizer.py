@@ -1,9 +1,46 @@
+from re import M
 from taurex.log import Logger, disableLogging, enableLogging
 import numpy as np
 import math
 from taurex import OutputSize
 from taurex.core.priors import PriorMode
 from taurex.data.citation import Citable
+
+
+def compile_params(fitparams, driveparams):
+    from taurex.core.priors import Uniform, LogUniform
+
+    fitting_parameters = []
+    fitting_priors = []
+    derived_parameters = []
+    _fit_priors = {}
+
+    for params in fitparams.values():
+        name, latex, fget, fset, mode, to_fit, bounds = params
+
+        #self.debug('Checking fitting parameter {}'.format(params))
+        if to_fit:
+            fitting_parameters.append(params)
+
+            if name not in _fit_priors:
+                prior = None
+                if mode == 'log':
+                    prior = LogUniform(lin_bounds=bounds)
+
+                else:
+                    prior = Uniform(bounds=bounds)
+                fitting_priors.append(prior)
+                _fit_priors[name] = prior
+            else:
+                fitting_priors.append(_fit_priors[name])
+
+    for params in driveparams.values():
+        name, latex, fget, compute = params
+        if compute:
+            derived_parameters.append(params)
+
+    return fitting_parameters, fitting_priors, _fit_priors, derived_parameters
+
 
 class Optimizer(Logger, Citable):
     """
@@ -40,6 +77,7 @@ class Optimizer(Logger, Citable):
         self.fitting_priors = []
 
     def set_model(self, model):
+        from taurex.model import ForwardModel
         """
         Sets the model to be optimized/fit
 
@@ -49,9 +87,10 @@ class Optimizer(Logger, Citable):
             The forward model we wish to optimize
 
         """
-        self._model = model
+        self._model: ForwardModel = model
 
     def set_observed(self, observed):
+        from taurex.spectrum import BaseSpectrum
         """
         Sets the observation to optimize the model to
 
@@ -61,7 +100,7 @@ class Optimizer(Logger, Citable):
             Observed spectrum we will optimize to
 
         """
-        self._observed = observed
+        self._observed: BaseSpectrum = observed
         if observed is not None:
             self._binner = observed.create_binner()
 
@@ -81,29 +120,47 @@ class Optimizer(Logger, Citable):
         # param_name,param_latex,
         #                 fget.__get__(self),fset.__get__(self),
         #                         default_fit,default_bounds
-        for params in self._model.fittingParameters.values():
-            name, latex, fget, fset, mode, to_fit, bounds = params
+        # for params in self._model.fittingParameters.values():
 
-            self.debug('Checking fitting parameter {}'.format(params))
-            if to_fit:
-                self.fitting_parameters.append(params)
+        self.fitting_parameters, \
+            self.fitting_priors, \
+            _model_priors, \
+            self.derived_parameters = \
+            compile_params(self._model.fittingParameters,
+                           self._model.derivedParameters)
 
-                if name not in self._fit_priors:
-                    prior = None
-                    if mode == 'log':
-                        prior = LogUniform(lin_bounds=bounds)
-                        
-                    else:
-                        prior = Uniform(bounds=bounds)
-                    self.fitting_priors.append(prior)
-                    self._fit_priors[name] = prior
-                else:
-                    self.fitting_priors.append(self._fit_priors[name])
+        self._fit_priors.update(_model_priors)
+        obs_fit, obs_prior, _obs_priors, obs_deriv = \
+            compile_params(
+                self._observed.fittingParameters,
+                self._observed.derivedParameters
+            )
+        self.fitting_parameters.extend(obs_fit)
+        self.fitting_priors.extend(obs_prior)
+        self._fit_priors.update(_obs_priors)
+        self.derived_parameters.extend(obs_deriv)
+        #     name, latex, fget, fset, mode, to_fit, bounds = params
 
-        for params in self._model.derivedParameters.values():
-            name, latex, fget, compute = params
-            if compute:
-                self.derived_parameters.append(params)
+        #     self.debug('Checking fitting parameter {}'.format(params))
+        #     if to_fit:
+        #         self.fitting_parameters.append(params)
+
+        #         if name not in self._fit_priors:
+        #             prior = None
+        #             if mode == 'log':
+        #                 prior = LogUniform(lin_bounds=bounds)
+
+        #             else:
+        #                 prior = Uniform(bounds=bounds)
+        #             self.fitting_priors.append(prior)
+        #             self._fit_priors[name] = prior
+        #         else:
+        #             self.fitting_priors.append(self._fit_priors[name])
+
+        # for params in self._model.derivedParameters.values():
+        #     name, latex, fget, compute = params
+        #     if compute:
+        #         self.derived_parameters.append(params)
 
         self.info('-------FITTING---------------')
         self.info('Parameters to be fit:')
@@ -133,7 +190,6 @@ class Optimizer(Logger, Citable):
                        f' Update length: {len(fit_params)}')
             raise ValueError('Trying to update model with more fitting'
                              ' parameters than enabled')
-
 
         for value, param, priors in zip(fit_params, self.fitting_parameters, self.fitting_priors):
             name, latex, fget, fset, mode, to_fit, bounds = param
@@ -171,7 +227,7 @@ class Optimizer(Logger, Citable):
 
         """
 
-        return [c[2]() if c[4] == 'linear' else math.log10(c[2]()) 
+        return [c[2]() if c[4] == 'linear' else math.log10(c[2]())
                 for c in self.fitting_parameters]
 
     @property
@@ -224,7 +280,6 @@ class Optimizer(Logger, Citable):
         return [c[1] if self._fit_priors[c[0]].priorMode is PriorMode.LINEAR else 'log({})'.format(c[1])
                 for c in self.fitting_parameters]
 
-
     @property
     def derived_names(self):
         """ 
@@ -240,7 +295,6 @@ class Optimizer(Logger, Citable):
         """
 
         return [c[0] for c in self.derived_parameters]
-
 
     @property
     def derived_latex(self):
@@ -285,19 +339,26 @@ class Optimizer(Logger, Citable):
 
         """
 
+        obj = self._model if parameter in self._model.fittingParameters \
+            else self._observed
+
         name, latex, fget, fset, mode, to_fit, bounds = \
-            self._model.fittingParameters[parameter]
+            obj.fittingParameters[parameter]
 
         to_fit = True
 
-        self._model.fittingParameters[parameter] = (
+        obj.fittingParameters[parameter] = (
             name, latex, fget, fset, mode, to_fit, bounds)
 
     def enable_derived(self, parameter):
+
+        obj = self._model if parameter in self._model.derivedParameters \
+            else self._observed
+
         name, latex, fget, compute = \
-            self._model.derivedParameters[parameter]
+            obj.derivedParameters[parameter]
         compute = True
-        self._model.derivedParameters[parameter] = (
+        obj.derivedParameters[parameter] = (
             name, latex, fget, compute
         )
 
@@ -311,22 +372,29 @@ class Optimizer(Logger, Citable):
             Name of the parameter we do not want to fit
 
         """
+
+        obj = self._model if parameter in self._model.fittingParameters \
+            else self._observed
+
         name, latex, fget, fset, mode, to_fit, bounds = \
-            self._model.fittingParameters[parameter]
+            obj.fittingParameters[parameter]
 
         to_fit = False
 
-        self._model.fittingParameters[parameter] = (
+        obj.fittingParameters[parameter] = (
             name, latex, fget, fset, mode, to_fit, bounds)
 
     def disable_derived(self, parameter):
+
+        obj = self._model if parameter in self._model.fittingParameters \
+            else self._observed
+
         name, latex, fget, compute = \
-            self._model.derivedParameters[parameter]
+            obj.derivedParameters[parameter]
         compute = False
-        self._model.derivedParameters[parameter] = (
+        obj.derivedParameters[parameter] = (
             name, latex, fget, compute
         )
-
 
     def set_boundary(self, parameter, new_boundaries):
         """
@@ -344,12 +412,15 @@ class Optimizer(Logger, Citable):
 
 
         """
+
+        obj = self._model if parameter in self._model.fittingParameters \
+            else self._observed
         name, latex, fget, fset, mode, to_fit, bounds = \
-            self._model.fittingParameters[parameter]
+            obj.fittingParameters[parameter]
 
         bounds = new_boundaries
 
-        self._model.fittingParameters[parameter] = (
+        obj.fittingParameters[parameter] = (
             name, latex, fget, fset, mode, to_fit, bounds)
 
     def set_factor_boundary(self, parameter, factors):
@@ -368,15 +439,18 @@ class Optimizer(Logger, Citable):
 
         """
 
+        obj = self._model if parameter in self._model.fittingParameters \
+            else self._observed
+
         name, latex, fget, fset, mode, to_fit, bounds = \
-            self._model.fittingParameters[parameter]
+            obj.fittingParameters[parameter]
 
         value = fget()
 
         new_boundaries = factors[0]*value, factors[1]*value
 
         bounds = new_boundaries
-        self._model.fittingParameters[parameter] = (
+        obj.fittingParameters[parameter] = (
             name, latex, fget, fset, mode, to_fit, bounds)
 
     def set_mode(self, parameter, new_mode):
@@ -394,20 +468,26 @@ class Optimizer(Logger, Citable):
 
 
         """
+
+        obj = self._model if parameter in self._model.fittingParameters \
+            else self._observed
         new_mode = new_mode.lower()
 
         name, latex, fget, fset, mode, to_fit, bounds = \
-            self._model.fittingParameters[parameter]
+            obj.fittingParameters[parameter]
 
         if new_mode not in ('log', 'linear',):
             self.error('Incorrect mode set for fit parameter,')
             raise ValueError
 
-        self._model.fittingParameters[parameter] = (
+        obj.fittingParameters[parameter] = (
             name, latex, fget, fset, new_mode, to_fit, bounds)
 
     def set_prior(self, parameter, prior):
-        if parameter not in self._model.fittingParameters:
+
+        obj = self._model if parameter in self._model.fittingParameters \
+            else self._observed
+        if parameter not in obj.fittingParameters:
             self.error('Fitting parameter %s does not exist', parameter)
             raise ValueError('Fitting parameter does not exist')
 
@@ -445,6 +525,8 @@ class Optimizer(Logger, Citable):
         from taurex.exceptions import InvalidModelException
         self.update_model(fit_params)
 
+        mydata = self._observed.spectrum
+
         obs_bins = self._observed.wavenumberGrid
 
         try:
@@ -453,7 +535,7 @@ class Optimizer(Logger, Citable):
         except InvalidModelException:
             return np.nan
 
-        res = (data.ravel() - final_model.ravel()) / datastd.ravel()
+        res = (mydata.ravel() - final_model.ravel()) / datastd.ravel()
         res = np.nansum(res*res)
         if res == 0:
             res = np.nan
@@ -486,7 +568,7 @@ class Optimizer(Logger, Citable):
         fit_names = self.fit_names
 
         prior_type = [p.__class__.__name__ for p in self.fitting_priors]
-        args = [p.params() for p in self.fitting_priors] 
+        args = [p.params() for p in self.fitting_priors]
 
         fit_values = self.fit_values
         self.info('')
@@ -547,16 +629,15 @@ class Optimizer(Logger, Citable):
         output.write_string_array('fit_parameter_latex', self.fit_latex)
         output.write_array('fit_boundary_low', np.array(
             [x.boundaries()[0] for x in self.fitting_priors]))
-        output.write_array('fit_boundary_high', np.array([x.boundaries()[1] for x in self.fitting_priors]))
+        output.write_array('fit_boundary_high', np.array(
+            [x.boundaries()[1] for x in self.fitting_priors]))
         if len(self.derived_names) > 0:
-            output.write_string_array('derived_parameter_names', self.derived_names)
-            output.write_string_array('derived_parameter_latex', self.derived_latex)
+            output.write_string_array(
+                'derived_parameter_names', self.derived_names)
+            output.write_string_array(
+                'derived_parameter_latex', self.derived_latex)
 
         return output
-
-
-
-
 
     def write_fit(self, output):
         """
@@ -615,7 +696,6 @@ class Optimizer(Logger, Citable):
 
         disableLogging()
 
-
         def sample_iter():
             count = 0
             for parameters, weight in sample_list[rank::size]:
@@ -627,7 +707,7 @@ class Optimizer(Logger, Citable):
                         count*100.0 / (len(sample_list)/size)))
                 disableLogging()
                 yield weight
-                count +=1
+                count += 1
 
         return self._model.compute_error(sample_iter, wngrid=binning,
                                          binner=self._binner)
@@ -643,7 +723,7 @@ class Optimizer(Logger, Citable):
 
         self.info('Post-processing - Generating spectra and profiles')
 
-        # Loop through each solution, grab optimized parameters and anything 
+        # Loop through each solution, grab optimized parameters and anything
         # else we want to store
         for solution, optimized_map, \
                 optimized_median, values in self.get_solution():
@@ -668,9 +748,10 @@ class Optimizer(Logger, Citable):
                 sol_values['Spectra']['Contributions'] = store_contributions(
                     self._binner, self._model, output_size=output_size-3)
             except Exception as e:
-                self.warning('Not bothering to store contributions since its broken')
+                self.warning(
+                    'Not bothering to store contributions since its broken')
                 self.warning('%s ', str(e))
-    
+
             # Update with the optimized median
             self.update_model(optimized_median)
 
@@ -695,7 +776,6 @@ class Optimizer(Logger, Citable):
 
             solution_dict['solution{}'.format(solution)] = sol_values
 
-
         if len(self.derived_names) > 0:
             #solution_dict[f'solution{solution}']['derived_params'] = {}
             # Compute derived
@@ -705,7 +785,8 @@ class Optimizer(Logger, Citable):
                 derived_dict = self.compute_derived_trace(solution)
                 if derived_dict is None:
                     continue
-                solution_dict[f'solution{solution}']['derived_params'].update(derived_dict)
+                solution_dict[f'solution{solution}']['derived_params'].update(
+                    derived_dict)
 
         enableLogging()
         self.info('Post-processing - Complete')
@@ -728,7 +809,7 @@ class Optimizer(Logger, Citable):
 
         count = 0
 
-        derived_param = {p: ([],[]) for p in self.derived_names}
+        derived_param = {p: ([], []) for p in self.derived_names}
 
         weight_comb = []
 
@@ -752,15 +833,17 @@ class Optimizer(Logger, Citable):
             for p, v in zip(self.derived_names, self.derived_values):
                 derived_param[p][0].append(v)
                 derived_param[p][1].append(weight)
-            
+
         result_dict = {}
 
         sorted_weights = weights.argsort()
 
         for param, (trace, w) in derived_param.items():
-            
-            all_trace = np.array(mpi.allreduce(trace, op='SUM'))  # I cant remember why this works
-            all_weight = np.array(mpi.allreduce(w, op='SUM'))  # I cant remember why this works
+
+            # I cant remember why this works
+            all_trace = np.array(mpi.allreduce(trace, op='SUM'))
+            # I cant remember why this works
+            all_weight = np.array(mpi.allreduce(w, op='SUM'))
 
             all_weight_sort = all_weight.argsort()
 
@@ -793,7 +876,7 @@ class Optimizer(Logger, Citable):
         ----------
         solution:
             a solution output from sampler
-        
+
         Yields
         ------
         traces: :obj:`array`
@@ -801,7 +884,7 @@ class Optimizer(Logger, Citable):
 
         weight: float
             Weight of sample
-        
+
         """
         from taurex.util.util import random_int_iter
         samples = self.get_samples(solution)
@@ -825,18 +908,18 @@ class Optimizer(Logger, Citable):
 
         solution_no: int
             Solution number
-        
+
         map: :obj:`array`
             Map values
-        
+
         median: :obj:`array`
             Median values
-        
+
         extra: :obj:`list`
             List of tuples of extra information to store.
             Must be of form ``(name, data)``
-            
-        
+
+
 
         """
         raise NotImplementedError
@@ -846,7 +929,6 @@ class Optimizer(Logger, Citable):
 
     def get_weights(self, solution_id):
         raise NotImplementedError
-
 
     def write(self, output):
         """
@@ -865,8 +947,6 @@ class Optimizer(Logger, Citable):
         """
         opt = output.create_group('Optimizer')
         self.write_optimizer(opt)
-
-
 
     @classmethod
     def input_keywords(self):
