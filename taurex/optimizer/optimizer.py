@@ -525,6 +525,8 @@ class Optimizer(Logger, Citable):
         from taurex.exceptions import InvalidModelException
         self.update_model(fit_params)
 
+        mydata = self._observed.spectrum
+
         obs_bins = self._observed.wavenumberGrid
 
         try:
@@ -533,7 +535,7 @@ class Optimizer(Logger, Citable):
         except InvalidModelException:
             return np.nan
 
-        res = (data.ravel() - final_model.ravel()) / datastd.ravel()
+        res = (mydata.ravel() - final_model.ravel()) / datastd.ravel()
         res = np.nansum(res*res)
         if res == 0:
             res = np.nan
