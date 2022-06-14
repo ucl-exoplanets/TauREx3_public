@@ -1,5 +1,5 @@
 import pytest
-from . import LineModel, LineObs
+from . import LineModel, LineObs, LineObsWithParams
 from hypothesis import given, note,strategies as st
 from taurex.optimizer import Optimizer
 from taurex.core.priors import Uniform, LogUniform
@@ -41,6 +41,60 @@ def test_optimizer_fittingparams(m, c):
     assert 'm' in opt.fit_names
     assert opt.fit_values[opt.fit_names.index('c')] == c
     assert opt.fit_values[opt.fit_names.index('m')] == m
+
+
+@given(m=st.floats(0.1, 100, allow_nan=False),
+       c=st.floats(0.1, 100, allow_nan=False))
+def test_optimizer_fittingparams_with_obs(m, c):
+
+    lm = LineModel()
+    lm.m = m
+    lm.c = c
+    lo = LineObsWithParams(m=m, c=c, N=10)
+
+    opt = Optimizer('test', observed=lo, model=lm)
+
+    opt.enable_fit('m')
+    opt.enable_fit('lol')
+    opt.compile_params()
+
+    assert 'm' in opt.fit_names
+    assert 'lol' in opt.fit_names
+    assert 'c' not in opt.fit_names
+    assert opt.fit_values[opt.fit_names.index('m')] == m
+
+    opt.enable_fit('c')
+    opt.disable_fit('m')
+    opt.compile_params()
+    assert 'c' in opt.fit_names
+    assert 'm' not in opt.fit_names
+    assert 'lol' in opt.fit_names
+    assert opt.fit_values[opt.fit_names.index('c')] == c
+
+    opt.enable_fit('c')
+    opt.disable_fit('m')
+    opt.disable_fit('lol')
+    opt.compile_params()
+    assert 'c' in opt.fit_names
+    assert 'm' not in opt.fit_names
+    assert 'lol' not in opt.fit_names
+    assert opt.fit_values[opt.fit_names.index('c')] == c
+
+    opt.disable_fit('m')
+    opt.disable_fit('c')
+    opt.disable_fit('lol')
+    opt.compile_params()
+
+    opt.enable_fit('c')
+    opt.enable_fit('m')
+    opt.enable_fit('lol')
+    opt.compile_params()
+    assert 'c' in opt.fit_names
+    assert 'm' in opt.fit_names
+    assert 'lol' in opt.fit_names
+    assert opt.fit_values[opt.fit_names.index('c')] == c
+    assert opt.fit_values[opt.fit_names.index('m')] == m
+
 
 
 @given(m=st.floats(0.1, 100, allow_nan=False),

@@ -5,9 +5,10 @@ Contains the basic definition of an observed spectrum for TauRex 3
 
 from taurex.log import Logger
 from taurex.output.writeable import Writeable
+from taurex.core import Fittable
 
 
-class BaseSpectrum(Logger, Writeable):
+class BaseSpectrum(Logger, Fittable, Writeable):
     """
 
     *Abstract class*
@@ -25,7 +26,8 @@ class BaseSpectrum(Logger, Writeable):
     """
 
     def __init__(self, name):
-        super().__init__(name)
+        Logger.__init__(self,name)
+        Fittable.__init__(self)
 
     def create_binner(self):
         """
@@ -139,6 +141,15 @@ class BaseSpectrum(Logger, Writeable):
 
         """
         raise NotImplementedError
+
+    @property
+    def fittingParameters(self):
+        return self.fitting_parameters()
+
+    @property
+    def derivedParameters(self):
+        return self.derived_parameters()
+
 
     def write(self, output):
         output.write_array('wlgrid', self.wavelengthGrid)

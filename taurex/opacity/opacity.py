@@ -1,8 +1,9 @@
 from taurex.log import Logger
+from taurex.core import Citable
 import numpy as np
 
 
-class Opacity(Logger):
+class Opacity(Logger, Citable):
     """
     This is the base class for computing opactities
 
@@ -70,3 +71,17 @@ class Opacity(Logger):
 
             # else:
             return np.interp(wngrid, self.wavenumberGrid[wngrid_filter], orig)
+
+    def opacityCitation(self):
+        """
+        Citation for the specific molecular opacity (linelist origin etc)
+
+
+        Returns
+        -------
+        list of str: 
+            List of string with reference information
+
+        """
+        return []
+

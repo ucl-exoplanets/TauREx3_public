@@ -2,6 +2,7 @@
 from .cia import CIA
 import numpy as np
 from taurex.util.math import interp_lin_only
+from taurex.log import Logger
 
 
 class EndOfHitranCIAException(Exception):
@@ -19,7 +20,7 @@ def hashwn(start_wn, end_wn):
     return str(start_wn)+str(end_wn)
 
 
-class HitranCiaGrid(object):
+class HitranCiaGrid(Logger):
     """
     Class that handles a particular HITRAN cia wavenumber grid
     Since temperatures for CIA sometimes have different wavenumber grids this
@@ -37,6 +38,7 @@ class HitranCiaGrid(object):
     """
 
     def __init__(self, wn_min, wn_max):
+        super().__init__(self.__class__.__name__)
         self.wn = None
         self.Tsigma = []
 

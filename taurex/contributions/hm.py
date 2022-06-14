@@ -3,7 +3,7 @@ from .contribution import Contribution, contribute_tau
 import numpy as np
 from taurex.data.fittable import fitparam
 from taurex.exceptions import InvalidModelException
-
+import warnings
 
 class HydrogenIon(Contribution):
 
