@@ -1,8 +1,11 @@
+from functools import lru_cache
+from urllib.error import HTTPError, URLError
 from pybtex.database import Entry
 
 
 def cleanup_string(string):
     return string.replace('{', '').replace('}', '').replace('\\', '')
+
 
 def recurse_bibtex(obj, entries):
     for b in obj.__class__.__bases__:
@@ -10,9 +13,11 @@ def recurse_bibtex(obj, entries):
             entries.extend(b.BIBTEX_ENTRIES)
             recurse_bibtex(b, entries)
 
+
 def stringify_people(authors):
 
     return ', '.join([cleanup_string(str(p)) for p in authors])
+
 
 def unique_citations_only(citations):
 
@@ -22,6 +27,7 @@ def unique_citations_only(citations):
             current_citations.append(c)
     return current_citations
 
+
 def to_bibtex(citations):
     import uuid
     from pybtex.database import BibliographyData
@@ -29,7 +35,6 @@ def to_bibtex(citations):
     bib_data = BibliographyData(entries=entries)
 
     return bib_data.to_string('bibtex')
-
 
 
 def handle_publication(fields):
@@ -62,6 +67,10 @@ def construct_nice_printable_string(entry, indent=0):
     mystring = ''
     indent = ''.join(['\t']*indent)
     form = f'{indent}%s\n'
+    
+    if isinstance(entry, str):
+        return f'Found non bibtex citation: {entry}\n'
+
 
     if 'title' in entry.fields:
         mystring += form % cleanup_string(entry.fields['title'])
@@ -85,6 +94,7 @@ class Citable:
     """
     List of bibtext entries
     """
+
     def citations(self):
         entries = self.BIBTEX_ENTRIES[:]
         recurse_bibtex(self, entries)
@@ -102,3 +112,25 @@ class Citable:
 
         return '\n'.join([construct_nice_printable_string(e)
                           for e in entries])
+
+
+@lru_cache(maxsize=100)
+def doi_to_bibtex(doi):
+    import urllib
+    BASE_URL = 'http://dx.doi.org/'
+    url = BASE_URL + doi
+
+    req = urllib.request.Request(url)
+    req.add_header('Accept', 'application/x-bibtex')
+    try:
+        with urllib.request.urlopen(req) as f:
+            return f.read().decode()
+    except HTTPError as e:
+        if e.code == 404:
+            print('DOI not found.')
+        else:
+            print('Service unavailable.')
+
+        return None
+    except URLError:
+        return None

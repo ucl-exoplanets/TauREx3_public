@@ -116,3 +116,24 @@ class RadisHITRANOpacity(Logger):
 
             # else:
             return np.interp(wngrid, self.wavenumberGrid, orig)
+
+    BIBTEX_ENTRIES = [
+        """
+        @ARTICLE{2019JQSRT.222...12P,
+            author = {{Pannier}, Erwan and {Laux}, Christophe O.},
+                title = "{RADIS: A nonequilibrium line-by-line radiative code for CO$_{2}$ and HITRAN-like database species}",
+            journal = {Journal of Quantitative Spectroscopy & Radiative Transfer},
+            keywords = {Line-by-line code, Nonequilibrium, Optical emission spectroscopy, Absorption spectroscopy},
+                year = 2019,
+                month = jan,
+            volume = {222},
+                pages = {12-25},
+                doi = {10.1016/j.jqsrt.2018.09.027},
+            adsurl = {https://ui.adsabs.harvard.edu/abs/2019JQSRT.222...12P},
+            adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+        }
+
+
+        """,
+
+    ]
