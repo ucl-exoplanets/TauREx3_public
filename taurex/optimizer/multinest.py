@@ -39,7 +39,7 @@ class MultiNestOptimizer(Optimizer):
         self.max_iter = int(max_iterations)
         # search for multiple modes
         self.multimodes = search_multi_modes
-        self.n_iter_before_update = n_iter_before_update
+        self.n_iter_before_update = int(n_iter_before_update)
         # parameters on which to cluster, e.g. if nclust_par = 3, it will
         # cluster on the first 3 parameters only.
         # if ncluster_par = -1 it clusters on all parameters
