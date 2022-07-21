@@ -123,7 +123,15 @@ class HDF5Opacity(InterpolatingOpacity):
             molecular_citation = ensure_string_utf8(
                 self._spec_dict['DOI'][()][0])
             new_bib = None
-            if not GlobalCache()['xsec_disable_doi']:
+
+            check_xsec = GlobalCache()['xsec_disable_doi']
+
+            if check_xsec is None:
+                check_xsec = False
+            else:
+                check_xsec = not check_xsec
+
+            if check_xsec:
                 new_bib = doi_to_bibtex(molecular_citation)
             
             self._molecular_citation = [new_bib or molecular_citation]
