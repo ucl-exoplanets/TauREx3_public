@@ -23,6 +23,7 @@ class MultiNestOptimizer(Optimizer):
                  mode_tolerance=-1e90,
                  importance_sampling=False,
                  resume=False,
+                 n_iter_before_update=100,
                  multinest_prefix='1-',
                  verbose_output=True, sigma_fraction=0.1):
         super().__init__('Multinest', observed, model, sigma_fraction)
@@ -38,6 +39,7 @@ class MultiNestOptimizer(Optimizer):
         self.max_iter = int(max_iterations)
         # search for multiple modes
         self.multimodes = search_multi_modes
+        self.n_iter_before_update = n_iter_before_update
         # parameters on which to cluster, e.g. if nclust_par = 3, it will
         # cluster on the first 3 parameters only.
         # if ncluster_par = -1 it clusters on all parameters
@@ -124,6 +126,7 @@ class MultiNestOptimizer(Optimizer):
                         multimodal=self.multimodes,
                         n_clustering_params=ncluster,
                         max_modes=self.max_modes,
+                        n_iter_before_update=self.n_iter_before_update,
                         outputfiles_basename=os.path.join(self.dir_multinest,
                                                           self.multinest_prefix),
                         const_efficiency_mode=self.const_eff,
@@ -334,10 +337,9 @@ class MultiNestOptimizer(Optimizer):
                 ('tracedata', v['tracedata']),
                 ('weights', v['weights'])]
 
-
     @classmethod
     def input_keywords(self):
-        return ['multinest','pymultinest', ]
+        return ['multinest', 'pymultinest', ]
 
     BIBTEX_ENTRIES = [
         """
