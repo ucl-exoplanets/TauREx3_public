@@ -526,6 +526,10 @@ class Optimizer(Logger, Citable):
         self.update_model(fit_params)
 
         mydata = self._observed.spectrum
+        try:
+            myerror = self._observed.errorBar
+        except:
+            myerror = datastd
 
         obs_bins = self._observed.wavenumberGrid
 
@@ -535,7 +539,7 @@ class Optimizer(Logger, Citable):
         except InvalidModelException:
             return np.nan
 
-        res = (mydata.ravel() - final_model.ravel()) / datastd.ravel()
+        res = (mydata.ravel() - final_model.ravel()) / myerror.ravel()
         res = np.nansum(res*res)
         if res == 0:
             res = np.nan
