@@ -526,10 +526,7 @@ class Optimizer(Logger, Citable):
         self.update_model(fit_params)
 
         mydata = self._observed.spectrum
-        try:
-            myerror = self._observed.errorBar
-        except:
-            myerror = datastd
+        myerror = self._observed.errorBar
 
         obs_bins = self._observed.wavenumberGrid
 
