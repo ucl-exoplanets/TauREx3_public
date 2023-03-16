@@ -79,6 +79,8 @@ class MultiNestOptimizer(Optimizer):
         sqrtpi = np.sqrt(2*np.pi)
 
         def multinest_loglike(cube, ndim, nparams):
+            data = self._observed.spectrum
+            datastd = self._observed.errorBar
             # log-likelihood function called by multinest
             fit_params_container = np.array(
                 [cube[i] for i in range(len(self.fitting_parameters))])
