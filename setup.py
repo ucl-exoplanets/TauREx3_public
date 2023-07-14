@@ -43,7 +43,7 @@ classifiers = [
 ]
 
 # Handle versioning
-version = '3.1.3-alpha'
+version = '3.1.4-alpha'
 
 with open("README.md", "r") as fh:
     long_description = fh.read()

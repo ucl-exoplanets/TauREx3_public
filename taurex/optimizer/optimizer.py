@@ -7,13 +7,13 @@ from taurex.core.priors import PriorMode
 from taurex.data.citation import Citable
 
 
-def compile_params(fitparams, driveparams):
+def compile_params(fitparams, driveparams, fit_priors=None):
     from taurex.core.priors import Uniform, LogUniform
 
     fitting_parameters = []
     fitting_priors = []
     derived_parameters = []
-    _fit_priors = {}
+    _fit_priors = fit_priors or {}
 
     for params in fitparams.values():
         name, latex, fget, fset, mode, to_fit, bounds = params
@@ -21,7 +21,6 @@ def compile_params(fitparams, driveparams):
         #self.debug('Checking fitting parameter {}'.format(params))
         if to_fit:
             fitting_parameters.append(params)
-
             if name not in _fit_priors:
                 prior = None
                 if mode == 'log':
@@ -127,13 +126,13 @@ class Optimizer(Logger, Citable):
             _model_priors, \
             self.derived_parameters = \
             compile_params(self._model.fittingParameters,
-                           self._model.derivedParameters)
+                           self._model.derivedParameters, self._fit_priors)
 
         self._fit_priors.update(_model_priors)
         obs_fit, obs_prior, _obs_priors, obs_deriv = \
             compile_params(
                 self._observed.fittingParameters,
-                self._observed.derivedParameters
+                self._observed.derivedParameters, self._fit_priors
             )
         self.fitting_parameters.extend(obs_fit)
         self.fitting_priors.extend(obs_prior)
