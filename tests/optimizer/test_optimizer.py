@@ -95,6 +95,27 @@ def test_optimizer_fittingparams_with_obs(m, c):
     assert opt.fit_values[opt.fit_names.index('c')] == c
     assert opt.fit_values[opt.fit_names.index('m')] == m
 
+def test_optimizer_setprior():
+    from taurex.core.priors import Uniform, LogUniform, Gaussian
+    lm = LineModel()
+    lm.m = 1.0
+    lm.c = 10.0
+    lo = LineObs(m=1.0, c=10.0, N=10)
+
+    opt = Optimizer('test', observed=lo, model=lm)
+
+
+    opt.set_prior('m', Uniform([0.1, 100]))
+    opt.set_prior('c', Gaussian(0.1, 100))
+
+
+
+    opt.enable_fit('m')
+    opt.enable_fit('c')
+    opt.compile_params()
+    assert isinstance(opt.fitting_priors[opt.fit_names.index('m')], Uniform)
+    assert isinstance(opt.fitting_priors[opt.fit_names.index('c')], Gaussian)
+
 
 
 @given(m=st.floats(0.1, 100, allow_nan=False),
