@@ -446,7 +446,7 @@ class Plotter(object):
                     _tracedata = np.column_stack((_tracedata, param['trace']))
 
             if color is None:
-                color_idx = np.float(solution_idx)/self.num_solutions
+                color_idx = float(solution_idx)/self.num_solutions
                 color = self.cmap(float(color_idx))
 
             # print('color: {}'.format(color_idx))

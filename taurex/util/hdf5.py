@@ -5,7 +5,9 @@ import numpy as np
 
 def get_klass_args(klass):
     import inspect
-    args, varargs, varkw, defaults = inspect.getargspec(klass.__init__)
+    if not hasattr(inspect, 'getargspec'):
+        inspect.getargspec = inspect.getfullargspec
+    args, varargs, varkw, defaults, *rest = inspect.getargspec(klass.__init__)
     if defaults is None:
         return []
     keyword_args = args[-len(defaults):]

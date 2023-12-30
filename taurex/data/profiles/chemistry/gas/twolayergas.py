@@ -197,7 +197,7 @@ class TwoLayerGas(Gas):
 
         C_smooth = 10**movingaverage(np.log10(chemprofile), int(wsize))
 
-        border = np.int((len(chemprofile) - len(C_smooth)) / 2)
+        border = int((len(chemprofile) - len(C_smooth)) / 2)
 
         self._mix_profile = chemprofile[::-1]
 

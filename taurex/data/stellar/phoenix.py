@@ -188,18 +188,18 @@ class PhoenixStar(BlackbodyStar):
         self._files = files
         if self.retro_version_file is not None:
             self._T_list = np.array(
-                [np.float(os.path.basename(k)[3:8]) for k in files])
+                [float(os.path.basename(k)[3:8]) for k in files])
             self._Logg_list = np.array(
-                [np.float(os.path.basename(k)[9:13]) for k in files])
+                [float(os.path.basename(k)[9:13]) for k in files])
             self._Z_list = np.array(
-                [np.float(os.path.basename(k)[14:17]) for k in files])
+                [float(os.path.basename(k)[14:17]) for k in files])
         else:
             self._T_list = np.array(
-                [np.float(os.path.basename(k)[3:8]) for k in files])*100
+                [float(os.path.basename(k)[3:8]) for k in files])*100
             self._Logg_list = np.array(
-                [np.float(os.path.basename(k)[8:12]) for k in files])
+                [float(os.path.basename(k)[8:12]) for k in files])
             self._Z_list = np.array(
-                [np.float(os.path.basename(k)[13:16]) for k in files])
+                [float(os.path.basename(k)[13:16]) for k in files])
         self._index_finder = NearestNDInterpolator(
             (self._T_list, self._Logg_list, self._Z_list),
             np.arange(0, self._T_list.shape[0]),rescale=True)

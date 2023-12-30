@@ -238,7 +238,7 @@ class NPoint(TemperatureProfile):
         if (wsize % 2 == 0):
             wsize += 1
         TP_smooth = movingaverage(TP, wsize)
-        border = np.int((len(TP) - len(TP_smooth))/2)
+        border = int((len(TP) - len(TP_smooth))/2)
 
         foo = TP[::-1]
         if len(TP_smooth) == len(foo):

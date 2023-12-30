@@ -6,10 +6,13 @@ log = Logger('Factory')
 def get_keywordarg_dict(klass, is_mixin=False):
 
     import inspect
+    if not hasattr(inspect, 'getargspec'):
+        inspect.getargspec = inspect.getfullargspec
+
     init_dicts = {}
     if not is_mixin:
         init_dicts = {}
-        args, varargs, varkw, defaults = inspect.getargspec(klass.__init__)
+        args, varargs, varkw, defaults, *rest = inspect.getargspec(klass.__init__)
         log.debug('Inpection {} {} {} {}'.format(args,
                                                  varargs,
                                                  varkw,
